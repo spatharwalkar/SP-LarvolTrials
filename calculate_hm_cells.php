@@ -385,104 +385,104 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 										$overall_statuses['not_yet_recruiting']=$overall_statuses['not_yet_recruiting']+1;
 										
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['not_yet_recruiting_active']=$overall_statuses['not_yet_recruiting_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['not_yet_recruiting_active_indlead']=$overall_statuses['not_yet_recruiting_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored') )	$overall_statuses['not_yet_recruiting_active_indlead']=$overall_statuses['not_yet_recruiting_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['not_yet_recruiting_active_owner_sponsored']=$overall_statuses['not_yet_recruiting_active_owner_sponsored']+1;
 										break;																														   
 									case 'Recruiting':
 										$overall_statuses['recruiting']=$overall_statuses['recruiting']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['recruiting_active']=$overall_statuses['recruiting_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['recruiting_active_indlead']=$overall_statuses['recruiting_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor'  or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['recruiting_active_indlead']=$overall_statuses['recruiting_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['recruiting_active_owner_sponsored']=$overall_statuses['recruiting_active_owner_sponsored']+1;
 										break;
 									case 'Enrolling by invitation':
 										$overall_statuses['enrolling_by_invitation']=$overall_statuses['enrolling_by_invitation']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['enrolling_by_invitation_active']=$overall_statuses['enrolling_by_invitation_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['enrolling_by_invitation_active_indlead']=$overall_statuses['enrolling_by_invitation_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor'  or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['enrolling_by_invitation_active_indlead']=$overall_statuses['enrolling_by_invitation_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['enrolling_by_invitation_active_owner_sponsored']=$overall_statuses['enrolling_by_invitation_active_owner_sponsored']+1;
 										break;
 									case 'Active, not recruiting':
 										$overall_statuses['active_not_recruiting']=$overall_statuses['active_not_recruiting']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['active_not_recruiting_active']=$overall_statuses['active_not_recruiting_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['active_not_recruiting_active_indlead']=$overall_statuses['active_not_recruiting_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor'  or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['active_not_recruiting_active_indlead']=$overall_statuses['active_not_recruiting_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['active_not_recruiting_active_owner_sponsored']=$overall_statuses['active_not_recruiting_active_owner_sponsored']+1;
 										break;
 									case 'Completed':
 										$overall_statuses['completed']=$overall_statuses['completed']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['completed_active']=$overall_statuses['completed_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['completed_active_indlead']=$overall_statuses['completed_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor'  or $row['institution_type']=='owner_sponsored') )	$overall_statuses['completed_active_indlead']=$overall_statuses['completed_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['completed_active_owner_sponsored']=$overall_statuses['completed_active_owner_sponsored']+1;
 										break;
 									case 'Suspended':
 										$overall_statuses['suspended']=$overall_statuses['suspended']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['suspended_active']=$overall_statuses['suspended_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['suspended_active_indlead']=$overall_statuses['suspended_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['suspended_active_indlead']=$overall_statuses['suspended_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['suspended_active_owner_sponsored']=$overall_statuses['suspended_active_owner_sponsored']+1;
 										break;
 									case 'Terminated':
 										$overall_statuses['terminated']=$overall_statuses['terminated']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['terminated_active']=$overall_statuses['terminated_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['terminated_active_indlead']=$overall_statuses['terminated_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor'  or $row['institution_type']=='owner_sponsored') )	$overall_statuses['terminated_active_indlead']=$overall_statuses['terminated_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['terminated_active_owner_sponsored']=$overall_statuses['terminated_active_owner_sponsored']+1;
 										
 										break;
 									case 'Withdrawn':
 										$overall_statuses['withdrawn']=$overall_statuses['withdrawn']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['withdrawn_active']=$overall_statuses['withdrawn_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['withdrawn_active_indlead']=$overall_statuses['withdrawn_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor'  or $row['institution_type']=='owner_sponsored') )	$overall_statuses['withdrawn_active_indlead']=$overall_statuses['withdrawn_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['withdrawn_active_owner_sponsored']=$overall_statuses['withdrawn_active_owner_sponsored']+1;
 										break;
 									case 'Available':
 										$overall_statuses['available']=$overall_statuses['available']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['available_active']=$overall_statuses['available_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['available_active_indlead']=$overall_statuses['available_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['available_active_indlead']=$overall_statuses['available_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['available_active_owner_sponsored']=$overall_statuses['available_active_owner_sponsored']+1;
 										break;
 									case 'No Longer Available':
 										$overall_statuses['no_longer_available']=$overall_statuses['no_longer_available']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['no_longer_available_active']=$overall_statuses['no_longer_available_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['no_longer_available_active_indlead']=$overall_statuses['no_longer_available_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['no_longer_available_active_indlead']=$overall_statuses['no_longer_available_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['no_longer_available_active_owner_sponsored']=$overall_statuses['no_longer_available_active_owner_sponsored']+1;
 										break;
 									case 'Approved for marketing':
 										$overall_statuses['approved_for_marketing']=$overall_statuses['approved_for_marketing']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['approved_for_marketing_active']=$overall_statuses['approved_for_marketing_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['approved_for_marketing_active_indlead']=$overall_statuses['approved_for_marketing_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['approved_for_marketing_active_indlead']=$overall_statuses['approved_for_marketing_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['approved_for_marketing_active_owner_sponsored']=$overall_statuses['approved_for_marketing_active_owner_sponsored']+1;
 										break;
 									case 'No longer recruiting':
 										$overall_statuses['no_longer_recruiting']=$overall_statuses['no_longer_recruiting']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['no_longer_recruiting_active']=$overall_statuses['no_longer_recruiting_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['no_longer_recruiting_active_indlead']=$overall_statuses['no_longer_recruiting_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['no_longer_recruiting_active_indlead']=$overall_statuses['no_longer_recruiting_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['no_longer_recruiting_active_owner_sponsored']=$overall_statuses['no_longer_recruiting_active_owner_sponsored']+1;
 										break;
 									case 'Withheld':
 										$overall_statuses['withheld']=$overall_statuses['withheld']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['withheld_active']=$overall_statuses['withheld_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['withheld_active_indlead']=$overall_statuses['withheld_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['withheld_active_indlead']=$overall_statuses['withheld_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['withheld_active_owner_sponsored']=$overall_statuses['withheld_active_owner_sponsored']+1;										
 										break;
 									case 'Temporarily Not Available':
 										$overall_statuses['temporarily_not_available']=$overall_statuses['temporarily_not_available']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['temporarily_not_available_active']=$overall_statuses['temporarily_not_available_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['temporarily_not_available_active_indlead']=$overall_statuses['temporarily_not_available_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['temporarily_not_available_active_indlead']=$overall_statuses['temporarily_not_available_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['temporarily_not_available_active_owner_sponsored']=$overall_statuses['temporarily_not_available_active_owner_sponsored']+1;										
 										break;
 									case 'Ongoing':
 										$overall_statuses['ongoing']=$overall_statuses['ongoing']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['ongoing_active']=$overall_statuses['ongoing_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['ongoing_active_indlead']=$overall_statuses['ongoing_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['ongoing_active_indlead']=$overall_statuses['ongoing_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['ongoing_active_owner_sponsored']=$overall_statuses['ongoing_active_owner_sponsored']+1;										
 										break;
 									case 'Not Authorized':
 										$overall_statuses['not_authorized']=$overall_statuses['not_authorized']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['not_authorized_active']=$overall_statuses['not_authorized_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['not_authorized_active_indlead']=$overall_statuses['not_authorized_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['not_authorized_active_indlead']=$overall_statuses['not_authorized_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['not_authorized_active_owner_sponsored']=$overall_statuses['not_authorized_active_owner_sponsored']+1;										
 										break;
 									case 'Prohibited':
 										$overall_statuses['prohibited']=$overall_statuses['prohibited']+1;
 										if($row['is_active']==1 or $row['is_active']=="1")	$overall_statuses['prohibited_active']=$overall_statuses['prohibited_active']+1;
-										if( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='industry_lead_sponsor' )	$overall_statuses['prohibited_active_indlead']=$overall_statuses['prohibited_active_indlead']+1;
+										if( ($row['is_active']==1 or $row['is_active']=="1") and  ($row['institution_type']=='industry_lead_sponsor' or $row['institution_type']=='owner_sponsored')  )	$overall_statuses['prohibited_active_indlead']=$overall_statuses['prohibited_active_indlead']+1;
 										elseif( ($row['is_active']==1 or $row['is_active']=="1") and  $row['institution_type']=='owner_sponsored' )	$overall_statuses['prohibited_active_owner_sponsored']=$overall_statuses['prohibited_active_owner_sponsored']+1;																				
 										break;
 								}
@@ -559,7 +559,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			$cnt_active_indlead=0;
 			foreach($instype as $key=>$act)
 			{
-				if( ($isactive[$key]==1 or $isactive[$key]=="1") and $act=='industry_lead_sponsor' )
+				if( ($isactive[$key]==1 or $isactive[$key]=="1") and ( $act=='industry_lead_sponsor' or $act=='owner_sponsored' ) )
 				{
 					$cnt_active_indlead++;
 				}
