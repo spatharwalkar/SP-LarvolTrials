@@ -46,7 +46,7 @@ elseif($table=='areas' || $table=='diseases')
 	}
 	else
 	{
-		$mesh_condition=" AND mesh_name=''";
+		$mesh_condition=" AND (mesh_name='' OR mesh_name IS NULL)";
 	}
 	$query = "select distinct $field, description from $table where $field like '%$search%' and class='$class' $mesh_condition  order by $field asc";
 }
