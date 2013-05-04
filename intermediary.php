@@ -417,6 +417,14 @@ print	'	<link href="'. $intermediaryCss . '?t=' . filectime($intermediaryCss) .'
 				$(".rowcollapse").hoverIntent(config);
 			});
 			
+			//check owner sponsor filter, on check industry lead sponsor
+			$(function(){
+				$("input[id=institution_type_1]").bind("click", function(){
+					if($(this).prop("checked") == true){
+						$("#institution_type_0").prop("checked", true);		
+					}
+				});
+			});
 			</script>
 			
 			<script type="text/javascript">
@@ -470,6 +478,11 @@ if(isset($_REQUEST['itype']) && $_REQUEST['itype'] != '')
 {
 	$globalOptions['itype'] = explode(',', $_REQUEST['itype']);
 	$globalOptions['itype'] = array_filter($globalOptions['itype'], 'iszero');
+	if(in_array('1', $globalOptions['itype'])){
+		if(!in_array('0', $globalOptions['itype'])){
+			array_push($globalOptions['itype'],'0');
+		}
+	}
 }
 
 if(isset($_REQUEST['status']) && $_REQUEST['status'] != '')
@@ -553,7 +566,8 @@ else if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm'])
 		
 		if(!isset($_REQUEST['itype']))
 		{
-			$globalOptions['itype'][0] = 0;
+			//$globalOptions['itype'][0] = 0;
+			$globalOptions['itype'][0] = 1;
 		}
 		
 	}
