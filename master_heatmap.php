@@ -3234,7 +3234,7 @@ function Download_reports()
 			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 			$rowsCategoryNamePrint = false;
 			$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
-			if($rows_Span[$row] > 0 && $cat != 'Undefined')
+			if($RowsSpan[$row] > 0 && $cat != 'Undefined')
 			{
 				$Entity1_Rowcat_width = ($entity1_Col_Width + $All_Column_Width);
 				$rowcount = $pdf->getNumLines($cat, $Entity1_Rowcat_width);
@@ -3578,7 +3578,7 @@ function Download_reports()
 			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
 			
 			$pdf->SetFont('freesansb', 'B ', 8); // Bold Font
-			if($rows_Span[$row] > 0 && $cat != 'Undefined' && !$rowsCategoryNamePrint)
+			if($RowsSpan[$row] > 0 && $cat != 'Undefined' && !$rowsCategoryNamePrint)
 			{
 				$Entity1_Rowcat_width = ($entity1_Col_Width + $All_Column_Width);
 				$rowcount = $pdf->getNumLines($cat, $Entity1_Rowcat_width);
