@@ -9,7 +9,7 @@ $c_lid = mysql_real_escape_string($_GET['c_lid']);
 $mesh_display=mysql_real_escape_string($_GET['mesh']);
 //echo 'hai';
 //filter input
-$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla', 'masterhm','diseases','institutions','moas','moacategories');
+$autoSuggestTables = array('areas','upm','products','data_trials', 'redtags', 'trialzilla', 'masterhm','diseases','institutions','moas','moacategories','entities');
 if(!in_array($table,$autoSuggestTables))die;
 
 if($table=='upm' && $field=='product')
@@ -54,14 +54,14 @@ elseif($table=='institutions')
 {
 	$tables="entities";
 	
-	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='Product' order by $field asc";
+	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='Institution' order by $field asc";
     
 }
 elseif($table=='moas')
 {
 	$tables="entities";
 	
-	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='Product' order by $field asc";
+	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='MOA' order by $field asc";
  
     
 }
@@ -69,7 +69,7 @@ elseif($table=='moacategories')
 {
 	$tables="entities";
 	
-	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='Product' order by $field asc";
+	$query = "select distinct $field, description from $tables where $field like '%$search%' and class='MOA_Category' order by $field asc";
     
 }
 elseif($table=='trialzilla')
@@ -80,7 +80,10 @@ elseif($table=='masterhm')
 {
 	$query = "select distinct `name`, `description`, `class` from `entities` where `name` like '%$search%' AND `class` NOT IN ('MOA_Category') AND (`class` = 'Disease' AND (LI_id IS NOT NULL AND LI_id <> '') OR `class` <> 'Disease') order by $field asc";
 }
-
+elseif($table=='entities')
+{
+	$query = "select distinct `name` from `entities` where `name` like '%$search%' order by name asc";
+}
 else
 {
 	$table="entities";
