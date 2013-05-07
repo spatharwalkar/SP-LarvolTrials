@@ -431,6 +431,20 @@ print	'	<link href="'. $intermediaryCss . '?t=' . filectime($intermediaryCss) .'
 					}
 				});
 			});
+			
+			//deny access to UPMs when not login, show popover message
+			$(function(){ 
+				$(".no_access").click(function(){
+					$( "#dialog-access-denied" ).dialog({
+						modal: true,
+						buttons: {
+							Ok: function() {
+								$( this ).dialog( "close" );
+							}
+						}
+					});
+				});
+			});
 			</script>
 			
 			<script type="text/javascript">
@@ -465,6 +479,8 @@ body {
 	background-color:#ffffff;
 	width: 100%;
 }
+
+#dialog-access-denied a {display:inline}
 </style>
 </head><body>';
 
@@ -810,3 +826,11 @@ if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && 
 			</html>';
 }
 ?>
+<div id="dialog-access-denied" class="" title="Access Denied" style="display:none;">
+	<p>
+		<span class="ui-icon ui-icon-circle-close" style="float: left; margin: 0 7px 50px 0;"></span>
+		Click-through to news items available for subscribers, who can <a target="_blank" href="http://www.larvolinsight.com"><u>click here</u></a> to login
+	</p>
+	<p>
+	</p>
+</div>

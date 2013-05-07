@@ -12444,7 +12444,7 @@ class TrialTracker
 	{	
 		$outputStr = '';
 		$bgColor = 'background-color:#9966FF;';
-		$anchorTag = ($upmLink != '' &&  $upmLink !== NULL) ? '<a href="' . $upmLink . '" target="_blank">&nbsp;</a>' : '&nbsp;' ;
+		$anchorTag = ($upmLink != '' &&  $upmLink !== NULL) ? '<a href="' . $upmLink . '" target="_blank">&nbsp;</a>' : '<a href="javascript:;" class="no_access">&nbsp;</a>' ;
 		
 		if($incViewCount === true && $larvolId !== NULL)
 		{
@@ -13143,7 +13143,8 @@ class TrialTracker
 			} 
 			else 
 			{
-				$outputStr .= $value['event_description'];
+				$outputStr .= '<a ' . $titleLinkColor . ' href="javascript:;" class="no_access">' . $value['event_description'] . '</a>';
+				
 			}
 			$outputStr .= '</div></td>';
 			
@@ -13292,7 +13293,8 @@ class TrialTracker
 				}
 				else
 				{
-					$outputStr .= '<img src="images/hourglass.png" alt="Hourglass"  border="0" />';
+					$outputStr .= '<a href="javascript:;" class="no_access">'
+								. '<img src="images/hourglass.png" alt="Hourglass"  border="0" /></a>';
 				}
 				$outputStr .= '</div>';
 			}
