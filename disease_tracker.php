@@ -11,9 +11,9 @@ if(!isset($_REQUEST['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 if(!is_numeric($id)) return;
 
-if($_POST['download'])
+if($_REQUEST['download'])
 {
-	DownloadMOATrackerReports();
+	DownloadDiseaseTrackerReports();
 	exit;
 }
 
@@ -24,10 +24,16 @@ if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 }
 
 ////Process Report Tracker
-function showMOATracker($id, $TrackerType, $page=1)
+function showDiseaseTracker($id, $TrackerType, $page=1)
 {
 	$HTMLContent = '';
-	$Return = DataGeneratorForMOATracker($id, $TrackerType, $page);
+	
+	if(isset($_REQUEST['dwcount']))
+		$CountType = $_REQUEST['dwcount'];
+	else
+		$CountType = 'total';
+		
+	$Return = DataGeneratorForDiseaseTracker($id, $TrackerType, $page, $CountType);
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -44,41 +50,47 @@ function showMOATracker($id, $TrackerType, $page=1)
 	$PhaseArray = $Return['PhaseArray'];
 	$TotalPages = $Return['TotalPages'];
 	$TotalRecords = $Return['TotalRecords'];
+	$GobalEntityType = $Return['GobalEntityType'];
 	
-	$MainPageURL = 'moa_tracker.php';	//PT=MOA TRACKER (MAIN PT PAGE)
-	if($TrackerType == 'DMT')	//DPT=DISEASE MOA TRACKER
-		$MainPageURL = 'trialzilla_disease.php';
+	$MainPageURL = 'disease_tracker.php';
+	if($TrackerType == 'PDT')	//DPT=DISEASE Disease TRACKER
+		$MainPageURL = 'trialzilla_product.php';
+	else if($TrackerType == 'CDT')	//DPT=DISEASE Disease TRACKER
+		$MainPageURL = 'trialzilla_company.php';
+	else if($TrackerType == 'MDT')	//DPT=DISEASE Disease TRACKER
+		$MainPageURL = 'trialzilla_moa.php';
+	else if($TrackerType == 'MCDT')	//DPT=DISEASE Disease TRACKER
+		$MainPageURL = 'trialzilla_moacategory.php';			
 	
-	$HTMLContent .= MOATrackerCommonCSS($uniqueId, $TrackerType);
+	$HTMLContent .= DiseaseTrackerCommonCSS($uniqueId, $TrackerType);
 	
-	if($TrackerType=='MTH')
-	$HTMLContent .= MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType);
+	if($TrackerType=='DTH')
+	$HTMLContent .= DiseaseTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType);
 	
-	$HTMLContent .= MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL);
+	$HTMLContent .= DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $GobalEntityType, $CountType);
 	
 	if($TotalPages > 1)
 	{
-		$paginate = MOATrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL);
+		$paginate = DiseaseTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
 		$HTMLContent .= '<br/><br/>'.$paginate[1];
 	}
 	
-	$HTMLContent .= MOATrackerCommonJScript($uniqueId);
+	$HTMLContent .= DiseaseTrackerCommonJScript($uniqueId, $id, $MainPageURL, $GobalEntityType, $page, $TrackerType);
 	
 	return $HTMLContent;
 }
 ///End of Process Report Tracker
 
-function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
+function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType)
 {
 	global $db;
 	global $now;
 	global $logger;
 	
 	//IMP DATA
-	$MOAOrMOACatIds = array();
-	$NewMOAOrMOACatIds = array();
+	$DiseaseIds = array();
+	$NewDiseaseIds = array();
 	$data_matrix=array();
-	$TotalRecords = array();
 	
 	///// No of columns in our graph
 	$columns = 10;
@@ -90,139 +102,258 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	
 	//END DATA
 	
-	if($TrackerType == 'DMT')	//MTH - MOA TRACKER with HEADER DMT - DISEASE MOA TRACKER
-	{
-		$query = 'SELECT `name`, `id` FROM `entities` WHERE `class`="Disease" AND id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
-		$header = mysql_fetch_array($res);
-		$Report_DisplayName = $header['name'];
-		$Return = GetMOAsOrMOACatFromDisease_MOATracker($header['id']);
-		$MOAOrMOACatIds = $Return['all'];
-		$id = $header['id'];
-		$TotalRecords['moa'] = count($Return['moa']);
-		$TotalRecords['moacat'] = count($Return['moacat']);
-		$TotalRecords['all'] = count($Return['all']);
+	$query = "SELECT `name`, `display_name`, `id`, `class` FROM `entities` WHERE id='" . $id ."'";
+	$res = mysql_query($query) or die(mysql_error());
+	$header = mysql_fetch_array($res);
 	
-		$types = array('MOA', 'MOA_Category');
-		foreach($types as $type)
-		{	
-			if($type == 'MOA')
-					$MOAOrMOACatIdQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname, e2.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`class`='MOA' AND e2.`id` IN ('".implode("','",$Return['moa'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-				else
-					$MOAOrMOACatIdQuery = "SELECT e3.`id` AS id, e3.`name` AS name, e2.`display_name` AS dispname, e3.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) JOIN `entity_relations` er2 ON(er2.`child`=e2.`id`) JOIN `entities` e3 ON(e3.`id` = er2.`parent`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`class`='MOA' AND e3.`id` IN ('".implode("','",$Return['moacat'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-			$MOAOrMOACatIdResult = mysql_query($MOAOrMOACatIdQuery) or die(mysql_error());
-			
-			$key = 0;
-			while($result = mysql_fetch_array($MOAOrMOACatIdResult))
-			{	
-				$key = $MOAOrMOACatId = $result['id'];
-				if(isset($MOAOrMOACatId) && $MOAOrMOACatId != NULL)
-				{					
-					if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+	if($header['display_name'] != NULL && trim($header['display_name']) != '')
+	$Report_DisplayName = $header['display_name'];
+	else
+	$Report_DisplayName = $header['name'];
+	
+	$GobalEntityType = $header['class'];
+	$id=$header['id'];
+	
+	if($GobalEntityType == 'Disease')
+	{
+		print "Disease tracker does not support disease as input.";
+		exit();
+	}
+	
+	
+	if($GobalEntityType != 'Product')	//FOR OTHER THAH
+	{
+		$DiseaseIds = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($id, $GobalEntityType)));
+		
+		if($GobalEntityType == 'MOA' || $GobalEntityType == 'Institution')
+		{
+			$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') OR (rpt.`entity2`=e2.`id` AND e2.`class`='Disease')) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . implode("','",$DiseaseIds) . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	
+		}
+		else if($GobalEntityType == 'MOA_Category')
+		{
+			$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') OR (rpt.`entity2`=e2.`id` AND e2.`class`='Disease')) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . implode("','",$DiseaseIds) . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+		}
+		
+		$DiseaseQueryResult = mysql_query($DiseaseQuery) or die(mysql_error());
+		
+		$key = 0;	
+		while($result = mysql_fetch_array($DiseaseQueryResult))
+		{
+			$key = $DiseaseId = $result['id'];
+			if(isset($DiseaseId) && $DiseaseId != NULL)
+			{
+				if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+				{
+					/// Fill up all data in Data Matrix only, so we can sort all data at one place
+					if($result['dispname'] != NULL && trim($result['dispname']) != '')
+					$data_matrix[$key]['RowHeader'] = $result['dispname'];
+					else
+					$data_matrix[$key]['RowHeader'] = $result['name'];
+					
+					$data_matrix[$key]['ID'] = $result['id'];
+					$NewDiseaseIds[] = $result['id'];
+					
+					$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
+					
+					if($GobalEntityType == 'Institution')
 					{
-						/// Fill up all data in Data Matrix only, so we can sort all data at one place
-						if($result['dispname'] != NULL && trim($result['dispname']) != '')
-						$data_matrix[$key]['RowHeader'] = $result['dispname'];
-						else
-						$data_matrix[$key]['RowHeader'] = $result['name'];
-						
-						$data_matrix[$key]['ID'] = $result['id'];
-						$data_matrix[$key]['class'] = $result['class'];
-						$NewMOAOrMOACatIds[] = $result['id'];
+						$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_company.php?CompanyId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DCPT';
+					}
+					else if($GobalEntityType == 'MOA')
+					{
+						$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DMPT';
+					}
+					else if($GobalEntityType == 'MOA_Category')
+					{
+						$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DMCPT';
+					}				
 					
-						if($data_matrix[$key]['class'] == 'MOA')
-						{
-							$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'];
-							if($TrackerType == 'DMT')
-							$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
-							else
-							$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
-						}
-						else if($data_matrix[$key]['class'] == 'MOA_Category')
-						{
-							$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
-							if($TrackerType == 'DMT')
-							$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMCPT';
-							else
-							$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=MCPT';
-						}
+					///// Initialize data
+					$data_matrix[$key]['phase_na']=0;
+					$data_matrix[$key]['phase_0']=0;
+					$data_matrix[$key]['phase_1']=0;
+					$data_matrix[$key]['phase_2']=0;
+					$data_matrix[$key]['phase_3']=0;
+					$data_matrix[$key]['phase_4']=0;
+				
+					$data_matrix[$key]['TotalCount'] = 0;
+					$data_matrix[$key]['productIds'] = array();	
+					$data_matrix[$key]['ProdExistance'] = array();		
+				}
 					
-						///// Initialize data
-						$data_matrix[$key]['phase_na']=0;
-						$data_matrix[$key]['phase_0']=0;
-						$data_matrix[$key]['phase_1']=0;
-						$data_matrix[$key]['phase_2']=0;
-						$data_matrix[$key]['phase_3']=0;
-						$data_matrix[$key]['phase_4']=0;
-						
-						$data_matrix[$key]['TotalCount'] = 0;
-						$data_matrix[$key]['productIds'] = array();	
-						$data_matrix[$key]['ProdExistance'] = array();			
+				if((($result['entity1'] == $key && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $key && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+				{
+					if($result['entity1'] == $key)
+						$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+					else
+						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+							
+					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+					{
+						$CurrentPhasePNTR = 0;
+					}
+					else if($result['phase'] == '0')
+					{
+						$CurrentPhasePNTR = 1;
+					}
+					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a' 
+					|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+					{
+						$CurrentPhasePNTR = 2;
+					}
+					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2' 
+					|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b' 
+					|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+					{
+						$CurrentPhasePNTR = 3;
+					}
+					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3' 
+					|| $result['phase'] == '3a' || $result['phase'] == '3b')
+					{
+						$CurrentPhasePNTR = 4;
+					}	
+					else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+					{
+						$CurrentPhasePNTR = 5;	
+					}
+							
+					$MAXPhasePNTR = $CurrentPhasePNTR;
+					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+							
+					$data_matrix[$key]['productIds'][] = $result['ProdId'];
+					
+					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+					if($max_count < $data_matrix[$key]['TotalCount'])
+						$max_count = $data_matrix[$key]['TotalCount'];
+				}	//End of if Product Existsnace										
+			} //END OF IF - Disease ID NULL OR NOT			
+		}	//END OF While - Fetch data
+	}//End of Product as golbal entity
+	else if($GobalEntityType == 'Product')
+	{
+		$DiseaseIds = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($id, $GobalEntityType)));
+		
+		$DiseaseQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`, e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";	
+
+		$DiseaseQueryResult = mysql_query($DiseaseQuery) or die(mysql_error());
+		
+		$key = 0;	
+		while($result = mysql_fetch_array($DiseaseQueryResult))
+		{
+			$key = $DiseaseId = $result['id'];
+			if(isset($DiseaseId) && $DiseaseId != NULL)
+			{
+				if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+				{
+					/// Fill up all data in Data Matrix only, so we can sort all data at one place
+					if($result['dispname'] != NULL && trim($result['dispname']) != '')
+					$data_matrix[$key]['RowHeader'] = $result['dispname'];
+					else
+					$data_matrix[$key]['RowHeader'] = $result['name'];
+					
+					$data_matrix[$key]['ID'] = $result['id'];
+					$NewDiseaseIds[] = $result['id'];
+					
+					if(CountType=='active')
+					{
+						$link_part = '&list=1';
+					}
+					elseif(CountType=='total')
+					{
+						$link_part = '&list=2';
+					}
+					elseif(CountType=='owner_sponsored')
+					{
+						$link_part = '&list=1&itype=0';
+					}
+					else
+					{
+						$link_part = '&list=1&itype=1';
 					}
 					
-					if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+					$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
+					$data_matrix[$key]['ColumnsLink'] = trim(urlPath()) .'trialzilla_ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
+					
+					///// Initialize data
+					$data_matrix[$key]['phase_na']=0;
+					$data_matrix[$key]['phase_0']=0;
+					$data_matrix[$key]['phase_1']=0;
+					$data_matrix[$key]['phase_2']=0;
+					$data_matrix[$key]['phase_3']=0;
+					$data_matrix[$key]['phase_4']=0;
+				
+					$data_matrix[$key]['TotalCount'] = 0;
+					$data_matrix[$key]['larvolIds'] = array();	
+					$data_matrix[$key]['TrialExistance'] = array();		
+				}
+				
+				if($CountType == 'indlead' || $CountType == 'owner_sponsored' || $CountType == 'active')
+				{
+					if(!$result['is_active']) continue;
+					if($CountType == 'indlead' && $result['institution_type'] != 'industry_lead_sponsor') continue;
+					if($CountType == 'owner_sponsored' &&  $result['institution_type'] != 'owner_sponsored') continue;
+				}
+				
+				if($result['id'] == $key && !in_array($result['larvol_id'],$data_matrix[$key]['TrialExistance']))	//Avoid duplicates like (1,2) and (2,1) type
+				{
+					$data_matrix[$key]['TrialExistance'][] = $result['larvol_id'];
+							
+					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
 					{
-						if($result['entity1'] == $id)
-						$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-						else
-						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
-						
-						if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
-						{
-							$CurrentPhasePNTR = 0;
-						}
-						else if($result['phase'] == '0')
-						{
-							$CurrentPhasePNTR = 1;
-						}
-						else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a' 
-						|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
-						{
-							$CurrentPhasePNTR = 2;
-						}
-						else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2' 
-						|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b' 
-						|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
-						{
-							$CurrentPhasePNTR = 3;
-						}
-						else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3' 
-						|| $result['phase'] == '3a' || $result['phase'] == '3b')
-						{
-							$CurrentPhasePNTR = 4;
-						}	
-						else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
-						{
-							$CurrentPhasePNTR = 5;	
-						}
-								
-						$MAXPhasePNTR = $CurrentPhasePNTR;
-						$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER	
-						
-						$data_matrix[$key]['productIds'][] = $result['ProdId'];
-						
-						$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
-						if($max_count < $data_matrix[$key]['TotalCount'])
-							$max_count = $data_matrix[$key]['TotalCount'];
-					}	//End of if Product Existsnace										
-				} //END OF IF - MOA ID NULL OR NOT			
-			}	//END OF While - Fetch data
-		}//End of Types for loop	
-	}	//End of DMT
+						$CurrentPhasePNTR = 0;
+					}
+					else if($result['phase'] == '0')
+					{
+						$CurrentPhasePNTR = 1;
+					}
+					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a' 
+					|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+					{
+						$CurrentPhasePNTR = 2;
+					}
+					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2' 
+					|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b' 
+					|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+					{
+						$CurrentPhasePNTR = 3;
+					}
+					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3' 
+					|| $result['phase'] == '3a' || $result['phase'] == '3b')
+					{
+						$CurrentPhasePNTR = 4;
+					}	
+					else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+					{
+						$CurrentPhasePNTR = 5;	
+					}
+							
+					$MAXPhasePNTR = $CurrentPhasePNTR;
+					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+							
+					$data_matrix[$key]['larvolIds'][] = $result['larvol_id'];
+					
+					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['larvolIds']);
+					if($max_count < $data_matrix[$key]['TotalCount'])
+						$max_count = $data_matrix[$key]['TotalCount'];
+				}	//End of if larvol Existsnace										
+			} //END OF IF - Disease ID NULL OR NOT			
+		}	//END OF While - Fetch data		
+	}	
 	/// This function willl Sort multidimensional array according to Total count
-	$data_matrix = sortTwoDimensionArrayByKeyMOATracker($data_matrix,'TotalCount');
+	$data_matrix = sortTwoDimensionArrayByKeyDiseaseTracker($data_matrix,'TotalCount');
 	
 	///////////PAGING DATA
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
-	if(!isset($_POST['download']))
+	$TotalRecords = count($NewDiseaseIds);
+	if(!isset($_REQUEST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
 		
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewMOAOrMOACatIds = array_slice($NewMOAOrMOACatIds, $StartSlice, $RecordsPerPage);
+		$NewDiseaseIds = array_slice($NewDiseaseIds, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
@@ -239,7 +370,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	$Return['report_name'] = $Report_DisplayName;
 	$Return['id'] = $id;
 	$Return['columns'] = $columns;
-	$Return['IdsArray'] = $NewMOAOrMOACatIds;
+	$Return['IdsArray'] = $NewDiseaseIds;
 	$Return['inner_columns'] = $inner_columns;
 	$Return['inner_width'] = $inner_width;
 	$Return['column_width'] = $column_width;
@@ -248,6 +379,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	$Return['PhaseArray'] = $PhaseArray;
 	$Return['TotalPages'] = $TotalPages;
 	$Return['TotalRecords'] = $TotalRecords;
+	$Return['GobalEntityType'] = $GobalEntityType;
 	
 	return $Return;
 }
@@ -270,10 +402,12 @@ body { font-family:Verdana; font-size: 13px;}
 .report_name {
 	font-weight:bold;
 	font-size:18px;
-}					
+}
+
+					
 </style>
 <?php
-function MOATrackerCommonCSS($uniqueId, $TrackerType)
+function DiseaseTrackerCommonCSS($uniqueId, $TrackerType)
 {
 	$htmlContent = '';
 	$htmlContent = '<style type="text/css">
@@ -307,14 +441,14 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 					#slideout_'.$uniqueId.' {
 						position: fixed;
 						_position:absolute;
-						top: '.(($TrackerType != 'MTH') ? '200':'40').'px;
+						top: '.(($TrackerType != 'DTH') ? '200':'40').'px;
 						right: 0;
 						margin: 12px 0 0 0;
 					}
 					
 					.slideout_inner {
 						position:absolute;
-						top: '.(($TrackerType != 'MTH') ? '200':'40').'px;
+						top: '.(($TrackerType != 'DTH') ? '200':'40').'px;
 						right: -255px;
 						display:none;
 					}
@@ -563,9 +697,46 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 	return $htmlContent;				
 }
 
-function MOATrackerCommonJScript($uniqueId)
+function DiseaseTrackerCommonJScript($uniqueId, $id, $MainPageURL, $GobalEntityType, $page, $TrackerType)
 {
-	$htmlContent = '';	
+	$htmlContent = '';
+	
+	$url = 'id='.$id.'&page='.$page;
+	if($TrackerType == 'PDT')	//PDT = PRODUCT DISEASE TRACKER
+		$url = 'e1='.$id.'&page='.$page.'&tab=diseasetrac';
+	else if($TrackerType == 'CDT')	//CDT = COMPANY DISEASE TRACKER
+		$url = 'CompanyId='.$id.'&page='.$page.'&tab=diseasetrac';
+	else if($TrackerType == 'MDT')	//MDT = MOA DISEASE TRACKER
+		$url = 'MoaId='.$id.'&page='.$page.'&tab=diseasetrac';
+	else if($TrackerType == 'MCDT')	//MCDT = MOA CATEGORY DISEASE TRACKER
+		$url = 'MoaCatId='.$id.'&page='.$page.'&tab=diseasetrac';
+		
+	//Script for view change
+	if($GobalEntityType == 'Product')
+	$htmlContent .= "<script language=\"javascript\" type=\"text/javascript\">
+					function change_view_".$uniqueId."_()
+					{
+						var dwcount = document.getElementById('".$uniqueId."_dwcount');
+						if(dwcount.value == 'active')
+						{
+							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=active\";
+						}
+						else if(dwcount.value == 'total')
+						{
+							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=total\";
+						}
+						else if(dwcount.value == 'owner_sponsored')
+						{
+							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=owner_sponsored\";
+						}
+						else
+						{
+							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=indlead\";
+						}
+					}
+						</script>";
+		
+	//Script for view change ends	
 	
 	//Script for Fixed header while resize
 	$htmlContent .= "<script type=\"text/javascript\">
@@ -797,7 +968,7 @@ function MOATrackerCommonJScript($uniqueId)
 <body bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
 <?php 
 
-function MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
+function DiseaseTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 {	
 	$Report_Name = $Report_DisplayName;
 	$htmlContent = '';
@@ -810,14 +981,14 @@ function MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 					   . '<br/><span style="font-weight:normal;">Send feedback to '
 					   . '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 					   . 'larvoltrials@larvol.com</a></span></td>'
-					   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' MOA Tracker</td></tr></table><br/>';
+					   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' Disease Tracker</td></tr></table><br/>';
 	}
 	return $htmlContent;
 }
 
-function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL)
+function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $GobalEntityType, $CountType)
 {				
-	if(count($IdsArray) == 0 && ($TrackerType == 'MTH' || $TrackerType == 'DMT')) return 'No MOA Found';
+	if(count($IdsArray) == 0) return 'No Disease Found';
 	
 	require_once('tcpdf/config/lang/eng.php');
 	require_once('tcpdf/tcpdf.php');  
@@ -828,19 +999,27 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 	
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
-					.'<form action="moa_tracker.php" method="post">'
+					.'<form action="disease_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
-	if($TrackerType != 'DMT')				
-	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords['all'].'&nbsp;MOA'. (($TotalRecords['all'] == 1) ? '':'s') . '</div></td>';
-					
+	if($TrackerType == 'DTH')				
+	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;'. (($TotalRecords == 1) ? 'Disease':'Diseases') .'</div></td>';
+	
 	if($TotalPages > 1)
 	{
-		$paginate = MOATrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL);
+		$paginate = DiseaseTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
 		$htmlContent .= '<td style="padding-left:0px; vertical-align:top; border:0px;">'.$paginate[1].'</td>';
-	}				
+	}
 	
+	if($GobalEntityType == 'Product')
+	$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
+					. '<option value="total" '. (($CountType == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
+					. '<option value="indlead" '. (($CountType == 'indlead') ?  'selected="selected"' : '' ).'>Active industry trials</option>'
+					. '<option value="owner_sponsored" '. (($CountType == 'owner_sponsored') ?  'selected="selected"' : '' ).'>Active owner-sponsored trials</option>'
+					. '<option value="active" '. (($CountType == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
+					. '</select></td>';
+										
 	$htmlContent .= '<td class="bottom right">'
 					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
 					. '</td>'
@@ -878,7 +1057,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 	$htmlContent .= '<th width="8px"></th></tr>';
 
 
-	$htmlContent .= '<tr><th class="RowHeader_col" align="right">Products</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+	$htmlContent .= '<tr><th class="RowHeader_col" align="right">'.(($GobalEntityType == 'Product') ? 'Trials' : 'Products') .'</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
 	for($j=0; $j < $columns; $j++)
 	{
@@ -922,8 +1101,8 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 		
 		$htmlContent .= '<tr id="'.$uniqueId.'_Graph_Row_A_'.$key.'"><th align="right" class="RowHeader_col" id="'.$uniqueId.'_RowHeaderCol_'.$key.'" rowspan="3"><a href="'.  $data_matrix[$key]['HeaderLink'] . '" target="_blank" style="text-decoration:underline;">'.$data_matrix[$key]['RowHeader'].'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
-		///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
-		///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
+		///Below function will derive number of lines required to display disease name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
+		///for disease column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
 		///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
 		$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$key]['RowHeader'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
 		
@@ -933,9 +1112,9 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 		}
 		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
 		
-		$Err = MOAsCountErr($data_matrix, $key, $ratio);
+		$Err = CountErr($data_matrix, $key, $ratio);
 			
-		$Max_ValueKey = Max_ValueKeyMOATracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+		$Max_ValueKey = Max_ValueKeyDiseaseTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 			
 		$total_cols = $inner_columns * $columns;
 		$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
@@ -945,8 +1124,8 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 		{
 			if($data_matrix[$key]['phase_'.$phase_nums] > 0)
 			{
-				$Color = getClassNColorforPhaseMOATracker($phase_nums);
-				$Mini_Bar_Width = CalculateMiniBarWidthMOATracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+				$Color = getClassNColorforPhaseDiseaseTracker($phase_nums);
+				$Mini_Bar_Width = CalculateMiniBarWidthDiseaseTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 				$phase_space =  $phase_space + $Mini_Bar_Width;					
 				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="' . $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" target="_blank" class="Link" >&nbsp;</a></th>';
 			}
@@ -955,7 +1134,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 		$remain_span = $total_cols - $phase_space;
 		
 		if($remain_span > 0)
-		$htmlContent .= DrawExtraHTMLCellsMOATracker($phase_space, $inner_columns, $remain_span);
+		$htmlContent .= DrawExtraHTMLCellsDiseaseTracker($phase_space, $inner_columns, $remain_span);
 		
 		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_C_'.$key.'">';
 		for($j=0; $j < $columns; $j++)
@@ -1010,7 +1189,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 	return $htmlContent;
 }
 
-function DrawExtraHTMLCellsMOATracker($phase_space, $inner_columns, $remain_span)
+function DrawExtraHTMLCellsDiseaseTracker($phase_space, $inner_columns, $remain_span)
 {
 	$aq_sp = 0;
 	while($aq_sp < $phase_space)
@@ -1030,14 +1209,25 @@ function DrawExtraHTMLCellsMOATracker($phase_space, $inner_columns, $remain_span
 	return $extraHTMLContent;
 }
 
-function MOATrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $MainPageURL)
+function DiseaseTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $MainPageURL, $GobalEntityType, $CountType)
 {	
 	$url = '';
 	$stages = 1;
 			
-	if($TrackerType == 'DMT')	//DPT=DISEASE MOA TRACKER
-		$url = 'DiseaseId=' . $id .'&amp;tab=MOAs';
-		
+	$url = 'id=' . $id .'&amp;tab=diseasetrac';
+	
+	$url = 'id='.$id;
+	if($TrackerType == 'PDT')	//PDT = PRODUCT DISEASE TRACKER
+		$url = 'e1='.$id.'&amp;tab=diseasetrac';
+	else if($TrackerType == 'CDT')	//CDT = COMPANY DISEASE TRACKER
+		$url = 'CompanyId='.$id.'&amp;tab=diseasetrac';
+	else if($TrackerType == 'MDT')	//MDT = MOA DISEASE TRACKER
+		$url = 'MoaId='.$id.'&amp;tab=diseasetrac';
+	else if($TrackerType == 'MCDT')	//MCDT = MOA CATEGORY DISEASE TRACKER
+		$url = 'MoaCatId='.$id.'&amp;tab=diseasetrac';
+	
+	if($GobalEntityType == 'Product')
+		$url .= '&amp;dwcount=' . $dwcount;	
 	
 	$rootUrl = $MainPageURL.'?';
 	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
@@ -1129,7 +1319,7 @@ function MOATrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $Mai
 }
 
 if(isset($_REQUEST['id']))
-print showMOATracker($_REQUEST['id'], 'MTH', $page);
+print showDiseaseTracker($_REQUEST['id'], 'DTH', $page);
 ?>
 <?
 if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))
@@ -1142,14 +1332,42 @@ if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALS
 </body>
 </html>
 <?php
-function DownloadMOATrackerReports()
+function DownloadDiseaseTrackerReports()
 {
 	ob_start();
 	if(!isset($_REQUEST['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 	if(!is_numeric($id)) return;
 	$TrackerType = $_REQUEST['TrackerType'];
-	$Return = DataGeneratorForMOATracker($id, $TrackerType);
+	
+	if($_REQUEST['dwcount']=='active')
+	{
+		$tooltip=$title="Active trials";
+		$pdftitle="Active trials";
+		$link_part = $commonPart2.'&list=1';
+		$mode = 'active';
+	}
+	elseif($_REQUEST['dwcount']=='total')
+	{
+		$pdftitle=$tooltip=$title="All trials (Active + Inactive)";
+		$link_part = $commonPart2.'&list=2';
+		$mode = 'total';
+	}
+	elseif($_REQUEST['dwcount']=='owner_sponsored')
+	{
+		$pdftitle=$tooltip=$title="Active owner-sponsored trials";
+		$link_part = $commonPart2.'&list=1&itype=0';
+		$mode = 'owner_sponsored';
+	}
+	else
+	{
+		$tooltip=$title="Active industry lead sponsor trials";
+		$pdftitle="Active industry lead sponsor trials";
+		$link_part = $commonPart2.'&list=1&itype=1';
+		$mode = 'indlead';
+	}	
+		
+	$Return = DataGeneratorForDiseaseTracker($id, $TrackerType, 0, $mode);
 	
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
@@ -1163,6 +1381,7 @@ function DownloadMOATrackerReports()
 	$ratio = $Return['ratio'];
 	$column_interval = $Return['column_interval'];
 	$PhaseArray = $Return['PhaseArray'];
+	$GobalEntityType = $Return['GobalEntityType'];
 	
 	$total_cols = $inner_columns * $columns;
 	
@@ -1170,9 +1389,7 @@ function DownloadMOATrackerReports()
 	
 	$Report_Name = $Report_DisplayName;
 	
-	if($TrackerType == 'DCT')	$TrackerName = ' Disease';
-	
-	if($_POST['dwformat']=='exceldown')
+	if($_REQUEST['dwformat']=='exceldown')
 	{
 	  	$name = $Report_Name;
 		
@@ -1207,7 +1424,19 @@ function DownloadMOATrackerReports()
      											'rotation'   => 0,
       											'wrap'       => false));
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.$TrackerName.' MOA Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Disease Tracker');
+		
+		if($GobalEntityType == 'Product')
+		{
+			$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
+			$objPHPExcel->getActiveSheet()->mergeCells('B' . $Excel_HMCounter . ':BH' . $Excel_HMCounter);
+			$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->applyFromArray(
+											array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+													'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+													'rotation'   => 0,
+													'wrap'       => false));
+			$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $tooltip);
+		}
 		
 		/// Extra Row
 		$Excel_HMCounter++;
@@ -1215,7 +1444,7 @@ function DownloadMOATrackerReports()
 		$from++;
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExportMOATracker($from, $inner_columns);
+			$to = getColspanforExcelExportDiseaseTracker($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$from = $to;
 			$from++;
@@ -1247,16 +1476,16 @@ function DownloadMOATrackerReports()
 			 
 			$from = $Start_Char;
 			
-			//// Limit product names so that they will not overlap other cells
+			//// Limit disease names so that they will not overlap other cells
 			$white_font['font']['color']['rgb'] = 'FFFFFF';
 			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->applyFromArray($white_font);
 			$objPHPExcel->getActiveSheet()->setCellValue($from . $Excel_HMCounter, '.');
 			$from++;
 				
 			//// Graph starts
-			$Err = MOAsCountErr($data_matrix, $key, $ratio);
+			$Err = CountErr($data_matrix, $key, $ratio);
 			
-			$Max_ValueKey = Max_ValueKeyMOATracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+			$Max_ValueKey = Max_ValueKeyDiseaseTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 			
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
@@ -1266,10 +1495,10 @@ function DownloadMOATrackerReports()
 			{
 				if($data_matrix[$key]['phase_'.$phase_nums] > 0)
 				{
-					$Mini_Bar_Width = CalculateMiniBarWidthMOATracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$Mini_Bar_Width = CalculateMiniBarWidthDiseaseTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 					$phase_space =  $phase_space + $Mini_Bar_Width;					
 					$url .= $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums;
-					$from = CreatePhaseCellforExcelExportMOATracker($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+					$from = CreatePhaseCellforExcelExportDiseaseTracker($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 				}
 			}
 			
@@ -1284,7 +1513,7 @@ function DownloadMOATrackerReports()
 				$extra_sp = $aq_sp - $phase_space;
 				if($extra_sp > 0)
 				{
-					$to = getColspanforExcelExportMOATracker($from, $extra_sp);
+					$to = getColspanforExcelExportDiseaseTracker($from, $extra_sp);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
 					$from = $to;
 					$from++;
@@ -1293,7 +1522,7 @@ function DownloadMOATrackerReports()
 				$remain_span = $remain_span - $extra_sp;
 				while($remain_span > 0)
 				{
-					$to = getColspanforExcelExportMOATracker($from, $inner_columns);
+					$to = getColspanforExcelExportDiseaseTracker($from, $inner_columns);
 					$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
 					$from = $to;
 					$from++;
@@ -1310,7 +1539,7 @@ function DownloadMOATrackerReports()
 		$from++;
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExportMOATracker($from, $inner_columns);
+			$to = getColspanforExcelExportDiseaseTracker($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$from = $to;
 			$from++;
@@ -1321,7 +1550,7 @@ function DownloadMOATrackerReports()
 		$from = $Start_Char;
 		$from++;
 		
-		$to = getColspanforExcelExportMOATracker($from, 2);
+		$to = getColspanforExcelExportDiseaseTracker($from, 2);
 		$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 		$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, 0);
 		$from = $to;
@@ -1329,10 +1558,8 @@ function DownloadMOATrackerReports()
 			
 		for($j=0; $j < $columns; $j++)
 		{
-			$to = getColspanforExcelExportMOATracker($from, (($j==0)? $inner_columns : $inner_columns));
+			$to = getColspanforExcelExportDiseaseTracker($from, (($j==0)? $inner_columns : $inner_columns));
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
-
-
 			$objPHPExcel->getActiveSheet()->SetCellValue($from . $Excel_HMCounter, (($j+1) * $column_interval));
 			$from = $to;
 			$from++;
@@ -1358,7 +1585,7 @@ function DownloadMOATrackerReports()
 		$from++;
 		foreach($p_colors as $key => $color)
 		{
-			$to = getColspanforExcelExportMOATracker($from, $inner_columns);
+			$to = getColspanforExcelExportDiseaseTracker($from, $inner_columns);
 			$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':'. $to . $Excel_HMCounter);
 			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
 			$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->getFill()->getStartColor()->setRGB($color);
@@ -1379,18 +1606,18 @@ function DownloadMOATrackerReports()
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_MOA_Analytic_Excel_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header('Content-Disposition: attachment;filename="Larvol_' . substr($Report_Name,0,20) . '_Disease_Analytic_Excel_' . date('Y-m-d_H.i.s') . '.xlsx"');
 			
 		header("Content-Transfer-Encoding: binary ");
 		$objWriter->save('php://output');
 		@flush();
 	} //Excel Function Ends
 	
-	if($_POST['dwformat']=='tsvdown')
+	if($_REQUEST['dwformat']=='tsvdown')
 	{
 		$TSV_data = "";
 		
-		$TSV_data ="MOA Name \t Phase 4 \t Phase 3 \t Phase 2 \t Phase 1 \t Phase 0 \t Phase N/A \n";
+		$TSV_data ="Disease Name \t Phase 4 \t Phase 3 \t Phase 2 \t Phase 1 \t Phase 0 \t Phase N/A \n";
 		
 		foreach($IdsArray as $key => $Ids)
 		{
@@ -1404,12 +1631,12 @@ function DownloadMOATrackerReports()
 		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
 		header("Content-type: application/force-download"); 
 		header("Content-Type: application/tsv");
-		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_MOA_Tracker_' . date('Y-m-d_H.i.s'). '.tsv"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Disease_Tracker_' . date('Y-m-d_H.i.s'). '.tsv"');
 		header("Content-Transfer-Encoding: binary ");
 		echo $TSV_data;
 	}	/// TSV FUNCTION ENDS HERE
 	
-	if($_POST['dwformat']=='pdfdown')
+	if($_REQUEST['dwformat']=='pdfdown')
 	{
 		require_once('tcpdf/tcpdf.php');  
 		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -1418,7 +1645,7 @@ function DownloadMOATrackerReports()
 		$pdf->SetAuthor('Larvol Trials');
 		$pdf->SetTitle('Larvol Trials');
 		$pdf->SetSubject('Larvol Trials');
-		$pdf->SetKeywords('Larvol Trials MOA Analytics, Larvol Trials MOA Analytics PDF Export');
+		$pdf->SetKeywords('Larvol Trials Disease Analytics, Larvol Trials Disease Analytics PDF Export');
 		// In pdf we have used two kinds of font- Actual text we are going to display will have size 8
 		// While at other places like displying space in subcolumns of graph cell, we have used font size as 6, 
 		// cause to display font 8 or 7 we require more width upto 2mm
@@ -1449,7 +1676,7 @@ function DownloadMOATrackerReports()
 		
 		$pdf->SetFont('verdanab', '', 8);	//Set font size as 8
 		
-		$Repo_Heading = $Report_Name.$TrackerName.' MOA Tracker';
+		$Repo_Heading = $Report_Name.$TrackerName.' Disease Tracker' . (($GobalEntityType == 'Product') ? ', '.$pdftitle:'');
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
 		$pdf->MultiCell($Page_Width, '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(5);
@@ -1463,7 +1690,7 @@ function DownloadMOATrackerReports()
 		foreach($IdsArray as $key => $Ids)
 		{	
 			$dimensions = $pdf->getPageDimensions();
-			//Height calculation depending on product name
+			//Height calculation depending on disease name
 			$rowcount = 0;
 			
 			$pdf->SetFont('verdana_old', '', 8);	//set font size as 8
@@ -1486,14 +1713,14 @@ function DownloadMOATrackerReports()
 			if (($startY + $Total_Height) + $dimensions['bm'] > ($dimensions['hk']))
 			{
 				//this row will cause a page break, draw the bottom border on previous row and give this a top border
-				CreateLastTickBorderMOATracker($pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval);
+				CreateLastTickBorderDiseaseTracker($pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval, $GobalEntityType);
 				$pdf->AddPage();
 			}
 			
 			$ln=0;
 			$Main_X = $pdf->GetX();
 			$Main_Y = $pdf->GetY();
-			/// Bypass product column
+			/// Bypass disease column
 			$Place_X = $Main_X+$Header_Col_Width;
 			$Place_Y = $Main_Y;
 			
@@ -1548,7 +1775,7 @@ function DownloadMOATrackerReports()
 			$Place_X = $Place_X + $Tic_dimension;
 			$Middle_Place = $Place_X;
 			
-			///// Part added to divide extra space formed by multiple rows of product name
+			///// Part added to divide extra space formed by multiple rows of disease name
 			if($Extra_Spacing > 0)
 			{
 				$ln=0;
@@ -1577,13 +1804,13 @@ function DownloadMOATrackerReports()
 					}
 				}
 			}
-			///// End of Part added to divide extra space formed by multiple rows of product name
+			///// End of Part added to divide extra space formed by multiple rows of disease name
 			
 			$Place_X = $Middle_Place;
 			
 			//// Graph starts
-			$Err = MOAsCountErr($data_matrix, $key, $ratio);
-			$Max_ValueKey = Max_ValueKeyMOATracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+			$Err = CountErr($data_matrix, $key, $ratio);
+			$Max_ValueKey = Max_ValueKeyDiseaseTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 				
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
@@ -1593,17 +1820,17 @@ function DownloadMOATrackerReports()
 			{
 				if($data_matrix[$key]['phase_'.$phase_nums] > 0)
 				{
-					$border = setStyleforPDFExportMOATracker($phase_nums, $pdf);
+					$border = setStyleforPDFExportDiseaseTracker($phase_nums, $pdf);
 					$Width = $subColumn_width;
-					$Mini_Bar_Width = CalculateMiniBarWidthMOATracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$Mini_Bar_Width = CalculateMiniBarWidthDiseaseTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 					$phase_space =  $phase_space + $Mini_Bar_Width;
 						
-					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$key]['phase_'.$phase_nums], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => 'Products', 'Subj' => 'Information', 'C' => array()));	
+					$pdf->Annotation($Place_X, $Place_Y, ($Width*$Mini_Bar_Width), $Line_Height, $data_matrix[$key]['phase_'.$phase_nums], array('Subtype'=>'Caret', 'Name' => 'Comment', 'T' => (($GobalEntityType == 'Product') ? 'Trials' : 'Products'), 'Subj' => 'Information', 'C' => array()));	
 						
 					$m=0;
 					while($m < $Mini_Bar_Width)
 					{
-						$Color = getClassNColorforPhaseMOATracker($phase_nums);
+						$Color = getClassNColorforPhaseDiseaseTracker($phase_nums);
 						$pdfContent = '<div align="center" style="vertical-align:top; float:none;"><a style="color:#'.$Color[1].'; text-decoration:none; line-height:2px;" href="'. $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" target="_blank" >&nbsp;</a></div>';
 						$pdf->MultiCell($Width, $Line_Height, $pdfContent, $border=0, $align='C', $fill=1, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 						$Place_X = $Place_X + $Width;
@@ -1647,7 +1874,7 @@ function DownloadMOATrackerReports()
 			$border = array('mode' => 'int', 'L' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(204,204,204)));
 			$pdf->MultiCell(1, $Line_Height, '', $border, $align='C', $fill=0, $ln, $Place_X, $Place_Y, $reseth=false, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Line_Height);
 			$Place_Y = $Place_Y + $Line_Height;
-			///// Part added to divide extra space formed by multiple rows of product name
+			///// Part added to divide extra space formed by multiple rows of disease name
 			if($Extra_Spacing > 0)
 			{
 				$ln=0;
@@ -1676,12 +1903,12 @@ function DownloadMOATrackerReports()
 					}
 				}
 			}
-			///// End of Part added to divide extra space formed by multiple rows of product name
+			///// End of Part added to divide extra space formed by multiple rows of disease name
 			
 			$ln=0;
 			$Place_X = $Main_X;
 			$Place_Y = $Place_Y;
-			/// Bypass product column
+			/// Bypass disease column
 			$Place_X =$Place_X+$Header_Col_Width;
 			$Place_Y = $Place_Y;
 			$border = array('mode' => 'ext', 'RB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(204,204,204)));
@@ -1713,20 +1940,20 @@ function DownloadMOATrackerReports()
 			$pdf->SetY($Place_Y);
 		}
 				
-		CreateLastTickBorderMOATracker($pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval);
+		CreateLastTickBorderDiseaseTracker($pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval, $GobalEntityType);
 			
 		ob_end_clean();
 		//Close and output PDF document
-		$pdf->Output(''. substr($Report_Name,0,20) .'_MOA_Tracker_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
+		$pdf->Output(''. substr($Report_Name,0,20) .'_Disease_Tracker_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 	}	/// End of PDF Function
 	
 	//Start of Real Chart Excel
-	if($_POST['dwformat']=='excelchartdown')
+	if($_REQUEST['dwformat']=='excelchartdown')
 	{
 		$Repo_Heading = $Report_Name;
 		
 		$objPHPExcel = new PHPExcel();
-		$WorksheetName = 'MOA_Tracker';
+		$WorksheetName = 'Disease_Tracker';
 		$objPHPExcel->getActiveSheet()->setTitle($WorksheetName);
 		$sheetPHPExcel = $objPHPExcel->getActiveSheet();
 		
@@ -1757,7 +1984,7 @@ function DownloadMOATrackerReports()
 		
 		}
 		
-		//Add each product data array to Input Array
+		//Add each disease data array to Input Array
 		for($decr=(count($IdsArray) - 1); $decr >= 0 ; $decr--)
 		{
 			$currentRow = $decr;
@@ -1773,7 +2000,6 @@ function DownloadMOATrackerReports()
 			
 			$ExcelChartArray[] = $CurrentExcelChartArray;
 			$CurrentExcelRow++;
-
 			foreach($DataColumns as $colId=>$colName)
 			{
 				$objPHPExcel->getActiveSheet()->setCellValue($colName.$CurrentExcelRow, $CurrentExcelChartArray[$colId]);
@@ -1814,10 +2040,10 @@ function DownloadMOATrackerReports()
 		$plotarea = new PHPExcel_Chart_PlotArea(null, array($series));
 		$legend = new PHPExcel_Chart_Legend(PHPExcel_Chart_Legend::POSITION_RIGHT, null, false);
 		$title = new PHPExcel_Chart_Title('');
-		$X_Label = new PHPExcel_Chart_Title('MOAs');
-		$Y_Label = new PHPExcel_Chart_Title('Number of Products');
+		$X_Label = new PHPExcel_Chart_Title('Diseases');
+		$Y_Label = new PHPExcel_Chart_Title('Number of '.(($GobalEntityType == 'Product') ? 'Trials' : 'Products'));
 		$chart = new PHPExcel_Chart(
-		  'MOA Tracker',                                // name
+		  'Disease Tracker',                                // name
 		  $title,                                           // title
 		  $legend,                                        	// legend
 		  $plotarea,                                      	// plotArea
@@ -1844,7 +2070,16 @@ function DownloadMOATrackerReports()
      											'rotation'   => 0,
       											'wrap'       => false));
 		
-		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.$TrackerName.' MOA Tracker');
+		$objPHPExcel->getActiveSheet()->SetCellValue('B1', $Report_Name.$TrackerName.' Disease Tracker');
+		
+		$objPHPExcel->getActiveSheet()->SetCellValue('A2', 'Display Mode:');
+		$objPHPExcel->getActiveSheet()->mergeCells('B2:AA2');
+		$objPHPExcel->getActiveSheet()->getStyle('B2')->getAlignment()->applyFromArray(
+      									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+      											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+     											'rotation'   => 0,
+      											'wrap'       => false));
+		$objPHPExcel->getActiveSheet()->SetCellValue('B2', $tooltip);
 		
 		$name = $Report_Name;
 		$objPHPExcel->getProperties()->setCreator(SITE_NAME);
@@ -1862,7 +2097,7 @@ function DownloadMOATrackerReports()
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_MOA_Tracker_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Disease_Tracker_' . date('Y-m-d_H.i.s') . '.xlsx"');
 		header("Content-Transfer-Encoding: binary ");
 		
 		$Writer->save('php://output');
@@ -1870,7 +2105,7 @@ function DownloadMOATrackerReports()
 	//End of Real Chart Excel
 }
 
-function getColspanforExcelExportMOATracker($cell, $inc)
+function getColspanforExcelExportDiseaseTracker($cell, $inc)
 {
 	for($i = 1; $i < $inc; $i++)
 	{
@@ -1879,7 +2114,7 @@ function getColspanforExcelExportMOATracker($cell, $inc)
 	return $cell;
 }
 
-function getBGColorforExcelExportMOATracker($phase)
+function getBGColorforExcelExportDiseaseTracker($phase)
 {
 	if($phase == '0')
 	{
@@ -1941,7 +2176,7 @@ function getBGColorforExcelExportMOATracker($phase)
 	return $bgColor;
 }
 
-function getClassNColorforPhaseMOATracker($phase)
+function getClassNColorforPhaseDiseaseTracker($phase)
 {
 	$Color = array();
 	if($phase == '0')
@@ -1983,7 +2218,7 @@ function getClassNColorforPhaseMOATracker($phase)
 	return $Color;
 }
 
-function getNameforPhaseMOATracker($phase)
+function getNameforPhaseDiseaseTracker($phase)
 {
 	$Name = '';
 	if($phase == '0')
@@ -2018,11 +2253,11 @@ function getNameforPhaseMOATracker($phase)
 	return $Name;
 }
 
-function CreatePhaseCellforExcelExportMOATracker($from, $Bar_Width, $url, $Excel_HMCounter, $countValue, $phase, &$objPHPExcel)
+function CreatePhaseCellforExcelExportDiseaseTracker($from, $Bar_Width, $url, $Excel_HMCounter, $countValue, $phase, &$objPHPExcel)
 {
-	$to = getColspanforExcelExportMOATracker($from, $Bar_Width);
+	$to = getColspanforExcelExportDiseaseTracker($from, $Bar_Width);
 	$objPHPExcel->getActiveSheet()->mergeCells($from . $Excel_HMCounter . ':' . $to . $Excel_HMCounter);
-	$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->applyFromArray(getBGColorforExcelExportMOATracker($phase));
+	$objPHPExcel->getActiveSheet()->getStyle($from . $Excel_HMCounter)->applyFromArray(getBGColorforExcelExportDiseaseTracker($phase));
 	$objPHPExcel->getActiveSheet()->getCell($from . $Excel_HMCounter)->getHyperlink()->setUrl($url); 
 	$objPHPExcel->getActiveSheet()->getCell($from . $Excel_HMCounter)->getHyperlink()->setTooltip($countValue);
 	$from = $to;
@@ -2031,7 +2266,7 @@ function CreatePhaseCellforExcelExportMOATracker($from, $Bar_Width, $url, $Excel
 	return $from;
 }
 
-function setStyleforPDFExportMOATracker($phase, &$pdf)
+function setStyleforPDFExportDiseaseTracker($phase, &$pdf)
 {
 	if($phase == '0')
 	{
@@ -2072,13 +2307,13 @@ function setStyleforPDFExportMOATracker($phase, &$pdf)
 	return $border;
 }
 
-function CreateLastTickBorderMOATracker(&$pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval)
+function CreateLastTickBorderDiseaseTracker(&$pdf, $Header_Col_Width, $Tic_dimension, $columns, $inner_columns, $subColumn_width, $column_interval, $GobalEntityType)
 {
 	$ln=0;
 	$Main_X = $pdf->GetX();
 	$Main_Y = $pdf->GetY();
-	/// Bypass product column
-	$pdf->MultiCell($Header_Col_Width, $Tic_dimension, 'Products', 0, $align='R', $fill=0, $ln, $Main_X, $Main_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
+	/// Bypass disease column
+	$pdf->MultiCell($Header_Col_Width, $Tic_dimension, (($GobalEntityType == 'Product') ? 'Trials' : 'Products'), 0, $align='R', $fill=0, $ln, $Main_X, $Main_Y, $reseth=false, $stretch=0, $ishtml=false, $autopadding=false, $maxh=0);
 
 	$Place_X = $Main_X+$Header_Col_Width;
 	$Place_Y = $Main_Y;
@@ -2103,7 +2338,7 @@ function CreateLastTickBorderMOATracker(&$pdf, $Header_Col_Width, $Tic_dimension
 	$ln=0;
 	$Main_X = $pdf->GetX();
 	$Main_Y = $pdf->GetY();
-	/// Bypass product column
+	/// Bypass disease column
 	$Place_X = $Main_X+$Header_Col_Width;
 	$Place_Y = $Main_Y;
 	/// SET NOT REQUIRED BORDERS TO WHITE COLORS THAT WILL MAKE TABLE COMPACT OTHERWISE HEIGHT/WIDTH ISSUE HAPPENS
@@ -2128,7 +2363,7 @@ function CreateLastTickBorderMOATracker(&$pdf, $Header_Col_Width, $Tic_dimension
 	$pdf->SetY($Place_Y);
 }
 
-function Max_ValueKeyMOATracker($valna, $val0, $val1, $val2, $val3, $val4)
+function Max_ValueKeyDiseaseTracker($valna, $val0, $val1, $val2, $val3, $val4)
 {
 $key = 'na';
 $max = $valna;
@@ -2166,7 +2401,7 @@ $max = $valna;
 	return $key;
 }
 
-function MOAsCountErr($data_matrix, $key, $ratio)
+function CountErr($data_matrix, $key, $ratio)
 {
 	$Rounded = (($data_matrix[$key]['phase_4'] > 0 && round($ratio * $data_matrix[$key]['phase_4']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_4'])) + (($data_matrix[$key]['phase_3'] > 0 && round($ratio * $data_matrix[$key]['phase_3']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_3'])) + (($data_matrix[$key]['phase_2'] > 0 && round($ratio * $data_matrix[$key]['phase_2']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_2'])) + (($data_matrix[$key]['phase_1'] > 0 && round($ratio * $data_matrix[$key]['phase_1']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_1'])) + (($data_matrix[$key]['phase_0'] > 0 && round($ratio * $data_matrix[$key]['phase_0']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_0'])) + (($data_matrix[$key]['phase_na'] > 0 && round($ratio * $data_matrix[$key]['phase_na']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_na']));
 	$Actual = ($ratio * $data_matrix[$key]['phase_4']) + ($ratio * $data_matrix[$key]['phase_3']) + ($ratio * $data_matrix[$key]['phase_2']) + ($ratio * $data_matrix[$key]['phase_1']) + ($ratio * $data_matrix[$key]['phase_0'])+ ($ratio * $data_matrix[$key]['phase_na']);
@@ -2175,7 +2410,7 @@ function MOAsCountErr($data_matrix, $key, $ratio)
 	return $Err;
 }
 
-function sortTwoDimensionArrayByKeyMOATracker($arr, $arrKey, $sortOrder=SORT_DESC)
+function sortTwoDimensionArrayByKeyDiseaseTracker($arr, $arrKey, $sortOrder=SORT_DESC)
 {
 	if(is_array($arr) && count($arr) > 0)
 	{
@@ -2188,53 +2423,40 @@ function sortTwoDimensionArrayByKeyMOATracker($arr, $arrKey, $sortOrder=SORT_DES
 	return $arr;
 }
 
-//Get MOAs/MOACategories from Disease
-function GetMOAsOrMOACatFromDisease_MOATracker($DiseaseID)
+//Get Diseases from Disease
+function GetDiseasesFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 {
 	global $db;
 	global $now;
-	$Products = array();
-	$MOAOrMOACats = array();
-	$onlymoas = array();
-	$OnlyMOACatIds = array();
-	$OnlyMOAIds = array();
+	$Diseases = array();
 	
-	//Get MOA Categoryids from Product id
-	$query = "SELECT e1.`id` as id, e2.`id` AS moaid FROM `entities` e1 JOIN `entity_relations` er1 ON(er1.`parent` = e1.`id`) JOIN `entities` e2 ON (er1.`child` = e2.`id`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) JOIN `entities` e3 ON(e3.`id` = er2.`parent`) JOIN `entity_relations` er3 ON(er3.`child` = e3.`id`) WHERE e1.`class` = 'MOA_Category' AND e1.`name` <> 'Other' AND e2.`class` = 'MOA' AND e3.`class` = 'Product' AND er3.`parent`='" . mysql_real_escape_string($DiseaseID) . "' AND (e3.`is_active` <> '0' OR e3.`is_active` IS NULL)";
-	
-	$res = mysql_query($query) or die('Bad SQL query getting MOA Categories from products ids in MT');
-		
-	if($res)
+	if($GobalEntityType == 'Product')
 	{
-		while($row = mysql_fetch_array($res))
-		{
-			if(!in_array($row['id'], $MOAOrMOACats))
-				$MOAOrMOACats[] = $row['id'];
-			if(!in_array($row['moaid'], $onlymoas))
-				$onlymoas[] = $row['moaid'];
-		}
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease' AND er.`child`='" . mysql_real_escape_string($EntityID) . "'";
 	}
-	$OnlyMOACatIds = $MOAOrMOACats;
-		
-	//Get MOA which dont have related category from product id
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON (er.`child` = e.`id`) JOIN `entities` e2 ON (e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'MOA' AND e2.`class` = 'Product' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND er2.`parent`='" . mysql_real_escape_string($DiseaseID) . "' ".((count($onlymoas) > 0) ? "AND e.`id` NOT IN (" . implode(',',$onlymoas) . ")" : "");	
-	$res = mysql_query($query) or die('Bad SQL query getting MOAs from products ids in MT');
+	else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA')
+	{
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) JOIN `entities` e2 ON (er.`child`=e2.`id`) JOIN `entity_relations` er2 ON(er2.`parent` = e2.`id`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product' AND er2.`child`='" . mysql_real_escape_string($EntityID) . "' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL)";
+	}
+	else if($GobalEntityType == 'MOA_Category')
+	{
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) JOIN `entities` e2 ON (er.`child`=e2.`id`) JOIN `entity_relations` er2 ON(er2.`parent` = e2.`id`) JOIN `entities` e3 ON (er2.`child`=e3.`id`) JOIN `entity_relations` er3 ON(er3.`child` = e3.`id`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product' AND e3.`class` = 'MOA' AND er3.`parent`='" . mysql_real_escape_string($EntityID) . "' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL)";
+	}
+	
+	$res = mysql_query($query) or die('Bad SQL query getting Diseases from products ids in DT');
 	
 	if($res)
 	{
 		while($row = mysql_fetch_array($res))
 		{
-			$MOAOrMOACats[] = $row['id'];
-			$OnlyMOAIds[] = $row['id'];
+			$Diseases[] = $row['id'];
 		}
 	}
-	$Return['all'] = array_filter(array_unique($MOAOrMOACats));
-	$Return['moa'] = array_filter(array_unique($OnlyMOAIds));
-	$Return['moacat'] = array_filter(array_unique($OnlyMOACatIds));
-	return $Return;
+	
+	return array_filter(array_unique($Diseases));
 }
 
-function CalculateMiniBarWidthMOATracker($Ratio, $countValue, $Key, $Max_ValueKey, $Err, $Total_Bar_Width)
+function CalculateMiniBarWidthDiseaseTracker($Ratio, $countValue, $Key, $Max_ValueKey, $Err, $Total_Bar_Width)
 {
 	if(round($Ratio * $countValue) > 0)
 		$Mini_Bar_Width = round($Ratio * $countValue);

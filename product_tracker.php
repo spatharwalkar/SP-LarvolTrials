@@ -1108,7 +1108,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
-	if($TrackerType != 'DPT')
+	if($TrackerType == 'PTH')
 	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;Product'. (($TotalRecords == 1) ? '':'s') .'</div></td>';
 	
 	if($TotalPages > 1)
@@ -1198,6 +1198,13 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		else
 		$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 		
+		
+		if($TrackerType != 'PTH')
+		$procommonPart1 = trim(urlPath()) .'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+		else
+		$procommonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];		
+		
+		
 		$commonPart2 = '';
 		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
 		if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
@@ -1225,7 +1232,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			
 			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['indlead_phase_na'], $data_matrix[$row]['indlead_phase_0'], $data_matrix[$row]['indlead_phase_1'], $data_matrix[$row]['indlead_phase_2'], $data_matrix[$row]['indlead_phase_3'], $data_matrix[$row]['indlead_phase_4']);
 						
-			$htmlContent .= '<tr id="'.$uniqueId.'_indlead_Graph_Row_A_'.$row.'"  class="indlead_Graph"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $commonPart1.'&sourcepg=TZ': $industryLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+			$htmlContent .= '<tr id="'.$uniqueId.'_indlead_Graph_Row_A_'.$row.'"  class="indlead_Graph"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $procommonPart1.'&sourcepg=TZP': $industryLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 			///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
 			///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
@@ -1272,7 +1279,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		
 			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
-			$htmlContent .= '<tr class="active_Graph" id="'.$uniqueId.'_active_Graph_Row_A_'.$row.'" ><th align="right" class="prod_col" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $commonPart1.'&sourcepg=TZ': $activeLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+			$htmlContent .= '<tr class="active_Graph" id="'.$uniqueId.'_active_Graph_Row_A_'.$row.'" ><th align="right" class="prod_col" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $procommonPart1.'&sourcepg=TZP': $activeLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 			for($j=0; $j < $columns; $j++)
 			{
@@ -1314,7 +1321,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			
 			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
-			$htmlContent .= '<tr class="total_Graph" id="'.$uniqueId.'_total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $commonPart1.'&sourcepg=TZ': $totalLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+			$htmlContent .= '<tr class="total_Graph" id="'.$uniqueId.'_total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $procommonPart1.'&sourcepg=TZP': $totalLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 			for($j=0; $j < $columns; $j++)
 			{
@@ -1357,7 +1364,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			
 			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['owner_sponsored_phase_na'], $data_matrix[$row]['owner_sponsored_phase_0'], $data_matrix[$row]['owner_sponsored_phase_1'], $data_matrix[$row]['owner_sponsored_phase_2'], $data_matrix[$row]['owner_sponsored_phase_3'], $data_matrix[$row]['owner_sponsored_phase_4']);
 						
-			$htmlContent .= '<tr id="'.$uniqueId.'_owner_sponsored_Graph_Row_A_'.$row.'"  class="owner_sponsored_Graph"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $commonPart1.'&sourcepg=TZ': $ownerSponsoredLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+			$htmlContent .= '<tr id="'.$uniqueId.'_owner_sponsored_Graph_Row_A_'.$row.'"  class="owner_sponsored_Graph"><th align="right" class="prod_col" id="'.$uniqueId.'_ProdCol_'.$row.'" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $procommonPart1.'&sourcepg=TZP': $ownerSponsoredLink) . '" target="_blank" style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 			///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
 			///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
@@ -1753,6 +1760,11 @@ function Download_reports()
 				else
 				$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 				
+				if($TrackerType != 'PTH')
+					$procommonPart1 = trim(urlPath()) .'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+				else
+					$procommonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+				
 				$fullLink = $commonPart1.$link_part;
 				/// Product Column
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
@@ -1762,7 +1774,7 @@ function Download_reports()
 				$objPHPExcel->getActiveSheet()->SetCellValue($cell, $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].((trim($data_matrix[$row]['productTag']) != '') ? ' ['.$data_matrix[$row]['productTag'].']':''));
 				
 				if($TrackerType != 'PTH')
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl($commonPart1.'&sourcepg=TZ'); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl($procommonPart1.'&sourcepg=TZP'); 
 				else
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl($fullLink); 
 				
@@ -2140,10 +2152,15 @@ function Download_reports()
 			else
 			$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 			
+			if($TrackerType != 'PTH')
+				$procommonPart1 = trim(urlPath()) .'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+			else
+				$procommonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+			
 			$fullLink = $commonPart1.$link_part;
 				
 			$ln=0;
-			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. (($TrackerType != 'PTH') ? $commonPart1.'&sourcepg=TZ':$fullLink) . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font style="color:#120f3c;">['.$data_matrix[$row]['productTag'].']</font>':'').'</div>';
+			$pdfContent = '<div align="right" style="vertical-align:top; float:none;"><a style="color:#000000; text-decoration:none;" href="'. (($TrackerType != 'PTH') ? $procommonPart1.'&sourcepg=TZP':$fullLink) . '" target="_blank" title="'. $title .'">'.$data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font style="color:#120f3c;">['.$data_matrix[$row]['productTag'].']</font>':'').'</div>';
 			$border = array('mode' => 'ext', 'LTRB' => array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(204,204,204)));
 			
 			$pdf->SetFont('freesans', ' ', 8, '', false); // Font size as 8

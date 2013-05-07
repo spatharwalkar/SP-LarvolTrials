@@ -1,6 +1,7 @@
 <?php
 	require_once('db.php');
 	require_once('product_tracker.php');
+	require_once('disease_tracker.php');
 	$page = 1;
 	if($_REQUEST['MoaCatId'] != NULL && $_REQUEST['MoaCatId'] != '' && isset($_REQUEST['MoaCatId']))
 	{
@@ -37,6 +38,16 @@
 	}
 
 	$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
+	
+	$tab = 'diseasetrac';
+	if(isset($_REQUEST['tab']))
+	{
+		$tab = mysql_real_escape_string($_REQUEST['tab']);
+	}
+	$tabCommonUrl = trim(urlPath()).'trialzilla_moacategory.php?MoaCatId='.$MoaCatId;
+	
+	$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
+	$TabProductCount = count(GetProductsFromMOACategory($MoaCatId, 'MCPT', array()));
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -79,6 +90,36 @@ a:visited {color:#6600bc;}  /* visited link */
 	border-top:#4f2683 solid 2px;
 }
 </style>
+<!--tab css-->
+<style>
+.selectTab
+{
+	background-image:url(images/selectTab.png); 
+	background-repeat:repeat-x;
+}
+
+.Tab
+{
+	background-image:url(images/Tab.png); 
+	background-repeat:repeat-x;
+}
+
+#disease_tabs a
+{
+	text-decoration:none;
+	color:#000000;
+	font-size:13px;
+	font-family:Arial, Helvetica, sans-serif;
+	display:block;
+}
+
+#diseaseTab_content
+{
+    background-color: #ffffff;
+    padding: 30px;
+	border-top:#333333 solid 1px;
+}
+</style>
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
 <script type="text/javascript" src="scripts/chrome.js"></script>
@@ -117,15 +158,56 @@ a:visited {color:#6600bc;}  /* visited link */
 
 <!-- Displaying Records -->
 <br/>
-<table width="100%" border="0" style="">
-<tr><td>
-<?php 
+<table width="100%" border="0" style="" cellpadding="0" cellspacing="0">
+<?php
+if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NULL))
+{
+	print '
+	<tr><td>
+		
+		<table cellpadding="0" cellspacing="0" id="disease_tabs">
+			<tr>
+				'; 
+				
+				$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+				$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
+				$moacatLinkName = '<a href="'.$tabCommonUrl.'&tab=moacat" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+				
+				if($tab == 'diseasetrac') {  
+				print '<td><img id="DiseaseImg" src="images/firstSelectTab.png" /></td><td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td><td><img id="MoaCatImg" src="images/selectTabConn.png" /></td><td id="moacatTab" class="Tab">'. $moacatLinkName .'</td><td><img id="lastImg" src="images/lastTab.png" /></td> 
+				<td></td>';
+				 } else if($tab == 'moacat') { 
+				print '<td><img id="DiseaseImg" src="images/firstTab.png" /></td><td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td><td><img id="MoaCatImg" src="images/middleTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
+				 } 
+	print	'            
+			</tr>
+		</table>
+	
+	</td></tr>';
+}	
+?>
+<tr><td align="center">
+<?php
+if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NULL))
+{
+	print '<div id="diseaseTab_content" align="center">';
+	if($tab == 'diseasetrac')
+		print showDiseaseTracker($MoaCatId, 'MCDT', $page);		//MCDT= MOA CATEGORY DISEASE TRACKER
+	else
+		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
+	print '</div>';
+}
+else
+{	 
 	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DMCPT')
 		print showProductTracker($MoaCatId, $dwcount, 'DMCPT', $page, $OptionArray);	//DMCPT= DISEASE MOA CATEGORY PRODUCT TRACKER
 	else
-		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
+		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 	
+}
 ?>
 </td></tr>
+
 </table>
 <br/><br/>
 <?php include "trialzilla_footer.php" ?>

@@ -462,7 +462,7 @@ if($ClassFlg)
 				else if($DataArray[$index]['type'] == 'Product')
 				{
 					$ProdRelateCompany = GetCompanyNames($DataArray[$index]['id']);
-					print ' 		<a href="'. trim(urlPath()) .'trialzilla_ott.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" target="_blank"><b>'.$DataArray[$index]['name'] . '</b>' . ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'') .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_product.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" target="_blank"><b>'.$DataArray[$index]['name'] . '</b>' . ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'') .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
 				}
 				else if($DataArray[$index]['type'] == 'Disease')
 						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDisease(trim($DataArray[$index]['id'])).' Products)';

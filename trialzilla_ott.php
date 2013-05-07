@@ -8,7 +8,7 @@
 	require_once('intermediary.php');
 	require_once('product_tracker.php');
 	
-	$e1 = NULL; $e1 = NULL; $phase = NULL;
+	$e1 = NULL; $e2 = NULL; $phase = NULL;
 	if(isset($_REQUEST['e1'])) $e1 = $_REQUEST['e1'];
 	if(isset($_REQUEST['e2'])) $e2 = $_REQUEST['e2'];
 	if(isset($_REQUEST['phase'])) $phase = $_REQUEST['phase'];	
@@ -158,7 +158,7 @@ function GetLinkNClass($id)
 	else if($header['class'] == 'MOA_Category')
 		$LinkNClass['link'] = 'trialzilla_moacategory.php?MoaCatId='. $header['id'];
 	else
-		$LinkNClass['link'] = 'trialzilla_ott.php?e1='. $header['id'].'&&sourcepg=TZ';
+		$LinkNClass['link'] = 'trialzilla_product.php?e1='. $header['id'].'&sourcepg=TZ';
 						
 	return $LinkNClass;
 }
