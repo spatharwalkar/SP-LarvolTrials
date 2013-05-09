@@ -483,6 +483,16 @@ body {
 #dialog-access-denied a {display:inline}
 </style>
 </head><body>';
+?>
+<div id="dialog-access-denied" class="" title="Access Denied" style="display:none;">
+	<p>
+		<span class="ui-icon ui-icon-circle-close" style="float: left; margin: 0 7px 50px 0;"></span>
+		Click-through to news items available for subscribers, who can <a target="_blank" href="http://www.larvolinsight.com"><u>click here</u></a> to login
+	</p>
+	<p>
+	</p>
+</div>
+<?php
 
 if(isset($_REQUEST['region']) && $_REQUEST['region'] != '')
 {
@@ -826,11 +836,3 @@ if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && 
 			</html>';
 }
 ?>
-<div id="dialog-access-denied" class="" title="Access Denied" style="display:none;">
-	<p>
-		<span class="ui-icon ui-icon-circle-close" style="float: left; margin: 0 7px 50px 0;"></span>
-		Click-through to news items available for subscribers, who can <a target="_blank" href="http://www.larvolinsight.com"><u>click here</u></a> to login
-	</p>
-	<p>
-	</p>
-</div>
