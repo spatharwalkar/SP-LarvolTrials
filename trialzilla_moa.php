@@ -39,7 +39,7 @@
 
 	$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
 	
-	$tab = 'diseasetrac';
+	$tab = 'moa';
 	if(isset($_REQUEST['tab']))
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);

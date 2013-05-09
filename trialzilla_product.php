@@ -27,7 +27,7 @@
 		$page = mysql_real_escape_string($_REQUEST['page']);
 	}
 	
-	$tab = 'diseasetrac';
+	$tab = 'ott';
 	if(isset($_REQUEST['tab']))
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
