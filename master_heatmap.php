@@ -1637,12 +1637,11 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 
 function Download_reports()
 {
-	if(isset($_GET['id'])) $_POST['id'] = $GET['id'];
 	ob_start();
 	global $db;
 	global $now;
-	if(!isset($_POST['id'])) return;
-	$id = mysql_real_escape_string(htmlspecialchars($_POST['id']));
+	if(!isset($_REQUEST['id'])) return;
+	$id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 	if(!is_numeric($id)) return;
 	
 	if(isset($_REQUEST['ohmtype']))
