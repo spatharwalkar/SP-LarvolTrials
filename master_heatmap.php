@@ -153,7 +153,7 @@ function  recalc_values($aval,$pval) // recalculate values
 /***Recalculation of cells end*/
 
 
-if($_POST['dwformat'])
+if($_POST['dwformat'] || isset($_GET['excel_x']) || isset($_GET['pdf_x']))
 {
 	if($_POST['dwformat']=='htmldown')
 		header('Location: ' . urlPath() . 'online_heatmap.php?id='.$_POST['id']);
@@ -1637,6 +1637,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 
 function Download_reports()
 {
+	if(isset($_GET['id'])) $_POST['id'] = $GET['id'];
 	ob_start();
 	global $db;
 	global $now;
@@ -1645,9 +1646,11 @@ function Download_reports()
 	if(!is_numeric($id)) return;
 	
 	if(isset($_REQUEST['ohmtype']))
-	$ohm = $_REQUEST['ohmtype'];
-	else
-	$ohm = 'SOHM';
+	{
+		$ohm = $_REQUEST['ohmtype'];
+	}else{
+		$ohm = 'SOHM';
+	}
 	
 	if($ohm == 'SOHM')
 	{
@@ -2565,7 +2568,7 @@ function Download_reports()
 	
 	$Report_Name = $ReportDisplayName;
 	
-	if($_POST['dwformat']=='pdfdown')
+	if($_POST['dwformat']=='pdfdown' || isset($_GET['pdf_x']))
 	{
 	
 		require_once('tcpdf/config/lang/eng.php');
@@ -4065,7 +4068,7 @@ function Download_reports()
 	}//Pdf Functions Ends
 	
 		
-	if($_POST['dwformat']=='exceldown')
+	if($_POST['dwformat']=='exceldown' || isset($_GET['excel_x']))
 	{
 	  	$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
 		
