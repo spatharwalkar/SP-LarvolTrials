@@ -368,7 +368,17 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						mysql_query('ROLLBACK');
 						return false;
 					}
-				
+				$query="select er.child from entity_relations er,entities e 
+									where er.parent = " . $cid . "
+									and er.child=e.id and e.class = 'Institution'";
+							$res=mysql_query($query);
+							$companyids=array();
+							while($row = mysql_fetch_assoc($res)) 
+							{ 
+								$companyids[] = $row['child'];
+							}	
+							//get name,search_name of these companies 
+							$cids = implode(",", $companyids);
 				foreach($nctidz as $key => $value)
 				{
 					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) and !empty($value) )
@@ -385,15 +395,70 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 					else
 					{
-					
+						$query="larvol_id,lead_spnosor from data_trials where larvol_id = " . $larvol_id . " limit 1";
+						$res=mysql_query($query);
+						if(!empty($res))
+						{
+							$row = mysql_fetch_assoc($res);
+							$lead_sponsor = $row['lead_sponsor'];
+						}
+						$ownersponsored='No';
+						if(!empty($lead_sponsor))
+						{
+							/******************** Calculate owner sponsored values           */
+				
+							$query="select name,search_name from entities where id in (" . $cids . ")	and class='institution'";
+							$res=mysql_query($query);
+							$csearchnames=array();
+							while($row = mysql_fetch_assoc($res)) 
+							{ 
+							
+								//if searchname has multiple entries then store each of them separately into the array
+								if(stripos($row['search_name'],"|"))
+								{
+									$searchname=explode("|", $row['search_name']);
+									foreach($searchname as $name) $csearchnames[] = $name;
+								}
+								else $csearchnames[]=$row['search_name'];
+								
+								$csearchnames[] = $row['name'];
+								
+							}
+							
+								//now loop through the names/searchnames check if any of them matches with the trial's sponsor name
+								$ownersponsored='No';
+								foreach($csearchnames as $name)
+								{
+									$lead_sponsor='xxx.'.$lead_sponsor;
+									$pos = stripos($lead_sponsor,trim($name));
+									if(!empty($pos) and $pos>0 )	
+									{
+										$ownersponsored='Yes';
+										break;
+									}
+								}
+							//*************************************
+						}
+						if($ownersponsored=='Yes')	
+						{
+							$reltype = 'ownersponsored';
+						}
+						else
+						{
+							$reltype = 'default';
+						}
+
 						if(trial_indexed($larvol_id,$cat,$cid)) // check if the trial+product/trial+area index already exists
 						{
+							$query="update entity_trials set relation_type = '". $reltype . "'
+							where trial='" . $larvol_id . "' and entity = '" . $cid . "' limit 1";
+							$res=mysql_query($query);
 							echo '<br>Larvol ID:'.$larvol_id . ' is already indexed. <br>';
 						}
 						else
 						{
 							echo '<br>'. date("Y-m-d H:i:s", strtotime('now')) . ' - Indexing Larvol ID:'.$larvol_id . '<br>';
-							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial` ) VALUES ("' . $cid . '", "' . $larvol_id .'") ';
+							$query='INSERT INTO `'. $table .'` (`'. $field .'`, `trial`, `relation_type` ) VALUES ("' . $cid . '", "' . $larvol_id .'", "' . $reltype .'") ';
 							$res = mysql_query($query);
 							if($res === false)
 							{

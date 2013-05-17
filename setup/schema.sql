@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS `clinical_study` (
   `larvol_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `institution_type` ENUM( 'owner_sponsored' ,'industry_lead_sponsor', 'industry_collaborator', 'coop', 'other') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'other',
+  `institution_type` ENUM( 'industry_lead_sponsor', 'industry_collaborator', 'coop', 'other') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'other',
   `import_time` datetime NOT NULL,
   `last_change` datetime NOT NULL,
   `region` varchar(63) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -510,6 +510,7 @@ CREATE TABLE IF NOT EXISTS `area_trials` (
 CREATE TABLE IF NOT EXISTS `entity_trials` (
   `entity` int(10) unsigned NOT NULL,
   `trial` int(10) unsigned NOT NULL,
+  `relation_type` ENUM( 'default', 'ownersponsored') NOT NULL DEFAULT 'default',
   PRIMARY KEY (`entity`,`trial`),
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -526,7 +527,7 @@ CREATE TABLE IF NOT EXISTS `data_history` (
   `lead_sponsor_lastchanged` datetime DEFAULT NULL,
   `collaborator_prev` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `collaborator_lastchanged` datetime DEFAULT NULL,
-  `institution_type_prev` enum('industry_lead_sponsor','industry_collaborator','coop','other','owner_sponsored') COLLATE utf8_unicode_ci DEFAULT 'other',
+  `institution_type_prev` enum('industry_lead_sponsor','industry_collaborator','coop','other') COLLATE utf8_unicode_ci DEFAULT 'other',
   `institution_type_lastchanged` datetime DEFAULT NULL,
   `source_prev` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `source_lastchanged` datetime DEFAULT NULL,
@@ -645,7 +646,7 @@ CREATE TABLE IF NOT EXISTS `data_manual` (
   `official_title` text COLLATE utf8_unicode_ci,
   `lead_sponsor` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `collaborator` text COLLATE utf8_unicode_ci DEFAULT NULL,
-  `institution_type` enum('industry_lead_sponsor','industry_collaborator','coop','other','owner_sponsored') COLLATE utf8_unicode_ci DEFAULT NULL,
+  `institution_type` enum('industry_lead_sponsor','industry_collaborator','coop','other') COLLATE utf8_unicode_ci DEFAULT NULL,
   `source` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `has_dmc` tinyint(1) DEFAULT NULL,
   `brief_summary` text COLLATE utf8_unicode_ci,
@@ -820,7 +821,7 @@ CREATE TABLE IF NOT EXISTS `data_trials` (
   `official_title` text COLLATE utf8_unicode_ci,
   `lead_sponsor` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `collaborator` text COLLATE utf8_unicode_ci DEFAULT NULL,
-  `institution_type` enum('industry_lead_sponsor','industry_collaborator','coop','other','owner_sponsored') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'other',
+  `institution_type` enum('industry_lead_sponsor','industry_collaborator','coop','other') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'other',
   `source` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `has_dmc` tinyint(1) DEFAULT NULL,
   `brief_summary` text COLLATE utf8_unicode_ci,

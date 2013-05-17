@@ -453,7 +453,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 						return false;
 					}
 					
-					/* UPDATE owner sponsored institution type */
+					/* UPDATE owner sponsored institution type ==> DISABLED THIS AS LOGIC IS INCORRECT 
 					
 					//see if the trial has a sponsor
 					$query="select lead_sponsor from data_trials where larvol_id='" .$larvol_id . "' limit 1";
@@ -522,7 +522,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 						}
 						
 					}
-					/************************/
+					************************/
 						
 					$query = 'SELECT `larvol_id` FROM data_history where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 					if(!$res = mysql_query($query))
