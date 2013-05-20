@@ -448,9 +448,9 @@ if($ClassFlg)
 			{
 				print'<table width="100%" border="0" cellspacing="0" cellpadding="0">
 						<tr>
-						<!--<td align="left"  width="100px" style="vertical-align:top;">
-								<img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;display:none" width="100px" height="17px" />
-						</td>-->
+						<td align="left"  width="100px" style="vertical-align:top;">
+								<img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
+						</td>
 						<td style="padding-left:5px;" align="left">';
 						
     			if($DataArray[$index]['type'] == 'Institution')
