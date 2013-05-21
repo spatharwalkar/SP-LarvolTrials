@@ -195,7 +195,8 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 {
 	print '<div id="diseaseTab_content" align="center">';
 	if($tab == 'diseasetrac')
-		print showDiseaseTracker($MoaCatId, 'MCDT', $page);		//MCDT= MOA CATEGORY DISEASE TRACKER
+		//print showDiseaseTracker($MoaCatId, 'MCDT', $page);		//MCDT= MOA CATEGORY DISEASE TRACKER
+		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER
 	else
 		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
 	print '</div>';
