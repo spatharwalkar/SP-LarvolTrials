@@ -175,8 +175,9 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				$moacatLinkName = '<a href="'.$tabCommonUrl.'&tab=moacat" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				
 				if($tab == 'diseasetrac') {  
-				print '<td><img id="DiseaseImg" src="images/firstSelectTab.png" /></td><td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td><td><img id="MoaCatImg" src="images/selectTabConn.png" /></td><td id="moacatTab" class="Tab">'. $moacatLinkName .'</td><td><img id="lastImg" src="images/lastTab.png" /></td> 
-				<td></td>';
+				/*print '<td><img id="DiseaseImg" src="images/firstSelectTab.png" /></td><td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td><td><img id="MoaCatImg" src="images/selectTabConn.png" /></td><td id="moacatTab" class="Tab">'. $moacatLinkName .'</td><td><img id="lastImg" src="images/lastTab.png" /></td> 
+				<td></td>';*/
+				  print '<td><img id="MoaCatImg" src="images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
 				 } else if($tab == 'moacat') { 
 				//print '<td><img id="DiseaseImg" src="images/firstTab.png" /></td><td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td><td><img id="MoaCatImg" src="images/middleTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
 				  print '<td><img id="MoaCatImg" src="images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
