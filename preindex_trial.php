@@ -381,6 +381,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							$cids = implode(",", $companyids);
 				foreach($nctidz as $key => $value)
 				{
+				
 					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) and !empty($value) )
 					{
 						$srch = array_search_partial($sourceid, $value); 
@@ -395,7 +396,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					}
 					else
 					{
-						$query="larvol_id,lead_spnosor from data_trials where larvol_id = " . $larvol_id . " limit 1";
+						$query="select larvol_id,lead_sponsor from data_trials where larvol_id = " . $larvol_id . " limit 1";
 						$res=mysql_query($query);
 						if(!empty($res))
 						{
