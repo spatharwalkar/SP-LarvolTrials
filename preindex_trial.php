@@ -411,7 +411,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							$query="select name,search_name from entities where id in (" . $cids . ")	and class='institution'";
 							$res=mysql_query($query);
 							$csearchnames=array();
-							while($row = mysql_fetch_assoc($res)) 
+							while($row = @mysql_fetch_assoc($res)) 
 							{ 
 							
 								//if searchname has multiple entries then store each of them separately into the array
