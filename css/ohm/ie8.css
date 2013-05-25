@@ -1,0 +1,10 @@
+@charset "utf-8";
+
+.col div div{
+	padding-top:30px !important;
+    top:-20px;
+    left:0px;
+}
+.spc div{
+	height:190px;
+}

@@ -1,0 +1,18 @@
+@charset "utf-8";
+
+.col div{
+	left:-2px;
+    margin-bottom:4px;
+}
+.col div,.col div div{
+	height:144px !important;
+	width:52px !important;
+   	min-width:52px !important;
+   	max-width:52px !important;
+}
+.col div div{
+    transform-origin:26px 26px !important;
+	writing-mode: tb-rl;
+	filter: flipv fliph;
+    padding:0 !important;
+}

@@ -677,4 +677,19 @@ function GetCompanyNames($productID)
 	$CompanyName = implode(', ',$CompanyNameArray);
 	return $CompanyName;
 }
+
+//Formats a product name with company per standard from LI
+function productFormatLI($name, $companies, $tag='')
+{
+	$name = htmlspecialchars($name);
+	$paren = strpos($name, '(');
+	if($paren === false)
+	{
+		$name = '<b>' . $name . '</b>';
+	}else{
+		$name = '<b>' . substr($name,0,$paren) . '</b>' . substr($name,$paren);
+	}
+	if(strlen($tag)) $tag = ' <span class="gray">' . $tag . '</span>';
+	return $name . ' / <i>' . implode(', ', $companies) . '</i>' . $tag;
+}
 ?>

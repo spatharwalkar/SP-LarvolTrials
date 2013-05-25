@@ -1,0 +1,11 @@
+@charset "utf-8";
+
+td,td a{
+	line-height:10px;
+}
+.view .hmcmenu,.export .hmcmenu{
+	display:block;
+}
+.col div div{
+	left:2px;
+}
