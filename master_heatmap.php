@@ -813,7 +813,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 /*** RECALCULATION STATUS. ****/
 	
 	$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report'.$query);
+	$res = mysql_query($query) or die('Bad SQL query getting heatmap report'.$query);
 	$res = mysql_fetch_array($res) or die('Report not found.');
 	$repoUser = $res['user'];
 	$shared = $res['shared'];
@@ -855,7 +855,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	}
 	
 	$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
-	$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers'.$query);
+	$res = mysql_query($query) or die('Bad SQL query getting heatmap report headers'.$query);
 	$rows = array();
 	$columns = array();
 	$entity2Ids = array();
@@ -1217,7 +1217,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	if($repoUser !== NULL)
 	{
 		$owner_name_query = 'SELECT `username`, `userlevel` FROM `users` WHERE id=' . $repoUser;
-		$owner_res = mysql_query($owner_name_query) or die('Bad SQL query retrieving username in master heatmap report');
+		$owner_res = mysql_query($owner_name_query) or die('Bad SQL query retrieving username in heatmap report');
 		if(mysql_num_rows($owner_res) > 0)
 		{
 			while($owner_row = mysql_fetch_array($owner_res))
@@ -1628,7 +1628,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	{
 		$out .= '<br clear="all"/><div align="left" style="vertical-align:bottom; float:left;"><fieldset style="margin-top:50px; padding:8px;"><legend>Advanced</legend>'
 				. '<label class="lbldeln"><input class="delrepe" type="checkbox" id="delrep" name="delrep['.$id.']" title="Delete" /></label>' 
-				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete this master heatmap report</fieldset></div>';
+				. '&nbsp;&nbsp;&nbsp;&nbsp;Delete this heatmap report</fieldset></div>';
 	};
 	$out .= '</form>';
 
@@ -1654,7 +1654,7 @@ function Download_reports()
 	if($ohm == 'SOHM')
 	{
 		$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
-		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
+		$res = mysql_query($query) or die('Bad SQL query getting heatmap report');
 		$res = mysql_fetch_array($res) or die('Report not found.');
 		$total_fld=$res['total'];
 		$name = $res['name'];
@@ -1666,7 +1666,7 @@ function Download_reports()
 	else
 	{
 		$query = 'SELECT `name`, `display_name` FROM `entities` WHERE id=' . $id . ' LIMIT 1';
-		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report');
+		$res = mysql_query($query) or die('Bad SQL query getting heatmap report');
 		$res = mysql_fetch_array($res) or die('Report not found.');
 		$total_fld = 0;
 		$dtt = 0;
@@ -1707,7 +1707,7 @@ function Download_reports()
 	if($ohm == 'SOHM')
 	{
 		$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
-		$res = mysql_query($query) or die('Bad SQL query getting master heatmap report headers');
+		$res = mysql_query($query) or die('Bad SQL query getting heatmap report headers');
 		
 		while($header = mysql_fetch_array($res))
 		{
@@ -2578,7 +2578,7 @@ function Download_reports()
 		$pdf->SetAuthor('Larvol Trials');
 		$pdf->SetTitle('Larvol Trials');
 		$pdf->SetSubject('Larvol Trials');
-		$pdf->SetKeywords('Larvol Trials Master Heatmap, Larvol Trials Master Heatmap PDF Export');
+		$pdf->SetKeywords('Larvol Trials Heatmap, Larvol Trials Heatmap PDF Export');
 		$pdf->SetFont('freesans', ' ', 8, '', false); // Normal Font
 		$pdf->setFontSubsetting(false);
 		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
@@ -4898,7 +4898,7 @@ function postEd()
 	
 	// block any user from modifying other peoples private reports and block non-admins from modifying global reports
 	$query = 'SELECT user,shared FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
-	$res = mysql_query($query) or die('Bad SQL query getting user for master heatmap report id');
+	$res = mysql_query($query) or die('Bad SQL query getting user for heatmap report id');
 	$res = mysql_fetch_assoc($res);
 	if($res === false) return;	///Replaced "Continue" by "Return" cause continue was giving "Cannot break/continue 1 level" error when report deleted and continue should only be used to escape through loop not function
 	if(count($res)==0){ die('Not found.'); }

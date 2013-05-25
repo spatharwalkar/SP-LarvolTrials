@@ -104,10 +104,8 @@ if($db->loggedIn())
 			. '<a href="admin_settings.php">Settings</a><br />'			
 			. '</div>');
 	}
-	echo('::<div class="drop">Reports<br />'
-		. '<a href="master_heatmap.php">Master HM</a><br />'
-		. '<a href="report_heatmap.php">Heatmap</a><br />'
-		. '<a href="report_update.php">Update Scan</a><br />'
+	echo('::<div class="drop">'
+		. '<a href="master_heatmap.php">Heatmap</a><br />'
 		. '</div>');
 	echo('</div>Welcome, <a href="profile.php">'
 		. htmlspecialchars($db->user->username) . '</a> :: <a href="index.php?logout">Logout</a> &nbsp; </div>');

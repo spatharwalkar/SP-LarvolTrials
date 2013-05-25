@@ -41,42 +41,13 @@ function editor()
 			. '<input type="hidden" name="id" value="' . $id . '" />'
 			. '<input type="submit" name="reportsave" value="Save edits" /><br clear="all"/>'
 			. '<label>Name: <input type="text" name="name" value="' . htmlspecialchars($rpt['name']) . '"/></label><br />'
-			. '<label>Calculate Master HM cells?: <input type="checkbox" name="mhm" value="calc" ' . $chkd . ' /></label><br />'  // checkbox for calulating Master HM cells
+			. '<label>Calculate HM cells?: <input type="checkbox" name="mhm" value="calc" ' . $chkd . ' /></label><br />'  // checkbox for calulating Master HM cells
 			. '<label>Refresh UPM status?: <input type="checkbox" name="upm_status" value="upm_s" ' . $chkd2 . ' /></label><br />'  // checkbox for updating status of UPMs.
 			. '<label>Update database (fetch)?: '
 			//. '<input type="checkbox" name="fetch"'	. ($rpt['fetch'] ? 'checked="checked"' : '') . '/>'
 			. makeDropdown('fetch',getEnumValues('schedule','fetch'),false,$rpt['fetch'])
 			. '</label><br clear="all"/>';
-	$reports = array();
-	$query = 'SELECT id,`name`,`category` FROM rpt_heatmap'; // . ' WHERE user IS NULL OR user=' . $db->user->id;
-	$res = mysql_query($query) or die('Bad SQL query getting heatmap names');
-	$reportsArr = array();
-	$categoryArr = array();
-	while($row = mysql_fetch_assoc($res))
-	{
-		$reportsArr[] = $row;
-		$categoryArr[$row['category']] = $row['category'];
 
-	}
-	sort($categoryArr);
-	foreach($categoryArr as $category)
-	{
-		$i=0;
-		foreach($reportsArr as $row)
-		{
-			if($i==0)
-			$reports['-'.$category] = $category;
-			if($row['category']==$category)
-			$reports['h' . $row['id']] = '&nbsp;&nbsp;&nbsp;&nbsp;Heatmap ' . $row['id'] . ': ' . $row['name'];
-		}		
-	}
-	$query = 'SELECT id,`name` FROM rpt_update'; // . ' WHERE user IS NULL OR user=' . $db->user->id;
-	$res = mysql_query($query) or die('Bad SQL query getting update-scan names');
-	while($row = mysql_fetch_assoc($res))
-	{
-		$reports['u' . $row['id']] = 'Update Scan ' . $row['id'] . ': ' . $row['name'];
-	}
-	
 	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
 	//Adding or modifying any sycn here should also modify in cron.php as well to kept all correct
 	$LISync['LI_sync1'] = 'LI Product Sync';
@@ -87,20 +58,6 @@ function editor()
 	$LISync['LI_sync32'] = 'LI Therapeutic Sync';
 	$LastSyncId = 32;	//Put Last Sync Id here - current its 32
 	//end
-	
-	$selectedreports = array();
-	$query = 'SELECT heatmap FROM schedule_heatmaps WHERE schedule=' . $id;
-	$res = mysql_query($query) or die('Bad SQL query getting associated heatmaps');
-	while($row = mysql_fetch_assoc($res))
-	{
-		$selectedreports[] = 'h' . $row['heatmap'];
-	}
-	$query = 'SELECT updatescan FROM schedule_updatescans WHERE schedule=' . $id;
-	$res = mysql_query($query) or die('Bad SQL query getting associated updatescans');
-	while($row = mysql_fetch_assoc($res))
-	{
-		$selectedreports[] = 'u' . $row['updatescan'];
-	}
 	
 	//li sync preselection
 	$query = "select `LI_sync` from `schedule` where id=$id";
@@ -124,12 +81,8 @@ function editor()
 		}		
 	}
 	//end
-	$out .= '<label>Run these reports: ' . makeDropdown('reports',$reports,10,$selectedreports,true) . '</label><br clear="all"/>'
-			.'<label>Run these LI sync: ' . makeDropdown('li_sync',$LISync,7,$selectedLISync,true) . '</label><br clear="all"/>'
-			. '<label>Send output to these emails (comma-delimited): <input type="text" name="emails" value="'
-			. htmlspecialchars($rpt['emails']) . '"/></label><br clear="all"/>';
-	$out .= '<label>Format: '.makeDropdown('format', getEnumValues('schedule', 'format'), false, $rpt['format']).'</label><br clear="all"/>';
-	$hours = array();
+	$out .= '<label>Run these LI sync: ' . makeDropdown('li_sync',$LISync,7,$selectedLISync,true) . '</label><br clear="all"/>';
+		$hours = array();
 	$days = array();
 	for($power = 0; $power < 24; ++$power)
 	{

@@ -880,7 +880,7 @@ function editor()
 	
 	
 	// RECALCULATE
-	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> RECALCULATE MASTER HEATMAP CELLS </b></legend>'
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> RECALCULATE HEATMAP CELLS </b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter Product id to recalculate : <input type="text" name="prod_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''

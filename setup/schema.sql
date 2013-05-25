@@ -102,41 +102,8 @@ CREATE TABLE IF NOT EXISTS `reports_status` (
   PRIMARY KEY (`run_id`,`report_type`,`type_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `rpt_heatmap` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
-  `user` int(10) unsigned DEFAULT NULL,
-  `footnotes` text COLLATE utf8_unicode_ci,
-  `description` text COLLATE utf8_unicode_ci,
-  `searchdata` text COLLATE utf8_unicode_ci COMMENT 'serialized then base64_encoded POST data from the search page',
-  `bomb` enum('N','Y') COLLATE utf8_unicode_ci NOT NULL,
-  `backbone_agent` enum('N','Y') COLLATE utf8_unicode_ci NOT NULL,
-  `count_only_active` enum('N','Y') COLLATE utf8_unicode_ci NOT NULL,
-  `category` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_user` (`user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `rpt_heatmap_cells` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `report` int(10) unsigned NOT NULL,
-  `row` tinyint(3) unsigned NOT NULL,
-  `column` tinyint(3) unsigned NOT NULL,
-  `searchdata` text COLLATE utf8_unicode_ci NOT NULL COMMENT 'serialized then base64_encoded POST data from the search page',
-  PRIMARY KEY (`id`),
-  KEY `FK_report` (`report`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `rpt_heatmap_headers` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `report` int(10) unsigned NOT NULL,
-  `header` varchar(127) COLLATE utf8_unicode_ci NOT NULL,
-  `num` tinyint(3) unsigned NOT NULL,
-  `type` enum('row','column') COLLATE utf8_unicode_ci NOT NULL,
-  `searchdata` text COLLATE utf8_unicode_ci COMMENT 'serialized then base64_encoded POST data from the search page',
-  PRIMARY KEY (`id`),
-  KEY `FK_report` (`report`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `rpt_trial_tracker` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -201,19 +168,7 @@ CREATE TABLE IF NOT EXISTS `schedule` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `schedule_heatmaps` (
-  `schedule` int(10) unsigned NOT NULL,
-  `heatmap` int(10) unsigned NOT NULL,
-  KEY `FK_heatmap` (`heatmap`),
-  KEY `FK_schedule` (`schedule`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `schedule_updatescans` (
-  `schedule` int(10) unsigned NOT NULL,
-  `updatescan` int(10) unsigned NOT NULL,
-  KEY `FK_updatescan` (`updatescan`),
-  KEY `FK_schedule` (`schedule`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `settings` (
   `name` varchar(31) COLLATE utf8_unicode_ci NOT NULL,
@@ -1293,14 +1248,7 @@ ALTER TABLE `data_values`
 ALTER TABLE `progress`
   ADD CONSTRAINT `progress_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `rpt_heatmap`
-  ADD CONSTRAINT `rpt_heatmap_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `rpt_heatmap_cells`
-  ADD CONSTRAINT `rpt_heatmap_cells_ibfk_1` FOREIGN KEY (`report`) REFERENCES `rpt_heatmap` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `rpt_heatmap_headers`
-  ADD CONSTRAINT `rpt_heatmap_headers_ibfk_1` FOREIGN KEY (`report`) REFERENCES `rpt_heatmap` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `rpt_trial_tracker`
   ADD CONSTRAINT `rpt_trial_tracker_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1313,14 +1261,6 @@ ALTER TABLE `rpt_update`
 
 ALTER TABLE `saved_searches`
   ADD CONSTRAINT `saved_searches_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `schedule_heatmaps`
-  ADD CONSTRAINT `schedule_heatmaps_ibfk_1` FOREIGN KEY (`schedule`) REFERENCES `schedule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `schedule_heatmaps_ibfk_2` FOREIGN KEY (`heatmap`) REFERENCES `rpt_heatmap` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `schedule_updatescans`
-  ADD CONSTRAINT `schedule_updatescans_ibfk_1` FOREIGN KEY (`schedule`) REFERENCES `schedule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `schedule_updatescans_ibfk_2` FOREIGN KEY (`updatescan`) REFERENCES `rpt_update` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `upm_history`
   ADD CONSTRAINT `upm_history_ibfk_2` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,

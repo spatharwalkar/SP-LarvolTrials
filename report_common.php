@@ -212,7 +212,7 @@ function reportListCommon($reportTable,$disperr=null)
 					.'<script src="scripts/slickgrid/slick_grid.js"></script>'
 					.'<div style="width:570px;padding:10px;">
 				    <div style="width:100%" class="grid-header">
-				      <form style="float:left;margin:0px;padding:0px;" action="master_heatmap.php" method="post"><label>Master Heatmap Reports</label> &nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" style="float:none; background-color:#009933; color:#FFFFFF;" value="+ New" name="makenew"></form>'
+				      <form style="float:left;margin:0px;padding:0px;" action="master_heatmap.php" method="post"><label>Heatmap Reports</label> &nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" style="float:none; background-color:#009933; color:#FFFFFF;" value="+ New" name="makenew"></form>'
 					  .((isset($_REQUEST['HMSearchId'])) ? '&nbsp;&nbsp;<a style="display:inline; text-decoration:none;" href="' . $resetURL . '"><input type="button" value="Reset report list" title="Reset report list" style="float:none; background-color:#009933; color:#FFFFFF; margin-top:3px;" onclick="javascript: window.location.href(\'' . $resetURL . '\')" /></a>':'')
 				      .'<span onclick="toggleWholeGrid()" title="Toggle Grid" class="grid-showhide ui-icon ui-icon-carat-1-s ui-corner-all" style="float:right"></span>
 				      <span onclick="toggleFilterRow()" title="Toggle search panel" class="ui-icon ui-icon-search ui-state-default ui-corner-all" style="float:right"></span>
