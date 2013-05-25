@@ -10,6 +10,7 @@
 */
 function ohm($id, $auto = false, $fullpage = false, $direct = true)
 {
+	global $now;
 	$id = (int)$id;
 
 	if(!$direct)
