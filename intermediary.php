@@ -548,7 +548,7 @@ if(isset($_REQUEST['osu']) && $_REQUEST['osu'] == 'on')
 	$globalOptions['onlyUpdates'] = "yes";
 }
 
-if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE)
+if((isset($_SERVER['HTTP_REFERER']) && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE || strpos($_SERVER['HTTP_REFERER'], 'delta') !== FALSE))
 || (isset($_REQUEST['LI']) && $_REQUEST['LI'] == 1))
 {
 	$globalOptions['LI'] = "1";
@@ -827,7 +827,7 @@ print           '$("ul #productbox li").click(function () {
             }); 
         </script>';
 
-	if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
+	if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) && (strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
 	{
 		$cpageURL = 'http://';
 		$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);

@@ -10613,7 +10613,7 @@ class TrialTracker
 	{
 		global $li_user;
 		
-		if((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE) 
+		if((isset($_SERVER['HTTP_REFERER']) && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE || strpos($_SERVER['HTTP_REFERER'], 'delta') !== FALSE)) 
 		|| (isset($_GET['LI']) && $_GET['LI'] == 1)   )
 		{
 			echo '<input type="hidden" name="LI" value="1" />';

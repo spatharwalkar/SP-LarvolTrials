@@ -2371,7 +2371,7 @@ function DisplayOHM($id, $ohm)
 	
 	$Report_Name = ((trim($ReportDisplayName) != '' && $ReportDisplayName != NULL)? trim($ReportDisplayName):'report '.$id.'');
 	
-	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 	{
 		if($ohm == 'SOHM' || $ohm == 'EOHMH')
 		$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
@@ -2774,7 +2774,7 @@ function DisplayOHM($id, $ohm)
 			</div>
 		  ';
 	  	
-	if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) && ($ohm == 'SOHM' || $ohm == 'EOHMH'))
+	if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) && ($ohm == 'SOHM' || $ohm == 'EOHMH'))
 	{
 		$cpageURL = 'http://';
 		$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);

@@ -802,7 +802,7 @@ function MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 	$Report_Name = $Report_DisplayName;
 	$htmlContent = '';
 	
-	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 	{
 		$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
 					   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" /></td>'
@@ -1132,7 +1132,7 @@ if(isset($_REQUEST['id']))
 print showMOATracker($_REQUEST['id'], 'MTH', $page);
 ?>
 <?
-if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))
+if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE)&&(strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE))
 {
 	$cpageURL = 'http://';
 	$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);

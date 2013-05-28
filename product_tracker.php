@@ -15,7 +15,7 @@ if(isset($_REQUEST['dwcount']))
 	$dwcount = $_REQUEST['dwcount'];
 else
 {
-	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 		$dwcount = 'total';
 	else
 		$dwcount = 'indlead';
@@ -428,7 +428,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 	}
 	
 	/// This function willl Sort multidimensional array according to industry lead column
-	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 		$data_matrix = sortTwoDimensionArrayByKey($data_matrix,'total');	//Sort according to default view as other than LI default view is total
 	else
 		$data_matrix = sortTwoDimensionArrayByKey($data_matrix,'indlead');
@@ -1077,7 +1077,7 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 	
 	$htmlContent = '';
 	
-	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&& strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 	{
 		$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
 					   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" /></td>'
@@ -1590,7 +1590,7 @@ if(isset($_REQUEST['id']))
 print showProductTracker($_REQUEST['id'], $dwcount, 'PTH', $page);	//PTH - Normal PRODUCT TRACKER WITH HEADER
 ?>
 <?
-if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE))
+if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE)&&(strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE))
 {
 	$cpageURL = 'http://';
 	$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);
