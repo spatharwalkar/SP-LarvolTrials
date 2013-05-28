@@ -192,6 +192,7 @@ class TrialTracker
 		$i = 2;
 		$naUpms = array();
 		
+		
 		foreach($Values['Data'] as $tkey => $tvalue)
 		{
 			if(isset($tvalue['naUpms']))
@@ -7727,8 +7728,13 @@ class TrialTracker
 		$Pids=substr($Pids,1); $Aids=substr($Aids,1); */
 		$where = " WHERE 1 ";
 		$join = "";
-		
+
+		if(isset($globalOptions['ownersponsoredfilter']) && $globalOptions['ownersponsoredfilter'] == 'on')
+		{
+			$where1 .= " and et.relation_type='ownersponsored' ";
+		}
 		$join .= " JOIN `entity_trials` et ON dt.`larvol_id` = et.`trial` AND et.`entity` IN ('" . $Pids . "') ";
+
 		$join .= " JOIN `entity_trials` et2 ON dt.`larvol_id` = et2.`trial` AND et2.`entity` IN ('" . $Aids . "') ";
 				
 		$join .= " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
@@ -7813,8 +7819,7 @@ class TrialTracker
 			$where .= " AND ((dt.`firstreceived_date` BETWEEN '" . $startRange . "' AND '" . $endRange . "') OR (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
 		}
 		
-		$Query = $query . $join . $where;
-		
+		$Query = $query . $join . $where . $where1;
 		//limit clause for pagination in webpage display and unsetting section headers which are not required in each page
 		if($display == 'web')
 		{
@@ -8361,7 +8366,6 @@ class TrialTracker
 		{
 			$where .= " AND ((dt.`firstreceived_date` BETWEEN '" . $startRange . "' AND '" . $endRange . "') OR (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
 		}
-		
 		if(isset($globalOptions['sphinxSearch']) && $globalOptions['sphinxSearch'] != '')
 		{
 			$lIds = get_sphinx_idlist($globalOptions['sphinxSearch']);
@@ -8580,7 +8584,6 @@ class TrialTracker
 				
 				$Query .= $limit;
 			}
-			
 			$res = m_query(__LINE__,$Query);
 			
 			if($res)
@@ -8907,6 +8910,11 @@ class TrialTracker
 		{
 			$query .= ", pt.`entity` AS productid ";
 			$where .= " AND pt.`entity` IN ('" . implode("','", $pIds) . "') ";
+			
+			if(isset($globalOptions['ownersponsoredfilter']) && $globalOptions['ownersponsoredfilter'] == 'on')
+			{
+				$where1 .= " and pt.relation_type='ownersponsored' ";
+			}
 			$join .= " JOIN `entity_trials` pt ON dt.`larvol_id` = pt.`trial` ";
 			$join .= " JOIN `entities` prdt ON pt.`entity` = prdt.id ";
 		}
@@ -9015,9 +9023,7 @@ class TrialTracker
 		{
 			$where .= " AND ((dt.`firstreceived_date` BETWEEN '" . $startRange . "' AND '" . $endRange . "') OR (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
 		}
-		
-		$Query = $query . $where;	
-		
+		$Query = $query . $where .$where1;	
 		//limit clause for pagination in webpage display and unsetting section headers which are not required in each page
 		if($display == 'web')
 		{
@@ -9517,7 +9523,6 @@ class TrialTracker
 		}
 		
 		$Query = $query . $where;	
-		
 		//limit clause for pagination in webpage display and unsetting section headers which are not required in each page
 		if($display == 'web')
 		{
@@ -9552,7 +9557,7 @@ class TrialTracker
 				$Values['Data'][0]['naUpms'] = $nvalue;
 			}
 		}
-		
+			
 		$res = m_query(__LINE__,$Query);
 		if($res)
 		{
@@ -10325,7 +10330,7 @@ class TrialTracker
 		{	
 			if($ottType != 'indexed' && $ottType != 'entities')
 			{
-				$dUrl = '';
+				$d2Url = '';
 				$dParams =  array_replace($urlParams, array('ipwnd' => 'off'));
 
 				$dUrl = http_build_query($dParams);
@@ -10335,6 +10340,19 @@ class TrialTracker
 			}
 		}
 		unset($dParams);
+		
+		$dParams2 = array();
+		if($globalOptions['ownersponsoredfilter'] == 'on')
+		{	
+
+				$dUrl2 = '';
+				$dParams2 =  array_replace($urlParams, array('osflt' => 'off'));
+
+				$dUrl2 = http_build_query($dParams2);
+				echo '<span class="filters"><label>Owner sponsored trials</label>'
+						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $dUrl2 . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+		}
+		unset($dParams2);
 		
 		$tParams = array();
 		if(!empty($globalOptions['product']))
@@ -10804,6 +10822,8 @@ class TrialTracker
 				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
 		}
 		
+		echo '<br/><input type="checkbox" id="osflt" name="osflt" ' . (($globalOptions['ownersponsoredfilter'] == "on") ? 'checked="checked"' : '') . ' />'
+		. '<label style="font-size:x-small;" for="osflt">Show only owner-sponsored trials</label>';
 		
 		echo  '</td></tr><tr>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
@@ -10925,6 +10945,11 @@ class TrialTracker
 		if(isset($globalOptions['includeProductsWNoData']) && $globalOptions['includeProductsWNoData'] == "on")
 		{
 			$url .= '&amp;ipwnd=on';
+		}
+		
+		if(isset($globalOptions['ownersponsoredfilter']) && $globalOptions['ownersponsoredfilter'] == "on")
+		{
+			$url .= '&amp;osflt=on';
 		}
 		
 		if(isset($globalOptions['sphinx_s']))

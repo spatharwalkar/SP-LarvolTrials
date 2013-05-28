@@ -1493,7 +1493,7 @@ function DisplayOHM($id, $ohm)
 							}
 							else if(dwcount.value == "indlead")
 							{
-								new_link = cell_link_val+"&list=1&itype=1";
+								new_link = cell_link_val+"&list=1&itype=0";
 								
 								if(tot_element != null && tot_element != "")
 								document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[2];
@@ -2487,7 +2487,7 @@ function DisplayOHM($id, $ohm)
 			$htmlContent .= '<input type="hidden" value="'.$col_active_total[$col].',endl,'.$col_count_total[$col].',endl,'.$col_indlead_total[$col].',endl,'.$col_active_owner_sponsored_total[$col].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			$htmlContent .= '<input type="hidden" value="'. $commonLinkPart1 .'e2=' . $entity2Ids[$col]. '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 			
-			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. $commonLinkPart1 .'e2=' . $entity2Ids[$col]. '&list=1&itype=1' . $commonLinkPart2 . '" target="_blank" style="text-decoration:underline; color:#000000;">';
+			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. $commonLinkPart1 .'e2=' . $entity2Ids[$col]. '&list=1&itype=0' . $commonLinkPart2 . '" target="_blank" style="text-decoration:underline; color:#000000;">';
 			
 			if($Rotation_Flg == 1)
 			{
@@ -2520,7 +2520,7 @@ function DisplayOHM($id, $ohm)
 			$htmlContent .= '<input type="hidden" value="'.$active_total.',endl,'.$count_total.',endl,'.$indlead_total.',endl,'.$active_owner_sponsored_total.'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
 			$htmlContent .= '<input type="hidden" value="'. $commonLinkPart1 .'e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). '" name="Link_value_'.$online_HMCounter.'" id="Link_value_'.$online_HMCounter.'" />';
 			
-			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. $commonLinkPart1 .'e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). '&list=1&itype=1&sr=now&er=1 month' . $commonLinkPart2 . '" target="_blank" style="color:#000000;"><b><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></b></a>';
+			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. $commonLinkPart1 .'e1=' . implode(',', $entity1Ids) . '&e2=' . implode(',', $entity2Ids). '&list=1&itype=0&sr=now&er=1 month' . $commonLinkPart2 . '" target="_blank" style="color:#000000;"><b><font id="Tot_ID_'.$online_HMCounter.'">'.$indlead_total.'</font></b></a>';
 		}
 		$htmlContent .= '</div></th>';
 	}
@@ -2567,7 +2567,7 @@ function DisplayOHM($id, $ohm)
 		if(isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL && !empty($entity2Ids))
 		{
 			$htmlContent .= '<input type="hidden" value="'.$row_active_total[$row].',endl,'.$row_count_total[$row].',endl,'.$row_indlead_total[$row].',endl,'.$row_active_owner_sponsored_total[$row].'" name="Cell_values_'.$online_HMCounter.'" id="Cell_values_'.$online_HMCounter.'" />';
-			$htmlContent .= '<input type="hidden" value="'. $commonLinkPart1 .'e1=' . $entity1Ids[$row] . '" name="Link_value_'.$online_HMCounter.'&list=1&itype=1&sr=now&er=1 month" id="Link_value_'.$online_HMCounter.'" />';
+			$htmlContent .= '<input type="hidden" value="'. $commonLinkPart1 .'e1=' . $entity1Ids[$row] . '" name="Link_value_'.$online_HMCounter.'&list=1&itype=0&sr=now&er=1 month" id="Link_value_'.$online_HMCounter.'" />';
 			
 			$htmlContent .= '<a id="Cell_Link_'.$online_HMCounter.'" href="'. $commonLinkPart1 .'e1=' . $entity1Ids[$row] . '&e2=' . implode(',', $entity2Ids). '&list=1' . $commonLinkPart2 . '" target="_blank" class="ottlink" style="text-decoration:underline; color:#000000;">'.formatBrandName($rowsDisplayName[$row], 'product').$rowsCompanyName[$row].'</a>'.((trim($rowsTagName[$row]) != '') ? ' <font class="tag">['.$rowsTagName[$row].']</font>':'');
 		}
@@ -2617,7 +2617,7 @@ function DisplayOHM($id, $ohm)
 				if($data_matrix[$rid][$cid]['total'] == 0)
 				$htmlContent .= '<input type="hidden" value="1" name="TotalZero_Flg_'.$online_HMCounter.'" id="TotalZero_Flg_'.$online_HMCounter.'" />';
 					
-				$htmlContent .= '<a onclick="INC_ViewCount(' . trim($entity1Ids[$row]) . ',' . trim($entity2Ids[$col]) . ',' . $online_HMCounter .')" style="color:#000000; '.$data_matrix[$rid][$cid]['count_start_style'].' vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; '.(($data_matrix[$rid][$cid]['total'] != 0) ? 'text-decoration:underline;' : 'text-decoration:none;').'" id="Cell_Link_'.$online_HMCounter.'" href="'. $commonLinkPart1 .'e1=' . $entity1Ids[$row] . '&e2=' . $entity2Ids[$col]. '&list=1&itype=1&sr=now&er=1 month' . $commonLinkPart2 . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'" style="color:#000000;">'. (($data_matrix[$rid][$cid]['total'] != 0) ? $data_matrix[$rid][$cid]['indlead'] : '&nbsp;') .'</font></b></a>';
+				$htmlContent .= '<a onclick="INC_ViewCount(' . trim($entity1Ids[$row]) . ',' . trim($entity2Ids[$col]) . ',' . $online_HMCounter .')" style="color:#000000; '.$data_matrix[$rid][$cid]['count_start_style'].' vertical-align:middle; padding-top:0px; padding-bottom:0px; line-height:13px; '.(($data_matrix[$rid][$cid]['total'] != 0) ? 'text-decoration:underline;' : 'text-decoration:none;').'" id="Cell_Link_'.$online_HMCounter.'" href="'. $commonLinkPart1 .'e1=' . $entity1Ids[$row] . '&e2=' . $entity2Ids[$col]. '&list=1&itype=0&sr=now&er=1 month' . $commonLinkPart2 . '" target="_blank" title="'. $title .'"><b><font id="Font_ID_'.$online_HMCounter.'" style="color:#000000;">'. (($data_matrix[$rid][$cid]['total'] != 0) ? $data_matrix[$rid][$cid]['indlead'] : '&nbsp;') .'</font></b></a>';
 						
 				if($data_matrix[$rid][$cid]['bomb']['src'] != 'new_square.png') //When bomb has square dont include it in pdf as size is big and no use
 				$htmlContent .= '<img id="Cell_Bomb_'.$online_HMCounter.'" title="'.$data_matrix[$rid][$cid]['bomb']['title'].'" src="'. trim(urlPath()) .'images/'.$data_matrix[$rid][$cid]['bomb']['src'].'"  style="'.$data_matrix[$rid][$cid]['bomb']['style'].' vertical-align:middle; margin-left:1px;" />';				
