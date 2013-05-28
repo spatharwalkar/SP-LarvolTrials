@@ -190,8 +190,11 @@ td a:not(.ex):not(.bex):not(.fex),th a:not(.ex):not(.bex):not(.fex){
 	line-height:0.7em;
 }
 td a{
-	width:100%;
-	display:block;
+	display:table-cell;
+	vertical-align:middle;
+	border:0;margin:0;padding:0;
+	width:52px;
+	height:14px;
 }
 .hmdata td.sect,.sect div,.sect div:hover,.sect a{
 	text-align:left;
@@ -219,7 +222,7 @@ a.ch{border-left:3px #F00 solid;}
 	border:rgb(255,173,51) 1px solid;
 	width:280px;
 	text-align:left;
-	margin-top:6px;
+	margin-top:3px;
 	margin-left:-3px;
 	display:none;
 	z-index:50;
@@ -230,12 +233,13 @@ td div a{
 	display:block;
 	line-height:normal;
 	margin:5px;
+	height:auto;
 }
 td:hover div,td div:hover{
 	display:block;
 }
-.bom a,a.bex{background:url(../../images/sbomb.png);}
-.fil a,a.fex{background:url(../../images/expanded_crop.gif);}
+.bom a,a.bex{background:url(../../images/bomb.png);}
+.fil a,a.fex{background:url(../../images/filing.png);}
 a.ex{background:url(../../images/phaseexp_small.png);}
 a.ex,a.bex,a.fex,.bom a,.fil a{background-repeat:no-repeat;}
 .bom a{background-position:right center;}

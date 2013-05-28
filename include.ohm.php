@@ -96,8 +96,12 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 	$res = mysql_query($rows);
 	if($res === false) return ohm_die($direct, 'Bad SQL query getting rows: ' . $rows);
 	$rows = array();
-	for($i=0;$set = mysql_fetch_assoc($res);++$i) $rows[$i] = $set;
-	
+	for($i=0;$set = mysql_fetch_assoc($res);++$i)
+	{
+		$rows[$i] = $set;
+		if($rows[$i]['display_name'] == 'NULL') $rows[$i]['display_name'] = NULL; //workaround for some bad data created by old editing page
+	}
+
 	$res = mysql_query($cols);
 	if($res === false) return ohm_die($direct, 'Bad SQL query getting columns: ' . $cols);
 	$cols = array();
@@ -111,8 +115,8 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 	$query = 'SELECT ' . $fields . ' FROM rpt_masterhm_cells '
 		. 'LEFT JOIN rpt_masterhm_headers AS rh1 ON entity1=rh1.type_id '
 		. 'LEFT JOIN rpt_masterhm_headers AS rh2 ON entity2=rh2.type_id '
-		. 'WHERE rh1.report=272 AND rh2.report=272 '
-		. 'AND ((rh1.type="row" AND rh2.type="column") OR (rh2.type="row" AND rh1.type="column"))';
+		. 'WHERE rh1.report=' . $id . ' AND rh2.report=' . $id
+		. ' AND ((rh1.type="row" AND rh2.type="column") OR (rh2.type="row" AND rh1.type="column"))';
 	$res = mysql_query($query);
 	if($res === false) return ohm_die($direct, 'Bad SQL query getting HM cells');
 	while($set = mysql_fetch_assoc($res))
@@ -257,7 +261,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 	</select><br /><br />
     <div>Highlight updates:<span style="color:#f6931f;">
       <input name="sr" type="text" class="jdpicker hmdates" id="startrange" onchange="updatechanges();" value="now" readonly="readonly" /> - <input type="text" id="endrange" name="er" value="1 month" readonly="readonly" class="jdpicker hmdates" onchange="updatechanges();"/></span><br />
-      <div id="slider-range-min" style="width:250px;margin-left:50px;"></div>
+      <div id="slider-range-min" style="width:250px;margin-left:50px;margin-top:5px;"></div>
   </div>
   </div>
 </div>
@@ -265,7 +269,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
   <div class="hmcmenu" style="width:42px;">
     <div class="hmchead">Export<br /><hr/>
     <form method="get" action="master_heatmap.php">
-    <input type="hidden" name="id" id="id" value="272"/>
+    <input type="hidden" name="id" id="id" value="' . $id . '"/>
     <input type="image" name="excel" id="excel" src="images/blank.gif" style="background-image:url(images/excel_30.png)" title="Excel"/>
     <input type="image" name="pdf" id="pdf" src="images/blank.gif" style="background-image:url(images/pdf_30.png)" title="PDF"/>
     </form>
@@ -303,7 +307,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 	{
 		$url = 'intermediary.php?e2=' . $col['ent_id'] . '&list=1&itype=1&hm='.$id;
 		$colHeader = $col['display_name'];
-		if(strlen($colHeader) == 0)
+		if(empty($colHeader))
 		{
 			if(strlen($col['ent_dn']) > 0)
 				$colHeader = $col['ent_dn'];
@@ -332,7 +336,6 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 	{
 		$sectionIDs[$row['category']][] = $row['ent_id'];
 	}
-	
 	//output main body of heatmap
 	$numcols = count($cols)+1;
 	$lastsect = '';
@@ -346,7 +349,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 			echo('<tr><td class="sect" colspan="' . $numcols . '"><div><a href="' . htmlspecialchars($url) . '">' . htmlspecialchars($row['category']) . '</a></div></td></tr>');
 		}
 		$rowHeader = $row['display_name'];
-		if(strlen($rowHeader) == 0)
+		if(empty($rowHeader))
 		{
 			if(strlen($row['ent_dn']) > 0)
 				$rowHeader = $row['ent_dn'];
@@ -405,19 +408,40 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 			if($cellInfo['bomb'] != 'none')
 			{
 				$cellClasses[] = 'bom';
-				$url = htmlspecialchars(''); //todo: use separate url
-				$mouseover .= '<a href="' . $url . '" class="bex' . (in_array('bomb_lastchanged',$cellChanges)?' ch':'') . '">' . $cellInfo['bomb_explain'] . '</a>';
+				//todo: use separate url
+				$linkStart = strpos($cellInfo['bomb_explain'],'http://');
+				$linkEnd = strpos($cellInfo['bomb_explain'],'>',$linkStart) - 1;
+				$linkLength = strlen($cellInfo['bomb_explain'])-$linkEnd;
+				$url = substr($cellInfo['bomb_explain'],$linkStart,$linkLength);
+				//end todo
+				$url = htmlspecialchars($url); 
+				$mouseover .= '<a href="' . $url . '" class="bex' . (in_array('bomb_lastchanged',$cellChanges)?' ch':'') . '">'
+							. strip_tags($cellInfo['bomb_explain']) . '</a>';
 			}
 			if(strlen($cellInfo['filing']))
 			{
 				$cellClasses[] = 'fil';
-				$url = htmlspecialchars(''); //todo: use separate url
-				$mouseover .= '<a href="' . $url . '" class="fex' . (in_array('filing_lastchanged',$cellChanges)?' ch':'') . '">' . $cellInfo['filing'] . '</a>';
+				//todo: use separate url
+				$linkStart = strpos($cellInfo['filing'],'http://');
+				$linkEnd = strpos($cellInfo['filing'],'>',$linkStart) - 1;
+				$linkLength = strlen($cellInfo['filing'])-$linkEnd;
+				$url = substr($cellInfo['filing'],$linkStart,$linkLength);
+				//end todo
+				$url = htmlspecialchars($url); //todo: use separate url
+				$mouseover .= '<a href="' . $url . '" class="fex' . (in_array('filing_lastchanged',$cellChanges)?' ch':'') . '">'
+							. strip_tags($cellInfo['filing']) . '</a>';
 			}
 			if(strlen($cellInfo['phase_explain']))
 			{
-				$url = htmlspecialchars(''); //todo: use separate url
-				$mouseover .= '<a href="' . $url . '" class="ex' . (in_array('phase_explain_lastchanged',$cellChanges)?' ch':'') . '">' . $cellInfo['phase_explain'] . '</a>';
+				//todo: use separate url
+				$linkStart = strpos($cellInfo['phase_explain'],'http://');
+				$linkEnd = strpos($cellInfo['phase_explain'],'>',$linkStart) - 1;
+				$linkLength = strlen($cellInfo['phase_explain'])-$linkEnd;
+				$url = substr($cellInfo['phase_explain'],$linkStart,$linkLength);
+				//end todo
+				$url = htmlspecialchars($url); //todo: use separate url
+				$mouseover .= '<a href="' . $url . '" class="ex' . (in_array('phase_explain_lastchanged',$cellChanges)?' ch':'') . '">'
+							. strip_tags($cellInfo['phase_explain']) . '</a>';
 			}
 			$url = 'intermediary.php?e1=' . $col['ent_id'] . '&e2=' . $row['ent_id'] . '&list=1&itype=1&hm=' . $id;
 			$cellnum = $forward ? $cells[$defVM][$row['ent_id']][$col['ent_id']] : $cells[$defVM][$col['ent_id']][$row['ent_id']];
