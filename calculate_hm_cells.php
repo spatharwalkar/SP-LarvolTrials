@@ -560,7 +560,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			$cnt_active_indlead=0;
 			foreach($instype as $key=>$act)
 			{
-				if( ($isactive[$key]==1 or $isactive[$key]=="1") and ( $act=='industry_lead_sponsor' or $instype2[$key]=='ownersponsored' ) )
+				if( ($isactive[$key]==1 or $isactive[$key]=="1") and  $act=='industry_lead_sponsor' )
 				{
 					$cnt_active_indlead++;
 				}
