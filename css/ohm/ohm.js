@@ -78,15 +78,18 @@ function updatechanges()
 				var over = hm.rows[row+2].cells[cell+1].children[1];
 				for(var change = 0; change < over.children.length; ++change)
 				{
-					var chclass = over.children[change].className + "";
-					chclass = chclass.replace('ch','').replace(' ','');
+					var chclass = '';
+					if($(over.children[change]).hasClass('bex')) chclass = 'bex';
+					if($(over.children[change]).hasClass('fex')) chclass = 'fex';
+					if($(over.children[change]).hasClass('ex')) chclass = 'ex';
+					if($(over.children[change]).hasClass('pha')) chclass = 'pha';
 					if($.inArray(chclass, borders) >= 0)
 					{
-						$(over.children[change]).addClass('ch');
-						if(chclass == 'pha') over.children[change].style.display="";
+						if(!$(over.children[change]).hasClass('ch')) $(over.children[change]).addClass('ch');
+						//if(chclass == 'pha') over.children[change].style.display="";
 					}else{
 						$(over.children[change]).removeClass('ch');
-						if(chclass == 'pha') over.children[change].style.display="none";
+						//if(chclass == 'pha') over.children[change].style.display="none";
 					}
 				}
 			}

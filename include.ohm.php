@@ -34,6 +34,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Online Heatmap</title>
+<base target="_blank"/>
 <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
 <script type="text/javascript" src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
@@ -83,7 +84,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 		$fields[] = 'count_' . $vm;
 	}
 	$fields = implode(',', $fields) . ',bomb,bomb_lastchanged,bomb_explain,if(phase4_override, 4, highest_phase) AS phase'
-		. ',if(highest_phase_lastchanged > phase4_override_lastchanged,highest_phase_prev,highest_phase) AS phase_prev'
+		. ',if(phase4_override AND highest_phase != 4,highest_phase,highest_phase_prev) AS phase_prev'
 		. ',greatest(highest_phase_lastchanged,phase4_override_lastchanged) as phase_lastchanged,phase_explain,phase_explain_lastchanged,'
 		. 'filing,filing_lastchanged,entity1,entity2';
 	$rowcolFrom = ' FROM (rpt_masterhm_headers LEFT JOIN entities ON type_id=entities.id) ';
@@ -154,6 +155,10 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 						'phase_explain','phase_explain_lastchanged','filing','filing_lastchanged');
 		foreach($directFields as $df)
 		{
+			if(($df == 'phase_prev' || $df == 'phase_lastchanged') && $set['phase_prev'] == $set['phase'])
+			{
+				continue;
+			}
 			$cellMeta[$set['entity1']][$set['entity2']][$df] = $set[$df];
 		}
 	}
@@ -305,7 +310,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 	//output column headers
 	foreach($cols as $col)
 	{
-		$url = 'intermediary.php?e2=' . $col['ent_id'] . '&list=1&itype=1&hm='.$id;
+		$url = 'intermediary.php?e2=' . $col['ent_id'] . '&list=1&itype=0&hm='.$id;
 		$colHeader = $col['display_name'];
 		if(empty($colHeader))
 		{
@@ -345,7 +350,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 		if($row['category'] != $lastsect)	//add row category header if new row category encoutered
 		{
 			$lastsect = $row['category'];
-			$url = 'intermediary.php?e1=' . implode(',',$sectionIDs[$row['category']]) . '&e2=' . $DTT . '&list=1&itype=1&hm=' . $id;
+			$url = 'intermediary.php?e1=' . implode(',',$sectionIDs[$row['category']]) . '&e2=' . $DTT . '&list=1&itype=0&hm=' . $id;
 			echo('<tr><td class="sect" colspan="' . $numcols . '"><div><a href="' . htmlspecialchars($url) . '">' . htmlspecialchars($row['category']) . '</a></div></td></tr>');
 		}
 		$rowHeader = $row['display_name'];
@@ -368,7 +373,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 			while($companyRow = mysql_fetch_assoc($res)) $prodCompanies[] = $companyRow['name'];
 			$rowHeader = productFormatLI($rowHeader, $prodCompanies, $row['tag']);
 		}
-		$url = 'intermediary.php?e1=' . $row['ent_id'] . '&list=1&itype=1&hm=' . $id;
+		$url = 'intermediary.php?e1=' . $row['ent_id'] . '&list=1&itype=0&hm=' . $id;
 		echo('<tr><th class="row"><div><a href="' . htmlspecialchars($url) . '">' . $rowHeader . '</a></div></th>');
 		foreach($cols as $col)
 		{
@@ -443,9 +448,10 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 				$mouseover .= '<a href="' . $url . '" class="ex' . (in_array('phase_explain_lastchanged',$cellChanges)?' ch':'') . '">'
 							. strip_tags($cellInfo['phase_explain']) . '</a>';
 			}
-			$url = 'intermediary.php?e1=' . $col['ent_id'] . '&e2=' . $row['ent_id'] . '&list=1&itype=1&hm=' . $id;
+			$url = 'intermediary.php?e1=' . $col['ent_id'] . '&e2=' . $row['ent_id'] . '&list=1&itype=0&hm=' . $id;
 			$cellnum = $forward ? $cells[$defVM][$row['ent_id']][$col['ent_id']] : $cells[$defVM][$col['ent_id']][$row['ent_id']];
-			echo('<td class="' . implode(' ', $cellClasses) . '"><a href="' . htmlspecialchars($url) . '">' . $cellnum . '</a><div>' . $mouseover . '</div></td>');
+			if(strlen($mouseover)) $mouseover = '<div>' . $mouseover . '</div>';
+			echo('<td class="' . implode(' ', $cellClasses) . '"><a href="' . htmlspecialchars($url) . '">' . $cellnum . '</a>' . $mouseover . '</td>');
 		}
 		echo('</tr>');
 	}
