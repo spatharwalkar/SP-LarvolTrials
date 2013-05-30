@@ -448,7 +448,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 				$mouseover .= '<a href="' . $url . '" class="ex' . (in_array('phase_explain_lastchanged',$cellChanges)?' ch':'') . '">'
 							. strip_tags($cellInfo['phase_explain']) . '</a>';
 			}
-			$url = 'intermediary.php?e1=' . $col['ent_id'] . '&e2=' . $row['ent_id'] . '&list=1&itype=0&hm=' . $id;
+			$url = 'intermediary.php?e1=' . $row['ent_id'] . '&e2=' . $col['ent_id'] . '&list=1&itype=0&hm=' . $id;
 			$cellnum = $forward ? $cells[$defVM][$row['ent_id']][$col['ent_id']] : $cells[$defVM][$col['ent_id']][$row['ent_id']];
 			if(strlen($mouseover)) $mouseover = '<div>' . $mouseover . '</div>';
 			echo('<td class="' . implode(' ', $cellClasses) . '"><a href="' . htmlspecialchars($url) . '">' . $cellnum . '</a>' . $mouseover . '</td>');

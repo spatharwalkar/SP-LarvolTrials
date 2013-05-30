@@ -240,11 +240,14 @@ td:hover div,td div:hover{
 }
 .bom a,a.bex{background:url(../../images/bomb.png);}
 .fil a,a.fex{background:url(../../images/filing.png);}
+.hmdata td div a.pha{background:none;}
 a.ex{background:url(../../images/phaseexp_small.png);}
 a.ex,a.bex,a.fex,.bom a,.fil a{background-repeat:no-repeat;}
 .bom a{background-position:right center;}
 .fil a{background-position:left center;}
-a.ex,a.bex,a.fex{background-position:1px 50%;padding-left:16px;}
+div a.ex,div a.bex,div a.fex{background-position:1px 50%;padding-left:16px;}
+.fil a{background-position:2px 50%;}
+.fil.ch a{background-position:1px 50%;}
 .cat,.cat div{
 	margin:0;padding:0;
 	height:22px;
