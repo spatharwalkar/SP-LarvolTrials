@@ -1,4 +1,7 @@
 <?php
+require_once('ohm.php');	//redirect to new ohm
+exit;
+
 if(isset($_GET['id']) || isset($_GET['e']))
 {
 	session_start();
