@@ -415,8 +415,8 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 				$cellClasses[] = 'bom';
 				//todo: use separate url
 				$linkStart = strpos($cellInfo['bomb_explain'],'http://');
-				$linkEnd = strpos($cellInfo['bomb_explain'],'>',$linkStart) - 1;
-				$linkLength = strlen($cellInfo['bomb_explain'])-$linkEnd;
+				$linkEnd = strpos($cellInfo['bomb_explain'],'"',$linkStart);
+				$linkLength = $linkEnd - $linkStart;
 				$url = substr($cellInfo['bomb_explain'],$linkStart,$linkLength);
 				//end todo
 				$url = htmlspecialchars($url); 
@@ -428,8 +428,8 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 				$cellClasses[] = 'fil';
 				//todo: use separate url
 				$linkStart = strpos($cellInfo['filing'],'http://');
-				$linkEnd = strpos($cellInfo['filing'],'>',$linkStart) - 1;
-				$linkLength = strlen($cellInfo['filing'])-$linkEnd;
+				$linkEnd = strpos($cellInfo['filing'],'"',$linkStart);
+				$linkLength = $linkEnd - $linkStart;
 				$url = substr($cellInfo['filing'],$linkStart,$linkLength);
 				//end todo
 				$url = htmlspecialchars($url); //todo: use separate url
@@ -440,8 +440,8 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 			{
 				//todo: use separate url
 				$linkStart = strpos($cellInfo['phase_explain'],'http://');
-				$linkEnd = strpos($cellInfo['phase_explain'],'>',$linkStart) - 1;
-				$linkLength = strlen($cellInfo['phase_explain'])-$linkEnd;
+				$linkEnd = strpos($cellInfo['phase_explain'],'"',$linkStart);
+				$linkLength = $linkEnd - $linkStart;
 				$url = substr($cellInfo['phase_explain'],$linkStart,$linkLength);
 				//end todo
 				$url = htmlspecialchars($url); //todo: use separate url
