@@ -9,7 +9,6 @@
 	require_once('product_tracker.php');
 	require_once('company_tracker.php');
 	require_once('moa_tracker.php');
-	require_once('online_heatmap.php');
 	$page = 1;
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
 	{
