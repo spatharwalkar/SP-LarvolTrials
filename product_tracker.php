@@ -285,15 +285,15 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			//// To avoid multiple queries to database, we are quering only one time and retrieveing all data and seprating each type
 			if($TrackerType == 'PTH')
 			{
-				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . $entity2Id ."' AND et.`trial` = et2.`trial`";	
+				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . $entity2Id ."' AND et.`trial` = et2.`trial`";	
 			}
 			else if($TrackerType == 'DPT' || $TrackerType=='DCPT' || $TrackerType=='DMCPT' || $TrackerType=='DMPT')
 			{
-				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . (($TrackerType == 'DPT') ? $id : $entity2Id) ."'";	
+				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . (($TrackerType == 'DPT') ? $id : $entity2Id) ."'";	
 			}
 			else
 			{
-				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'";
+				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'";
 			}
 			
 			$phase_res = mysql_query($phase_query) or die(mysql_error());
@@ -304,9 +304,9 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 				{
 					$data_matrix[$row]['active']++;
 					if($phase_row['institution_type'] == 'industry_lead_sponsor')
-					$data_matrix[$row]['indlead']++;
-					if($phase_row['institution_type'] == 'owner_sponsored')
-					$data_matrix[$row]['owner_sponsored']++;
+						$data_matrix[$row]['indlead']++;
+					if($phase_row['relation_type'] == 'ownersponsored')
+						$data_matrix[$row]['owner_sponsored']++;
 				}
 					
 				if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
@@ -316,9 +316,9 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 					{
 						$data_matrix[$row]['active_phase_na']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
-						$data_matrix[$row]['indlead_phase_na']++;
-						if($phase_row['institution_type'] == 'owner_sponsored')
-						$data_matrix[$row]['owner_sponsored_phase_na']++;
+							$data_matrix[$row]['indlead_phase_na']++;
+						if($phase_row['relation_type'] == 'ownersponsored')
+							$data_matrix[$row]['owner_sponsored_phase_na']++;
 					}
 				}
 				else if($phase_row['phase'] == '0')
@@ -328,9 +328,9 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 					{
 						$data_matrix[$row]['active_phase_0']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
-						$data_matrix[$row]['indlead_phase_0']++;
-						if($phase_row['institution_type'] == 'owner_sponsored')
-						$data_matrix[$row]['owner_sponsored_phase_0']++;
+							$data_matrix[$row]['indlead_phase_0']++;
+						if($phase_row['relation_type'] == 'ownersponsored')
+							$data_matrix[$row]['owner_sponsored_phase_0']++;
 					}
 				}
 				else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
@@ -341,9 +341,9 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 					{
 						$data_matrix[$row]['active_phase_1']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
-						$data_matrix[$row]['indlead_phase_1']++;
-						if($phase_row['institution_type'] == 'owner_sponsored')
-						$data_matrix[$row]['owner_sponsored_phase_1']++;
+							$data_matrix[$row]['indlead_phase_1']++;
+						if($phase_row['relation_type'] == 'ownersponsored')
+							$data_matrix[$row]['owner_sponsored_phase_1']++;
 					}
 				}
 				else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
@@ -355,9 +355,9 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 					{
 						$data_matrix[$row]['active_phase_2']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
-						$data_matrix[$row]['indlead_phase_2']++;
-						if($phase_row['institution_type'] == 'owner_sponsored')
-						$data_matrix[$row]['owner_sponsored_phase_2']++;
+							$data_matrix[$row]['indlead_phase_2']++;
+						if($phase_row['relation_type'] == 'ownersponsored')
+							$data_matrix[$row]['owner_sponsored_phase_2']++;
 					}
 				}
 				else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
@@ -1211,8 +1211,8 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT') $commonPart2 = '&e2=' . $entity2Id;
 		if($TrackerType != 'PTH') $commonPart2 .= '&sourcepg=TZ';
 		
-		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=1';
-		$ownerSponsoredLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
+		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
+		$ownerSponsoredLink = $commonPart1 . $commonPart2 . '&osflt=on';
 		$activeLink = $commonPart1 . $commonPart2 . '&list=1';
 		$totalLink = $commonPart1 . $commonPart2 . '&list=2';
 		
@@ -1663,14 +1663,14 @@ function Download_reports()
 	elseif($_POST['dwcount']=='owner_sponsored')
 	{
 		$pdftitle=$tooltip=$title="Active owner-sponsored trials";
-		$link_part = $commonPart2.'&list=1&itype=0';
+		$link_part = $commonPart2.'&list=1&osflt=on';
 		$mode = 'owner_sponsored';
 	}
 	else
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
 		$pdftitle="Active industry lead sponsor trials";
-		$link_part = $commonPart2.'&list=1&itype=1';
+		$link_part = $commonPart2.'&list=1&itype=0';
 		$mode = 'indlead';
 	}
 	

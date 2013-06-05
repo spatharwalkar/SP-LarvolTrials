@@ -1509,7 +1509,7 @@ function DisplayOHM($id, $ohm)
 							}
 							else if(dwcount.value == "active_owner_sponsored")
 							{
-								new_link = cell_link_val+"&list=1&itype=0";
+								new_link = cell_link_val+"&list=1&osflt=on";
 								
 								if(tot_element != null && tot_element != "")
 								document.getElementById("Tot_ID_"+i).innerHTML = Cell_values_Arr[3];

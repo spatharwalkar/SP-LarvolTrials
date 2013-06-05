@@ -1111,7 +1111,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	{
 		$title="Active owner sponsored trials";
 		$view_tp='active_owner_sponsored';
-		$link_part = '&list=1&itype=0&hm=' . $id;
+		$link_part = '&list=1&osflt=on&hm=' . $id;
 	}
 	else
 	{
@@ -2540,7 +2540,7 @@ function Download_reports()
 	elseif($_POST['dwcount']=='active_owner_sponsored')
 	{
 		$pdftitle=$tooltip=$title="Active owner sponsored trials";
-		$link_part = '&list=1&itype=0';
+		$link_part = '&list=1&osflt=on';
 		$mode = 'active_owner_sponsored';
 	}
 	else

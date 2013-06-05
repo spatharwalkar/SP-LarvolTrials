@@ -214,7 +214,7 @@ if (isset($_POST['prod_id']))
 {
 	require_once('calculate_hm_cells.php');
 	$parameters=array();
-	$parameters['product']=$_POST['prod_id']; // for product
+	$parameters['entity1']=$_POST['prod_id']; // for product
 	calc_cells($parameters);
 	return;
 }
@@ -223,11 +223,11 @@ if (isset($_POST['area_id']))
 {
 	require_once('calculate_hm_cells.php');
 	$parameters=array();
-	$parameters['area']=$_POST['area_id']; // for product
+	$parameters['entity2']=$_POST['area_id']; // for product
 	calc_cells($parameters);
 	return;
 }
-// RECALCULATE a area
+// RECALCULATE all cells
 if (isset($_POST['recalculate_all'])) 
 {
 	require_once('calculate_hm_cells.php');

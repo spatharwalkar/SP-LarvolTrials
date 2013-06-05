@@ -233,7 +233,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType)
 	{
 		$DiseaseIds = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($id, $GobalEntityType)));
 		
-		$DiseaseQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`, e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";	
+		$DiseaseQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";	
 
 		$DiseaseQueryResult = mysql_query($DiseaseQuery) or die(mysql_error());
 		
@@ -254,21 +254,21 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType)
 					$data_matrix[$key]['ID'] = $result['id'];
 					$NewDiseaseIds[] = $result['id'];
 					
-					if(CountType=='active')
+					if($CountType=='active')
 					{
 						$link_part = '&list=1';
 					}
-					elseif(CountType=='total')
+					elseif($CountType=='total')
 					{
 						$link_part = '&list=2';
 					}
-					elseif(CountType=='owner_sponsored')
+					elseif($CountType=='owner_sponsored')
 					{
-						$link_part = '&list=1&itype=0';
+						$link_part = '&list=1&osflt=on';
 					}
 					else
 					{
-						$link_part = '&list=1&itype=1';
+						$link_part = '&list=1&itype=0';
 					}
 					
 					$data_matrix[$key]['HeaderLink'] = trim(urlPath()) .'trialzilla_disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
@@ -291,7 +291,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType)
 				{
 					if(!$result['is_active']) continue;
 					if($CountType == 'indlead' && $result['institution_type'] != 'industry_lead_sponsor') continue;
-					if($CountType == 'owner_sponsored' &&  $result['institution_type'] != 'owner_sponsored') continue;
+					if($CountType == 'owner_sponsored' &&  $result['relation_type'] != 'ownersponsored') continue;
 				}
 				
 				if($result['id'] == $key && !in_array($result['larvol_id'],$data_matrix[$key]['TrialExistance']))	//Avoid duplicates like (1,2) and (2,1) type
@@ -1356,14 +1356,14 @@ function DownloadDiseaseTrackerReports()
 	elseif($_REQUEST['dwcount']=='owner_sponsored')
 	{
 		$pdftitle=$tooltip=$title="Active owner-sponsored trials";
-		$link_part = $commonPart2.'&list=1&itype=0';
+		$link_part = $commonPart2.'&list=1&osflt=on';
 		$mode = 'owner_sponsored';
 	}
 	else
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
 		$pdftitle="Active industry lead sponsor trials";
-		$link_part = $commonPart2.'&list=1&itype=1';
+		$link_part = $commonPart2.'&list=1&itype=0';
 		$mode = 'indlead';
 	}	
 		
