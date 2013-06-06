@@ -1117,7 +1117,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	{
 		$title="Active industry lead sponsor trials";
 		$view_tp='indlead';
-		$link_part = '&list=1&itype=1&hm=' . $id;
+		$link_part = '&list=1&itype=0&hm=' . $id;
 	}
 
 	$out = '<br/>&nbsp;&nbsp;<b>View type: </b> <select id="view_type" name="view_type" onchange="window.location.href=\'master_heatmap.php?id='.$_GET['id'].'&view_type=\'+this.value+\'\'">'
@@ -2547,7 +2547,7 @@ function Download_reports()
 	{
 		$tooltip=$title="Active industry lead sponsor trials";
 		$pdftitle="Active industry lead sponsor trials";
-		$link_part = '&list=1&itype=1';
+		$link_part = '&list=1&itype=0';
 		$mode = 'indlead';
 	}
 	//if slider has default range dont add these parameters in links as OTT has same default range
