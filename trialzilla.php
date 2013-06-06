@@ -454,21 +454,21 @@ if($ClassFlg)
 						<td style="padding-left:5px;" align="left">';
 						
     			if($DataArray[$index]['type'] == 'Institution')
-					print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" target="_blank">'.$DataArray[$index]['name'].'</a>&nbsp;&nbsp;('.GetProductsCountFromCompany(trim($DataArray[$index]['id'])).' Products)';
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_company.php?CompanyId='. trim($DataArray[$index]['id']) .'" title="Company" >'.$DataArray[$index]['name'].'</a>&nbsp;&nbsp;('.GetProductsCountFromCompany(trim($DataArray[$index]['id'])).' Products)';
 				else if($DataArray[$index]['type'] == 'MOA')
 				{
-					print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" target="_blank">'.$DataArray[$index]['name'].'</a>&nbsp;&nbsp;('.GetProductsCountFromMOA(trim($DataArray[$index]['id'])).' Products)';
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($DataArray[$index]['id']) .'" title="MOA" >'.$DataArray[$index]['name'].'</a>&nbsp;&nbsp;('.GetProductsCountFromMOA(trim($DataArray[$index]['id'])).' Products)';
 				}
 				else if($DataArray[$index]['type'] == 'Product')
 				{
 					$ProdRelateCompany = GetCompanyNames($DataArray[$index]['id']);
-					print ' 		<a href="'. trim(urlPath()) .'trialzilla_product.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" target="_blank"><b>'.$DataArray[$index]['name'] . '</b>' . ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'') .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
+					print ' 		<a href="'. trim(urlPath()) .'trialzilla_product.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" ><b>'.$DataArray[$index]['name'] . '</b>' . ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'') .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
 				}
 				else if($DataArray[$index]['type'] == 'Disease')
-						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" target="_blank">'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDisease(trim($DataArray[$index]['id'])).' Products)';
+						print ' 		<a href="'. trim(urlPath()) .'trialzilla_disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" >'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDisease(trim($DataArray[$index]['id'])).' Products)';
 				else if($DataArray[$index]['type'] == 'MOA_Category')
 				{
-						print ' 	<a href="'. trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId='. trim($DataArray[$index]['id']) .'" title="MOA Category" target="_blank"><b>'.$DataArray[$index]['name'] .'</b></a>&nbsp;&nbsp;('.GetProductsCountFromMOACat(trim($DataArray[$index]['id'])).' Products)';
+						print ' 	<a href="'. trim(urlPath()) .'trialzilla_moacategory.php?MoaCatId='. trim($DataArray[$index]['id']) .'" title="MOA Category" ><b>'.$DataArray[$index]['name'] .'</b></a>&nbsp;&nbsp;('.GetProductsCountFromMOACat(trim($DataArray[$index]['id'])).' Products)';
 				}
 				
 				if($DataArray[$index]['type'] != 'MOA_Category') print '<br /><br style="line-height:6px;" />';
@@ -561,7 +561,7 @@ function MOAListing($MOACat)
 									<img src="images/MOAarrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
 								</td>
 								<td style="padding-left:5px;" align="left">';
-			$htmlContent .= ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($SMOA['id']) .'" title="MOA" target="_blank">'.(($SMOA['display_name'] != NULL && $SMOA['display_name'] != '') ? $SMOA['display_name']:$SMOA['name']).'</a>&nbsp;&nbsp;('.GetProductsCountFromMOA(trim($SMOA['id'])).' Products)<br />';
+			$htmlContent .= ' 		<a href="'. trim(urlPath()) .'trialzilla_moa.php?MoaId='. trim($SMOA['id']) .'" title="MOA" >'.(($SMOA['display_name'] != NULL && $SMOA['display_name'] != '') ? $SMOA['display_name']:$SMOA['name']).'</a>&nbsp;&nbsp;('.GetProductsCountFromMOA(trim($SMOA['id'])).' Products)<br />';
 			$htmlContent .= '	</td>
 				   			</tr>';									
 		}
