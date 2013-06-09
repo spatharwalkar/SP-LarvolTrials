@@ -155,8 +155,8 @@ print '
 				print '<td><img id="DiseaseImg" src="images/firstSelectTab.png" /></td><td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td><td><img id="CompanyImg" src="images/selectTabConn.png" /></td><td id="CompanyTab" class="Tab">'. $companyLinkName .'</td><td><img id="lastImg" src="images/lastTab.png" /></td> 
 				<td></td>';
 				 } else if($tab == 'ott') { 
-				//print '<td><img id="DiseaseImg" src="images/firstTab.png" /></td><td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td><td><img id="CompanyImg" src="images/middleTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
-				 print '<td><img id="CompanyImg" src="images/firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
+				print '<td><img id="DiseaseImg" src="images/firstTab.png" /></td><td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td><td><img id="CompanyImg" src="images/middleTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
+				// print '<td><img id="CompanyImg" src="images/firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
 				 } 
 	print	'            
 			</tr>
