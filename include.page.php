@@ -220,12 +220,16 @@ if(isset($_GET['sort_order']) && $_GET['sort_order']=='DESC' )
 
 if($table !='upm')
 {
-	if($table =='diseases' && ( empty($mesh) ||  $mesh<>'YES'))
-		$where .= " and LI_id is not null and LI_id<>'' ";
+	
+	if($table =='diseases' && $mesh=="YES")
+		$where .= " and LI_id is not null and LI_id<>'' and mesh_name!='' ";
+	else if($table =='diseases')
+	    $where .= " and LI_id is not null and LI_id<>'' and (mesh_name='' OR mesh_name IS NULL)";
 	if($_GET['no_sort']!=1)
 		$query = "select * from $actual_table $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
 		$query = "select * from $actual_table $where limit $start , $limit";
+
 }
 elseif($table=='upm')
 {
