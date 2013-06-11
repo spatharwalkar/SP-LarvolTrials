@@ -524,21 +524,34 @@ $array1=array
 
 	function eudraPhase($phase1, $phase2, $phase3, $phase4)
 	{
-		if((strlen($phase1) <> 0) && ($phase1 == 1))
+		if(( strlen($phase3) <> 0) && ($phase3 == 1) && strlen($phase4) <> 0 && ($phase4 == 1))
 		{
-			return "1";
+			return "3/4";
 		}
-		else if((strlen($phase2) <> 0) && ($phase2 == 1))
+		elseif(( strlen($phase2) <> 0) && ($phase2 == 1) && strlen($phase3) <> 0 && ($phase3 == 1))
 		{
-			return "2";
+			return "2/3";
+		}
+		elseif(( strlen($phase1) <> 0) && ($phase1 == 1) && strlen($phase2) <> 0 && ($phase2 == 1))
+		{
+			return "1/2";
+		}
+
+		else if((strlen($phase4) <> 0) && ($phase4 == 1))
+		{
+			return "4";
 		}
 		else if((strlen($phase3) <> 0) && ($phase3 == 1))
 		{
 			return "3";
 		}
-		else if((strlen($phase4) <> 0) && ($phase4 == 1))
+		else if((strlen($phase2) <> 0) && ($phase2 == 1))
 		{
-			return "4";
+			return "2";
+		}
+		elseif((strlen($phase1) <> 0) && ($phase1 == 1))
+		{
+			return "1";
 		}
 
 		return "1";
@@ -927,7 +940,10 @@ $array1=array
 		if(substr($enrollment,0,1)=='`') $enrollment=(substr($enrollment,1));
 		if(substr($criteria,0,1)=='`') $criteria=(substr($criteria,1));
 		if(substr($gender,0,1)=='`') $gender=(substr($gender,1));
-		if(substr($phase,0,1)=='`') $phase=(substr($phase,1));
+		if($phase=='`1/2`') $phase='1/2';
+		elseif($phase=='`2/3`') $phase='2/3';
+		elseif($phase=='`3/4`') $phase='3/4';
+		elseif(substr($phase,0,1)=='`') $phase=(substr($phase,1));
 		if(substr($condition,0,1)=='`') $condition=(substr($condition,1));
 		if(substr($intervention_type,0,1)=='`') $intervention_type=(substr($intervention_type,1));
 		if(substr($intervention_name,0,1)=='`') $intervention_name=(substr($intervention_name,1));
