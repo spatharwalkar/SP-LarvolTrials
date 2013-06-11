@@ -4,9 +4,16 @@
 	font-family:Arial, sans-serif;
 	font-size:13px;
 	position:relative;
+	height:100%;
 }
 table,.heatmap,.hmdata,.hmcontrol,.hmcmenu,.hmchead,body{
 	border:0;margin:0;padding:0;
+}
+body{
+	height:100%;
+}
+html{
+	height:200px;
 }
 .hmcontrol{
 	position:fixed;
@@ -109,8 +116,15 @@ div.jdpicker_w{
 	display:inline;
 }
 .hmdata{
-	position:absolute;
-	left:42px;
+	margin-left:42px;
+	text-align:center;
+	height:100%;
+}
+#mainhm{
+	margin-left:auto;
+	margin-right:auto;
+	width:auto;
+	height:100%;
 }
 th,th div div,.row div{
 	text-align: left;
@@ -120,11 +134,18 @@ th,th div div,.row div{
 td a:not(.ex):not(.bex):not(.fex),th a:not(.ex):not(.bex):not(.fex){
 	color:#000;
 }
+tr.hrow{
+	height:100%;
+}
+.spc{
+	height:100%;
+	vertical-align:top;
+}
 .spc div{
 	background-color:#FFF;
 	z-index:300;
 	position:relative;
-	height:167px;
+	height:100%;
 	width:100%;
 	text-align:center;
 }
@@ -160,7 +181,7 @@ td a:not(.ex):not(.bex):not(.fex),th a:not(.ex):not(.bex):not(.fex){
 .row{
 	padding:0;
 	min-width:250px;
-	max-width:450px;
+	max-width:500px;
 	font-weight:normal;
 }
 .row div{
@@ -250,7 +271,6 @@ div a.ex,div a.bex,div a.fex{background-position:1px 50%;padding-left:16px;}
 .fil.ch a{background-position:1px 50%;}
 .cat,.cat div{
 	margin:0;padding:0;
-	height:22px;
 	text-align:center;
 	background-color:white;
 	vertical-align:middle;

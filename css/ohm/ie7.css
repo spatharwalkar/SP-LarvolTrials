@@ -12,3 +12,9 @@ td a{
 .col div div{
 	left:2px;
 }
+html,body{
+	height:auto;
+}
+.hmdata{
+	margin-left:0;
+}

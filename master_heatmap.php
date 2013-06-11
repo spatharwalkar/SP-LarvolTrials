@@ -1094,7 +1094,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			}
 		}
 	}
-	
+
 	if($_GET['view_type']=='total')
 	{
 		$title="All trials (Active+Inactive)";
@@ -2524,20 +2524,20 @@ function Download_reports()
 	}//END OF SORT IF
 	
 	$count_fillbomb=0;	
-	if($_POST['dwcount']=='active')
+	if($_POST['dwcount']=='active' || $_GET['view_type'] == 'active')
 	{
 		$tooltip=$title="Active trials";
 		$pdftitle="Active trials";
 		$link_part = '&list=1';
 		$mode = 'active';
 	}
-	elseif($_POST['dwcount']=='total')
+	elseif($_POST['dwcount']=='total' || $_GET['view_type'] == 'total')
 	{
 		$pdftitle=$tooltip=$title="All trials (Active + Inactive)";
 		$link_part = '&list=2';
 		$mode = 'total';
 	}
-	elseif($_POST['dwcount']=='active_owner_sponsored')
+	elseif($_POST['dwcount']=='active_owner_sponsored' || $_GET['view_type'] == 'active_owner_sponsored')
 	{
 		$pdftitle=$tooltip=$title="Active owner sponsored trials";
 		$link_part = '&list=1&osflt=on';

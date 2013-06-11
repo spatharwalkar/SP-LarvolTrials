@@ -102,6 +102,16 @@ function updateviewmode()
 	var hm = document.getElementById('mainhm');
 	var mode = document.getElementById('viewmode').value;
 	var section=0;
+	
+	var exportVT = document.getElementById('view_type');	
+	switch(mode)
+	{
+		case 'ai':  exportVT.value = 'indlead';					break;
+		case 'aos': exportVT.value = 'active_owner_sponsored';	break;
+		case 'act': exportVT.value = 'active';					break;
+		case 'all': exportVT.value = 'total';					break;
+	}
+	
 	for(var row = 0; row < (hm.rows.length-2); ++row)
 	{
 		if(row-section>=cells_active_industry.length) break;
@@ -115,10 +125,10 @@ function updateviewmode()
 			var value = '&nbsp;';
 			switch(mode)
 			{
-				case 'ai':  value = cells_active_industry[row-section][cell]; break;
-				case 'aos': value = cells_active_os[row-section][cell]; break;
-				case 'act': value = cells_active[row-section][cell]; break;
-				case 'all': value = cells_all[row-section][cell]; break;
+				case 'ai':  value = cells_active_industry[row-section][cell];	break;
+				case 'aos': value = cells_active_os[row-section][cell];			break;
+				case 'act': value = cells_active[row-section][cell];			break;
+				case 'all': value = cells_all[row-section][cell];				break;
 			}
 			if(value == null) value='&nbsp;';
 			if(hm.rows[row+2].cells[cell+1].children.length>0)

@@ -274,6 +274,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
   <div class="hmcmenu" style="width:42px;">
     <div class="hmchead">Export<br /><hr/>
     <form method="get" action="master_heatmap.php">
+	<input type="hidden" name="view_type" id="view_type" value="indlead"/>
     <input type="hidden" name="id" id="id" value="' . $id . '"/>
     <input type="image" name="excel" id="excel" src="images/blank.gif" style="background-image:url(images/excel_30.png)" title="Excel"/>
     <input type="image" name="pdf" id="pdf" src="images/blank.gif" style="background-image:url(images/pdf_30.png)" title="PDF"/>
@@ -286,7 +287,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 
 <div class="hmdata">
 <table width="200" border="0" cellspacing="1" cellpadding="0" id="mainhm">
-<tr>
+<tr class="hrow">
 <th class="spc" rowspan="2"><div>' . $heatmapName . '</div></th>';
 	//Determine column category ranges
 	$cats = array();
