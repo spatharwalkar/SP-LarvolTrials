@@ -344,9 +344,10 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 	}
 	//output main body of heatmap
 	$numcols = count($cols)+1;
+	$numrows = count($rows)+1;
 	$lastsect = '';
 	$changetypes = array('bomb_lastchanged','phase_lastchanged','phase_explain_lastchanged','filing_lastchanged');
-	foreach($rows as $row)
+	foreach($rows as $rowIndex => $row)
 	{
 		if($row['category'] != $lastsect)	//add row category header if new row category encoutered
 		{
@@ -376,7 +377,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 		}
 		$url = 'intermediary.php?e1=' . $row['ent_id'] . '&list=1&itype=0&hm=' . $id;
 		echo('<tr><th class="row"><div><a href="' . htmlspecialchars($url) . '">' . $rowHeader . '</a></div></th>');
-		foreach($cols as $col)
+		foreach($cols as $columnIndex => $col)
 		{
 			$blank = true;
 			$mouseover = '';
@@ -451,7 +452,17 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 			}
 			$url = 'intermediary.php?e1=' . $row['ent_id'] . '&e2=' . $col['ent_id'] . '&list=1&itype=0&hm=' . $id;
 			$cellnum = $forward ? $cells[$defVM][$row['ent_id']][$col['ent_id']] : $cells[$defVM][$col['ent_id']][$row['ent_id']];
-			if(strlen($mouseover)) $mouseover = '<div>' . $mouseover . '</div>';
+			if(strlen($mouseover))
+			{
+				$moClass = array();
+				if($numcols - $columnIndex < 7) $moClass[] = 're';
+				if($numrows - $rowIndex < 4) $moClass[] = 'be';
+				if(!empty($moClass))
+					$moClass = ' class="' . implode(' ',$moClass) . '"';
+				else
+					$moClass='';
+				$mouseover = '<div' . $moClass . '>' . $mouseover . '</div>';
+			}
 			echo('<td class="' . implode(' ', $cellClasses) . '"><a href="' . htmlspecialchars($url) . '">' . $cellnum . '</a>' . $mouseover . '</td>');
 		}
 		echo('</tr>');
