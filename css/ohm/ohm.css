@@ -238,7 +238,7 @@ td.p2{background-color:rgb(255,255,0)}
 td.p3{background-color:rgb(255,153,0)}
 td.p4{background-color:rgb(255,0,0)}
 td.ch{border:3px red groove;}
-a.ch{border-left:3px #F00 solid;}
+a.ch,span.ch{border-left:3px #F00 solid;}
 .hmdata td div{
 	position:absolute;
 	border-radius:5px;
@@ -258,24 +258,34 @@ a.ch{border-left:3px #F00 solid;}
 .hmdata td div.be{ /* mouseover near bottom edge */
 	bottom:0;
 }
-td div a{
+td div a,td div span{
 	width:90%;
 	display:block;
 	line-height:normal;
 	margin:5px;
 	height:auto;
 }
+.hmdata table#mainhm tr td div span a{ /* support links given in the mouseover freetext */
+	width:auto;
+	display:inline-block;
+	margin:-.175em 0 0 0;
+	background:none;
+	border:0;padding:auto;
+	color:blue;
+	position:static;
+	vertical-align:auto;
+}
 td:hover div,td div:hover{
 	display:block;
 }
-.bom a,a.bex{background:url(../../images/bomb.png);}
-.fil a,a.fex{background:url(../../images/filing.png);}
+.bom a,div .bex{background:url(../../images/bomb.png);}
+.fil a,div .fex{background:url(../../images/filing.png);}
+div .ex{background:url(../../images/phaseexp_small.png);}
 .hmdata td div a.pha{background:none;}
-a.ex{background:url(../../images/phaseexp_small.png);}
-a.ex,a.bex,a.fex,.bom a,.fil a{background-repeat:no-repeat;}
+td div .ex,td div .bex,td div .fex,.bom a,.fil a{background-repeat:no-repeat;}
 .bom a{background-position:right center;}
 .fil a{background-position:left center;}
-div a.ex,div a.bex,div a.fex{background-position:1px 50%;padding-left:16px;}
+div .ex,div .bex,div .fex{background-position:1px 50%;padding-left:16px;}
 .fil a{background-position:2px 50%;}
 .fil.ch a{background-position:1px 50%;}
 .cat,.cat div{

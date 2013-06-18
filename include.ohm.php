@@ -5,10 +5,11 @@
  $auto -- Generate an "autoheatmap", meaning $id will be a disease (otherwise, it is a static heatmap id)
  $fullpage -- Output an entire valid xhtml page (otherwise, just outputs the ohm code. make sure to inlcude the right css/js files)
  $direct -- echo directly to browser (recommended) (otherwise, return the html)
+ $li -- enter Larvol Insight mode
  
  returns false on error
 */
-function ohm($id, $auto = false, $fullpage = false, $direct = true)
+function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 {
 	global $now;
 	$id = (int)$id;
@@ -288,7 +289,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 <div class="hmdata">
 <table width="200" border="0" cellspacing="1" cellpadding="0" id="mainhm">
 <tr class="hrow">
-<th class="spc" rowspan="2"><div>' . $heatmapName . '</div></th>';
+<th class="spc" rowspan="2"><div>' . ($li ? '&nbsp;' : $heatmapName) . '</div></th>';
 	//Determine column category ranges
 	$cats = array();
 	$cl = 0;
@@ -366,7 +367,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 				$rowHeader = $row['class'] . ' ' . $row['ent_id'];
 		}
 		if($row['class'] == 'Product')
-		{
+		{	//todo: use real name of related company instead of company text given in product itself
 			//$query = 'SELECT name FROM entity_relations LEFT JOIN entities ON parent=id WHERE class="Institution" AND child=' . $row['ent_id'];
 			$query = 'SELECT company AS name FROM entities WHERE id=' . $row['ent_id'];
 			$res = mysql_query($query);
@@ -412,43 +413,63 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true)
 			}
 			if(strlen($cellInfo['phase_prev']))
 				$mouseover .= '<a class="pha' . (in_array('phase_lastchanged',$cellChanges)?' ch':'') . '">Highest phase updated from: Phase ' . $cellInfo['phase_prev'] . '</a>';
+			/* For each freetext item in the mouseover:
+			   If there are 2+ links don't change the content and just structure it with a wrapping span
+			   If there is just one or 0 links then strip out all tags, and structure it with a new link tag using the given url
+			    - this is very space efficient and has less chance of allowing invalid markup
+			*/
 			if($cellInfo['bomb'] != 'none')
 			{
 				$cellClasses[] = 'bom';
-				//todo: use separate url
-				$linkStart = strpos($cellInfo['bomb_explain'],'http://');
-				$linkEnd = strpos($cellInfo['bomb_explain'],'"',$linkStart);
-				$linkLength = $linkEnd - $linkStart;
-				$url = substr($cellInfo['bomb_explain'],$linkStart,$linkLength);
-				//end todo
-				$url = htmlspecialchars($url); 
-				$mouseover .= '<a href="' . $url . '" class="bex' . (in_array('bomb_lastchanged',$cellChanges)?' ch':'') . '">'
+				if(substr_count($cellInfo['bomb_explain'],'http') >= 2)
+				{
+					$mouseover .= '<span class="bex' . (in_array('bomb_lastchanged',$cellChanges)?' ch':'') . '">' . $cellInfo['bomb_explain'] . '</span>';
+				}else{
+					//todo: use separate url
+					$linkStart = strpos($cellInfo['bomb_explain'],'http://');
+					$linkEnd = strpos($cellInfo['bomb_explain'],'"',$linkStart);
+					$linkLength = $linkEnd - $linkStart;
+					$url = substr($cellInfo['bomb_explain'],$linkStart,$linkLength);
+					//end todo
+					$url = htmlspecialchars($url); 
+					$mouseover .= '<a href="' . $url . '" class="bex' . (in_array('bomb_lastchanged',$cellChanges)?' ch':'') . '">'
 							. strip_tags($cellInfo['bomb_explain']) . '</a>';
+				}
 			}
 			if(strlen($cellInfo['filing']))
 			{
 				$cellClasses[] = 'fil';
-				//todo: use separate url
-				$linkStart = strpos($cellInfo['filing'],'http://');
-				$linkEnd = strpos($cellInfo['filing'],'"',$linkStart);
-				$linkLength = $linkEnd - $linkStart;
-				$url = substr($cellInfo['filing'],$linkStart,$linkLength);
-				//end todo
-				$url = htmlspecialchars($url); //todo: use separate url
-				$mouseover .= '<a href="' . $url . '" class="fex' . (in_array('filing_lastchanged',$cellChanges)?' ch':'') . '">'
+				if(substr_count($cellInfo['filing'],'http') >= 2)
+				{
+					$mouseover .= '<span class="fex' . (in_array('filing_lastchanged',$cellChanges)?' ch':'') . '">' . $cellInfo['filing'] . '</span>';
+				}else{
+					//todo: use separate url
+					$linkStart = strpos($cellInfo['filing'],'http://');
+					$linkEnd = strpos($cellInfo['filing'],'"',$linkStart);
+					$linkLength = $linkEnd - $linkStart;
+					$url = substr($cellInfo['filing'],$linkStart,$linkLength);
+					//end todo
+					$url = htmlspecialchars($url);
+					$mouseover .= '<a href="' . $url . '" class="fex' . (in_array('filing_lastchanged',$cellChanges)?' ch':'') . '">'
 							. strip_tags($cellInfo['filing']) . '</a>';
+				}
 			}
 			if(strlen($cellInfo['phase_explain']))
 			{
-				//todo: use separate url
-				$linkStart = strpos($cellInfo['phase_explain'],'http://');
-				$linkEnd = strpos($cellInfo['phase_explain'],'"',$linkStart);
-				$linkLength = $linkEnd - $linkStart;
-				$url = substr($cellInfo['phase_explain'],$linkStart,$linkLength);
-				//end todo
-				$url = htmlspecialchars($url); //todo: use separate url
-				$mouseover .= '<a href="' . $url . '" class="ex' . (in_array('phase_explain_lastchanged',$cellChanges)?' ch':'') . '">'
+				if(substr_count($cellInfo['phase_explain'],'http') >= 2)
+				{
+					$mouseover .= '<span class="ex' . (in_array('phase_explain_lastchanged',$cellChanges)?' ch':'') . '">' . $cellInfo['phase_explain'] . '</span>';
+				}else{
+					//todo: use separate url
+					$linkStart = strpos($cellInfo['phase_explain'],'http://');
+					$linkEnd = strpos($cellInfo['phase_explain'],'"',$linkStart);
+					$linkLength = $linkEnd - $linkStart;
+					$url = substr($cellInfo['phase_explain'],$linkStart,$linkLength);
+					//end todo
+					$url = htmlspecialchars($url);
+					$mouseover .= '<a href="' . $url . '" class="ex' . (in_array('phase_explain_lastchanged',$cellChanges)?' ch':'') . '">'
 							. strip_tags($cellInfo['phase_explain']) . '</a>';
+				}
 			}
 			$url = 'intermediary.php?e1=' . $row['ent_id'] . '&e2=' . $col['ent_id'] . '&list=1&itype=0&hm=' . $id;
 			$cellnum = $forward ? $cells[$defVM][$row['ent_id']][$col['ent_id']] : $cells[$defVM][$col['ent_id']][$row['ent_id']];
