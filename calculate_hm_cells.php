@@ -1024,16 +1024,18 @@ function add_data($entity1id,$entity2id,$cnt_total,$cnt_active,$cnt_active_indle
 							'`count_total` = "'. $cnt_total .'",
 							`last_update` = "'. $curtime .'"
 					';
-		
-		if(!$res = mysql_query($query))
+		//prevent inserting records with no data
+		if( !is_null($cnt_total) && $cnt_total>0 )
 		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				global $logger;
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
 		}
-	
 	}
 	/**************/
 	$curtime = date('Y-m-d H:i:s');
