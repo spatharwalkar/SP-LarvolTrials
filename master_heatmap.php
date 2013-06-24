@@ -5121,6 +5121,7 @@ function postEd()
 						$display_name=mysql_real_escape_string($_POST[$t.'s_display'][$num]);
 						
 						if($_POST['type_'.$t][$num] == 'Product')
+						
 						$tag=mysql_real_escape_string($_POST['tag_'.$t][$num]);
 							
 						$category=mysql_real_escape_string($_POST['category_'.$t][$num]);
@@ -5152,9 +5153,9 @@ function postEd()
 							$change_flag=1;
 						}
 						
-						if(trim($tag) != trim($originDT['tag']))
+						if(trim($_POST['tag_'.$t][$num]) != trim($originDT['tag']))
 						{
-							$query .= ' `tag` = "' . $tag . '",';
+							$query .= ' `tag` = "' . $_POST['tag_'.$t][$num] . '",';
 							$change_flag=1;
 						}
 						
@@ -5171,9 +5172,11 @@ function postEd()
 		
 		if(isset($_POST['cell_entity1']) && !empty($_POST['cell_entity1']))
 		{
+			
 			foreach($_POST['cell_entity1'] as $row => $data)
 			foreach($data as $col => $value)
 			{
+				
 				$entity1=$_POST['cell_entity1'][$row][$col];
 				$entity2=$_POST['cell_entity2'][$row][$col];
 				
