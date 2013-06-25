@@ -476,8 +476,10 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 			if(strlen($mouseover))
 			{
 				$moClass = array();
-				if($numcols - $columnIndex < 7) $moClass[] = 're';
-				if($numrows - $rowIndex < 4) $moClass[] = 'be';
+				//apply css classes for 'edge' if the mouseover is close to the end of the heatmap
+				//(unless the hm is too small for it to matter)
+				if(($numcols >= 6) && ($numcols - $columnIndex < 7)) $moClass[] = 're';
+				if(($numrows >= 8) && ($numrows - $rowIndex < 5)) $moClass[] = 'be';
 				if(!empty($moClass))
 					$moClass = ' class="' . implode(' ',$moClass) . '"';
 				else
