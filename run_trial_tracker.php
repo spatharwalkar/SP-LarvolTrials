@@ -5394,12 +5394,12 @@ class TrialTracker
 		$secondYear = date('Y')+1;
 		$thirdYear = date('Y')+2;
 		
-		$pdfContent = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
+		$pageStyle = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 						. '<html xmlns="http://www.w3.org/1999/xhtml">'
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
-						. '<title>Larvol PDF Export</title>';
-		$pdfStyle	 = 	'<style type="text/css">'
-						. 'body { font-family:Arial; font-color:black; font-size:8px;}'
+						. '<title>Larvol PDF Export</title>'
+			                        . '<style type="text/css">'
+						. 'body { font-family:Arial,Helvetica,sans-serif; font-color:black; font-size:8px; width:100%}'
 						. 'a, a:hover{color:#000000;text-decoration:none;display:block;width:100%; height:100%;}'
 						.'td {vertical-align:top; border-right: 0.5px solid blue; border-left:0.5px solid blue; border-top: 0.5px solid blue; border-bottom: 
 						0.5px solid blue;}'
@@ -5410,69 +5410,45 @@ class TrialTracker
 						.'.manual {color:#FF7700;}'
 						.'.manage {table-layout:fixed;border-top:0.5px solid blue;border-left:0.5px solid blue;border-bottom:0.5px solid blue;}'
 						.'.manage td{ margin:0; padding:0;}'
+						.'.manage td div, .manage th div{ page-break-inside: avoid;}'
 						.'.manage th { border-top:0.5px solid blue;	border-left:0.5px solid blue; border-right:0.5px solid blue;color:#0000FF;white-space:nowrap;}'
 						.'.newtrial td, .newtrial td a{ color:#FF0000;}'
 						.'.bomb { float:left; margin-top:20px; text-align:center;}'
 						.'.result {	font-weight:bold;font-size:18px;}'
 						.'.norecord { padding:0px; height:auto; line-height:normal; font-weight:normal;	background-color: #EDEAFF; color:#000000;}'
-						.'.sectiontitles{ font-family: Arial; font-weight: bold; background-color: #A2FF97;}'
+						.'.sectiontitles{ font-family: Arial; font-weight: bold; background-color: #A2FF97 !important;}'
 						.'tr.upms td{ text-align: left;background-color:#C5E5FA;}'
 						.'tr.upms td a{	color:#0000FF; text-decoration:none;}'
 						.'@page {margin-top: 1em; margin-bottom: 2em;}'
 						.'.nobr {white-space: nowrap}'
 						.'.startdatehighlight {border-right-color: red}'
 						.'.tag {color:#120f3c; font-weight:bold;}'
-						.'</style>';	
-		
-		$pdfContent .= $pdfStyle;
-		$pdfContent .='</head>'
-						.'<body>'
-						.'<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
-		
-		$headerContent = $pdfContent;
-		
-		require_once('tcpdf/config/lang/eng.php');
-		require_once('tcpdf/tcpdf.php');
-		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-		
-		// set document information
-		//$pdf->SetCreator(PDF_CREATOR);
-		$pdf->SetAuthor('Larvol Trials');
-		$pdf->SetTitle('Larvol Trials');
-		$pdf->SetSubject('Larvol Trials');
-		$pdf->SetKeywords('Larvol Trials, Larvol Trials PDF Export');
-		
-		$pdf->SetFont('verdana', '', 8);
-		$pdf->setFontSubsetting(false);
-		//set margins
-		if($loggedIn)
-		{
-			$pdf->SetMargins(8.6, 15, 8.6);
-		}
-		else
-		{
-			$pdf->SetMargins(13.6, 15, 13.6);
-		}
-		
-		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-		
-		// remove default header/footer
-		$pdf->setPrintHeader(false);
-		
-		//set some language-dependent strings
-		$pdf->setLanguageArray($l);
-		//set auto page breaks
-		
-		$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-		$pdf->AddPage();
-
-		
-		track_time($n,'HTML to PDF conversion started');
-		$time_start = microtime(true);
-		
-		$headerContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $headerContent);
-		$pdf->writeHTML($headerContent, true, false, true, false, '');
+						//.'.manage tr{page-break-before: always;page-break-after: always;}'
+						.'.manage td{padding-left:3px;}'
+						.'</style>'	
+						.'<script>'
+				        .'function subst() {'
+				        .'  var vars={};'
+				        ."  var x=document.location.search.substring(1).split('&');"
+				        ."  for (var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}"
+				        ."  var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];"
+				        .'  for (var i in x) {'
+				        .'    var y = document.getElementsByClassName(x[i]);'
+				        .'    for (var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];'
+				
+				        ."    if(vars['page'] == 1){ "
+				        .'       document.getElementById("ott_header").style.display = \'none\';'
+				        .'    }'
+				
+				        .'  }'
+				        .'}'
+				        .'</script>'
+        
+		                .'</head>'
+						.'<body onload="subst()">';
+		$pdfContent = $pageStyle;
+		$logoHtml = '<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
+		$pdfContent .= $logoHtml;
 		
 		$Values = array();
 		$Ids = array();
@@ -5517,7 +5493,7 @@ class TrialTracker
 		}
 		
 		
-		$tableHeader ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
+		$headerContent ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage" id="ott_header">'
 						 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
 						 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
 						 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
@@ -5552,11 +5528,45 @@ class TrialTracker
 						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
 						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
 						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-						 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr></table>';
-		
-		$tableHeader = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $tableHeader);
-		//print table header with style
-		$pdf->writeHTML($pdfStyle. $tableHeader, true, false, true, false, '');
+						 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>'
+						 . '</thead></table>';
+
+			$pdfContent .='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
+						 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
+						 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
+						 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
+						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;" title="&quot;RoW&quot; = Rest of World">Region</th>'
+						 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Interventions</th>'
+						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
+						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
+						 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
+						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
+						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
+						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
+						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Result</th>'
+						 . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">-</th>'
+						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . $currentYear . '</th>'
+						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . $secondYear . '</th>'
+						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . $thirdYear . '</th>'
+						 . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">+</th></tr></thead>'
+						. '<tr style="border:none; border-top:none;">'
+						. (($loggedIn) ? '<td border="0" style="width:30px; height:0px; border-top:none; border:none;" ></td>' : '' )
+						. '<td border="0" height="0px" style="width:93px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:18px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
+						. '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td>'
+						. '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+						. '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+						. '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
+						. '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>';
 		
 		$counter = 0;
 		$outputStr = '';
@@ -5572,7 +5582,7 @@ class TrialTracker
 		
 		foreach($Values['Data'] as $dkey => $dvalue)
 		{
-			$outputStr = '';
+			//$outputStr = '';
 			$sectionHeader = $dvalue['sectionHeader'];
 			if($ottType == 'rowstacked')
 			{
@@ -5615,8 +5625,8 @@ class TrialTracker
 						$rowspan = count($tvalue['upms'])+1; 
 		
 					
-					//row starts  
-					$outputStr .= '<tr style="width:' . $col_width . 'px; height:'.(24).'px; page-break-inside:avoid;" nobr="true" ' 
+					//row starts  page-break-inside:avoid;
+					$outputStr .= '<tr style="width:' . $col_width . 'px; height:'.(24).'px; page-break-inside: avoid; page-break-before: avoid;page-break-after: avoid;" ' 
 								. (($tvalue['new'] == 'y') ? 'class="newtrial" ' : ''). '>';  
 						
 						
@@ -6256,7 +6266,7 @@ class TrialTracker
 						$tvalue['start_date'], $tvalue['end_date'], $phaseColor, $borderRight, $borderLeft);
 					
 					
-					$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
+					//$trialGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $trialGnattChart);	
 					$outputStr .= $trialGnattChart;	
 					
 					$outputStr .= '</tr>';
@@ -6277,7 +6287,7 @@ class TrialTracker
 							$edYear = date('Y', strtotime($mvalue['end_date']));
 							$upmTitle = htmlformat($mvalue['event_description']);
 							
-							$outputStr .= '<tr style="page-break-inside:avoid;" nobr="true">';
+							$outputStr .= '<tr style="page-break-inside: avoid;">';
 							
 							if($loggedIn) 
 							{
@@ -6377,7 +6387,7 @@ class TrialTracker
 							$upmGnattChart = $this->upmGnattChart($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'],
 							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft, $tvalue['larvol_id']);
 							
-							$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
+							//$upmGnattChart = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $upmGnattChart);
 							
 							$outputStr .= $upmGnattChart;
 							$outputStr .= '</tr>';
@@ -6392,32 +6402,70 @@ class TrialTracker
 				//Rendering Upms
 				$outputStr .= $this->dUnmatchedUpmsPdf($globalOptions, $ottType, $sectionHeader, $naUpms, 'y');
 			}
-			if($outputStr != ''){
-				$outputStr = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $outputStr);
-				$outputStr = '<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'.$outputStr.'</table>';
-				$pdf->writeHTML($pdfStyle.$outputStr, true, false, true, false, '');
-			}
+
 		}
 
 		$pdfContent .= $outputStr;
 		
-		//echo "<br/><br/>===>".
 		$pdfContent .= '</table></body></html>';
-		$endTableContent = '</body></html>';
-		$pdf->writeHTML($endTableContent, true, false, true, false, '');
-		//exit;
 		$pdfContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $pdfContent);
+		$pdfContent = preg_replace('<img src="images/trans_big.gif" />', '/&nbsp;/', $pdfContent);
+		$pdfContent = preg_replace('/src="images/', 'src="'.dirname(__FILE__).'/images', $pdfContent);//update image source path
+		//$pdfContent = preg_replace("/images\/up/", dirname(__FILE__)."/images/up", $pdfContent);//update image source path
+
+		//create dir wkhtmltopdf if not exists
+		if (!file_exists(dirname(__FILE__).'\wkhtmltopdf')) {
+			mkdir(dirname(__FILE__).'\wkhtmltopdf', 0777);
+		}
 		
+		$header_filename = 'header_'. date("Y-m-d_H.i.s").'.html';
+		$header_file_html = dirname(__FILE__).'\wkhtmltopdf\header_'. date("Y-m-d_H.i.s").'.html' ;
+		$fp = fopen($header_file_html, 'w') or die('Cannot open file:  '.$header_file_html);
+		fwrite($fp, $pageStyle.$headerContent.'</body></html>');
+		fclose($fp);
+		
+		$filename = 'Larvol_PDF_'. date("Y-m-d_H.i.s").'.html';
+		//$logo_html = dirname(__FILE__).'\wkhtmltopdf\logo.html' ;
+		$file_html = dirname(__FILE__).'\wkhtmltopdf\Larvol_PDF_'. date("Y-m-d_H.i.s").'.html' ;
+		$file_pdf = dirname(__FILE__).'\wkhtmltopdf\Larvol_PDF_'. date("Y-m-d_H.i.s").'.pdf' ;
+		$time_start = microtime(true);
+//echo $pdfContent;die;
+		$handle = fopen($file_html, 'w') or die('Cannot open file:  '.$file_html);
+		fwrite($handle, $pdfContent);
+		fclose($handle);
+		$time_end = microtime(true);
+		track_time_diff($n,'HTML file creation, time taken in miliseconds', $time_start, $time_end);		
+		track_time($n,'HTML to PDF conversion started');
+		
+		$root_url = 'http';
+		if ($_SERVER["HTTPS"] == "on") {
+			$root_url .= "s";
+		}
+		$root_url .= "://";
+		if ($_SERVER["SERVER_PORT"] != "80") {
+			$root_url .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"];
+		} else {
+			$root_url .= $_SERVER["SERVER_NAME"];
+		}
+		$url_parts = explode("/",$_SERVER['REQUEST_URI']);
+		$header_file_url = $root_url.'/'.$url_parts[count($url_parts)-2].'/wkhtmltopdf/'.$header_filename;
+		$file_url = $root_url.'/'.$url_parts[count($url_parts)-2].'/wkhtmltopdf/'.$filename;
+		$time_start = microtime(true);
+		$command = 'wkhtmltopdf --disable-smart-shrinking -s A4 -T 5mm --header-html "'.$header_file_html .'" --header-spacing 0 --footer-spacing 2 --footer-line --footer-right [page]/[toPage]  "' .$file_html . '" "' . $file_pdf .'" && "'.$file_pdf.'"' ;
+		//$command = 'wkhtmltopdf --disable-smart-shrinking -s A4 "' .$file_html . '" "' . $file_pdf .'" && "'.$file_pdf.'"' ;
+		//print_r($_SERVER);
+		//echo $command;
+		//die;
+		exec($command);
 		$time_end = microtime(true);
 		track_time_diff($n,'HTML to PDF conversion ended, time taken in miliseconds', $time_start, $time_end);
+		unlink($header_file_html);
+		unlink($filename_html);
 		ob_end_clean();
-		//Close and output PDF document
-		track_time($n,'PDF download start');
-		$time_start = microtime(true);
-		$pdf->Output('Larvol PDF_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
-		$time_end = microtime(true);
-		track_time_diff($n,'PDF download end, total time elapsed', $time_start, $time_end);
-		
+		header('Content-disposition: attachment; filename='.basename($file_pdf));
+		header('Content-type: application/pdf');
+		readfile($file_pdf);
+
 	}
 	
 	function dUnmatchedUpmsPdf($globalOptions, $ottType, $sectionHeader, $naUpms, $noRecordRow = 'y')
@@ -10599,7 +10647,7 @@ class TrialTracker
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							//comment the following line to hide pdf export
-							//. '<option value="pdf">PDF</option>'
+							. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
