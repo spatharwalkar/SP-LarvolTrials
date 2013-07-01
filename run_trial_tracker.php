@@ -6306,7 +6306,7 @@ class TrialTracker
 									$idColor = 'gray';
 								}
 								$outputStr .= '<td style="width:30px; border-top:none;" class="' . $rowOneType . '"><a style="color:' . $idColor 
-								. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
+								. '" href="' . $dir . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
 							}
 							
 							if(!$loggedIn && !$this->liLoggedIn())
@@ -6625,7 +6625,7 @@ class TrialTracker
 					$titleLinkColor = 'style="color:#FF0000;"';
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td style="width:30px;" ' . $title . '><a ' . $titleLinkColor . ' href="' . urlPath() . 'upm.php?search_id=' 
+				$outputStr .= '<td style="width:30px;" ' . $title . '><a ' . $titleLinkColor . ' href="' . $dir . 'upm.php?search_id=' 
 							. $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
 			}
 			
@@ -10461,8 +10461,8 @@ class TrialTracker
 		
 		echo '<div id="buttons">'
 			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
-			. '<a style="display:inline;" href="' . urlPath() . $resetUrl . '">'
-			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . urlPath() . $resetUrl . '\')" /></a></div>'
+			. '<a style="display:inline;" href="' . $dir . $resetUrl . '">'
+			. '<input type="button" value="Reset" id="reset" class="resetbutton" onclick="javascript: window.location.href(\'' . $dir . $resetUrl . '\')" /></a></div>'
 			. '<div class="milestones" style="width:155px;margin-right: 10px;"><div id="addtoright"></div></div>'
 			. '<div class="export" id="chromemenu" style="width:64px;"><div><a rel="dropmenu"><b style="margin-left:16px;">Export</b></a></div></div>'
 			. '</div>';
@@ -11278,7 +11278,7 @@ class TrialTracker
 				{
 					$tvalue['full_id'] = str_replace('`', "\n", $tvalue['full_id']);
 				}
-				$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . urlPath() . 'edit_trials.php?larvol_id=' . $tvalue['larvol_id'] 
+				$outputStr .= '<a style="color:' . $titleLinkColor . '" href="' . $dir . 'edit_trials.php?larvol_id=' . $tvalue['larvol_id'] 
 								. '" target="_blank">' . $tvalue['full_id'] . '</a></div></td>';
 			}
 			
@@ -11914,7 +11914,7 @@ class TrialTracker
 							$idColor = 'gray';
 						}
 						$outputStr .= '<td style="border-top:0px;" class="' . $rowOneType . '"><a style="color:' . $idColor 
-						. '" href="' . urlPath() . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
+						. '" href="' . $dir . 'upm.php?search_id=' . $mvalue['id'] . '" target="_blank">' . $mvalue['id'] . '</a></td>';
 					}
 					
 					if(!$loggedIn && !$this->liLoggedIn())
@@ -13205,7 +13205,7 @@ class TrialTracker
 					$titleLinkColor = 'style="color:#FF0000;"';
 					$title = ' title = "New record" ';
 				}
-				$outputStr .= '<td ' . $title . '><a ' . $titleLinkColor . ' href="' . urlPath() . 'upm.php?search_id=' 
+				$outputStr .= '<td ' . $title . '><a ' . $titleLinkColor . ' href="' . $dir . 'upm.php?search_id=' 
 							. $value['id'] . '" target="_blank">' . $value['id'] . '</a></td>';
 			}
 			
