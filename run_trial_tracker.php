@@ -5394,6 +5394,12 @@ class TrialTracker
 		$secondYear = date('Y')+1;
 		$thirdYear = date('Y')+2;
 		
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
+		
 		$pageStyle = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 						. '<html xmlns="http://www.w3.org/1999/xhtml">'
 						. '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
@@ -5447,7 +5453,7 @@ class TrialTracker
 		                .'</head>'
 						.'<body onload="subst()">';
 		$pdfContent = $pageStyle;
-		$logoHtml = '<div align="center"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
+		$logoHtml = '<div align="center"><img src="'.$dir.'images/Larvol-Trial-Logo-notag.png" alt="Main" width="200" height="25" id="header" /></div><br/>';
 		$pdfContent .= $logoHtml;
 		
 		$Values = array();
@@ -6328,15 +6334,15 @@ class TrialTracker
 									$outputStr .= '<a href="' . $mvalue['result_link'] . '" style="color:#000;">';
 									if($mvalue['event_type'] == 'Clinical Data')
 									{
-										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+										$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
 									}
 									else if($mvalue['status'] == 'Cancelled')
 									{
-										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+										$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
 									}
 									else
 									{
-										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+										$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
 									}
 									$outputStr .= '</a>';
 								}
@@ -6344,15 +6350,15 @@ class TrialTracker
 								{
 									if($mvalue['event_type'] == 'Clinical Data')
 									{
-										$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
+										$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-diamond.png" alt="Diamond" height="6px" width="6px" style="margin:4px;" border="0" />';
 									}
 									else if($mvalue['status'] == 'Cancelled')
 									{
-										$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
+										$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-cancel.png" alt="Cancel" height="6px" width="6px" style="margin:4px;" border="0" />';
 									}
 									else
 									{
-										$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
+										$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark" height="6px" width="6px" style="margin:4px;" border="0" />';
 									}
 								}
 							}
@@ -6361,11 +6367,11 @@ class TrialTracker
 								if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 								{
 									$outputStr .= '<a href="' . $mvalue['event_link'] . '" target="_blank">'
-												. '<img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" /></a>';
+												. '<img src="'.$dir.'images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" /></a>';
 								}
 								else
 								{
-									$outputStr .= '<img src="images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" />';
+									$outputStr .= '<img src="'.$dir.'images/hourglass.png" alt="Hourglass" height="8px" width="8px" style="margin:3px;" border="0" />';
 								}
 							}
 							$outputStr .= '</td>';
@@ -6410,7 +6416,7 @@ class TrialTracker
 		$pdfContent .= '</table></body></html>';
 		$pdfContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $pdfContent);
 		$pdfContent = preg_replace('<img src="images/trans_big.gif" />', '/&nbsp;/', $pdfContent);
-		$pdfContent = preg_replace('/src="images/', 'src="'.dirname(__FILE__).'/images', $pdfContent);//update image source path
+		$pdfContent = preg_replace('/src="images/', 'src="'.dirname(__FILE__).''.$dir.'images', $pdfContent);//update image source path
 		//$pdfContent = preg_replace("/images\/up/", dirname(__FILE__)."/images/up", $pdfContent);//update image source path
 
 		//create dir wkhtmltopdf if not exists
@@ -6521,6 +6527,11 @@ class TrialTracker
 	{
 		global $db;
 		$loggedIn	= $db->loggedIn();
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
 		
 		$outputStr = '';
 		if($loggedIn)
@@ -6535,7 +6546,7 @@ class TrialTracker
 		{
 			$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
 						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-						. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+						. 'style="background: url(\''.$dir.'images/down.png\') no-repeat left center;"'
 						. ' onclick="sh(this,\'rowstacked\');" style="width:' . $col_width . 'px;">&nbsp;</td></tr>'
 						. $this->displayUnMatchedUpmsPdf($loggedIn, $naUpmIndex, $naUpms)
 						. '<tr class="trialtitles" style=" width:'.$col_width.'px; page-break-inside:avoid;" nobr="true">'
@@ -6551,7 +6562,7 @@ class TrialTracker
 			
 			$outputStr .= '<tr class="trialtitles" style=" width:' . $col_width . 'px; page-break-inside:avoid;" nobr="true">'
 						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-						. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+						. ' style="background: url(\''.$dir.'images/' . $image . '.png\') no-repeat left center;"'
 						. ' onclick="sh(this,\'' . $naUpmIndex . '\');" style="width:' . $col_width . 'px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 						. $sectionHeader . '</td></tr>';
 			$outputStr .= $this->displayUnMatchedUpmsPdf($loggedIn, $naUpmIndex, $naUpms);
@@ -6563,6 +6574,11 @@ class TrialTracker
 	function displayUnMatchedUpmsPdf($loggedIn, $naUpmIndex, $naUpms)
 	{
 		global $now;
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
 		
 		if($loggedIn)
 			$col_width=570;
@@ -6771,15 +6787,15 @@ class TrialTracker
 					$outputStr .= '<a href="' . $value['result_link'] . '" ' . $target . '>';
 					if($value['event_type'] == 'Clinical Data')
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
 					}
 					else if($value['status'] == 'Cancelled')
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
 					}
 					else
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
 					}
 					$outputStr .= '</a>';
 				}
@@ -6787,15 +6803,15 @@ class TrialTracker
 				{
 					if($value['event_type'] == 'Clinical Data')
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
 					}
 					else if($value['status'] == 'Cancelled')
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
 					}
 					else
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
 					}
 				}
 				$outputStr .= '</div>';
@@ -6806,11 +6822,11 @@ class TrialTracker
 				if($value['event_link'] != '' && $value['event_link'] !== NULL)
 				{
 					$outputStr .= '<a href="' . $value['event_link'] . '" target="_blank">'
-								. '<img src="images/hourglass.png" alt="Hourglass"  border="0" /></a>';
+								. '<img src="'.$dir.'images/hourglass.png" alt="Hourglass"  border="0" /></a>';
 				}
 				else
 				{
-					$outputStr .= '<img src="images/hourglass.png" alt="Hourglass"  border="0" />';
+					$outputStr .= '<img src="'.$dir.'images/hourglass.png" alt="Hourglass"  border="0" />';
 				}
 				$outputStr .= '</span>';
 			}
@@ -6826,7 +6842,7 @@ class TrialTracker
 							date('m',strtotime($value['end_date'])), date('Y',strtotime($value['end_date'])), $currentYear, $secondYear, $thirdYear, 
 							$value['start_date'], $value['end_date'], $value['event_link'], $upmTitle, $upmBorderRight, $upmBorderLeft);
 			
-			$outputStr = preg_replace('/&nbsp;/', '<img src="images/trans_big.gif" />', $outputStr);
+			$outputStr = preg_replace('/&nbsp;/', '<img src="'.$dir.'images/trans_big.gif" />', $outputStr);
 			$outputStr .= '</tr>';
 		}
 		
@@ -10185,6 +10201,11 @@ class TrialTracker
 	{
 		global $db, $maxEnrollLimit;
 		$loggedIn	= $db->loggedIn();
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
 		
 		if($ottType == 'indexed')
 			$globalOptions['includeProductsWNoData'] = "on";
@@ -10203,7 +10224,7 @@ class TrialTracker
 		
 		$this->displayFilterControls($productSelector, $count, $Values['activecount'], $Values['inactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
 		echo '<div id="parent">';
-		echo '<div class="advanced" id="togglefilters"><img src="images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" />&nbsp;Advanced</div>'
+		echo '<div class="advanced" id="togglefilters"><img src="'.$dir.'images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" />&nbsp;Advanced</div>'
 				. '<div class="records">' . $count . '&nbsp;Trials</div>';
 		
 		foreach($urlParams as $key => $value) 
@@ -10217,6 +10238,11 @@ class TrialTracker
 		}
 		
 		echo '<div id="outercontainer" align="left"><p style="overflow:hidden;margin: 0;">';
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
 		
 		$lParams = array();
 		if($globalOptions['type'] == 'inactiveTrials')
@@ -10224,18 +10250,16 @@ class TrialTracker
 			$lUrl = '';
 			$lParams =  array_replace($urlParams, array('list' => '1'));
 			$lUrl = http_build_query($lParams);
-			
 			echo '<span class="filters"><label>Inactive Trials</label>'
-				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $lUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		else if($globalOptions['type'] == 'allTrials')
 		{
 			$lUrl = '';
 			$lParams =  array_replace($urlParams, array('list' => '1'));
 			$lUrl = http_build_query($lParams);
-			
 			echo '<span class="filters"><label>All Trials</label>'
-				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $lUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';;
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $lUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';;
 		}
 		
 		$sFilters = array();
@@ -10260,9 +10284,8 @@ class TrialTracker
 			
 			$sParams =  array_replace($urlParams, array('status' => $sUrl));
 			$sUrl = http_build_query($sParams);
-			
 			echo '<span class="filters"><label>' .  $sFilters[$value] . '</label>'
-				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $sUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $sUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($sFilters);
 		unset($sParams);
@@ -10282,7 +10305,7 @@ class TrialTracker
 			$val = $this->institutionFilters[$value];
 			$val = str_replace('_', ' ', ucfirst($val));
 			echo '<span class="filters"><label>' . $val . '</label>'
-					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $iUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $iUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 
 		}
 		unset($iParams);
@@ -10298,9 +10321,8 @@ class TrialTracker
 
 			$rParams =  array_replace($urlParams, array('region' => $rUrl));
 			$rUrl = http_build_query($rParams);
-			
 			echo '<span class="filters"><label>' .  $this->regionFilters[$value] . '</label>'
-				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $rUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $rUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($rParams);
 		unset($key);
@@ -10318,9 +10340,8 @@ class TrialTracker
 				
 				$pParams =  array_replace($urlParams, array('phase' => $pUrl));
 				$pUrl = http_build_query($pParams);
-
 				echo '<span class="filters"><label>Phase ' .  $phases[$value] . '</label>'
-				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $pUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $pUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
 		unset($phases);
@@ -10336,7 +10357,7 @@ class TrialTracker
 			$hUrl = http_build_query($hParams);
 			
 			echo '<span class="filters"><label>' . $globalOptions['startrange'] . ' - ' . $globalOptions['endrange'] . '</label>'
-					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $hUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $hUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($hParams);
 		
@@ -10348,7 +10369,7 @@ class TrialTracker
 			$oUrl = http_build_query($oParams);
 			
 			echo '<span class="filters"><label>Only updates</label>'
-				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $oUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $oUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($oParams);
 		
@@ -10369,7 +10390,7 @@ class TrialTracker
 			$eUrl = http_build_query($eParams);
 			
 			echo '<span class="filters"><label>' . $ev . '</label>'
-					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $eUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $eUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($eParams);
 		
@@ -10384,7 +10405,7 @@ class TrialTracker
 				$dUrl = http_build_query($dParams);
 				$title = (($ottType == 'colstacked') ? 'Products' : 'Areas');
 				echo '<span class="filters"><label>' . $title . ' with no data</label>'
-						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $dUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $dUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
 		unset($dParams);
@@ -10398,7 +10419,7 @@ class TrialTracker
 
 				$dUrl2 = http_build_query($dParams2);
 				echo '<span class="filters"><label>Owner sponsored trials</label>'
-						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $dUrl2 . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $dUrl2 . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
 		unset($dParams2);
 		
@@ -10415,7 +10436,7 @@ class TrialTracker
 				$tUrl = http_build_query($tParams);
 			
 				echo '<span class="filters"><label>' . $productSelector[$value] . '</label>'
-						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $tUrl . '"><img src="images/black-cancel.png" alt="Remove Filter" /></a></span>';
+						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $tUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
 		unset($tParams);
@@ -10572,7 +10593,12 @@ class TrialTracker
 		global $db;
 		$loggedIn	= $db->loggedIn();
 		$outputStr = '';
-		
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
+			
 		$naUpmIndex = preg_replace('/[^a-zA_Z0-9]/i', '', $sectionHeader);
 		$naUpmIndex = substr($naUpmIndex, 0, 15);
 			
@@ -10580,7 +10606,7 @@ class TrialTracker
 		{
 			$outputStr .= '<tr class="trialtitles">'
 						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-						. 'style="background: url(\'images/down.png\') no-repeat left center;"'
+						. 'style="background: url(\''.$dir.'images/down.png\') no-repeat left center;"'
 						. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;</td></tr>'
 						. $this->displayUnMatchedUpms($ottType, $loggedIn, $naUpmIndex, $naUpms)
 						. '<tr class="trialtitles">'
@@ -10596,7 +10622,7 @@ class TrialTracker
 			
 			$outputStr .= '<tr class="trialtitles">'
 						. '<td colspan="' . getColspanBasedOnLogin($loggedIn) . '" class="upmpointer sectiontitles"'
-						. ' style="background: url(\'images/' . $image . '.png\') no-repeat left center;"'
+						. ' style="background: url(\''.$dir.'images/' . $image . '.png\') no-repeat left center;"'
 						. ' onclick="sh(this,\'' . $naUpmIndex . '\');">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' 
 						. $sectionHeader . '</td></tr>';
 			$outputStr .= $this->displayUnMatchedUpms($ottType, $loggedIn, $naUpmIndex, $naUpms);
@@ -10660,6 +10686,11 @@ class TrialTracker
 	function displayHeader($productAreaInfo)
 	{
 		global $li_user;
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
 		
 		if((isset($_SERVER['HTTP_REFERER']) && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') !== FALSE || strpos($_SERVER['HTTP_REFERER'], 'delta') !== FALSE)) 
 		|| (isset($_GET['LI']) && $_GET['LI'] == 1)   )
@@ -10674,7 +10705,7 @@ class TrialTracker
 			$li_user=null;
 			echo '<input type="hidden" name="LS" value="1" />';
 			echo '<table width="100%">'
-					. '<tr><td><img src="images/larvol_sigma_logo.gif" alt="Main" width="358" height="61" id="header" /></td>'
+					. '<tr><td><img src="'.$dir.'images/larvol_sigma_logo.gif" alt="Main" width="358" height="61" id="header" /></td>'
 					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 					. '<br/><span style="font-weight:normal;">Send feedback to '
 					. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
@@ -10686,7 +10717,7 @@ class TrialTracker
 		{
 			$li_user=null;
 			echo '<table width="100%">'
-					. '<tr><td><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
+					. '<tr><td><img src="'.$dir.'images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" id="header" /></td>'
 					. '<td nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 					. '<br/><span style="font-weight:normal;">Send feedback to '
 					. '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
@@ -11121,6 +11152,12 @@ class TrialTracker
 		$secondYear = (date('Y')+1);
 		$thirdYear = (date('Y')+2);
 		
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
+			
 		$counter = 0;
 		$outputStr = '';
 		$sectionId = '';
@@ -11912,15 +11949,15 @@ class TrialTracker
 							$outputStr .= '<a href="' . $mvalue['result_link'] . '" target="_blank">';
 							if(strcasecmp($mvalue['event_type'], 'Clinical Data') == 0)
 							{
-								$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
+								$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-diamond.png" alt="Diamond"';
 							}
 							else if($mvalue['status'] == 'Cancelled')
 							{
-								$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
+								$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-cancel.png" alt="Cancel"';
 							}
 							else
 							{
-								$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
+								$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
 							}
 							$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" /></a>';
 						}
@@ -11928,23 +11965,23 @@ class TrialTracker
 						{
 							if(strcasecmp($mvalue['event_type'], 'Clinical Data') == 0)
 							{
-								$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond"';
+								$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-diamond.png" alt="Diamond"';
 							}
 							else if($mvalue['status'] == 'Cancelled')
 
 							{
-								$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel"';
+								$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-cancel.png" alt="Cancel"';
 							}
 							else
 							{
-								$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
+								$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
 							}
 							$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" />';
 						}
 					}
 					else if($mvalue['status'] == 'Pending')
 					{
-						$icon = '<img src="images/hourglass.png" alt="Hourglass"  border="0" onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')" />';
+						$icon = '<img src="'.$dir.'images/hourglass.png" alt="Hourglass"  border="0" onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')" />';
 						if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 						{	
 							$outputStr .= '<a href="' . $mvalue['event_link'] . '" target="_blank">' . $icon . '</a>';
@@ -13110,7 +13147,11 @@ class TrialTracker
 		$currentYear = date('Y');
 		$secondYear = (date('Y')+1);
 		$thirdYear = (date('Y')+2);
-		
+		global $cwd;
+		if(isset($cwd) && stripos($cwd,'sigma')!==false)
+			$dir='../';
+		else
+			$dir='';
 		$cntr = 0;
 		
 		$display = 'style="display: none;"';
@@ -13327,15 +13368,15 @@ class TrialTracker
 					$outputStr .= '<a href="' . $value['result_link'] . '" ' . $target . '>';
 					if(strcasecmp($value['event_type'], 'Clinical Data') == 0)
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
 					}
 					else if($value['status'] == 'Cancelled')
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
 					}
 					else
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
 					}
 					$outputStr .= '</a>';
 				}
@@ -13343,15 +13384,15 @@ class TrialTracker
 				{
 					if(strcasecmp($value['event_type'], 'Clinical Data') == 0)
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-diamond.png" alt="Diamond" border="0" />';
 					}
 					else if($value['status'] == 'Cancelled')
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-cancel.png" alt="Cancel" border="0" />';
 					}
 					else
 					{
-						$outputStr .= '<img src="images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
+						$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark" border="0" />';
 					}
 				}
 				$outputStr .= '</div>';
@@ -13362,12 +13403,12 @@ class TrialTracker
 				if($value['event_link'] != '' && $value['event_link'] !== NULL)
 				{
 					$outputStr .= '<a href="' . $value['event_link'] . '" target="_blank">'
-								. '<img src="images/hourglass.png" alt="Hourglass"  border="0" /></a>';
+								. '<img src="'.$dir.'images/hourglass.png" alt="Hourglass"  border="0" /></a>';
 				}
 				else
 				{
 					$outputStr .= '<a href="javascript:;" class="no_access">'
-								. '<img src="images/hourglass.png" alt="Hourglass"  border="0" /></a>';
+								. '<img src="'.$dir.'images/hourglass.png" alt="Hourglass"  border="0" /></a>';
 				}
 				$outputStr .= '</div>';
 			}

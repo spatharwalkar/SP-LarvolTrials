@@ -821,19 +821,19 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL,
 						var dwcount = document.getElementById('".$uniqueId."_dwcount');
 						if(dwcount.value == 'active')
 						{
-							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=active\";
+							location.href = \"". $MainPageURL ."?".$url."&dwcount=active\";
 						}
 						else if(dwcount.value == 'total')
 						{
-							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=total\";
+							location.href = \"". $MainPageURL ."?".$url."&dwcount=total\";
 						}
 						else if(dwcount.value == 'owner_sponsored')
 						{
-							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=owner_sponsored\";
+							location.href = \"". $MainPageURL ."?".$url."&dwcount=owner_sponsored\";
 						}
 						else
 						{
-							location.href = \"".trim(urlPath()) . $MainPageURL ."?".$url."&dwcount=indlead\";
+							location.href = \"". $MainPageURL ."?".$url."&dwcount=indlead\";
 						}
 					}
 						</script>";
@@ -1074,13 +1074,19 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 {	
 	if($TrackerType == 'PTH')
 		$Report_Name = ((trim($Report_DisplayName) != '' && $Report_DisplayName != NULL)? trim($Report_DisplayName):'report '.$id.'');
-	
+	global $cwd;
+	if(isset($cwd) && stripos($cwd,'sigma')!==false)
+		$dir='../';
+	else
+		$dir='';
+
+		
 	$htmlContent = '';
 	
 	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&& strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 	{
 		$htmlContent .= '<table cellspacing="0" cellpadding="0" width="100%" style="background-color:#FFFFFF;">'
-					   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" /></td>'
+					   . '<tr><td width="33%" style="background-color:#FFFFFF;"><img src="'.$dir.'images/Larvol-Trial-Logo-notag.png" alt="Main" width="327" height="47" /></td>'
 					   . '<td width="34%" align="center" style="background-color:#FFFFFF;" nowrap="nowrap"><span style="color:#ff0000;font-weight:normal;margin-left:40px;">Interface work in progress</span>'
 					   . '<br/><span style="font-weight:normal;">Send feedback to '
 					   . '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
@@ -1093,7 +1099,12 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $OptionArray)
 {				
 	if(count($productIds) == 0) return 'No Products Found';
-	
+		global $cwd;
+	if(isset($cwd) && stripos($cwd,'sigma')!==false)
+		$dir='../';
+	else
+		$dir='';
+
 	require_once('tcpdf/config/lang/eng.php');
 	require_once('tcpdf/tcpdf.php');  
 	$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -1123,7 +1134,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '<option value="active" '. (($dwcount == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
 					. '</select></td>'
 					. '<td class="bottom right">'
-					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'./images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
+					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\''.$dir.'images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
 					. '</td>'
 					. '</tr>'
 					. '</table>';
@@ -1194,15 +1205,15 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		$row = $incr;
 		
 		if($TrackerType != 'PTH')
-		$commonPart1 = trim(urlPath()) .'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
+		$commonPart1 = 'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
 		else
-		$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+		$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 		
 		
 		if($TrackerType != 'PTH')
-		$procommonPart1 = trim(urlPath()) .'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+		$procommonPart1 = 'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
 		else
-		$procommonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];		
+		$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];		
 		
 		
 		$commonPart2 = '';
@@ -1434,7 +1445,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	
 	///Add HELP Tab here only
 	$htmlContent .= '<div id="slideout_'.$uniqueId.'">
-    					<img src="images/help.png" alt="Help" />
+    					<img src="'.$dir.'images/help.png" alt="Help" />
     					<div class="slideout_inner">
         					<table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
        							<tr><td colspan="2" style="padding-right: 1px;">
@@ -1756,14 +1767,14 @@ function Download_reports()
 			if(isset($data_matrix[$row]['productIds']) && $data_matrix[$row]['productIds'] != NULL && !empty($entity2Id))
 			{
 				if($TrackerType != 'PTH')
-				$commonPart1 = trim(urlPath()) .'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
+				$commonPart1 = 'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
 				else
-				$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+				$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 				
 				if($TrackerType != 'PTH')
-					$procommonPart1 = trim(urlPath()) .'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+					$procommonPart1 = 'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
 				else
-					$procommonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+					$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 				
 				$fullLink = $commonPart1.$link_part;
 				/// Product Column
@@ -2148,14 +2159,14 @@ function Download_reports()
 			$Place_Y = $pdf->GetY();
 			
 			if($TrackerType != 'PTH')
-			$commonPart1 = trim(urlPath()) .'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
+			$commonPart1 = 'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
 			else
-			$commonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+			$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 			
 			if($TrackerType != 'PTH')
-				$procommonPart1 = trim(urlPath()) .'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+				$procommonPart1 = 'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
 			else
-				$procommonPart1 = trim(urlPath()) .'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+				$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 			
 			$fullLink = $commonPart1.$link_part;
 				

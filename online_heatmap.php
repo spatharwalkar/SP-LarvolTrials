@@ -2364,7 +2364,7 @@ function DisplayOHM($id, $ohm)
 		if($ohm == 'EOHMH')
 			$commonLinkPart1 = trim(urlPath()) .'intermediary.php?';
 		else
-			$commonLinkPart1 = trim(urlPath()) .'trialzilla_ott.php?sourcepg=TZ&';
+			$commonLinkPart1 = trim(urlPath()) .'sigma/trialzilla_ott.php?sourcepg=TZ&';
 		$commonLinkPart2 = '';
 	}
 	

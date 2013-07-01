@@ -76,19 +76,19 @@ function DisplayOTT()
 	if(isset($_REQUEST['DiseaseId']))
 	{
 		$globalOptions['DiseaseId'] = $_REQUEST['DiseaseId'];
-		$globalOptions['pageLocation'] = "trialzilla_disease";
+		$globalOptions['pageLocation'] = "sigma/trialzilla_disease";
 		$_REQUEST['e1'] = $globalOptions['DiseaseId'];
 	}
 	if(isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ')
 	{
 		$globalOptions['sourcepg'] = $_REQUEST['sourcepg'];
-		$globalOptions['pageLocation'] = "trialzilla_ott";
+		$globalOptions['pageLocation'] = "sigma/trialzilla_ott";
 	}
 	
 	if(isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZP')
 	{
 		$globalOptions['sourcepg'] = $_REQUEST['sourcepg'];
-		$globalOptions['pageLocation'] = "trialzilla_product";
+		$globalOptions['pageLocation'] = "sigma/trialzilla_product";
 	}
 	
 	if((isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ') || (isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZP') || (isset($_REQUEST['DiseaseId'])))
@@ -219,24 +219,29 @@ function DisplayOTT()
 	{
 		$globalOptions['startrange'] = 'now';
 	}
+	global $cwd;
+	if(isset($cwd) && stripos($cwd,'sigma')!==false)
+		$dir='../';
+	else
+		$dir='';
+
+	$intermediaryCss = $dir.'css/intermediary.css';
+	$jueryUiCss 	= $dir.'css/themes/cupertino/jquery-ui-1.8.17.custom.css';
+	$dateInputCss 	= $dir.'date/date_input.css';
+	$jdPickerCss 	= $dir.'scripts/date/jdpicker.css';
+	$scrollBarCs	= $dir.'css/jquery.mCustomScrollbar.css';
 	
-	$intermediaryCss = 'css/intermediary.css';
-	$jueryUiCss 	= 'css/themes/cupertino/jquery-ui-1.8.17.custom.css';
-	$dateInputCss 	= 'date/date_input.css';
-	$jdPickerCss 	= 'scripts/date/jdpicker.css';
-	$scrollBarCs	= 'css/jquery.mCustomScrollbar.css';
-	
-	$jqueryJs 		= 'scripts/jquery.js';
-	$funcJs 		= 'scripts/func.js';
-	$jqueryMinJs 	= 'scripts/jquery-1.7.1.min.js';
-	$jqueryUiMinJs 	= 'scripts/jquery-ui-1.8.17.custom.min.js';
-	$dateInputJs 	= 'date/jquery.date_input.js';
-	$jdPickerJs 	= 'scripts/date/jquery.jdpicker.js';
-	$initJs 		= 'date/init.js';
-	$chromeJs 		= 'scripts/chrome.js';
-	$hoverJs 		= 'scripts/jquery.hoverIntent.minified.js';
-	$mouseWheelJs 	= 'scripts/jquery.mousewheel.min.js';
-	$scrollBarJs 	= 'scripts/jquery.mCustomScrollbar.js';
+	$jqueryJs 		= $dir.'scripts/jquery.js';
+	$funcJs 		= $dir.'scripts/func.js';
+	$jqueryMinJs 	= $dir.'scripts/jquery-1.7.1.min.js';
+	$jqueryUiMinJs 	= $dir.'scripts/jquery-ui-1.8.17.custom.min.js';
+	$dateInputJs 	= $dir.'date/jquery.date_input.js';
+	$jdPickerJs 	= $dir.'scripts/date/jquery.jdpicker.js';
+	$initJs 		= $dir.'date/init.js';
+	$chromeJs 		= $dir.'scripts/chrome.js';
+	$hoverJs 		= $dir.'scripts/jquery.hoverIntent.minified.js';
+	$mouseWheelJs 	= $dir.'scripts/jquery.mousewheel.min.js';
+	$scrollBarJs 	= $dir.'scripts/jquery.mCustomScrollbar.js';
 
 if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
 print	'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -246,24 +251,24 @@ print	'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://ww
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 			<title>Online Trial Tracker</title>';
 			
-print	'	<link href="'. $intermediaryCss . '?t=' . filectime($intermediaryCss) .'" rel="stylesheet" type="text/css" media="all" />
-			<link href="'. $jueryUiCss . '?t=' . filectime($jueryUiCss) .'" rel="stylesheet" type="text/css" media="all" />
-			<link href="'. $dateInputCss . '?t=' . filectime($dateInputCss) .'" rel="stylesheet" type="text/css" media="all" />
-			<link href="'. $jdPickerCss . '?t=' . filectime($jdPickerCss) .'" rel="stylesheet" type="text/css" media="screen" />
-			<link href="'. $scrollBarCs . '?t=' . filectime($scrollBarCs) .'" rel="stylesheet" type="text/css" media="screen" />
+print	'	<link href="'. $intermediaryCss . '?t=' . @filectime($intermediaryCss) .'" rel="stylesheet" type="text/css" media="all" />
+			<link href="'. $jueryUiCss . '?t=' . @filectime($jueryUiCss) .'" rel="stylesheet" type="text/css" media="all" />
+			<link href="'. $dateInputCss . '?t=' . @filectime($dateInputCss) .'" rel="stylesheet" type="text/css" media="all" />
+			<link href="'. $jdPickerCss . '?t=' . @filectime($jdPickerCss) .'" rel="stylesheet" type="text/css" media="screen" />
+			<link href="'. $scrollBarCs . '?t=' . @filectime($scrollBarCs) .'" rel="stylesheet" type="text/css" media="screen" />
 			
-			<script type="text/javascript" src="'. $jqueryJs . '?t=' . filectime($jqueryJs) .'" ></script>
-			<script type="text/javascript" src="'. $funcJs . '?t=' . filectime($funcJs) .'"></script>	
-			<script type="text/javascript" src="'. $jqueryMinJs . '?t=' . filectime($jqueryMinJs) .'"></script>
-			<script type="text/javascript" src="'. $jqueryUiMinJs . '?t=' . filectime($jqueryUiMinJs) .'"></script>
-			<script type="text/javascript" src="'. $dateInputJs . '?t=' . filectime($dateInputJs) .'"></script>
-			<script type="text/javascript" src="'. $jdPickerJs . '?t=' . filectime($jdPickerJs) .'"></script>
-			<script type="text/javascript" src="'. $initJs . '?t=' . filectime($initJs) .'"></script>
-			<script type="text/javascript" src="'. $chromeJs . '?t=' . filectime($chromeJs) .'"></script>
-			<script type="text/javascript" src="'. $hoverJs . '?t=' . filectime($hoverJs) .'"></script>
+			<script type="text/javascript" src="'. $jqueryJs . '?t=' . @filectime($jqueryJs) .'" ></script>
+			<script type="text/javascript" src="'. $funcJs . '?t=' . @filectime($funcJs) .'"></script>	
+			<script type="text/javascript" src="'. $jqueryMinJs . '?t=' . @filectime($jqueryMinJs) .'"></script>
+			<script type="text/javascript" src="'. $jqueryUiMinJs . '?t=' . @filectime($jqueryUiMinJs) .'"></script>
+			<script type="text/javascript" src="'. $dateInputJs . '?t=' . @filectime($dateInputJs) .'"></script>
+			<script type="text/javascript" src="'. $jdPickerJs . '?t=' . @filectime($jdPickerJs) .'"></script>
+			<script type="text/javascript" src="'. $initJs . '?t=' . @filectime($initJs) .'"></script>
+			<script type="text/javascript" src="'. $chromeJs . '?t=' . @filectime($chromeJs) .'"></script>
+			<script type="text/javascript" src="'. $hoverJs . '?t=' . @filectime($hoverJs) .'"></script>
 			
-			<script type="text/javascript" src="'. $mouseWheelJs . '?t=' . filectime($mouseWheelJs) .'"></script>
-			<script type="text/javascript" src="'. $scrollBarJs . '?t=' . filectime($scrollBarJs) .'"></script>
+			<script type="text/javascript" src="'. $mouseWheelJs . '?t=' . @filectime($mouseWheelJs) .'"></script>
+			<script type="text/javascript" src="'. $scrollBarJs . '?t=' . @filectime($scrollBarJs) .'"></script>
 			
 			<script type="text/javascript">
 				var _gaq = _gaq || [];
@@ -626,18 +631,23 @@ else
 }
 
 global $db;
-
+global $cwd;
+if(isset($cwd) && stripos($cwd,'sigma')!==false)
+	$dir='../';
+else
+	$dir='';
+	
 print      '<div id="slideout" '.((isset($globalOptions['DiseaseId']) || $globalOptions['sourcepg'] == 'TZ' || $globalOptions['sourcepg'] == 'TZP') ? 'style="top:200px;"':'').'>
-            <img src="images/help.png" alt="Help" />
+            <img src="'.$dir.'images/help.png" alt="Help" />
             <div class="slideout_inner">
                 <table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-                <tr><td width="15%"><img src="images/black-diamond.png" alt="Data release" /></td><td>Click for data release</td></tr>
-                <tr><td><img src="images/red-diamond.png" alt="Data release (new)" /></td><td>Click for data release (new)</td></tr>
-                <tr><td><img src="images/hourglass.png" alt="Results pending" /></td><td>Results pending</td></tr>
-                <tr><td><img src="images/black-checkmark.png" alt="Milestone result" /></td><td>Click for milestone result</td></tr>
-                <tr><td><img src="images/red-checkmark.png" alt="Milestone result (new)" /></td><td>Click for milestone result (new)</td></tr>
-                <tr><td><img src="images/purple-bar.png" alt="Milestone details" /></td><td>Click for milestone details</td></tr>
-                <tr><td><img src="images/down.png" alt="Milestones" /></td><td>Display milestones</td></tr>
+                <tr><td width="15%"><img src="'.$dir.'images/black-diamond.png" alt="Data release" /></td><td>Click for data release</td></tr>
+                <tr><td><img src="'.$dir.'images/red-diamond.png" alt="Data release (new)" /></td><td>Click for data release (new)</td></tr>
+                <tr><td><img src="'.$dir.'images/hourglass.png" alt="Results pending" /></td><td>Results pending</td></tr>
+                <tr><td><img src="'.$dir.'images/black-checkmark.png" alt="Milestone result" /></td><td>Click for milestone result</td></tr>
+                <tr><td><img src="'.$dir.'images/red-checkmark.png" alt="Milestone result (new)" /></td><td>Click for milestone result (new)</td></tr>
+                <tr><td><img src="'.$dir.'images/purple-bar.png" alt="Milestone details" /></td><td>Click for milestone details</td></tr>
+                <tr><td><img src="'.$dir.'images/down.png" alt="Milestones" /></td><td>Display milestones</td></tr>
                 <tr><td colspan="2" style="padding-right: 1px;">
                  <div style="float:left;padding-top:3px;">Phase&nbsp;</div>
                  <div class="gray">N/A</div>

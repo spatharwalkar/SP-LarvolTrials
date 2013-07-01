@@ -2561,7 +2561,7 @@ function Download_reports()
 	if($ohm == 'SOHM' || $ohm == 'EOHMH')
 		$CommonLinkForAll = urlPath() .'intermediary.php?';
 	else
-		$CommonLinkForAll = urlPath() .'trialzilla_ott.php?sourcepg=TZ&';	
+		$CommonLinkForAll = urlPath() .'sigma/trialzilla_ott.php?sourcepg=TZ&';	
 	
 	$link_part=str_replace(' ','+',$link_part);	
 	
