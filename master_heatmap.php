@@ -1733,18 +1733,19 @@ function Download_reports()
 					} 
 					
 					//$columnsDisplayName[$header['num']] = $result['display_name'];
+					//Using htmlspecialchars to convert special characters into HTML entities for header coloumns
 					if($type == 'Product')
-						$columnsDisplayName[$header['num']] = $result['name'];
+						$columnsDisplayName[$header['num']] = htmlspecialchars($result['name']);
 					else
 					{
 						if(trim($header['display_name']) != '' && $header['display_name'] != NULL && trim($header['display_name']) != 'NULL') //HM LEVEL Display name
-							$columnsDisplayName[$header['num']] = $header['display_name'];
+							$columnsDisplayName[$header['num']] = htmlspecialchars($header['display_name']);
 						else if(trim($result['display_name']) != '' && $result['display_name'] != NULL && trim($result['display_name']) != 'NULL') //Global Display name
-							$columnsDisplayName[$header['num']] = $result['display_name'];
+							$columnsDisplayName[$header['num']] = htmlspecialchars($result['display_name']);
 						else if($type == 'Area')
-							$columnsDisplayName[$header['num']] = $type .' '.$result['id'] ;	//For area display class n id
+							$columnsDisplayName[$header['num']] = htmlspecialchars($type .' '.$result['id']) ;	//For area display class n id
 						else
-							$columnsDisplayName[$header['num']] = $result['name'] ;	//For for other than Area take actual name
+							$columnsDisplayName[$header['num']] = htmlspecialchars($result['name']) ;	//For for other than Area take actual name
 					}
 						
 					$columnsDescription[$header['num']] = $result['description'];
