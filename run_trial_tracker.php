@@ -5432,7 +5432,7 @@ class TrialTracker
 						//.'.manage tr{page-break-before: always;page-break-after: always;}'
 						.'.manage td{padding-left:3px;}'
 						.'</style>'	
-						.'<script>'
+						.'<script type="text/javascript">'
 				        .'function subst() {'
 				        .'  var vars={};'
 				        ."  var x=document.location.search.substring(1).split('&');"
@@ -6416,24 +6416,24 @@ class TrialTracker
 		$pdfContent .= '</table></body></html>';
 		$pdfContent = preg_replace('/(background-image|background-position|background-repeat):(\w)*\s/', '', $pdfContent);
 		$pdfContent = preg_replace('<img src="images/trans_big.gif" />', '/&nbsp;/', $pdfContent);
-		$pdfContent = preg_replace('/src="images/', 'src="'.dirname(__FILE__).''.$dir.'images', $pdfContent);//update image source path
+		$pdfContent = preg_replace('/src="images/', 'src="'.dirname(__FILE__).'/images', $pdfContent);//update image source path
 		//$pdfContent = preg_replace("/images\/up/", dirname(__FILE__)."/images/up", $pdfContent);//update image source path
 
 		//create dir wkhtmltopdf if not exists
-		if (!file_exists(dirname(__FILE__).'\wkhtmltopdf')) {
-			mkdir(dirname(__FILE__).'\wkhtmltopdf', 0777);
+		if (!file_exists(dirname(__FILE__).'/wkhtmltopdf')) {
+			mkdir(dirname(__FILE__).'/wkhtmltopdf', 0777);
 		}
 		
 		$header_filename = 'header_'. date("Y-m-d_H.i.s").'.html';
-		$header_file_html = dirname(__FILE__).'\wkhtmltopdf\header_'. date("Y-m-d_H.i.s").'.html' ;
+		$header_file_html = dirname(__FILE__).'/wkhtmltopdf/header_'. date("Y-m-d_H.i.s").'.html' ;
 		$fp = fopen($header_file_html, 'w') or die('Cannot open file:  '.$header_file_html);
 		fwrite($fp, $pageStyle.$headerContent.'</body></html>');
 		fclose($fp);
 		
 		$filename = 'Larvol_PDF_'. date("Y-m-d_H.i.s").'.html';
 		//$logo_html = dirname(__FILE__).'\wkhtmltopdf\logo.html' ;
-		$file_html = dirname(__FILE__).'\wkhtmltopdf\Larvol_PDF_'. date("Y-m-d_H.i.s").'.html' ;
-		$file_pdf = dirname(__FILE__).'\wkhtmltopdf\Larvol_PDF_'. date("Y-m-d_H.i.s").'.pdf' ;
+		$file_html = dirname(__FILE__).'/wkhtmltopdf/Larvol_PDF_'. date("Y-m-d_H.i.s").'.html' ;
+		$file_pdf = dirname(__FILE__).'/wkhtmltopdf/Larvol_PDF_'. date("Y-m-d_H.i.s").'.pdf' ;
 		$time_start = microtime(true);
 //echo $pdfContent;die;
 		$handle = fopen($file_html, 'w') or die('Cannot open file:  '.$file_html);
@@ -6471,7 +6471,7 @@ class TrialTracker
 		header('Content-disposition: attachment; filename='.basename($file_pdf));
 		header('Content-type: application/pdf');
 		readfile($file_pdf);
-
+	
 	}
 	
 	function dUnmatchedUpmsPdf($globalOptions, $ottType, $sectionHeader, $naUpms, $noRecordRow = 'y')
@@ -10673,7 +10673,7 @@ class TrialTracker
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							//comment the following line to hide pdf export
-							. '<option value="pdf">PDF</option>'
+							//. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
