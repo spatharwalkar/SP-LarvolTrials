@@ -153,6 +153,18 @@
 			}		
 		}
 		
+		/**
+		 * Holds the information of entity URLs and entity names.
+		 * @var $arrTZBarLink 
+		*/
+		
+		$arrTZBarLink =array("Institution"=> array("url"=>"index.php?class=Institution","name"=>"Companies"),
+							 "MOA"		  => array("url"=>"index.php?class=MOA","name"=>"Mechanisms of Action"),
+							 "Disease"	  => array("url"=>"index.php?class=Disease","name"=>"Diseases"),
+							 "Product"	  => array("url"=>"index.php?class=Product", "name"=>"Products")				
+							);
+		
+		
 		if($globalOptions['class'] == 'MOA')	//IN CASE OF MOA  - GET MOA ID AS WELL WHO DOES NOT HAVE CATEGORY OR has Other Category
 		{
 			$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e LEFT OUTER JOIN `entity_relations` er ON(e.`id`=er.`child`) LEFT OUTER JOIN `entities` e2 ON(e2.`id`=er.`parent`) WHERE e.`class`='MOA' AND ((e2.`name` = 'Other' AND e2.`class` = 'MOA_Category') OR er.`parent` IS NULL)";
@@ -379,9 +391,20 @@ a:visited {color:#6600bc;}  /* visited link */
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
 	<tr>
-    	<td width="50%" style="border:0; font-weight:bold; padding-left:5px;" align="left">&nbsp;
-        	
+	   <?php if ( !empty($_REQUEST["class"]) && array_key_exists($_REQUEST["class"], $arrTZBarLink)) { ?>
+    	<td width="50%" align="left" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:middle;">
+        	<table><tbody><tr>
+        	<td style="vertical-align:top;"><a href="<?php print $arrTZBarLink[$_REQUEST["class"]]["url"];?>" style="color:#FFFFFF; display:inline; text-decoration:underline;"><?php print $arrTZBarLink[$_REQUEST["class"]]["name"]; ?></a>&nbsp;</td>            </tr></tbody></table>
+        </td> <?php }    elseif ( !empty($_REQUEST["TzSearch"]) && ($FoundRecords > 0) ) { ?>
+    	<td width="50%" align="left" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:middle;">
+        	<table><tbody><tr>
+        	<td style="vertical-align:top;"><a href="<?php echo "index.php?TzSearch=".$_REQUEST["TzSearch"];?>" style="color:#FFFFFF; display:inline; text-decoration:underline;"><?php print $_REQUEST["TzSearch"]; ?></a>&nbsp;</td>            </tr></tbody></table>
+        </td> <?php } else { ?>
+        <td width="50%" align="left" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:middle;">
+        	<table><tbody><tr>
+        	<td style="vertical-align:top;">&nbsp;</td>            </tr></tbody></table>
         </td>
+        <?php  } ?>
         <td width="50%" style="border:0; font-weight:bold; padding-right:5px;" align="right">
         	<?php
             	if($FoundRecords > 0)
@@ -397,10 +420,6 @@ a:visited {color:#6600bc;}  /* visited link */
 						$showResult .= ' of about '. $FoundRecords;
 					}
 					
-					if($ClassFlg)
-					$showResult .= ' for "'. $globalOptions['classType'] .'"';
-					else
-					$showResult .= ' for "'. $globalOptions['TzSearch'] .'"';
 					
 					if($globalOptions['Alpha'] != '')
 					$showResult .= ' Starting with Letter '. (($globalOptions['Alpha'] == 'Other') ? 'Other than "A-Z"' : '"'.$globalOptions['Alpha'] .'"');
