@@ -73,22 +73,29 @@ function DisplayOTT()
 	$globalOptions['endrange'] = "1 month";
 	
 	$globalOptions['pageLocation'] = "intermediary";
+	
+	global $cwd;
+	if(isset($cwd) && stripos($cwd,'sigma')!==false)
+		$dir='../';
+	else
+		$dir='';
+	
 	if(isset($_REQUEST['DiseaseId']))
 	{
 		$globalOptions['DiseaseId'] = $_REQUEST['DiseaseId'];
-		$globalOptions['pageLocation'] = "sigma/trialzilla_disease";
+		$globalOptions['pageLocation'] = $dir."sigma/trialzilla_disease";
 		$_REQUEST['e1'] = $globalOptions['DiseaseId'];
 	}
 	if(isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ')
 	{
 		$globalOptions['sourcepg'] = $_REQUEST['sourcepg'];
-		$globalOptions['pageLocation'] = "sigma/trialzilla_ott";
+		$globalOptions['pageLocation'] = $dir."sigma/trialzilla_ott";
 	}
 	
 	if(isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZP')
 	{
 		$globalOptions['sourcepg'] = $_REQUEST['sourcepg'];
-		$globalOptions['pageLocation'] = "sigma/trialzilla_product";
+		$globalOptions['pageLocation'] = $dir."sigma/trialzilla_product";
 	}
 	
 	if((isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ') || (isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZP') || (isset($_REQUEST['DiseaseId'])))
