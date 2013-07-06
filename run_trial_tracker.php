@@ -9071,6 +9071,8 @@ class TrialTracker
 			if($lIds != '')
 			{
 				$where .= " AND dt.`larvol_id` IN (" . $lIds . ") ";
+			} else { // if get_sphinx_idlist returns null then set $globalOptions['lIds'] to false
+				$globalOptions['lIds'] = false;
 			}
 		}
 		
@@ -9122,7 +9124,11 @@ class TrialTracker
 				$Values['Data'][0]['naUpms'] = $nvalue;
 			}
 		}
-		$res = m_query(__LINE__,$Query);
+		// if $globalOptions['lIds'] (i.e. search results in OTT) are empty then stop query exection and set $res to null
+		if($globalOptions['lIds'] === false)
+			$res = null;
+		else
+			$res = m_query(__LINE__,$Query);
 		
 		if($res)
 		{
@@ -9372,7 +9378,11 @@ class TrialTracker
 		}
 		else
 		{
-			$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+			//Writing the log seprately for free text search results in OTT
+			if($globalOptions['lIds'] === false)
+				$log 	= 'ERROR: Bad SQL query.' . $query . mysql_error().'and get_sphinx_idlist function returns null while search == '.$globalOptions['sphinxSearch'];
+			else 
+				$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
 			$logger->error($log);
 			unset($log);
 		}
