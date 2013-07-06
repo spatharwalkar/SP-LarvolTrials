@@ -222,9 +222,9 @@ if($table !='upm')
 {
 	
 	if($table =='diseases' && $mesh=="YES")
-		$where .= " and LI_id is not null and LI_id<>'' and mesh_name!='' ";
+		$where .= " and class='Disease' and mesh_name!='' ";
 	else if($table =='diseases')
-	    $where .= " and LI_id is not null and LI_id<>'' and (mesh_name='' OR mesh_name IS NULL)";
+	    $where .= " and class='Disease' and (mesh_name='' OR mesh_name IS NULL)";
 	if($_GET['no_sort']!=1)
 		$query = "select * from $actual_table $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
