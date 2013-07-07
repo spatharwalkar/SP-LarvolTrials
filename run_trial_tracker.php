@@ -263,6 +263,7 @@ class TrialTracker
 					}
 					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
 					{
+					
 						$ctLink = 'http://clinicaltrials.gov/ct2/show/' . padnct($nctId);
 					}
 					else 
@@ -8203,7 +8204,7 @@ class TrialTracker
 		$productSelector = array();
 		
 		$this->timeParams($globalOptions);
-		
+	
 		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="'. $globalOptions['pageLocation'] .'.php">'
 				.'<input type="hidden" name="e1" value="' . $resultIds['e1'] . '" />'
 				. '<input type="hidden" name="e2" value="' . $resultIds['e2'] . '" />';
@@ -8211,7 +8212,7 @@ class TrialTracker
 		if(isset($globalOptions['DiseaseId']))		
 		echo '<input type="hidden" name="DiseaseId" value="' . $globalOptions['DiseaseId'] . '" />'
 				. '<input type="hidden" name="tab" value="DiseaseOTT" />';
-				
+		
 		if($globalOptions['sourcepg'] == 'TZ')		
 		echo '<input type="hidden" name="sourcepg" value="TZ" />';
 		
@@ -10286,6 +10287,7 @@ class TrialTracker
 		{
 			$sFilters = $this->allStatusValues;
 		}
+		
 		foreach($globalOptions['status'] as $key => $value)
 		{	
 			$sUrl = '';
@@ -10318,6 +10320,7 @@ class TrialTracker
 					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $iUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 
 		}
+		
 		unset($iParams);
 		unset($key);
 		unset($value);
@@ -10340,6 +10343,7 @@ class TrialTracker
 		
 		$phases = array('na' => 'N/A', '0' => '0', '1' => '1', '2' => '2', '3' => '3', '4' => '4');
 		$pParams = array();
+		
 		foreach($globalOptions['phase'] as $key => $value)
 		{
 			if(array_key_exists($value, $phases))
@@ -10354,6 +10358,7 @@ class TrialTracker
 				. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $pUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
+		
 		unset($phases);
 		unset($pParams);
 		unset($key);
@@ -10369,6 +10374,7 @@ class TrialTracker
 			echo '<span class="filters"><label>' . $globalOptions['startrange'] . ' - ' . $globalOptions['endrange'] . '</label>'
 					. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $hUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 		}
+		
 		unset($hParams);
 		
 		$oParams = array();
@@ -10449,6 +10455,7 @@ class TrialTracker
 						. '<a href="'. $globalOptions['pageLocation'] .'.php?' . $tUrl . '"><img src="'.$dir.'images/black-cancel.png" alt="Remove Filter" /></a></span>';
 			}
 		}
+		
 		unset($tParams);
 		unset($key);
 		unset($value);
@@ -10503,7 +10510,9 @@ class TrialTracker
 		
 		if($count > 0)
 		{
+			
 			echo $this->displayTrials($globalOptions, $loggedIn, $Values, $ottType, $totalPages);
+			
 		}
 		else
 		{
@@ -10547,6 +10556,7 @@ class TrialTracker
 		}
 		if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
 		echo '<br/><br/><div style="height:50px;"></div>';
+		
 	}
 	
 	function dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms, $noRecordRow = 'y')
@@ -11209,6 +11219,7 @@ class TrialTracker
 					}
 					
 					//Rendering Upms
+					
 					$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms);
 				}
 			}
@@ -11361,7 +11372,7 @@ class TrialTracker
 			}
 			else if(isset($tvalue['source_id']) && strpos($tvalue['source_id'], 'NCT') !== FALSE)
 			{	
-				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($tvalue['nct_id']) . '" ';
+				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($tvalue['nct_id']).'"';
 			}
 			else 
 			{ 	
@@ -11369,8 +11380,16 @@ class TrialTracker
 			}
 			
 			$outputStr .= ' target="_blank" ';
-			
-			$outputStr .= ' onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')"><font id="ViewCount_' . $tvalue['larvol_id'] . '">';
+			if(stripos($_SERVER["REQUEST_URI"],'sigma')!==false or stripos($_SERVER["REQUEST_URI"],'tab=')!==false )
+			{
+				
+			}
+			else
+			{
+				
+				$outputStr .= ' onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')"';
+			}
+			$outputStr .= '><font id="ViewCount_' . $tvalue['larvol_id'] . '">';
 			if($tvalue['viewcount'] != '' && $tvalue['viewcount'] != NULL && $tvalue['viewcount'] > 0)
 			{
 				$outputStr .= '<span class="viewcount" title="Total views">' . $tvalue['viewcount'].'&nbsp;</span>&nbsp;'; 
@@ -11431,6 +11450,7 @@ class TrialTracker
 					$attr = '" title="New record';
 				}
 			}
+			
 			$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'
 						. $tvalue["enrollment"] . '</div></td>';	
 			
@@ -11473,6 +11493,7 @@ class TrialTracker
 					$attr = '" title="New record';
 				}
 			}
+			
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' 
 						. (($tvalue['region'] != '' && $tvalue['region'] !== NULL) ? $tvalue['region'] : '&nbsp;') . '</div></td>';	
 						
@@ -11523,6 +11544,7 @@ class TrialTracker
 					$attr = '" title="New record';
 				}
 			}
+			
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 						. '<div class="rowcollapse">' . $tvalue['intervention_name'] . '</div></td>';	
 						
@@ -11630,6 +11652,7 @@ class TrialTracker
 				{
 					$attr = '" title="New record';
 				}
+			
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' . $tvalue['lead_sponsor'];
 			if($tvalue['lead_sponsor'] != '' && $tvalue['collaborator'] != ''
@@ -11638,7 +11661,7 @@ class TrialTracker
 				$outputStr .= ', ';
 			}
 			$outputStr .= $tvalue["collaborator"] . '</div></td>';
-						
+			
 						
 			//overall status column
 			$attr = ' ';
@@ -11969,7 +11992,18 @@ class TrialTracker
 							{
 								$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
 							}
-							$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" /></a>';
+							
+							$outputStr .= ' style="padding-top: 3px;" border="0"';
+							
+							if(stripos($_SERVER["REQUEST_URI"],'sigma')!==false or stripos($_SERVER["REQUEST_URI"],'tab=')!==false )
+							{
+							}
+							else
+							{
+								$outputStr .= 'onclick="INC_ViewCount('.$tvalue['larvol_id'].')"';
+							}
+							$outputStr .= '/></a>';
+							
 						}
 						else
 						{
@@ -11986,12 +12020,32 @@ class TrialTracker
 							{
 								$outputStr .= '<img src="'.$dir.'images/' . $imgColor . '-checkmark.png" alt="Checkmark"';
 							}
-							$outputStr .= ' style="padding-top: 3px;" border="0" onclick="INC_ViewCount('.$tvalue['larvol_id'].')" />';
-						}
+							
+							$outputStr .= ' style="padding-top: 3px;" border="0"';
+							
+							if(stripos($_SERVER["REQUEST_URI"],'sigma')!==false or stripos($_SERVER["REQUEST_URI"],'tab=')!==false )
+							{
+							}
+							else
+							{
+								$outputStr .= 'onclick="INC_ViewCount('.$tvalue['larvol_id'].')"';
+							}
+							$outputStr .= '/>';
+													}
 					}
 					else if($mvalue['status'] == 'Pending')
 					{
-						$icon = '<img src="'.$dir.'images/hourglass.png" alt="Hourglass"  border="0" onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')" />';
+						$icon = '<img src="'.$dir.'images/hourglass.png" alt="Hourglass"  border="0"';
+						
+						if(stripos($_SERVER["REQUEST_URI"],'sigma')!==false or stripos($_SERVER["REQUEST_URI"],'tab=')!==false )
+							{
+							}
+							else
+							{
+								$icon .= ' onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')"'; 
+							}
+							$icon .= '/>';
+							
 						if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 						{	
 							$outputStr .= '<a href="' . $mvalue['event_link'] . '" target="_blank">' . $icon . '</a>';
@@ -12568,7 +12622,14 @@ class TrialTracker
 		
 		if($incViewCount === true && $larvolId !== NULL)
 		{
-			$incViewCountLink = ' onclick="INC_ViewCount(' . $larvolId . ')" ';
+			
+			if(stripos($_SERVER["REQUEST_URI"],'sigma')!==false or stripos($_SERVER["REQUEST_URI"],'tab=')!==false )
+			{
+			}
+			else
+			{
+				$incViewCountLink = ' onclick="INC_ViewCount(' . $larvolId . ')" ';
+			}
 		}
 		
 		$hoverText = '';
