@@ -13520,11 +13520,24 @@ class TrialTracker
 	function liLoggedIn()
 	{
 		global $li_user;
-		if( isset($_COOKIE['li_user']) or isset($_SESSION['li_user']) or (isset($li_user) and $li_user == 'YES') )
+		//if( isset($_COOKIE['li_user']) or isset($_SESSION['li_user']) or (isset($li_user) and $li_user == 'YES') or ( db_based_login() )
+		if( $this->db_based_login() )
 		{
 			return true;
 		}
 		return false;
+	}
+	
+	function db_based_login()
+	{
+		$userip=$_SERVER['REMOTE_ADDR'];
+		$query = 'SELECT `ip`,`id` FROM li_login WHERE ip="'.$userip.'" limit 1' ;
+		$res = mysql_query($query) or die('Bad SQL Query getting login info');
+		$row = mysql_fetch_assoc($res);
+		if($row['ip'] && $row['ip'] == $userip)
+			return true;
+		else
+			return false;
 	}
 }
 
