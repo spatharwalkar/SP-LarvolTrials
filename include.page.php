@@ -221,7 +221,6 @@ if(isset($_GET['sort_order']) && $_GET['sort_order']=='DESC' )
 if($table !='upm')
 {
 	
-	
 	if($table =='diseases' && $mesh=="YES")
 		$where .= " and class='Disease' and mesh_name!='' ";
 	else if($table =='diseases')
