@@ -66,7 +66,7 @@ display:inline;
 </head>
 
 <body>
-<?php include "trialzilla_searchbox.php";?>
+<?php include "searchbox.php";?>
 <!-- Number of Results -->
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
@@ -79,7 +79,7 @@ display:inline;
 					$LinkDetails = GetLinkNClass($e2);
 					if($LinkDetails['class'] == 'Disease')
 					{
-						print '<td><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e1. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+						print '<td><a style="color:#FFFFFF; display:inline;" href="ott.php?e1='.$e1. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 						print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e2).'</a>&nbsp;</td><td style="vertical-align:top;"> >> </td>';
 					}
 				}
@@ -96,7 +96,7 @@ display:inline;
 					$e1name = GetEntityName($e1);
 					
 					if(isset($e2) && $e2 != NULL)
-					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e2. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:middle;"><a style="color:#FFFFFF; display:inline;" href="ott.php?e1='.$e2. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.$e1name.'</a>&nbsp;</td>';
 				}
 				if(isset($e2) && $e2 != NULL)
@@ -104,13 +104,13 @@ display:inline;
 					$LinkDetails = GetLinkNClass($e2);
 					if($LinkDetails['class'] != 'Disease')
 					{
-						print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e1. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+						print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="ott.php?e1='.$e1. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 						print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e2).'</a>&nbsp;</td>';
 					}
 				}
 				if(isset($phase) && $phase != NULL)
 				{
-					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_ott.php?e1='.$e1 . ((isset($e2) && $e2 != NULL) ? '&e2='.$e2:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="ott.php?e1='.$e1 . ((isset($e2) && $e2 != NULL) ? '&e2='.$e2:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline;" href="#">';
 					$allPh = explode(',',$phase);
 					$phnm = '';
@@ -137,7 +137,7 @@ display:inline;
 </td></tr>
 </table>
 <br/><br/>
-<?php include "trialzilla_footer.php" ?>
+<?php include "footer.php" ?>
 
 </body>
 </html>
@@ -153,15 +153,15 @@ function GetLinkNClass($id)
 	$LinkNClass['class'] = $header['class'];
 	
 	if($header['class'] == 'Disease')
-		$LinkNClass['link'] = 'trialzilla_disease.php?DiseaseId='. $header['id'];
+		$LinkNClass['link'] = 'disease.php?DiseaseId='. $header['id'];
 	else if($header['class'] == 'Institution')
-		$LinkNClass['link'] = 'trialzilla_company.php?CompanyId='. $header['id'];
+		$LinkNClass['link'] = 'company.php?CompanyId='. $header['id'];
 	else if($header['class'] == 'MOA')
-		$LinkNClass['link'] = 'trialzilla_moa.php?MoaId='. $header['id'];
+		$LinkNClass['link'] = 'moa.php?MoaId='. $header['id'];
 	else if($header['class'] == 'MOA_Category')
-		$LinkNClass['link'] = 'trialzilla_moacategory.php?MoaCatId='. $header['id'];
+		$LinkNClass['link'] = 'moacategory.php?MoaCatId='. $header['id'];
 	else
-		$LinkNClass['link'] = 'trialzilla_product.php?e1='. $header['id'].'&sourcepg=TZ';
+		$LinkNClass['link'] = 'product.php?e1='. $header['id'].'&sourcepg=TZ';
 						
 	return $LinkNClass;
 }

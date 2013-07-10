@@ -10718,7 +10718,7 @@ class TrialTracker
 			echo '<input type="hidden" name="LI" value="1" />';
 			$li_user='YES';
 		}
-		elseif((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'trialzilla') !== FALSE) 
+		elseif((isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'sigma') !== FALSE) 
 		|| (isset($_REQUEST['LS']) && $_REQUEST['LS'] == "1")   )
 		{
 			$_GET['LS']="1";

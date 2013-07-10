@@ -49,7 +49,7 @@ function showMOATracker($id, $TrackerType, $page=1)
 	
 	$MainPageURL = 'moa_tracker.php';	//PT=MOA TRACKER (MAIN PT PAGE)
 	if($TrackerType == 'DMT')	//DPT=DISEASE MOA TRACKER
-		$MainPageURL = 'trialzilla_disease.php';
+		$MainPageURL = 'disease.php';
 	
 	$HTMLContent .= MOATrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -134,19 +134,19 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 					
 						if($data_matrix[$key]['class'] == 'MOA')
 						{
-							$data_matrix[$key]['HeaderLink'] = 'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'];
+							$data_matrix[$key]['HeaderLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'];
 							if($TrackerType == 'DMT')
-							$data_matrix[$key]['ColumnsLink'] = 'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
+							$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
 							else
-							$data_matrix[$key]['ColumnsLink'] = 'trialzilla_moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
+							$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
 						}
 						else if($data_matrix[$key]['class'] == 'MOA_Category')
 						{
-							$data_matrix[$key]['HeaderLink'] = 'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
+							$data_matrix[$key]['HeaderLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
 							if($TrackerType == 'DMT')
-							$data_matrix[$key]['ColumnsLink'] = 'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMCPT';
+							$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMCPT';
 							else
-							$data_matrix[$key]['ColumnsLink'] = 'trialzilla_moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=MCPT';
+							$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=MCPT';
 						}
 					
 						///// Initialize data

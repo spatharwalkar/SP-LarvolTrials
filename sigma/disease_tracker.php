@@ -56,13 +56,13 @@ function showDiseaseTracker($id, $TrackerType, $page=1)
 	
 	$MainPageURL = 'disease_tracker.php';
 	if($TrackerType == 'PDT')	//DPT=DISEASE Disease TRACKER
-		$MainPageURL = 'trialzilla_product.php';
+		$MainPageURL = 'product.php';
 	else if($TrackerType == 'CDT')	//DPT=DISEASE Disease TRACKER
-		$MainPageURL = 'trialzilla_company.php';
+		$MainPageURL = 'company.php';
 	else if($TrackerType == 'MDT')	//DPT=DISEASE Disease TRACKER
-		$MainPageURL = 'trialzilla_moa.php';
+		$MainPageURL = 'moa.php';
 	else if($TrackerType == 'MCDT')	//DPT=DISEASE Disease TRACKER
-		$MainPageURL = 'trialzilla_moacategory.php';			
+		$MainPageURL = 'moacategory.php';			
 	
 	$HTMLContent .= DiseaseTrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -167,19 +167,19 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType)
 					$data_matrix[$key]['ID'] = $result['id'];
 					$NewDiseaseIds[] = $result['id'];
 					
-					$data_matrix[$key]['HeaderLink'] = 'trialzilla_disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
+					$data_matrix[$key]['HeaderLink'] = 'disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
 					
 					if($GobalEntityType == 'Institution')
 					{
-						$data_matrix[$key]['ColumnsLink'] = 'trialzilla_company.php?CompanyId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DCPT';
+						$data_matrix[$key]['ColumnsLink'] = 'company.php?CompanyId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DCPT';
 					}
 					else if($GobalEntityType == 'MOA')
 					{
-						$data_matrix[$key]['ColumnsLink'] = 'trialzilla_moa.php?MoaId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DMPT';
+						$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DMPT';
 					}
 					else if($GobalEntityType == 'MOA_Category')
 					{
-						$data_matrix[$key]['ColumnsLink'] = 'trialzilla_moacategory.php?MoaCatId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DMCPT';
+						$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $id . '&DiseaseId=' . $data_matrix[$key]['ID'] . '&TrackerType=DMCPT';
 					}				
 					
 					///// Initialize data
@@ -286,8 +286,8 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType)
 						$link_part = '&list=1&itype=0';
 					}
 					
-					$data_matrix[$key]['HeaderLink'] = 'trialzilla_disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
-					$data_matrix[$key]['ColumnsLink'] = 'trialzilla_ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
+					$data_matrix[$key]['HeaderLink'] = 'disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
+					$data_matrix[$key]['ColumnsLink'] = 'ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
 					
 					///// Initialize data
 					$data_matrix[$key]['phase_na']=0;

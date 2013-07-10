@@ -51,7 +51,7 @@ body
    </tr>
 </table>
 
-<?php include "trialzilla_footer.php" ?>
+<?php include "footer.php" ?>
 
 </body>
 </html>

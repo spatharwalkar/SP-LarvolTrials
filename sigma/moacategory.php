@@ -47,7 +47,7 @@
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
-	$tabCommonUrl = 'trialzilla_moacategory.php?MoaCatId='.$MoaCatId;
+	$tabCommonUrl = 'moacategory.php?MoaCatId='.$MoaCatId;
 	
 	$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
 	$TabProductCount = count(GetProductsFromMOACategory($MoaCatId, 'MCPT', array()));
@@ -129,7 +129,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <script type="text/javascript" src="scripts/iepngfix_tilebg.js"></script>
 </head>
 <body>
-<?php include "trialzilla_searchbox.php";?>
+<?php include "searchbox.php";?>
 <!-- Number of Results -->
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
@@ -140,17 +140,17 @@ a:visited {color:#6600bc;}  /* visited link */
 				
 				if(isset($DiseaseId) && $DiseaseId != NULL)
 				{
-					print '<td><a style="color:#FFFFFF; display:inline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=MCPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
-					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_disease.php?DiseaseId='.$DiseaseId.'">'.GetEntityName($DiseaseId).'</a>&nbsp;</td><td style="vertical-align:top;"> >> </td>';
+					print '<td><a style="color:#FFFFFF; display:inline;" href="moacategory.php?MoaCatId='.$MoaCatId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=MCPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="disease.php?DiseaseId='.$DiseaseId.'">'.GetEntityName($DiseaseId).'</a>&nbsp;</td><td style="vertical-align:top;"> >> </td>';
 				}
 				if(isset($DiseaseId) && $DiseaseId != NULL)
 				{
-					print '<td><a style="color:#FFFFFF; display:inline;" href="trialzilla_disease.php?DiseaseId='.$DiseaseId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td><a style="color:#FFFFFF; display:inline;" href="disease.php?DiseaseId='.$DiseaseId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 				}
-				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId.'">'.$MoaCatName.'</a>&nbsp;</td>';
+				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="moacategory.php?MoaCatId='.$MoaCatId.'">'.$MoaCatName.'</a>&nbsp;</td>';
 				if(isset($phase) && $phase != NULL)
 				{
-					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_moacategory.php?MoaCatId='.$MoaCatId . ((isset($DiseaseId) && $DiseaseId != NULL) ? '&DiseaseId='.$DiseaseId.'&TrackerType=DMCPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="moacategory.php?MoaCatId='.$MoaCatId . ((isset($DiseaseId) && $DiseaseId != NULL) ? '&DiseaseId='.$DiseaseId.'&TrackerType=DMCPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline;" href="#">'.GetPhaseName($phase).'</a></td>';
 				} 
 			?>
@@ -216,7 +216,7 @@ else
 
 </table>
 <br/><br/>
-<?php include "trialzilla_footer.php" ?>
+<?php include "footer.php" ?>
 
 </body>
 </html>

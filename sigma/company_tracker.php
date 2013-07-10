@@ -49,7 +49,7 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 	
 	$MainPageURL = 'company_tracker.php';	//PT=COMPANY TRACKER (MAIN PT PAGE)
 	if($TrackerType == 'DCT')	//DPT=DISEASE COMPANY TRACKER
-		$MainPageURL = 'trialzilla_disease.php';
+		$MainPageURL = 'disease.php';
 	
 	$HTMLContent .= CompanyTrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -120,9 +120,9 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 					$data_matrix[$key]['ID'] = $result['CompId'];
 					$NewCompanyIds[] = $result['CompId'];
 					
-					$data_matrix[$key]['HeaderLink'] = 'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'];
+					$data_matrix[$key]['HeaderLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'];
 						
-					$data_matrix[$key]['ColumnsLink'] = 'trialzilla_company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';			
+					$data_matrix[$key]['ColumnsLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';			
 				
 					///// Initialize data
 					$data_matrix[$key]['phase_na']=0;

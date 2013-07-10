@@ -48,7 +48,7 @@
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
 	
-	$tabCommonUrl = 'trialzilla_company.php?CompanyId='.$CompanyId;
+	$tabCommonUrl = 'company.php?CompanyId='.$CompanyId;
 	
 	$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
 	$TabProductCount = count(GetProductsFromCompany($CompanyId, 'CPT', array()));
@@ -135,7 +135,7 @@ display:inline;
 </head>
 
 <body>
-<?php include "trialzilla_searchbox.php";?>
+<?php include "searchbox.php";?>
 <!-- Number of Results -->
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
@@ -145,17 +145,17 @@ display:inline;
         	<?php 
 				if(isset($DiseaseId) && $DiseaseId != NULL)
 				{
-					print '<td><a style="color:#FFFFFF; display:inline;" href="trialzilla_company.php?CompanyId='.$CompanyId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=CPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
-					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_disease.php?DiseaseId='.$DiseaseId.'">'.GetEntityName($DiseaseId).'</a>&nbsp;</td>';
+					print '<td><a style="color:#FFFFFF; display:inline;" href="company.php?CompanyId='.$CompanyId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=CPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="disease.php?DiseaseId='.$DiseaseId.'">'.GetEntityName($DiseaseId).'</a>&nbsp;</td>';
 				}
 				if(isset($DiseaseId) && $DiseaseId != NULL)
 				{
-					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_disease.php?DiseaseId='.$DiseaseId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="disease.php?DiseaseId='.$DiseaseId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 				}
-				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_company.php?CompanyId='.$CompanyId.'">'.$CompanyName.'</a>&nbsp;</td>';
+				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="company.php?CompanyId='.$CompanyId.'">'.$CompanyName.'</a>&nbsp;</td>';
 				if(isset($phase) && $phase != NULL)
 				{
-					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="trialzilla_company.php?CompanyId='.$CompanyId . ((isset($DiseaseId) && $DiseaseId != NULL) ? '&DiseaseId='.$DiseaseId.'&TrackerType=DCPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="company.php?CompanyId='.$CompanyId . ((isset($DiseaseId) && $DiseaseId != NULL) ? '&DiseaseId='.$DiseaseId.'&TrackerType=DCPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline;" href="#">'.GetPhaseName($phase).'</a></td>';
 				} 
 			?>
@@ -219,7 +219,7 @@ else
 
 </table>
 <br/><br/>
-<?php include "trialzilla_footer.php" ?>
+<?php include "footer.php" ?>
 
 </body>
 </html>

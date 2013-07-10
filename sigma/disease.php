@@ -37,7 +37,7 @@
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
-	$tabCommonUrl = 'trialzilla_disease.php?DiseaseId='.$DiseaseId;
+	$tabCommonUrl = 'disease.php?DiseaseId='.$DiseaseId;
 	
 	$TabProductCount = count(GetProductsFromDisease($DiseaseId));
 	$TabCompanyCount = count(GetCompaniesFromDisease_CompanyTracker($DiseaseId));
@@ -124,7 +124,7 @@ a:visited {color:#6600bc;}  /* visited link */
 
 <body style="background-color:#FFFFFF;">
 <!-- Name & Logo -->
-<?php include "trialzilla_searchbox.php";?>
+<?php include "searchbox.php";?>
 <!-- Number of Results -->
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
@@ -207,7 +207,7 @@ a:visited {color:#6600bc;}  /* visited link */
 <?php
 if($tab != 'DiseaseOTT')
 print '<br/><br/>';
-include "trialzilla_footer.php";
+include "footer.php";
 
 /* Function to get Trials count from Disease id */
 function GetTrialsCountFromDisease($DiseaseID)

@@ -35,7 +35,7 @@
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
 	
-	$tabCommonUrl = 'trialzilla_product.php?e1='.$e1;
+	$tabCommonUrl = 'product.php?e1='.$e1;
 	
 	$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($e1, 'Product'));
 	$TabTrialsCount = GetTrialsCountFromProduct($e1);
@@ -122,7 +122,7 @@ display:inline;
 </head>
 
 <body>
-<?php include "trialzilla_searchbox.php";?>
+<?php include "searchbox.php";?>
 <!-- Number of Results -->
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
@@ -130,7 +130,7 @@ display:inline;
     	<td width="100%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:middle;" align="left">
         	<table><tr>
         	<?php 
-				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="trialzilla_product.php?e1='.$e1.'">'.$ProductName.'</a>&nbsp;</td>';
+				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="product.php?e1='.$e1.'">'.$ProductName.'</a>&nbsp;</td>';
 			?>
             </tr></table>
         </td>
@@ -184,7 +184,7 @@ print '</div>';
 </table>
 
 <br/><br/>
-<?php include "trialzilla_footer.php" ;
+<?php include "footer.php" ;
 
 /* Function to get Trials count from Disease id */
 function GetTrialsCountFromProduct($ProductID)

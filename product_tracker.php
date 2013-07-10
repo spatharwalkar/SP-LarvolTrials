@@ -60,13 +60,13 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	$MainPageURL = 'product_tracker.php';	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	
 	if($TrackerType == 'CPT' || $TrackerType == 'DCPT')	//CPT=COMPANY PRODUCT TRACKER || DCPT=DISEASE COMPANY PRODUCT TRACKER
-		$MainPageURL = 'trialzilla_company.php';
+		$MainPageURL = 'company.php';
 	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER
-		$MainPageURL = 'trialzilla_moa.php';
+		$MainPageURL = 'moa.php';
 	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER
-		$MainPageURL = 'trialzilla_moacategory.php';
+		$MainPageURL = 'moacategory.php';
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
-		$MainPageURL = 'trialzilla_disease.php';
+		$MainPageURL = 'disease.php';
 	
 	
 	$HTMLContent .= TrackerCommonCSS($uniqueId, $TrackerType);
@@ -1205,13 +1205,13 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		$row = $incr;
 		
 		if($TrackerType != 'PTH')
-		$commonPart1 = 'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
+		$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
 		else
 		$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 		
 		
 		if($TrackerType != 'PTH')
-		$procommonPart1 = 'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+		$procommonPart1 = 'product.php?e1=' . $data_matrix[$row]['productIds'];
 		else
 		$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];		
 		
@@ -1767,12 +1767,12 @@ function Download_reports()
 			if(isset($data_matrix[$row]['productIds']) && $data_matrix[$row]['productIds'] != NULL && !empty($entity2Id))
 			{
 				if($TrackerType != 'PTH')
-				$commonPart1 = 'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
+				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
 				else
 				$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 				
 				if($TrackerType != 'PTH')
-					$procommonPart1 = 'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+					$procommonPart1 = 'product.php?e1=' . $data_matrix[$row]['productIds'];
 				else
 					$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 				
@@ -2159,12 +2159,12 @@ function Download_reports()
 			$Place_Y = $pdf->GetY();
 			
 			if($TrackerType != 'PTH')
-			$commonPart1 = 'trialzilla_ott.php?e1=' . $data_matrix[$row]['productIds'];
+			$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
 			else
 			$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 			
 			if($TrackerType != 'PTH')
-				$procommonPart1 = 'trialzilla_product.php?e1=' . $data_matrix[$row]['productIds'];
+				$procommonPart1 = 'product.php?e1=' . $data_matrix[$row]['productIds'];
 			else
 				$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 			
