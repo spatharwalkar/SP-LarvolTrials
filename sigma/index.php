@@ -499,7 +499,7 @@ if($ClassFlg)
 				if($DataArray[$index]['type'] == 'MOA_Category')
 					print MOAListing(trim($DataArray[$index]['id']));
 			}
-			//else print '<tr><td><img src="images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="120px" height="17px" /></td><td>'.$DataArray[$index]['type'].'</td></tr>';					
+			//else print '<tr><td><img src="../images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="120px" height="17px" /></td><td>'.$DataArray[$index]['type'].'</td></tr>';					
 		}
 	}
 ?>
