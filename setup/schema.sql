@@ -1218,6 +1218,12 @@ CREATE TABLE `entity_relations` (
   CONSTRAINT `entity_relations_fk2` FOREIGN KEY (`child`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
 
+CREATE TABLE `li_login` (
+  `id` varchar(50) NOT NULL,
+  `ip` varchar(20) NOT NULL,
+  PRIMARY KEY (`ip`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+
 ALTER TABLE `products_moas`
   ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
