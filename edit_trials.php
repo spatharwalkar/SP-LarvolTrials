@@ -77,7 +77,8 @@ $_GET['PME_sys_rec']=$_GET['larvol_id'];
 }
 if(isset($_GET['mode']) and $_GET['mode']=='edit' )
 {
-	if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
+	//if($db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root'))
+	if($db->loggedIn() )
 	{
 		$_GET['PME_sys_operation']='PME_op_Change';
 		$_GET['PME_sys_rec']=$_GET['larvol_id'];
@@ -88,7 +89,8 @@ if(isset($_GET['mode']) and $_GET['mode']=='edit' )
 		$_GET['PME_sys_rec']=$_GET['larvol_id'];
 	}
 }
-$adm=$db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root');
+//$adm=$db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root');
+$adm=$db->loggedIn();//Manual trial entry and overriding should be allowed to all users, not just Admin
 
 if(!$adm and isset($_POST['PME_sys_operation']) and ($_POST['PME_sys_operation']=='PME_op_Change' or $_POST['PME_sys_operation']=='Change'))
 {
@@ -119,7 +121,8 @@ if(isset($_GET['PME_sys_operation'])) $change=$_GET['PME_sys_operation'];
 if(isset($_POST['PME_sys_operation'])) $change=$_POST['PME_sys_operation'];
 
 
-if( $db->loggedIn() and ( $db->user->userlevel=='admin' || $db->user->userlevel=='root' ) and ( $change=='Change' or $change=='PME_op_Change' ) )
+//if( $db->loggedIn() and ( $db->user->userlevel=='admin' || $db->user->userlevel=='root' ) and ( $change=='Change' or $change=='PME_op_Change' ) )
+if( $db->loggedIn() and ( $change=='Change' or $change=='PME_op_Change' ) )
 {
 	
 

@@ -171,7 +171,7 @@ class phpMyEdit
 	function virtual($k)      { return stristr($this->fdd[$k]['input'],'V') && $this->col_has_sql($k); }
 
 	function add_operation()    { return $this->operation == $this->labels['Add']    && $this->add_enabled();    }
-	function change_operation() { global $db; return $this->operation == $this->labels['Change'] && $this->change_enabled() && $db->loggedIn() && ($db->user->userlevel=='admin'||$db->user->userlevel=='root') ;}
+	function change_operation() { global $db; return $this->operation == $this->labels['Change'] && $this->change_enabled() && $db->loggedIn() ;}//Manual trial entry and overriding should be allowed to all users, not just Admin //&& ($db->user->userlevel=='admin'||$db->user->userlevel=='root') 
 	function copy_operation()   { return $this->operation == $this->labels['Copy']   && $this->copy_enabled();   }
 	function delete_operation() { return $this->operation == $this->labels['Delete'] && $this->delete_enabled(); }
 	function view_operation()   { return $this->operation == $this->labels['View']   && $this->view_enabled();   }
@@ -2565,7 +2565,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							echo 'view.png" border="0" ';
 							echo 'alt="',$viewTitle,'" title="',$viewTitle,'" /></a>&nbsp;&nbsp;';
 						}
-						if ($this->change_enabled() and $db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root') ) {
+						if ($this->change_enabled() and $db->loggedIn() and ($db->user->userlevel=='admin'|| $db->user->userlevel=='root' || $db->user->userlevel=='user') ) { // allow editing to user
 							$printed_out && print('&nbsp;');
 							$printed_out = true;
 							echo '<a class="',$css_class_name,'" href="',$changeQuery,'"><img class="';
@@ -2573,7 +2573,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 							echo 'jedit.png"  border="0" ';
 							echo 'alt="',$changeTitle,'" title="',$changeTitle,'" /></a>';
 							
-							if( $this->change_enabled()  and $db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root') )
+							if( $this->change_enabled()  and $db->loggedIn() and ($db->user->userlevel=='admin'|| $db->user->userlevel=='root' || $db->user->userlevel=='user') )
 							{
 								echo'
 								
