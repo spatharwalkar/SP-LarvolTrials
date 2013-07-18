@@ -1211,7 +1211,9 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 							{
 								$InstAssocPresent = true;
 							}
-							if(!$InstAssocPresent) $InstAssoInsert = true;
+							//if(!$InstAssocPresent) $InstAssoInsert = true;
+							//making this always true so that it can delete existing associations and add the ones received from API.
+							$InstAssoInsert = true;
 						}
 						else
 						{
@@ -1230,6 +1232,18 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						if($InstAssoInsert)
 						{
 							//$InstAssocInsertquery = "INSERT INTO products_institutions (`product`, `institution`) VALUES ('{$ProdID}','{$InstIdLocal}')";
+							//first remove existing institution associations for this product
+							$qry=" DELETE FROM entity_relations where parent = '". $ProdID ."' and child in 
+								( select id from entities where class=\"Institution\") limit 10 ";
+							$delok = mysql_query($qry);
+							if(!$delok)
+							{
+								pr('Cannot remove old entity relations  <br> Query='.$qry.'<br>');
+								pr(mysql_errno());
+								pr(mysql_error());
+								return false;
+							}
+							
 							$InstAssocInsertquery = "INSERT INTO entity_relations values ('" .  $ProdID  . "', '" . $InstIdLocal . "')";
 							$InstAssocInsertresult = mysql_query($InstAssocInsertquery);
 							if(!$InstAssocInsertresult)
