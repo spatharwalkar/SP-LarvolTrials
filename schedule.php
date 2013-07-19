@@ -24,7 +24,7 @@ function editor()
 	if(!isset($_GET['id'])) return;
 	$id = mysql_real_escape_string(htmlspecialchars($_GET['id']));
 	if(!is_numeric($id)) return;
-	$query = 'SELECT `name`,`fetch`,`runtimes`,`emails`,`format`, `calc_HM`, `upm_status` FROM schedule WHERE id=' . $id . ' LIMIT 1';
+	$query = 'SELECT * FROM schedule WHERE id=' . $id . ' LIMIT 1';
 	$res = mysql_query($query) or die('Bad SQL query getting item'.mysql_error()."<br />".$query);
 	$rpt = mysql_fetch_assoc($res) or die('Item not found.');
 	
@@ -36,13 +36,22 @@ function editor()
 		$chkd2=" checked='checked' ";
 	else
 		$chkd2="";
-	
+	if($rpt['get_diseases']==1)
+		$chkd3=" checked='checked' ";
+	else
+		$chkd3="";
+	if($rpt['get_disease_cat']==1)
+		$chkd4=" checked='checked' ";
+	else
+		$chkd4="";
 	$out = '<form action="schedule.php" method="post"><fieldset class="schedule"><legend>Edit schedule item ' . $id . '</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />'
 			. '<input type="submit" name="reportsave" value="Save edits" /><br clear="all"/>'
 			. '<label>Name: <input type="text" name="name" value="' . htmlspecialchars($rpt['name']) . '"/></label><br />'
 			. '<label>Calculate HM cells?: <input type="checkbox" name="mhm" value="calc" ' . $chkd . ' /></label><br />'  // checkbox for calulating Master HM cells
 			. '<label>Refresh UPM status?: <input type="checkbox" name="upm_status" value="upm_s" ' . $chkd2 . ' /></label><br />'  // checkbox for updating status of UPMs.
+			. '<label>Update Diseases?: <input type="checkbox" name="upd_disease" value="upd_d" ' . $chkd3 . ' /></label>'  // update deseases
+			. '<label>Update Disease Categories?: <input type="checkbox" name="upd_dis_cat" value="upd_dc" ' . $chkd4 . ' /></label><br />'  // deseases categories
 			. '<label>Update database (fetch)?: '
 			//. '<input type="checkbox" name="fetch"'	. ($rpt['fetch'] ? 'checked="checked"' : '') . '/>'
 			. makeDropdown('fetch',getEnumValues('schedule','fetch'),false,$rpt['fetch'])
@@ -186,6 +195,25 @@ function postEd()
 		global $logger;
 		//	echo '<pre>'; print_r($_GET);  print_r($_POST); echo '</pre>';
 
+
+		if( isset($_POST['upd_dis_cat']) and $_POST['upd_dis_cat']=='upd_dc' )  
+		{
+			$query = 'UPDATE `schedule` SET `get_disease_cat`="1" where `id`="'.$id . '" limit 1';
+		}
+		else
+		{
+			$query = 'UPDATE `schedule` SET `get_disease_cat`=NULL where `id`="'.$id . '" limit 1';
+		}
+		mysql_query($query);
+		if( isset($_POST['upd_disease']) and $_POST['upd_disease']=='upd_d' )  
+		{
+			$query = 'UPDATE `schedule` SET `get_diseases`="1" where `id`="'.$id . '" limit 1';
+		}
+		else
+		{
+			$query = 'UPDATE `schedule` SET `get_diseases`=NULL where `id`="'.$id . '" limit 1';
+		}
+		mysql_query($query);
 		if( isset($_POST['mhm']) and $_POST['mhm']=='calc' )  
 		{
 			$query = 'UPDATE `schedule` SET `calc_HM`="1" where `id`="'.$id . '" limit 1';
@@ -194,6 +222,7 @@ function postEd()
 		{
 			$query = 'UPDATE `schedule` SET `calc_HM`= NULL where `id`="'.$id . '" limit 1';		
 		}
+		mysql_query($query);
 		if( isset($_POST['upm_status']) and $_POST['upm_status']=='upm_s' )  
 		{
 			$query = 'UPDATE `schedule` SET `upm_status`="1" where `id`="'.$id . '" limit 1';
@@ -202,7 +231,6 @@ function postEd()
 		{
 			$query = 'UPDATE `schedule` SET `upm_status`= NULL where `id`="'.$id . '" limit 1';		
 		}
-			
 		if(!mysql_query($query))
 		{
 			$log='Error saving changes to schedule: ' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;

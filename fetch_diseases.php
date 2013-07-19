@@ -183,7 +183,7 @@ function update_mesh_preindex($nctids,$diseaseid)
 		return false;
 	}
 //	mysql_query("START TRANSACTION");
-	$res=mysql_query("delete from entity_trials where entity=".$diseaseid." ;") or die("Error deleting records from entity_trials ". mysql_errror());
+	$res=mysql_query("delete from entity_trials where entity=".$diseaseid." ;") or die("Error deleting records from entity_trials ". mysql_error());
 	foreach ($nctids as $nctid=>$ts)
 	{
 		$larvol_id=get_larvolID($nctid);

@@ -165,6 +165,8 @@ CREATE TABLE IF NOT EXISTS `schedule` (
   `LI_sync` smallint(5) unsigned DEFAULT NULL COMMENT 'bit mask entry products and areas scheudler',
   `calc_HM` tinyint(4) unsigned DEFAULT NULL,
   `upm_status` tinyint(4) unsigned DEFAULT NULL,
+  `get_diseases` tinyint(4) unsigned DEFAULT NULL,
+  `get_disease_cat` tinyint(4) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -384,7 +386,7 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `class` enum('Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area') CHARACTER SET latin1 NOT NULL,
+  `class` enum('Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area','Disease_Category') CHARACTER SET latin1 NOT NULL,
   `description` text COLLATE utf8_unicode_ci,
   `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `client_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
