@@ -206,11 +206,40 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 		}
 	}
 	
-	//pr($entity1ids);
-	//pr($entity2ids);
+//	pr($entity1ids);
+//	pr($entity2ids);
 	$counter=0;
 	$progress_count = 0;
-	
+	//if it is a disease, do a recalculation for the category too.  so add the category to the array.
+	foreach ($entity1ids as $ak=>$av)
+	{
+		$Disease=isDisease($av['id']);
+		if($Disease)
+			{
+
+				$Query = 'select parent from entity_relations where child ="' . $Disease . '" and parent in (select id from entities where class="Disease_Category") ';
+				$Res = mysql_query($Query);
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$entity1ids[]['id'] = $row['parent'];
+				}	
+			}		
+	}	
+	foreach ($entity2ids as $ak=>$av)
+	{
+		$Disease=isDisease($av['id']);
+		if($Disease)
+			{
+
+				$Query = 'select parent from entity_relations where child ="' . $Disease . '" and parent in (select id from entities where class="Disease_Category") ';
+				$Res = mysql_query($Query);
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$entity1ids[]['id'] = $row['parent'];
+				}	
+			}		
+	}		
+			
 	foreach ($entity1ids as $ak=>$av)
 	{
 		
@@ -228,7 +257,30 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			if(!$pv['id'] or is_null($pv['id']) or empty($pv['id']))
 			{
 				continue;
-			}      
+			}
+
+				
+			
+			//check if any of the entities is a Disease category, and if yes, then do a separate calculation 
+			
+			$DC=isDiseaseCategory($av['id'],$pv['id']);
+			if($DC)
+			{
+				$Query = 'select child from entity_relations where parent ="' . $DC . '" ';
+				$Res = mysql_query($Query);
+				$diseaseids=array();
+				while($row = mysql_fetch_assoc($Res))
+				{
+					$diseaseids[] = $row['child'];
+				}
+				
+				$diseaseids = implode(",", $diseaseids);
+				$overall_statuses=calculateDCcell($diseaseids,$pv['id']);
+				
+				add_data($av['id'],$pv['id'],$overall_statuses[$cnt_total],$overall_statuses[$cnt_active],$overall_statuses[$cnt_active_indlead],$overall_statuses[$cnt_active_owner_sponsored],"none",$overall_statuses[$max_phase],$overall_statuses,false);
+				continue;
+			}
+			
 			
 			/*
 			$query_m='	SELECT a.trial from area_trials a 
@@ -1103,6 +1155,165 @@ function getBombdtl()
 		return $bomb;
 	
 }
+function isDiseaseCategory($av,$pv)
+{
+	global $logger;
+	$exists=false;
+	if(!empty($av))
+	{
+		$query = 'SELECT id from entities where id="'.$av.'" and class="Disease_Category" limit 1';
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$res = mysql_fetch_assoc($res);
+		if($res !== false)
+			return $av;
+	}
+	if(!empty($pv) and $exists === false)
+	{
+		$query = 'SELECT id from entities where id="'.$pv.'" and class="Disease_Category" limit 1';
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$res = mysql_fetch_assoc($res);
+		if($res !== false)
+			return $pv;
+		else
+			return false;
+	}
+	return false;
+}
+function isDisease($av)
+{
+	global $logger;
+	$exists=false;
+	if(!empty($av))
+	{
+		$query = 'SELECT id from entities where id="'.$av.'" and class="Disease" limit 1';
+		if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+		$res = mysql_fetch_assoc($res);
+		if($res !== false)
+			return $av;
+	}
+	return false;
+}
+function calculateDCcell($diseaseids,$pv)
+{
 
+if(empty($diseaseids) or empty($pv))	return false;
+$DC_query = "SELECT 
+sum(count_total) as cnt_total,
+sum(count_active) as cnt_active,
+sum(count_active_indlead) as cnt_active_indlead,
+sum(count_active_owner_sponsored) as cnt_active_owner_sponsored, 
+max(highest_phase) as max_phase,
+sum(not_yet_recruiting) as not_yet_recruiting ,
+sum(recruiting) as recruiting ,
+sum(enrolling_by_invitation) as enrolling_by_invitation ,
+sum(active_not_recruiting) as active_not_recruiting ,
+sum(completed) as completed ,
+sum(suspended) as suspended ,
+sum(`terminated`) as `terminated` ,
+sum(withdrawn) as withdrawn ,
+sum(available) as available ,
+sum(no_longer_available) as no_longer_available ,
+sum(approved_for_marketing) as approved_for_marketing ,
+sum(no_longer_recruiting) as no_longer_recruiting ,
+sum(withheld) as withheld ,
+sum(temporarily_not_available) as temporarily_not_available ,
+sum(ongoing) as ongoing ,
+sum(not_authorized) as not_authorized ,
+sum(prohibited) as prohibited ,
+sum(not_yet_recruiting_active) as not_yet_recruiting_active ,
+sum(recruiting_active) as recruiting_active ,
+sum(enrolling_by_invitation_active) as enrolling_by_invitation_active ,
+sum(active_not_recruiting_active) as active_not_recruiting_active ,
+sum(completed_active) as completed_active ,
+sum(suspended_active) as suspended_active ,
+sum(terminated_active) as terminated_active ,
+sum(withdrawn_active) as withdrawn_active ,
+sum(available_active) as available_active ,
+sum(no_longer_available_active) as no_longer_available_active ,
+sum(approved_for_marketing_active) as approved_for_marketing_active ,
+sum(no_longer_recruiting_active) as no_longer_recruiting_active ,
+sum(withheld_active) as withheld_active ,
+sum(temporarily_not_available_active) as temporarily_not_available_active ,
+sum(ongoing_active) as ongoing_active ,
+sum(not_authorized_active) as not_authorized_active ,
+sum(prohibited_active) as prohibited_active ,
+sum(not_yet_recruiting_active_indlead) as not_yet_recruiting_active_indlead ,
+sum(recruiting_active_indlead) as recruiting_active_indlead ,
+sum(enrolling_by_invitation_active_indlead) as enrolling_by_invitation_active_indlead ,
+sum(active_not_recruiting_active_indlead) as active_not_recruiting_active_indlead ,
+sum(completed_active_indlead) as completed_active_indlead ,
+sum(suspended_active_indlead) as suspended_active_indlead ,
+sum(terminated_active_indlead) as terminated_active_indlead ,
+sum(withdrawn_active_indlead) as withdrawn_active_indlead ,
+sum(available_active_indlead) as available_active_indlead ,
+sum(no_longer_available_active_indlead) as no_longer_available_active_indlead ,
+sum(approved_for_marketing_active_indlead) as approved_for_marketing_active_indlead ,
+sum(no_longer_recruiting_active_indlead) as no_longer_recruiting_active_indlead ,
+sum(withheld_active_indlead) as withheld_active_indlead ,
+sum(temporarily_not_available_active_indlead) as temporarily_not_available_active_indlead ,
+sum(ongoing_active_indlead) as ongoing_active_indlead ,
+sum(not_authorized_active_indlead) as not_authorized_active_indlead ,
+sum(prohibited_active_indlead) as prohibited_active_indlead ,
+sum(not_yet_recruiting_active_owner_sponsored) as not_yet_recruiting_active_owner_sponsored ,
+sum(recruiting_active_owner_sponsored) as recruiting_active_owner_sponsored ,
+sum(enrolling_by_invitation_active_owner_sponsored) as enrolling_by_invitation_active_owner_sponsored ,
+sum(active_not_recruiting_active_owner_sponsored) as active_not_recruiting_active_owner_sponsored ,
+sum(completed_active_owner_sponsored) as completed_active_owner_sponsored ,
+sum(suspended_active_owner_sponsored) as suspended_active_owner_sponsored ,
+sum(terminated_active_owner_sponsored) as terminated_active_owner_sponsored ,
+sum(withdrawn_active_owner_sponsored) as withdrawn_active_owner_sponsored ,
+sum(available_active_owner_sponsored) as available_active_owner_sponsored ,
+sum(no_longer_available_active_owner_sponsored) as no_longer_available_active_owner_sponsored ,
+sum(approved_for_marketing_active_owner_sponsored) as approved_for_marketing_active_owner_sponsored ,
+sum(no_longer_recruiting_active_owner_sponsored) as no_longer_recruiting_active_owner_sponsored ,
+sum(withheld_active_owner_sponsored) as withheld_active_owner_sponsored ,
+sum(temporarily_not_available_active_owner_sponsored) as temporarily_not_available_active_owner_sponsored ,
+sum(ongoing_active_owner_sponsored) as ongoing_active_owner_sponsored ,
+sum(not_authorized_active_owner_sponsored) as not_authorized_active_owner_sponsored ,
+sum(prohibited_active_owner_sponsored) as prohibited_active_owner_sponsored ,
+sum(new_trials) as new_trials 
+FROM rpt_masterhm_cells
+WHERE ". $pv . " in (entity1,entity2) and 
+( 
+entity1 in (" . $diseaseids . ")
+or
+entity2 in (" . $diseaseids . ")
+)
+";
+
+	if(!$res = mysql_query($DC_query))
+	{
+		global $logger;
+		$log='There seems to be a problem with the SQL Query:'.$DC_query.' Error:' . mysql_error();
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+	$res = mysql_fetch_assoc($res);
+	if ($res === false)
+		return false;
+	else
+	{
+		return $res;
+	}
+}
 
 ?>  
