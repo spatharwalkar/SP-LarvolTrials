@@ -850,9 +850,10 @@ print           '$("ul #productbox li").click(function () {
 		$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);
 		echo '<a href="li/larvolinsight.php?url='. $cpageURL .'"><span style="color:red;font-weight:bold;margin-left:10px;">LI view</span></a><br>';
 	}
-	
-if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')		
-	print ' </body>
+if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP') {		
+	include 'footer_trialtracker.php';
+	print '</body>
 			</html>';
+	}
 }
 ?>
