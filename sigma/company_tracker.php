@@ -234,7 +234,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Larvol Trials :: Product Tracker</title>
+<title>Larvol Sigma :: Product Tracker</title>
 <script type="text/javascript" src="scripts/popup-window.js"></script>
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>

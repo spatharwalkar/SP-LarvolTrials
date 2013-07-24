@@ -404,7 +404,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType)
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Larvol Trials</title>
+<title>Larvol Sigma</title>
 <script type="text/javascript" src="scripts/popup-window.js"></script>
 <script src="scripts/jquery-1.7.1.min.js"></script>
 <script src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
