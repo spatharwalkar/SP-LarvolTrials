@@ -1251,7 +1251,7 @@ class TrialTracker
 
 		$objPHPExcel->createSheet(1);
 		$objPHPExcel->setActiveSheetIndex(1);
-		$objPHPExcel->getActiveSheet()->setTitle('UPMs');
+		$objPHPExcel->getActiveSheet()->setTitle('Milestones');
 
 		$objPHPExcel->getActiveSheet()->getStyle('B1:F200')->getAlignment()->setWrapText(false);
 		$objPHPExcel->getActiveSheet()->setCellValue('A1' , 'ID');
