@@ -263,7 +263,6 @@ class TrialTracker
 					}
 					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') !== FALSE)
 					{
-					
 						$ctLink = 'http://clinicaltrials.gov/ct2/show/' . padnct($nctId);
 					}
 					else 
@@ -5500,7 +5499,7 @@ class TrialTracker
 		}
 		
 		
-		$headerContent ='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage" id="ott_header">'
+		$headerContent ='<table style="border-collapse:collapse;" width="99%" cellpadding="0" cellspacing="0" class="manage" id="ott_header">'
 						 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
 						 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
 						 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
@@ -5509,7 +5508,7 @@ class TrialTracker
 						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
 						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
 						 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
-						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
+						// . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
 						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
 						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
 						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Result</th>'
@@ -5518,27 +5517,9 @@ class TrialTracker
 						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . $secondYear . '</th>'
 						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . $thirdYear . '</th>'
 						 . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">+</th></tr></thead>'
-						 . '<tr style="border:none; border-top:none;">'
-						 . (($loggedIn) ? '<td border="0" style="width:30px; height:0px; border-top:none; border:none;" ></td>' : '' )
-						 . '<td border="0" height="0px" style="width:93px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:18px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-						 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td>'
-						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-						 . '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-						 . '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>'
-						 . '</thead></table>';
+						 . '</table>';
 
-			$pdfContent .='<table style="border-collapse:collapse;" width="100%" cellpadding="0" cellspacing="0" class="manage">'
+			$pdfContent .='<table style="border-collapse:collapse;" width="99%" cellpadding="0" cellspacing="0" class="manage">'
 						 . '<thead><tr>'. (($loggedIn) ? '<th valign="bottom" align="center" style="width:30px; vertical-align:bottom;" >ID</th>' : '' )
 						 . '<th valign="bottom" height="11px" align="center" style="width:93px; vertical-align:bottom;">Title</th>'
 						 . '<th valign="bottom" align="center" style="width:18px; vertical-align:bottom;" title="Black: Actual&nbsp;&nbsp;Gray: Anticipated&nbsp;&nbsp;Red: Change greater than 20%">N</th>'
@@ -5547,7 +5528,7 @@ class TrialTracker
 						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Sponsor</th>'
 						 . '<th valign="bottom" align="center" style="width:41px; vertical-align:bottom;">Status</th>'
 						 . '<th valign="bottom" align="center" style="width:60px; vertical-align:bottom;">Conditions</th>'
-						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
+						// . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">Start</th>'
 						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;" title="MM/YY">End</th>'
 						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Ph</th>'
 						 . '<th valign="bottom" align="center" style="width:20px; vertical-align:bottom;">Result</th>'
@@ -5556,24 +5537,7 @@ class TrialTracker
 						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . $secondYear . '</th>'
 						 . '<th valign="bottom" align="center" style="width:24px; vertical-align:bottom;" colspan="12">' . $thirdYear . '</th>'
 						 . '<th valign="bottom" align="center" style="width:6px; vertical-align:bottom;" colspan="3">+</th></tr></thead>'
-						. '<tr style="border:none; border-top:none;">'
-						. (($loggedIn) ? '<td border="0" style="width:30px; height:0px; border-top:none; border:none;" ></td>' : '' )
-						. '<td border="0" height="0px" style="width:93px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:18px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:41px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:60px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:20px; height:0px; border-top:none; border:none;"></td>'
-						. '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td>'
-						. '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-						. '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-						. '<td border="0" style="width:24px; height:0px; border-top:none; border:none;" colspan="12"></td>'
-						. '<td border="0" style="width:6px; height:0px; border-top:none; border:none;" colspan="3"></td></tr>';
+							;
 		
 		$counter = 0;
 		$outputStr = '';
@@ -6080,7 +6044,7 @@ class TrialTracker
 					$outputStr .= '<td style="width:60px; '.$rowOneBGType.'" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
 								. '<span>' . $tvalue['condition'] . '</span></td>';
 							
-								
+/*								
 					//start date column
 					$attr = ' ';
 					$borderLeft = '';
@@ -6140,7 +6104,7 @@ class TrialTracker
 						$outputStr .= '&nbsp;';
 					}
 					$outputStr .= '</span></td>';
-							
+*/							
 							
 					//end date column
 					$attr = ' ';
@@ -6430,16 +6394,27 @@ class TrialTracker
 		$fp = fopen($header_file_html, 'w') or die('Cannot open file:  '.$header_file_html);
 		fwrite($fp, $pageStyle.$headerContent.'</body></html>');
 		fclose($fp);
+		chmod($header_file_html, 0777);  // octal; correct value of mode
 		
 		$filename = 'Larvol_PDF_'. date("Y-m-d_H.i.s").'.html';
 		//$logo_html = dirname(__FILE__).'\wkhtmltopdf\logo.html' ;
 		$file_html = dirname(__FILE__).'/wkhtmltopdf/Larvol_PDF_'. date("Y-m-d_H.i.s").'.html' ;
 		$file_pdf = dirname(__FILE__).'/wkhtmltopdf/Larvol_PDF_'. date("Y-m-d_H.i.s").'.pdf' ;
 		$time_start = microtime(true);
-//echo $pdfContent;die;
+
 		$handle = fopen($file_html, 'w') or die('Cannot open file:  '.$file_html);
 		fwrite($handle, $pdfContent);
 		fclose($handle);
+		chmod($file_html, 0777);  // octal; correct value of mode
+		
+		//echo $pdfContent;
+		///die;
+/*
+  		$fppdf = fopen($file_pdf, 'w') or die('Cannot open file:  '.$file_pdf);
+		fwrite($fppdf, '');
+		fclose($fppdf); */
+		
+		
 		$time_end = microtime(true);
 		track_time_diff($n,'HTML file creation, time taken in miliseconds', $time_start, $time_end);		
 		track_time($n,'HTML to PDF conversion started');
@@ -6458,20 +6433,25 @@ class TrialTracker
 		$header_file_url = $root_url.'/'.$url_parts[count($url_parts)-2].'/wkhtmltopdf/'.$header_filename;
 		$file_url = $root_url.'/'.$url_parts[count($url_parts)-2].'/wkhtmltopdf/'.$filename;
 		$time_start = microtime(true);
-		$command = 'wkhtmltopdf --disable-smart-shrinking -s A4 -T 5mm --header-html "'.$header_file_html .'" --header-spacing 0 --footer-spacing 2 --footer-line --footer-right [page]/[toPage]  "' .$file_html . '" "' . $file_pdf .'" && "'.$file_pdf.'"' ;
-		//$command = 'wkhtmltopdf --disable-smart-shrinking -s A4 "' .$file_html . '" "' . $file_pdf .'" && "'.$file_pdf.'"' ;
-		//print_r($_SERVER);
+		$command = 'wkhtmltopdf/wkhtmltopdf --disable-smart-shrinking -s A4 -T 5mm --header-html "'.$header_file_html .'" --header-spacing 0 --footer-spacing 2 --footer-line --footer-right [page]/[toPage]  "' .$file_html . '" "' . $file_pdf .'" ' ;
 		//echo $command;
 		//die;
-		exec($command);
-		$time_end = microtime(true);
-		track_time_diff($n,'HTML to PDF conversion ended, time taken in miliseconds', $time_start, $time_end);
-		unlink($header_file_html);
-		unlink($filename_html);
-		ob_end_clean();
-		header('Content-disposition: attachment; filename='.basename($file_pdf));
-		header('Content-type: application/pdf');
-		readfile($file_pdf);
+		exec($command, $output, $returnFlag);
+		//it returns 0 on success
+		if($returnFlag == 0){
+			$time_end = microtime(true);
+			track_time_diff($n,'HTML to PDF conversion ended, time taken in miliseconds', $time_start, $time_end);
+			unlink($header_file_html);
+			unlink($filename_html);
+			exec("rm *.html");//remove html files
+			//ob_end_clean();
+			header('Content-disposition: attachment; filename='.basename($file_pdf));
+			header('Content-type: application/pdf');
+			readfile($file_pdf);			
+		}else{
+			die("Failed to create PDF report.");
+		}
+
 	
 	}
 	
@@ -8204,7 +8184,7 @@ class TrialTracker
 		$productSelector = array();
 		
 		$this->timeParams($globalOptions);
-	
+		
 		echo '<form id="frmOtt" name="frmOtt" method="get" target="_self" action="'. $globalOptions['pageLocation'] .'.php">'
 				.'<input type="hidden" name="e1" value="' . $resultIds['e1'] . '" />'
 				. '<input type="hidden" name="e2" value="' . $resultIds['e2'] . '" />';
@@ -8212,7 +8192,7 @@ class TrialTracker
 		if(isset($globalOptions['DiseaseId']))		
 		echo '<input type="hidden" name="DiseaseId" value="' . $globalOptions['DiseaseId'] . '" />'
 				. '<input type="hidden" name="tab" value="DiseaseOTT" />';
-		
+				
 		if($globalOptions['sourcepg'] == 'TZ')		
 		echo '<input type="hidden" name="sourcepg" value="TZ" />';
 		
@@ -9129,7 +9109,7 @@ class TrialTracker
 		if($globalOptions['lIds'] === false)
 			$res = null;
 		else
-			$res = m_query(__LINE__,$Query);
+		$res = m_query(__LINE__,$Query);
 		
 		if($res)
 		{
@@ -9383,7 +9363,7 @@ class TrialTracker
 			if($globalOptions['lIds'] === false)
 				$log 	= 'ERROR: Bad SQL query.' . $query . mysql_error().'and get_sphinx_idlist function returns null while search == '.$globalOptions['sphinxSearch'];
 			else 
-				$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
+			$log 	= 'ERROR: Bad SQL query. ' . $query . mysql_error();
 			$logger->error($log);
 			unset($log);
 		}
@@ -10693,7 +10673,7 @@ class TrialTracker
 							. '<li><select id="wFormat" name="wFormat" size="3" style="height:54px;">'
 							. '<option value="excel" selected="selected">Excel</option>'
 							//comment the following line to hide pdf export
-							//. '<option value="pdf">PDF</option>'
+							. '<option value="pdf">PDF</option>'
 							. '<option value="tsv">TSV</option>'
 							. '</select></li></ul>'
 							. '<input type="hidden" name="shownCnt" value="' . $shownCnt . '" />'
@@ -11372,7 +11352,7 @@ class TrialTracker
 			}
 			else if(isset($tvalue['source_id']) && strpos($tvalue['source_id'], 'NCT') !== FALSE)
 			{	
-				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($tvalue['nct_id']).'"';
+				$outputStr .= ' href="http://clinicaltrials.gov/ct2/show/' . padnct($tvalue['nct_id']) . '" ';
 			}
 			else 
 			{ 	
@@ -11386,7 +11366,7 @@ class TrialTracker
 			}
 			else
 			{
-				
+			
 				$outputStr .= ' onclick="INC_ViewCount(' . $tvalue['larvol_id'] . ')"';
 			}
 			$outputStr .= '><font id="ViewCount_' . $tvalue['larvol_id'] . '">';
@@ -11661,7 +11641,7 @@ class TrialTracker
 				$outputStr .= ', ';
 			}
 			$outputStr .= $tvalue["collaborator"] . '</div></td>';
-			
+						
 						
 			//overall status column
 			$attr = ' ';
@@ -12031,7 +12011,7 @@ class TrialTracker
 								$outputStr .= 'onclick="INC_ViewCount('.$tvalue['larvol_id'].')"';
 							}
 							$outputStr .= '/>';
-													}
+						}
 					}
 					else if($mvalue['status'] == 'Pending')
 					{
@@ -12628,8 +12608,8 @@ class TrialTracker
 			}
 			else
 			{
-				$incViewCountLink = ' onclick="INC_ViewCount(' . $larvolId . ')" ';
-			}
+			$incViewCountLink = ' onclick="INC_ViewCount(' . $larvolId . ')" ';
+		}
 		}
 		
 		$hoverText = '';
