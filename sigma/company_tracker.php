@@ -50,6 +50,8 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 	$MainPageURL = 'company_tracker.php';	//PT=COMPANY TRACKER (MAIN PT PAGE)
 	if($TrackerType == 'DCT')	//DPT=DISEASE COMPANY TRACKER
 		$MainPageURL = 'disease.php';
+	if($TrackerType == 'DISCATCT')	//DPT=DISEASE COMPANY TRACKER
+		$MainPageURL = 'disease_category.php';
 	
 	$HTMLContent .= CompanyTrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -90,6 +92,19 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	$Report_DisplayName = NULL;
 	
 	//END DATA
+	if($TrackerType == 'DISCATCT')	//CTH - COMPANY TRACKER with HEADER DCT - DISEASE COMPANY TRACKER
+	{
+		global $CompanyIds;
+		
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' .$id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+	
+		$CompanyIds = array_filter(array_unique($CompanyIds));
+		$id=$header['id'];
+	}
+	
 	
 	if($TrackerType == 'DCT')	//CTH - COMPANY TRACKER with HEADER DCT - DISEASE COMPANY TRACKER
 	{
@@ -99,8 +114,11 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$Report_DisplayName = $header['name'];
 		$CompanyIds = array_filter(array_unique(GetCompaniesFromDisease_CompanyTracker($header['id'])));
 		$id=$header['id'];
+	}
 	
 		$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+		
+		
 		$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
 		
 		$key = 0;	
@@ -184,7 +202,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 				}	//End of if Product Existsnace										
 			} //END OF IF - COMPANY ID NULL OR NOT			
 		}	//END OF While - Fetch data
-	}//End of DCT	
+	
 	/// This function willl Sort multidimensional array according to Total count
 	$data_matrix = sortTwoDimensionArrayByKeyCompanyTracker($data_matrix,'TotalCount');
 	
@@ -796,7 +814,7 @@ function CompanyTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 
 function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL)
 {				
-	if(count($IdsArray) == 0 && ($TrackerType == 'CTH' || $TrackerType == 'DCT')) return 'No Company Found';
+	if(count($IdsArray) == 0 && ($TrackerType == 'CTH' || $TrackerType == 'DCT' || $TrackerType == 'DISCATCT')) return 'No Company Found';
 	
 	require_once('../tcpdf/config/lang/eng.php');
 	require_once('../tcpdf/tcpdf.php');  
@@ -2163,6 +2181,32 @@ function sortTwoDimensionArrayByKeyCompanyTracker($arr, $arrKey, $sortOrder=SORT
 	}
 	return $arr;
 }
+
+
+//Get Companies from Disease
+function GetCompaniesFromDiseaseCat_CompanyTracker($arrDiseaseIds)
+{
+	global $db;
+	global $now;
+	$Products = array();
+	$Companies = array();
+	$arrImplode = implode(",", $arrDiseaseIds);
+	
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) JOIN `entities` e2 ON(e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'Institution' AND e.`category`='Industry' AND e2.`class` = 'Product' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND er2.`parent` in(" . mysql_real_escape_string($arrImplode) . ")";
+	
+	$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$Companies[] = $row['id'];
+		}
+	}
+
+	return array_filter(array_unique($Companies));
+}
+
 
 //Get Companies from Disease
 function GetCompaniesFromDisease_CompanyTracker($DiseaseID)

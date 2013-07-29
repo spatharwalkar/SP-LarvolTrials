@@ -59,7 +59,9 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	
 	$MainPageURL = 'product_tracker.php';	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	
-	if($TrackerType == 'CPT' || $TrackerType == 'DCPT')	//CPT=COMPANY PRODUCT TRACKER || DCPT=DISEASE COMPANY PRODUCT TRACKER
+	if($TrackerType == 'DISCATPT')	//DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
+		$MainPageURL = 'disease_category.php';	
+	else if($TrackerType == 'CPT' || $TrackerType == 'DCPT')	//CPT=COMPANY PRODUCT TRACKER || DCPT=DISEASE COMPANY PRODUCT TRACKER
 		$MainPageURL = 'company.php';
 	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER
 		$MainPageURL = 'moa.php';
@@ -155,6 +157,24 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			print "Product Tracker not supported for ". (($entity2Type == 'Institution') ? 'Company' : $entity2Type) .".";
 			exit();
 		}
+	}
+	else if($TrackerType == 'DISCATPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
+	{
+		global $productIds;
+		
+		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' . $id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+			$Report_DisplayName = $header['display_name'];
+	
+		$id=$header['id'];
+		$ExtName = GetReportNameExtension($OptionArray);
+		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];
+		$entity2Id = $OptionArray['DiseaseCatId'];
+		$entity2Type = 'Disease Category';
+	
 	}
 	else if($TrackerType == 'CPT' || $TrackerType=='DCPT')	//CPT=COMPANY PRODUCT TRACKER	//DCPT=DISEASE COMPANY PRODUCT TRACKER
 	{
@@ -799,7 +819,9 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL,
 	
 	$url = 'id=' . $id .'&page=' . $page;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	$phase = $OptionArray['Phase'];	
-	if($TrackerType=='DCPT')	//CPT=DISEASE COMPANY PRODUCT TRACKER
+	if($TrackerType=='DISCATPT')	//DISCATPT=DISEASE CATEGORY COMPANY PRODUCT TRACKER
+		$url = 'DiseaseCatId=' . $id .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;	
+	else if($TrackerType=='DCPT')	//CPT=DISEASE COMPANY PRODUCT TRACKER
 		$url = 'CompanyId=' . $id .'&DiseaseId='. $OptionArray['DiseaseId'] .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
 	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER
 		$url = 'CompanyId=' . $id . ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
@@ -1491,7 +1513,9 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	$stages = 1;
 	$phase = $OptionArray['Phase'];		
 	$url = 'id=' . $id .'&amp;dwcount=' . $dwcount;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
-	if($TrackerType == 'DCPT')	//DCPT=DISEASE COMPANY PRODUCT TRACKER
+	if($TrackerType == 'DISCATPT')	//DISCATPT=DISEASE CATEGORY COMPANY PRODUCT TRACKER
+		$url = 'DiseaseCatId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType . ((isset($phase) && $phase != NULL && $phase != '') ? '&amp;phase=' . $phase:'' );
+	else if($TrackerType == 'DCPT')	//DCPT=DISEASE COMPANY PRODUCT TRACKER
 		$url = 'CompanyId=' . $id .'&amp;DiseaseId=' . $OptionArray['DiseaseId'] .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType . ((isset($phase) && $phase != NULL && $phase != '') ? '&amp;phase=' . $phase:'' );
 	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER 
 		$url = 'CompanyId=' . $id . ((isset($phase) && $phase != NULL && $phase != '') ? '&amp;phase=' . $phase:'' ) .'&amp;dwcount=' . $dwcount;	
@@ -3272,6 +3296,28 @@ function GetPhaseName($phase)
 	{ $phasenm = 'Phase N/A'; }
 		
 	return $phasenm;	
+}
+
+
+//Get products froms disease category
+function GetProductsFromDiseaseCat($DiseaseCatID)
+{
+	global $db;
+	global $now;
+	$Products = array();
+	$arrImplode = implode(",", $DiseaseCatID);
+	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent` in(" . mysql_real_escape_string($arrImplode) . ") AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+
+	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT');
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$Products[] = $row['id'];
+		}
+	}
+	return array_filter(array_unique($Products));
 }
 
 ?>
