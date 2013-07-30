@@ -97,13 +97,131 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	if($TrackerType == 'DISCATMT')	//MTH - MOA TRACKER with HEADER DMT - DISEASE MOA TRACKER
 	{
 		global $MOAData;
+		global $arrDiseaseIds;
+		$arrImplode = implode(",", $arrDiseaseIds);
 		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if(!empty($header['display_name']))
 			$Report_DisplayName = $header['display_name'];
-		$Return = $MOAData ;//GetMOAsOrMOACatFromDiseaseCat_MOATracker($header['id']); //Avoid Redundant Query Execution TO Optimize application		
+		$Return = $MOAData ;//GetMOAsOrMOACatFromDiseaseCat_MOATracker($header['id']); //Avoid Redundant Query Execution TO Optimize application	
+
+		$TotalRecords['all'] = count($Return['all']);
+		if ($TotalRecords['all'] > 0) {
+			$MOAOrMOACatIds = $Return['all'];
+			$id = $header['id'];
+			$TotalRecords['moa'] = count($Return['moa']);
+			$TotalRecords['moacat'] = count($Return['moacat']);
+		
+		
+			$types = array('MOA', 'MOA_Category');
+			foreach($types as $type)
+			{
+				if($type == 'MOA')
+					$MOAOrMOACatIdQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname, e2.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` in(". $arrImplode .") OR rpt.`entity2` in(". $arrImplode .")) AND e2.`class`='MOA' AND e2.`id` IN ('".implode("','",$Return['moa'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+				else
+					$MOAOrMOACatIdQuery = "SELECT e3.`id` AS id, e3.`name` AS name, e2.`display_name` AS dispname, e3.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) JOIN `entity_relations` er2 ON(er2.`child`=e2.`id`) JOIN `entities` e3 ON(e3.`id` = er2.`parent`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`class`='MOA' AND e3.`id` IN ('".implode("','",$Return['moacat'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+				$MOAOrMOACatIdResult = mysql_query($MOAOrMOACatIdQuery) or die(mysql_error());
+					
+				$key = 0;
+				while($result = mysql_fetch_array($MOAOrMOACatIdResult))
+				{
+					$key = $MOAOrMOACatId = $result['id'];
+					if(isset($MOAOrMOACatId) && $MOAOrMOACatId != NULL)
+					{
+						if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+						{
+							/// Fill up all data in Data Matrix only, so we can sort all data at one place
+							if($result['dispname'] != NULL && trim($result['dispname']) != '')
+								$data_matrix[$key]['RowHeader'] = $result['dispname'];
+							else
+								$data_matrix[$key]['RowHeader'] = $result['name'];
+		
+							$data_matrix[$key]['ID'] = $result['id'];
+							$data_matrix[$key]['class'] = $result['class'];
+							$NewMOAOrMOACatIds[] = $result['id'];
+								
+							if($data_matrix[$key]['class'] == 'MOA')
+							{
+								$data_matrix[$key]['HeaderLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'];
+								if($TrackerType == 'DMT')
+									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
+								else
+									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
+							}
+							else if($data_matrix[$key]['class'] == 'MOA_Category')
+							{
+								$data_matrix[$key]['HeaderLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
+								if($TrackerType == 'DMT')
+									$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMCPT';
+								else
+									$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=MCPT';
+							}
+								
+							///// Initialize data
+							$data_matrix[$key]['phase_na']=0;
+							$data_matrix[$key]['phase_0']=0;
+							$data_matrix[$key]['phase_1']=0;
+							$data_matrix[$key]['phase_2']=0;
+							$data_matrix[$key]['phase_3']=0;
+							$data_matrix[$key]['phase_4']=0;
+		
+							$data_matrix[$key]['TotalCount'] = 0;
+							$data_matrix[$key]['productIds'] = array();
+							$data_matrix[$key]['ProdExistance'] = array();
+						}
+							
+						if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+						{
+							if($result['entity1'] == $id)
+								$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+							else
+								$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+		
+							if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+							{
+								$CurrentPhasePNTR = 0;
+							}
+							else if($result['phase'] == '0')
+							{
+								$CurrentPhasePNTR = 1;
+							}
+							else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
+									|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+							{
+								$CurrentPhasePNTR = 2;
+							}
+							else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
+									|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
+									|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+							{
+								$CurrentPhasePNTR = 3;
+							}
+							else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
+									|| $result['phase'] == '3a' || $result['phase'] == '3b')
+							{
+								$CurrentPhasePNTR = 4;
+							}
+							else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+							{
+								$CurrentPhasePNTR = 5;
+							}
+		
+							$MAXPhasePNTR = $CurrentPhasePNTR;
+							$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+		
+							$data_matrix[$key]['productIds'][] = $result['ProdId'];
+		
+							$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+							if($max_count < $data_matrix[$key]['TotalCount'])
+								$max_count = $data_matrix[$key]['TotalCount'];
+						}	//End of if Product Existsnace
+					} //END OF IF - MOA ID NULL OR NOT
+				}	//END OF While - Fetch data
+			}//End of Types for loop
+		}	//End of Count > 0 Condition
+		/// This function willl Sort multidimensional array according to Total count
 		
 	}
 	
@@ -115,124 +233,125 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		$Return = GetMOAsOrMOACatFromDisease_MOATracker($header['id']);
+
+		$TotalRecords['all'] = count($Return['all']);
+		if ($TotalRecords['all'] > 0) {
+			$MOAOrMOACatIds = $Return['all'];
+			$id = $header['id'];
+			$TotalRecords['moa'] = count($Return['moa']);
+			$TotalRecords['moacat'] = count($Return['moacat']);
 		
-	}
 		
-	$TotalRecords['all'] = count($Return['all']);
-	if ($TotalRecords['all'] > 0) {
-		$MOAOrMOACatIds = $Return['all'];
-		$id = $header['id'];
-		$TotalRecords['moa'] = count($Return['moa']);
-		$TotalRecords['moacat'] = count($Return['moacat']);
-		
-	
-		$types = array('MOA', 'MOA_Category');
-		foreach($types as $type)
-		{	
-			if($type == 'MOA')
+			$types = array('MOA', 'MOA_Category');
+			foreach($types as $type)
+			{
+				if($type == 'MOA')
 					$MOAOrMOACatIdQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname, e2.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`class`='MOA' AND e2.`id` IN ('".implode("','",$Return['moa'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 				else
 					$MOAOrMOACatIdQuery = "SELECT e3.`id` AS id, e3.`name` AS name, e2.`display_name` AS dispname, e3.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) JOIN `entity_relations` er2 ON(er2.`child`=e2.`id`) JOIN `entities` e3 ON(e3.`id` = er2.`parent`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`class`='MOA' AND e3.`id` IN ('".implode("','",$Return['moacat'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-			$MOAOrMOACatIdResult = mysql_query($MOAOrMOACatIdQuery) or die(mysql_error());
-			
-			$key = 0;
-			while($result = mysql_fetch_array($MOAOrMOACatIdResult))
-			{	
-				$key = $MOAOrMOACatId = $result['id'];
-				if(isset($MOAOrMOACatId) && $MOAOrMOACatId != NULL)
-				{					
-					if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+				$MOAOrMOACatIdResult = mysql_query($MOAOrMOACatIdQuery) or die(mysql_error());
+					
+				$key = 0;
+				while($result = mysql_fetch_array($MOAOrMOACatIdResult))
+				{
+					$key = $MOAOrMOACatId = $result['id'];
+					if(isset($MOAOrMOACatId) && $MOAOrMOACatId != NULL)
 					{
-						/// Fill up all data in Data Matrix only, so we can sort all data at one place
-						if($result['dispname'] != NULL && trim($result['dispname']) != '')
-						$data_matrix[$key]['RowHeader'] = $result['dispname'];
-						else
-						$data_matrix[$key]['RowHeader'] = $result['name'];
-						
-						$data_matrix[$key]['ID'] = $result['id'];
-						$data_matrix[$key]['class'] = $result['class'];
-						$NewMOAOrMOACatIds[] = $result['id'];
-					
-						if($data_matrix[$key]['class'] == 'MOA')
+						if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
 						{
-							$data_matrix[$key]['HeaderLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'];
-							if($TrackerType == 'DMT')
-							$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
+							/// Fill up all data in Data Matrix only, so we can sort all data at one place
+							if($result['dispname'] != NULL && trim($result['dispname']) != '')
+								$data_matrix[$key]['RowHeader'] = $result['dispname'];
 							else
-							$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
-						}
-						else if($data_matrix[$key]['class'] == 'MOA_Category')
-						{
-							$data_matrix[$key]['HeaderLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
-							if($TrackerType == 'DMT')
-							$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMCPT';
-							else
-							$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=MCPT';
-						}
-					
-						///// Initialize data
-						$data_matrix[$key]['phase_na']=0;
-						$data_matrix[$key]['phase_0']=0;
-						$data_matrix[$key]['phase_1']=0;
-						$data_matrix[$key]['phase_2']=0;
-						$data_matrix[$key]['phase_3']=0;
-						$data_matrix[$key]['phase_4']=0;
-						
-						$data_matrix[$key]['TotalCount'] = 0;
-						$data_matrix[$key]['productIds'] = array();	
-						$data_matrix[$key]['ProdExistance'] = array();			
-					}
-					
-					if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
-					{
-						if($result['entity1'] == $id)
-						$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-						else
-						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
-						
-						if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
-						{
-							$CurrentPhasePNTR = 0;
-						}
-						else if($result['phase'] == '0')
-						{
-							$CurrentPhasePNTR = 1;
-						}
-						else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a' 
-						|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
-						{
-							$CurrentPhasePNTR = 2;
-						}
-						else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2' 
-						|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b' 
-						|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
-						{
-							$CurrentPhasePNTR = 3;
-						}
-						else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3' 
-						|| $result['phase'] == '3a' || $result['phase'] == '3b')
-						{
-							$CurrentPhasePNTR = 4;
-						}	
-						else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
-						{
-							$CurrentPhasePNTR = 5;	
-						}
+								$data_matrix[$key]['RowHeader'] = $result['name'];
+		
+							$data_matrix[$key]['ID'] = $result['id'];
+							$data_matrix[$key]['class'] = $result['class'];
+							$NewMOAOrMOACatIds[] = $result['id'];
 								
-						$MAXPhasePNTR = $CurrentPhasePNTR;
-						$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER	
-						
-						$data_matrix[$key]['productIds'][] = $result['ProdId'];
-						
-						$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
-						if($max_count < $data_matrix[$key]['TotalCount'])
-							$max_count = $data_matrix[$key]['TotalCount'];
-					}	//End of if Product Existsnace										
-				} //END OF IF - MOA ID NULL OR NOT			
-			}	//END OF While - Fetch data
-		}//End of Types for loop	
-	}	//End of Count > 0 Condition
-	/// This function willl Sort multidimensional array according to Total count
+							if($data_matrix[$key]['class'] == 'MOA')
+							{
+								$data_matrix[$key]['HeaderLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'];
+								if($TrackerType == 'DMT')
+									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
+								else
+									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
+							}
+							else if($data_matrix[$key]['class'] == 'MOA_Category')
+							{
+								$data_matrix[$key]['HeaderLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
+								if($TrackerType == 'DMT')
+									$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMCPT';
+								else
+									$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=MCPT';
+							}
+								
+							///// Initialize data
+							$data_matrix[$key]['phase_na']=0;
+							$data_matrix[$key]['phase_0']=0;
+							$data_matrix[$key]['phase_1']=0;
+							$data_matrix[$key]['phase_2']=0;
+							$data_matrix[$key]['phase_3']=0;
+							$data_matrix[$key]['phase_4']=0;
+		
+							$data_matrix[$key]['TotalCount'] = 0;
+							$data_matrix[$key]['productIds'] = array();
+							$data_matrix[$key]['ProdExistance'] = array();
+						}
+							
+						if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+						{
+							if($result['entity1'] == $id)
+								$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+							else
+								$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+		
+							if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+							{
+								$CurrentPhasePNTR = 0;
+							}
+							else if($result['phase'] == '0')
+							{
+								$CurrentPhasePNTR = 1;
+							}
+							else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
+									|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+							{
+								$CurrentPhasePNTR = 2;
+							}
+							else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
+									|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
+									|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+							{
+								$CurrentPhasePNTR = 3;
+							}
+							else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
+									|| $result['phase'] == '3a' || $result['phase'] == '3b')
+							{
+								$CurrentPhasePNTR = 4;
+							}
+							else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+							{
+								$CurrentPhasePNTR = 5;
+							}
+		
+							$MAXPhasePNTR = $CurrentPhasePNTR;
+							$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+		
+							$data_matrix[$key]['productIds'][] = $result['ProdId'];
+		
+							$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+							if($max_count < $data_matrix[$key]['TotalCount'])
+								$max_count = $data_matrix[$key]['TotalCount'];
+						}	//End of if Product Existsnace
+					} //END OF IF - MOA ID NULL OR NOT
+				}	//END OF While - Fetch data
+			}//End of Types for loop
+		}	//End of Count > 0 Condition
+		/// This function willl Sort multidimensional array according to Total count
+		
+	}
+	
 	$data_matrix = sortTwoDimensionArrayByKeyMOATracker($data_matrix,'TotalCount');
 	
 	///////////PAGING DATA
@@ -855,7 +974,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
-	if($TrackerType != 'DMT')				
+	if($TrackerType != 'DMT' && $TrackerType != 'DISCATMT')				
 	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords['all'].'&nbsp;MOA'. (($TotalRecords['all'] == 1) ? '':'s') . '</div></td>';
 					
 	if($TotalPages > 1)
