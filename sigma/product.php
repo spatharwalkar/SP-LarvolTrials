@@ -34,10 +34,16 @@
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
-	
+	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
+	global $tabCommonUrl;
 	$tabCommonUrl = 'product.php?e1='.$e1;
 	
-	$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($e1, 'Product'));
+	if($categoryFlag == 1){
+		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($e1, 'Product' ));
+	}else{
+		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($e1, 'Product' ));
+	}
+	
 	$TabTrialsCount = GetTrialsCountFromProduct($e1);
 	
 	$meta_title = 'Larvol Sigma'; //default value
@@ -150,8 +156,11 @@ print '
 		<table cellpadding="0" cellspacing="0" id="disease_tabs">
 			<tr>
 				'; 
-				
-				$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+				if($categoryFlag == 1){
+					$CountExt = (($TabDiseaseCount == 1) ? 'Disease Category':'Disease Categories');
+				}else{
+					$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+				}
 				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabTrialsCount == 1) ? 'Trial':'Trials');
 				$companyLinkName = '<a href="'.$tabCommonUrl.'&tab=ott&sourcepg=TZP" title="'.$TabTrialsCount.' '.$CountExt.'">&nbsp;'.$TabTrialsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
@@ -172,8 +181,9 @@ print '
 <tr><td align="center">
 <?php
 print '<div id="diseaseTab_content" align="center">';
-if($tab == 'diseasetrac')
-	print showDiseaseTracker($e1, 'PDT', $page);		//PDT = PRODUCT DISEASE TRACKER
+if($tab == 'diseasetrac'){
+	print showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
+}	
 else
 {
 	chdir ("..");
