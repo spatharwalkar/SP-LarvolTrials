@@ -1,7 +1,7 @@
 <?php 
 //Below lines are lines should be kept on top of all like session start gives session error, sphinx also gives query related error
 // - so incase of TZ we place in these pages itself
-if(!isset($_REQUEST['DiseaseId']) && isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP')
+if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP')
 {
 	header('P3P: CP="CAO PSA OUR"');
 	session_start();
@@ -40,7 +40,7 @@ if(isset($_POST['btnDownload']))
 	$tt->generateTrialTracker($fileType, $resultIds, $globalOptions);
 	exit;
 }
-if(!isset($_REQUEST['DiseaseId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP')
+if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP')
 DisplayOTT();
 function DisplayOTT()
 {
@@ -86,6 +86,12 @@ function DisplayOTT()
 		$globalOptions['pageLocation'] = $dir."sigma/disease";
 		$_REQUEST['e1'] = $globalOptions['DiseaseId'];
 	}
+	if(isset($_REQUEST['DiseaseCatId']))
+	{
+		$globalOptions['DiseaseCatId'] = $_REQUEST['DiseaseCatId'];
+		$globalOptions['pageLocation'] = $dir."sigma/disease_category";
+		$_REQUEST['e1'] = $globalOptions['DiseaseCatId'];
+	}
 	if(isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ')
 	{
 		$globalOptions['sourcepg'] = $_REQUEST['sourcepg'];
@@ -98,7 +104,7 @@ function DisplayOTT()
 		$globalOptions['pageLocation'] = $dir."sigma/product";
 	}
 	
-	if((isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ') || (isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZP') || (isset($_REQUEST['DiseaseId'])))
+	if((isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ') || (isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZP') || (isset($_REQUEST['DiseaseId'])) || (isset($_REQUEST['DiseaseCatId'])) )
 	{
 		if(!isset($_REQUEST['list']))	//set default view all trials in case of TZ related OTT.
 		{
@@ -157,7 +163,9 @@ function DisplayOTT()
 			{
 				$globalOptions['resetLink'] .= ',' . $rkey . '=' . $rvalue;
 				if(isset($globalOptions['DiseaseId']))
-				$globalOptions['resetLink'] = ',DiseaseId='. $globalOptions['DiseaseId'] .',tab=DiseaseOTT';
+					$globalOptions['resetLink'] = ',DiseaseId='. $globalOptions['DiseaseId'] .',tab=DiseaseOTT';
+				if(isset($globalOptions['DiseaseCatId']))
+					$globalOptions['resetLink'] = ',DiseaseCatId='. $globalOptions['DiseaseCatId'] .',tab=DiseaseOTT';
 			}
 		}		
 	}
@@ -250,7 +258,7 @@ function DisplayOTT()
 	$mouseWheelJs 	= $dir.'scripts/jquery.mousewheel.min.js';
 	$scrollBarJs 	= $dir.'scripts/jquery.mCustomScrollbar.js';
 
-if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
+if(!isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
 print	'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 		<html xmlns="http://www.w3.org/1999/xhtml">
 		<head>
@@ -483,7 +491,7 @@ print	'	<link href="'. $intermediaryCss . '?t=' . @filectime($intermediaryCss) .
 			}
 			</script>';
 
-if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')			
+if(!isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')			
 print	'
 <style type="text/css">
 html,body {
@@ -572,8 +580,8 @@ if(isset($_REQUEST['pr']) && $_REQUEST['pr'] != '')
 	$globalOptions['product'] = array_filter($globalOptions['product'], 'iszero');
 }
 
-if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']) || isset($globalOptions['DiseaseId']))
-{
+if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']) || isset($globalOptions['DiseaseId']) || isset($globalOptions['DiseaseCatId']))
+{ 
 	$globalOptions['url'] = 'e1=' . $_REQUEST['e1'] . '&e2=' . $_REQUEST['e2'];	
 	if(isset($_REQUEST['JSON_search']))
 	{
@@ -844,13 +852,13 @@ print           '$("ul #productbox li").click(function () {
             }); 
         </script>';
 
-	if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) && (strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
+	if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) && (strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) && !isset($globalOptions['DiseaseId']) && !isset($globalOptions['DiseaseCatId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
 	{
 		$cpageURL = 'http://';
 		$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);
 		echo '<a href="li/larvolinsight.php?url='. $cpageURL .'"><span style="color:red;font-weight:bold;margin-left:10px;">LI view</span></a><br>';
 	}
-if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP') {		
+if(!isset($globalOptions['DiseaseId']) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP') {		
 	include 'footer_trialtracker.php';
 	print '</body>
 			</html>';

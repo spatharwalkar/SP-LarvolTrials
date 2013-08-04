@@ -8193,6 +8193,10 @@ class TrialTracker
 		echo '<input type="hidden" name="DiseaseId" value="' . $globalOptions['DiseaseId'] . '" />'
 				. '<input type="hidden" name="tab" value="DiseaseOTT" />';
 				
+		if(isset($globalOptions['DiseaseCatId']))
+			echo '<input type="hidden" name="DiseaseCatId" value="' . $globalOptions['DiseaseCatId'] . '" />'
+					. '<input type="hidden" name="tab" value="DiseaseOTT" />';
+		
 		if($globalOptions['sourcepg'] == 'TZ')		
 		echo '<input type="hidden" name="sourcepg" value="TZ" />';
 		
@@ -8216,8 +8220,10 @@ class TrialTracker
 			$Arr = $this->processNonHmParams($resultIds, $globalOptions, 'webPage');
 		}
 		
-		if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
+		if(!isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
 		$this->displayHeader($Arr['tHeader']);
+		
+		
 			
 		$ottType = $Arr['ottType'];
 		$productSelector = $Arr['productSelector'];
@@ -8233,7 +8239,7 @@ class TrialTracker
 		{
 			$Values = $this->compileOTTData2($ottType, $TrialsInfo, $Ids, $globalOptions);
 		}
-		
+
 		echo $this->displayWebPage($ottType, $resultIds, $Values, $productSelector, $globalOptions);
 		
 		unset($ottType, $productSelector, $Ids, $TrialsInfo, $Arr);
@@ -8908,7 +8914,20 @@ class TrialTracker
 		$pIds = array();
 		$aIds = array();
 		
-		$pIds = array_map(function($item) { return $item['product']; }, $Ids);
+		if(isset($globalOptions["DiseaseCatId"]) && $globalOptions["DiseaseCatId"] != ""){
+			$query = "SELECT child FROM `entity_relations` WHERE parent =".$globalOptions["DiseaseCatId"];
+			$res = mysql_query($query) or die('Bad SQL query for counting diseases by a disease category ID ');
+			
+			if($res)
+			{
+				while($row = mysql_fetch_array($res))
+					$arrDiseaseIds[] = $row['child'];
+			}
+			$pIds=$arrDiseaseIds;
+		} else {
+			$pIds = array_map(function($item) { return $item['product']; }, $Ids);
+		}
+		
 		$pIds = array_filter($pIds);	
 		$pIds = array_unique($pIds);	
 		
@@ -8980,6 +8999,7 @@ class TrialTracker
 			$tQuery = "SELECT COUNT(*) AS totalcount "
 						. " FROM `data_trials` dt ";
 			$tQuery .=  $join . $where;
+			
 			$tRes = m_query(__LINE__,$tQuery);
 			if($tRes)
 			{
@@ -10534,7 +10554,7 @@ class TrialTracker
 				. $this->downloadOptions($count, $Values['totalcount'], $ottType, $resultIds, $globalOptions)
 				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 		}
-		if(!isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
+		if(!isset($globalOptions['DiseaseId']) && !isset($globalOptions['DiseaseCatId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
 		echo '<br/><br/><div style="height:50px;"></div>';
 		
 	}
@@ -10956,6 +10976,10 @@ class TrialTracker
 		
 		if(isset($globalOptions['DiseaseId']))
 		$url .= '&amp;DiseaseId=' . $globalOptions['DiseaseId'] . '&amp;tab=DiseaseOTT';
+		
+		if(isset($globalOptions['DiseaseCatId']))
+			$url .= '&amp;DiseaseCatId=' . $globalOptions['DiseaseCatId'] . '&amp;tab=DiseaseOTT';
+		
 		
 		if($globalOptions['sourcepg'] == 'TZ')
 		$url .= '&amp;sourcepg=TZ';

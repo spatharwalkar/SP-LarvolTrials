@@ -31,7 +31,6 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 	$HTMLContent = '';
 	$Return = DataGeneratorForCompanyTracker($id, $TrackerType, $page);
 	$uniqueId = uniqid();
-	
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
 	$Report_DisplayName = $Return['report_name'];
@@ -106,6 +105,92 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$CompanyIds = array_filter(array_unique($CompanyIds));
 		$id=$header['id'];
 		$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` in(". $arrImplode .") OR rpt.`entity2` in(". $arrImplode .")) AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+
+		$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
+		
+		$key = 0;
+		while($result = mysql_fetch_array($CompanyQueryResult))
+		{
+			$key = $CompanyId = $result['CompId'];
+			if(isset($CompanyId) && $CompanyId != NULL)
+			{
+				if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+				{
+					/// Fill up all data in Data Matrix only, so we can sort all data at one place
+					if($result['CompDispName'] != NULL && trim($result['CompDispName']) != '')
+						$data_matrix[$key]['RowHeader'] = $result['CompDispName'];
+					else
+						$data_matrix[$key]['RowHeader'] = $result['CompName'];
+						
+					$data_matrix[$key]['ID'] = $result['CompId'];
+					$NewCompanyIds[] = $result['CompId'];
+						
+					$data_matrix[$key]['HeaderLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'];
+		
+					$data_matrix[$key]['ColumnsLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseCatId=' . $id . '&TrackerType=DISCATCT';
+		
+					///// Initialize data
+					$data_matrix[$key]['phase_na']=0;
+					$data_matrix[$key]['phase_0']=0;
+					$data_matrix[$key]['phase_1']=0;
+					$data_matrix[$key]['phase_2']=0;
+					$data_matrix[$key]['phase_3']=0;
+					$data_matrix[$key]['phase_4']=0;
+		
+					$data_matrix[$key]['TotalCount'] = 0;
+					$data_matrix[$key]['productIds'] = array();
+					$data_matrix[$key]['ProdExistance'] = array();
+				}
+					
+		
+				if(((in_array($result['entity1'],$arrDiseaseIds ) && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || (in_array($result['entity2'] ,$arrDiseaseIds) && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+				{
+					if($result['entity1'] == $id)
+						$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+					else
+						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+						
+					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+					{
+						$CurrentPhasePNTR = 0;
+					}
+					else if($result['phase'] == '0')
+					{
+						$CurrentPhasePNTR = 1;
+					}
+					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
+							|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+					{
+						$CurrentPhasePNTR = 2;
+					}
+					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
+							|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
+							|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+					{
+						$CurrentPhasePNTR = 3;
+					}
+					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
+							|| $result['phase'] == '3a' || $result['phase'] == '3b')
+					{
+						$CurrentPhasePNTR = 4;
+					}
+					else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+					{
+						$CurrentPhasePNTR = 5;
+					}
+						
+					$MAXPhasePNTR = $CurrentPhasePNTR;
+					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+						
+					$data_matrix[$key]['productIds'][] = $result['ProdId'];
+						
+					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+					if($max_count < $data_matrix[$key]['TotalCount'])
+						$max_count = $data_matrix[$key]['TotalCount'];
+				}	//End of if Product Existsnace
+			} //END OF IF - COMPANY ID NULL OR NOT
+		}	//END OF While - Fetch data
+		
 	}
 	
 	
@@ -118,14 +203,10 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$CompanyIds = array_filter(array_unique(GetCompaniesFromDisease_CompanyTracker($header['id'])));
 		$id=$header['id'];
 		$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-	}
-	
-		
-		
-		
+
 		$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
 		
-		$key = 0;	
+		$key = 0;
 		while($result = mysql_fetch_array($CompanyQueryResult))
 		{
 			$key = $CompanyId = $result['CompId'];
@@ -135,17 +216,17 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 				{
 					/// Fill up all data in Data Matrix only, so we can sort all data at one place
 					if($result['CompDispName'] != NULL && trim($result['CompDispName']) != '')
-					$data_matrix[$key]['RowHeader'] = $result['CompDispName'];
+						$data_matrix[$key]['RowHeader'] = $result['CompDispName'];
 					else
-					$data_matrix[$key]['RowHeader'] = $result['CompName'];
-					
+						$data_matrix[$key]['RowHeader'] = $result['CompName'];
+						
 					$data_matrix[$key]['ID'] = $result['CompId'];
 					$NewCompanyIds[] = $result['CompId'];
-					
-					$data_matrix[$key]['HeaderLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'];
 						
-					$data_matrix[$key]['ColumnsLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';			
-				
+					$data_matrix[$key]['HeaderLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'];
+		
+					$data_matrix[$key]['ColumnsLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DCPT';
+		
 					///// Initialize data
 					$data_matrix[$key]['phase_na']=0;
 					$data_matrix[$key]['phase_0']=0;
@@ -153,19 +234,20 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 					$data_matrix[$key]['phase_2']=0;
 					$data_matrix[$key]['phase_3']=0;
 					$data_matrix[$key]['phase_4']=0;
-				
+		
 					$data_matrix[$key]['TotalCount'] = 0;
-					$data_matrix[$key]['productIds'] = array();	
-					$data_matrix[$key]['ProdExistance'] = array();		
+					$data_matrix[$key]['productIds'] = array();
+					$data_matrix[$key]['ProdExistance'] = array();
 				}
 					
+		
 				if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
 				{
 					if($result['entity1'] == $id)
 						$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
 					else
 						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
-							
+						
 					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
 					{
 						$CurrentPhasePNTR = 0;
@@ -174,39 +256,44 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 					{
 						$CurrentPhasePNTR = 1;
 					}
-					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a' 
-					|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
+							|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
 					{
 						$CurrentPhasePNTR = 2;
 					}
-					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2' 
-					|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b' 
-					|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
+							|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
+							|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
 					{
 						$CurrentPhasePNTR = 3;
 					}
-					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3' 
-					|| $result['phase'] == '3a' || $result['phase'] == '3b')
+					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
+							|| $result['phase'] == '3a' || $result['phase'] == '3b')
 					{
 						$CurrentPhasePNTR = 4;
-					}	
+					}
 					else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
 					{
-						$CurrentPhasePNTR = 5;	
+						$CurrentPhasePNTR = 5;
 					}
-							
+						
 					$MAXPhasePNTR = $CurrentPhasePNTR;
 					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
-							
+						
 					$data_matrix[$key]['productIds'][] = $result['ProdId'];
-					
+						
 					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
 					if($max_count < $data_matrix[$key]['TotalCount'])
 						$max_count = $data_matrix[$key]['TotalCount'];
-				}	//End of if Product Existsnace										
-			} //END OF IF - COMPANY ID NULL OR NOT			
+				}	//End of if Product Existsnace
+			} //END OF IF - COMPANY ID NULL OR NOT
 		}	//END OF While - Fetch data
+		
+	}
 	
+		
+		
+		
 	/// This function willl Sort multidimensional array according to Total count
 	$data_matrix = sortTwoDimensionArrayByKeyCompanyTracker($data_matrix,'TotalCount');
 	
@@ -833,7 +920,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
-	if($TrackerType != 'DCT')				
+	if($TrackerType != 'DCT' && $TrackerType != 'DISCATCT')				
 	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;'. (($TotalRecords == 1) ? 'Company':'Companies') .'</div></td>';
 	
 	if($TotalPages > 1)

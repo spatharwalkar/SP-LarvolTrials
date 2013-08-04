@@ -147,13 +147,17 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 								$data_matrix[$key]['HeaderLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'];
 								if($TrackerType == 'DMT')
 									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
+								else if($TrackerType == 'DISCATMT')
+									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseCatId=' . $id . '&TrackerType=DISCATMT';
 								else
 									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
 							}
 							else if($data_matrix[$key]['class'] == 'MOA_Category')
 							{
 								$data_matrix[$key]['HeaderLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'];
-								if($TrackerType == 'DMT')
+								if($TrackerType == 'DISCATMT')
+									$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseCatId=' . $id . '&TrackerType=DISCATMT';
+								else if($TrackerType == 'DMT')
 									$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMCPT';
 								else
 									$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $data_matrix[$key]['ID'] . '&TrackerType=MCPT';
@@ -172,7 +176,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 							$data_matrix[$key]['ProdExistance'] = array();
 						}
 							
-						if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+						if(((in_array($result['entity1'],$arrDiseaseIds)&& !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || (in_array($result['entity2'] ,$arrDiseaseIds) && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
 						{
 							if($result['entity1'] == $id)
 								$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
