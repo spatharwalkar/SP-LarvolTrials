@@ -28,7 +28,9 @@ $(document).ready(function()
 	}
 	else
 	{
-		$('#addedtoright').css('background-color','#DDDDDD').css('cursor','default').css('color','#777777');
+		//$('#addedtoright').css('background-color','#DDDDDD').css('cursor','default').css('color','#777777');
+		//We remove the .milestones container div so that we can utilise screen space
+		$('#addtoright').parent().remove();
 	}
 
 });
