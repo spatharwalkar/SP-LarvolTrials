@@ -10,7 +10,7 @@ ignore_user_abort(true);
 global $db;
 global $logger;
 //remaptrials(null,null,'ALL');
-function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
+function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storechanges=NULL  )
 {
 	global $logger;
 	if(isset($source_id)) // A single trial
@@ -571,7 +571,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 					if (trim($oldval3)<>trim($value3) and !empty($oldval3)) 
 						$str3 = $comma . ' is_active_prev = "'. $oldval3 .'", is_active_lastchanged = "' . $olddate .'"';  else $str3 = "";
 					$cond1 = strlen($str1.$str2.$str3)>5;
-					if($exists and $cond1)
+					if($exists and $cond1 and (isset($storechanges) && $storechanges=='YES') )
 					{
 						$query = 'update data_history set ' . $str1.$str2.$str3  .'  where `larvol_id`="' .$larvol_id . '" limit 1' ;
 						if(!mysql_query($query))
@@ -586,7 +586,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL  )
 					}
 					else
 					{
-						if(  $cond1 )
+						if(  $cond1  and (isset($storechanges) && $storechanges=='YES') )
 						{
 						$query = 'insert into data_history set ' . $str1.$str2.$str3  .'  limit 1' ;
 						if(!mysql_query($query))
@@ -941,7 +941,7 @@ function update_history($larvol_id,$fld,$val,$lastchanged_date)
 			else $str1="";	
 			
 			$cond1 = strlen($str1)>5;
-			if($exists and $cond1)
+			if($exists and $cond1  and (isset($storechanges) && $storechanges=='YES') )
 			{
 				$query = 'update data_history set ' . $str1  .'  where `larvol_id`="' .$larvol_id . '" limit 1' ;
 				if(!mysql_query($query))
@@ -955,7 +955,7 @@ function update_history($larvol_id,$fld,$val,$lastchanged_date)
 			}
 			else
 			{
-				if(  $cond1 )
+				if(  $cond1  and (isset($storechanges) && $storechanges=='YES') )
 				{
 				$query = 'insert into data_history set ' . $str1 .' , larvol_id="' .$larvol_id . '"' ;
 				if(!mysql_query($query))

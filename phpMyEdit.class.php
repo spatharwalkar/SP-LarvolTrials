@@ -2932,7 +2932,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		//remap trial
 		require_once('remap_trials.php');
 		ob_start();
-		remaptrials(NULL,$lid,NULL);
+		remaptrials(NULL,$lid,NULL,'YES');
 		ob_end_clean();
 
 		// new row added, so update sphinx index.
@@ -3092,8 +3092,8 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 		*/
 		require_once('remap_trials.php');
 		ob_start();
-		if(isset($lid)) remaptrials(NULL,$lid,NULL);
-		else remaptrials(NULL,$this->rec,NULL);
+		if(isset($lid)) remaptrials(NULL,$lid,NULL,'YES');
+		else remaptrials(NULL,$this->rec,NULL,'YES');
 		ob_end_clean();
 
 		// record updated, now update sphinx index too.
