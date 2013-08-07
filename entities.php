@@ -219,12 +219,14 @@ else
 	$ignoreFields = array('LI_id','administration_mode','approvals','brand_names','client_name','code_names','comments','company','created','discontinuation_status_comment','discontinuation_status','generic_names','is_active','is_key','licensing_mode','modified','old_id','product_type','search_name','xml','searchdata','mesh_name');
 	$skipArr = array('xml','LI_id','old_id','is_active','client_name','comments','product_type','licensing_mode','administrative_mode','created','modified','company','brand_names','generic_names','code_names','approvals','search_name','administration_mode','discontinuation_status','is_key','discontinuation_status_comment','mesh_name');
 }
+
+$addEdit_flag = (($db->user->userlevel == 'admin') || ($db->user->userlevel == 'root')) ? TRUE : FALSE;
+
 $entity=$_REQUEST['entity'];
-pagePagination($limit,$totalCount,$table,$script,$ignoreFields, array('import'=>true,'searchDataCheck'=>true,'add_new_record'=>true,'search'=>true,$entity));
+pagePagination($limit,$totalCount,$table,$script,$ignoreFields, array('import'=>true,'searchDataCheck'=>true,'add_new_record'=>true,'search'=>true,$entity, 'addEdit_flag' => $addEdit_flag));
 //pagination controller
 
 //define skip array table fields
-
 
 echo '<br/>';
 echo '<div class="clr">';
@@ -252,7 +254,7 @@ $skipArr = array('comments','entity_type','licensing_mode','administration_mode'
 $ExtraSortFields = array(0=>'LI_id',1=>'name',2=>'company');
 //normal upm listing
 $start = $page*$limit;
-contentListing($start,$limit,$table,$script,$skipArr,$includeArr,array('delete'=>false,'ignoresort'=>array('is_active'),'extrasort'=>$ExtraSortFields));
+contentListing($start,$limit,$table,$script,$skipArr,$includeArr,array('delete'=>false,'ignoresort'=>array('is_active'),'extrasort'=>$ExtraSortFields, 'addEdit_flag' => $addEdit_flag));
 echo '</div>';
 /* echo '<div class="querybuilder" id="inline_content">
 </div></div>'; */

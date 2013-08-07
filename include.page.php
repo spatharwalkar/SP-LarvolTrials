@@ -102,6 +102,7 @@ function tableColumnDetails($table)
 function contentListing($start=0,$limit=50,$table,$script,$ignoreFields=array(),$includeFields=array(),$options=array('delete'=>true,'ignoresort'=>array(),'extrasort'=>array()))
 {
 global $deleteFlag;
+$addEdit_flag = isset($options['addEdit_flag']) ? (bool) $options['addEdit_flag'] : FALSE;
 if($options['delete']===false)
 $deleteFlag=false;
 //get search params
@@ -332,8 +333,12 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">';
-				echo $v;
+                                $edit_url = $v;
+                                if($addEdit_flag) {
+                                    $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
+                                }
+				echo '<td style="'.$defaultTdStyle.'">';
+				echo $edit_url;
 				echo '</a></td>';				
 			}else
 			if($columnName == 'event_link' || $columnName == 'result_link')
@@ -405,9 +410,13 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-				echo '<td style="'.$defaultTdStyle.'"><a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">';
-				echo $v;
-				echo '</a></td>';				
+                                $edit_url = $v;
+                                if($addEdit_flag) {
+                                    $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
+                                }                                
+				echo '<td style="'.$defaultTdStyle.'">';
+				echo $edit_url;
+				echo '</td>';				
 			}else
 			if($columnName == 'event_link' || $columnName == 'result_link')
 			{
@@ -2402,7 +2411,8 @@ function fillUpmLarvolIDs($upmId,$LarvolIDs=array())
  * @author Jithu Thomas
  */
 function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),$options=array('import'=>true,'searchDataCheck'=>false,'search'=>true,'add_new_record'=>true),$entity=null)
-{
+{ 
+        $addEdit_flag = (isset($options['addEdit_flag'])) ? $options['addEdit_flag'] : FALSE;
 	global $page;	
 	$actual_table=$table;
 	switch($table)
@@ -2447,7 +2457,9 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	echo '<fieldset class="floatl">';
 	echo '<legend> Actions: </legend>';
 	if(isset($options['add_new_record']) && $options['add_new_record']!==false)
-	echo '<input type="submit" value="Add New Record" name="add_new_record">';
+            if($addEdit_flag == TRUE) { 
+                echo '<input type="submit" value="Add New Record" name="add_new_record">';
+            }
 		if($options['import'])
 		echo '<input type="submit" value="Import" name="import">';
 		echo '</fieldset>';
