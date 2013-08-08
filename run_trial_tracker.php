@@ -8913,7 +8913,7 @@ class TrialTracker
 		
 		$pIds = array();
 		$aIds = array();
-		
+
 		if(isset($globalOptions["DiseaseCatId"]) && $globalOptions["DiseaseCatId"] != ""){
 			$query = "SELECT child FROM `entity_relations` WHERE parent =".$globalOptions["DiseaseCatId"];
 			$res = mysql_query($query) or die('Bad SQL query for counting diseases by a disease category ID ');
@@ -8925,6 +8925,7 @@ class TrialTracker
 			}
 			$pIds=$arrDiseaseIds;
 		} else {
+			
 			$pIds = array_map(function($item) { return $item['product']; }, $Ids);
 		}
 		
@@ -8934,6 +8935,16 @@ class TrialTracker
 		$aIds = array_map(function($item) { return $item['area']; }, $Ids);	
 		$aIds = array_filter($aIds);
 		$aIds = array_unique($aIds);
+		
+		$query = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $aIds) . ") group by id";
+		$res = mysql_query($query) or die(mysql_error());
+		if(mysql_num_rows($res) > 0)
+		{
+			while($row = mysql_fetch_array($res)){
+				$arrDiseaseIds[] = $row['child'];
+			}
+			$aIds=$arrDiseaseIds;
+		}
 		
 		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
 		$endRange = date('Y-m-d', $this->timeMachine);
