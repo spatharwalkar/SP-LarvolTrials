@@ -8928,7 +8928,7 @@ class TrialTracker
 			
 			$pIds = array_map(function($item) { return $item['product']; }, $Ids);
 		}
-		
+		//echo __FILE__."<br/>".__LINE__."<br/><pre/>";var_dump($pIds); die;		
 		$pIds = array_filter($pIds);	
 		$pIds = array_unique($pIds);	
 		
@@ -11286,7 +11286,8 @@ class TrialTracker
 				{
 					$naUpms = $Values['Data'][$sectionId]['naUpms'];
 				}
-				
+				if (empty($sectionHeader) && !empty($_REQUEST["DiseaseCatId"]))
+					$sectionHeader = $Values["Data"][$_REQUEST["DiseaseCatId"]]["sectionHeader"];
 				//Rendering Upms
 				$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms, 'n');
 			}
