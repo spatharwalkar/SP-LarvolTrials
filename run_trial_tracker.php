@@ -8936,14 +8936,17 @@ class TrialTracker
 		$aIds = array_filter($aIds);
 		$aIds = array_unique($aIds);
 		
-		$query = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $aIds) . ") group by id";
-		$res = mysql_query($query) or die(mysql_error());
-		if(mysql_num_rows($res) > 0)
-		{
-			while($row = mysql_fetch_array($res)){
-				$arrDiseaseIds[] = $row['child'];
+		if(count($aIds) > 0){
+			$query = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $aIds) . ") group by id";
+			$res = mysql_query($query) or die(mysql_error());
+			if(mysql_num_rows($res) > 0)
+			{
+				while($row = mysql_fetch_array($res)){
+					$arrDiseaseIds[] = $row['child'];
+				}
+				$aIds=$arrDiseaseIds;
 			}
-			$aIds=$arrDiseaseIds;
+				
 		}
 		
 		$startRange = date('Y-m-d', strtotime($this->timeInterval, $this->timeMachine));
