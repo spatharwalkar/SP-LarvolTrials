@@ -1528,8 +1528,11 @@ else $ddesc=$rec->detailed_descr->textblock;
 				$pc_date = normal('date',(string)$value);
 			}
 	}
-	if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
-	else $end_date=$pc_date;
+	
+	// changed condition so that field primary_completion_date takes precedence over completion_date.
+	
+	if(isset($pc_date) and !is_null($pc_date)) $end_date=$pc_date;
+	else $end_date=$c_date;
 	foreach($record_data as $fieldname => $value)
 	{
 		if(!addval($larvol_id, $fieldname, $value,$record_data['lastchanged_date'],$oldtrial,NULL,$end_date,$rec->id_info->nct_id))

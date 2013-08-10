@@ -336,9 +336,10 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storecha
 			$record_data = $res;
 			
 		}
-
-		if(isset($c_date) and !is_null($c_date)) $end_date=$c_date;
-		else $end_date=$pc_date;
+		
+		// changed condition so that field primary_completion_date takes precedence over completion_date.
+		if(isset($pc_date) and !is_null($pc_date)) $end_date=$pc_date;
+		else $end_date=$c_date;
 		
 
 		$i=0;

@@ -124,15 +124,16 @@ function applyInactiveDate($arr=array())
 										'Available'
 		);
 		
-		if($completionDate)
-		{
-			$addedDate = getAddedDate('completion_date', $studyCatId);
-			$inactiveDate = $completionDate;
-		}
-		elseif($primaryCompletionDate) 
+		// changed condition so that field primary_completion_date takes precedence over completion_date.
+		if($primaryCompletionDate) 
 		{
 			$addedDate = getAddedDate('primary_completion_date', $studyCatId);
 			$inactiveDate = $primaryCompletionDate;
+		}
+		elseif($completionDate)
+		{
+			$addedDate = getAddedDate('completion_date', $studyCatId);
+			$inactiveDate = $completionDate;
 		}
 		elseif($overallStatus)
 		{
