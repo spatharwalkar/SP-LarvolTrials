@@ -8227,6 +8227,16 @@ class TrialTracker
 			
 		$ottType = $Arr['ottType'];
 		$productSelector = $Arr['productSelector'];
+	    
+	    if(!empty($globalOptions["sphinxSearch"]) && in_array($globalOptions["sphinxSearch"],$productSelector) && (false === in_array($globalOptions["sphinxSearch"],$globalOptions["product"])) ){
+	    	$arrKey = array_search($globalOptions["sphinxSearch"],$productSelector);
+	    	$arrKey = ( string ) $arrKey;
+	    	if(false === strpos($_REQUEST["pr"], $arrKey)) {
+	    	    array_push($globalOptions["product"],$arrKey);
+	    	}
+	    	unset($globalOptions["sphinxSearch"]);
+		} 
+		
 		$Ids = $Arr['Ids'];
 		$TrialsInfo = $Arr['TrialsInfo'];
 		
