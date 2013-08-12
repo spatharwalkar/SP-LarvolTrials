@@ -333,10 +333,8 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-                                $edit_url = $v;
-                                if($addEdit_flag) {
-                                    $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
-                                }
+                                $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
+                                
 				echo '<td style="'.$defaultTdStyle.'">';
 				echo $edit_url;
 				echo '</a></td>';				
@@ -410,10 +408,8 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-                                $edit_url = $v;
-                                if($addEdit_flag) {
-                                    $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
-                                }                                
+                                $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
+                                
 				echo '<td style="'.$defaultTdStyle.'">';
 				echo $edit_url;
 				echo '</td>';				
@@ -813,6 +809,8 @@ function input_tag($row,$dbVal=null,$options=array())
 	
 	//get general input params from options
 	$disabled = (isset($options['disabled']) && $options['disabled']===true)?'disabled="disabled"':null;
+        //Not using $disabled var above seems to be being used as bool in the code below whereas its value is being set as non-boolean??
+	$input_disabled = (isset($options['input_disabled']) && $options['input_disabled']===true)?TRUE:FALSE;
 	$altTitle = (isset($options['alttitle']))?$options['alttitle']:null;
 	$style = (isset($options['style']))?$options['style']:null;
 	
@@ -832,6 +830,10 @@ function input_tag($row,$dbVal=null,$options=array())
 	switch($type)
 	{
 		case 'enum':
+                        if($input_disabled) {
+                            echo $dbVal; 
+                            break;
+                        }                 
 			$type1 = $row['Type'];
 			$search = array('enum','(',')','\'');
 			$replace = array('','','','');
@@ -844,6 +846,10 @@ function input_tag($row,$dbVal=null,$options=array())
 			break;
 			
 		case 'searchdata':
+                        if($input_disabled) {
+                            echo ''; 
+                            break;
+                        }
 			$id = $options['id']?$options['id']:null;
 			$table = $options['table'];
 			if($searchData!='' && ($options['callFrom']!='contentListingProducts' && $options['callFrom']!='contentListingAreas'))
@@ -909,6 +915,7 @@ function input_tag($row,$dbVal=null,$options=array())
 				return '<input type="checkbox" name="'.$nameIndex.$row['Field'].'" id="'.$row['Field'].'" title="'.$altTitle.'" alt="'.$altTitle.'" '.$checkedStat.'/ value="1">';
 			}
 		default:
+                  
 			$dateinput = (strpos($row['Field'], 'date') !== false) ? ' class="jdpicker"' : '';
 			
 			if(is_array($dbVal) && count($dbVal)>0 && isset($options['one_to_many']) && $options['one_to_many']==1)
@@ -922,11 +929,11 @@ function input_tag($row,$dbVal=null,$options=array())
 			elseif(is_array($dbVal) && count($dbVal)>0 && (isset($options['one_to_many']) || $options['one_to_many']!=1))
 			{
 				//nodb val support since dbval is array this option is proceeded with a options['one_to_many'] == 1 input_tag call
-				return '<input '.$style.' type="text" value="" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
+				return $input_disabled ? "" : '<input '.$style.' type="text" value="" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
 			}
 			else 
 			{
-				return '<input '.$style.' type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
+				return $input_disabled ? $dbVal : '<input '.$style.' type="text" value="'.$dbVal.'" name="'.$nameIndex.$row['Field'].'" id="'.$nameIndex.$row['Field'].'"' . $dateinput . '/>';
 			}
 			break;
 	}
@@ -2636,7 +2643,11 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	$formStyle = isset($options['formStyle'])?$options['formStyle']:null;
 	$mainTableStyle = isset($options['mainTableStyle'])?$options['mainTableStyle']:null;
 	$addEditGlobalInputStyle = isset($options['addEditGlobalInputStyle'])?$options['addEditGlobalInputStyle']:null;
-	
+
+        $addEdit_flag = isset($options['addEdit_flag'])?$options['addEdit_flag']:FALSE;
+        $input_disabled = !$addEdit_flag;
+	$defaultOptions = array('input_disabled' => $input_disabled);
+
 	//get current details if the id is passed.
 	if($id)
 	{
@@ -2765,7 +2776,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			}			
 			echo '<tr><td>'.ucwords(implode(' ',explode('_',$row['Field']))).' : </td>';
 			echo '<td>';
-			echo input_tag($row,$dbVal,array('table'=>$actual_table,'id'=>$id,'callFrom'=>'addedit','saveStatusForInputTag'=>$saveStatusForInputTag));
+			echo input_tag($row,$dbVal,array('table'=>$actual_table,'id'=>$id,'callFrom'=>'addedit','saveStatusForInputTag'=>$saveStatusForInputTag, 'input_disabled'=>$input_disabled));
 			echo '</td></tr>';	
 			$i++;
 			continue;			
@@ -2919,7 +2930,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 	}
 	echo '<tr>&nbsp;<td></td><td>
 	<input type="hidden" name="entity" value="'.$_REQUEST['entity'].'"/>
-	<input name ="save" type="submit" value="Save"/></td>';
+	'.($input_disabled ? '<input type="button" onclick="history.go(-1)" value="Go back" />' : '<input name ="save" type="submit" value="Save"/>').'</td>';
 	echo '</table>';
 	echo '</form>';
 	//upm history 

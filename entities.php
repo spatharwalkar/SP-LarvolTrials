@@ -136,7 +136,12 @@ $(document).ready(function(){
 </script>
 
 <div class="error">Under Development</div>
-<?php 
+<?php
+
+$addEdit_flag = (($db->user->userlevel == 'admin') || ($db->user->userlevel == 'root')) ? TRUE : FALSE;
+$addEdit_flag = FALSE;
+//$addEdit_flag = TRUE;
+
 //Start controller area
 //delete controller should come above save controller if delete box is added in the add edit form
 if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteFlag)
@@ -149,6 +154,10 @@ if(isset($_REQUEST['deleteId']) && is_numeric($_REQUEST['deleteId']) && $deleteF
 //save operation controller
 if($_REQUEST['save']=='Save')
 {
+        if($addEdit_flag == FALSE) {
+            echo '<p style="color:red">Sorry, but you do not seem to have enough permissions to perform the save operation!</p>';
+            exit;
+        }
 	//defined readonly table fields here as well to avoid them in query will be better
 	$ReadOnlyArr = array('comments','entity_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals');
 	foreach($ReadOnlyArr as $Rfield)
@@ -220,8 +229,6 @@ else
 	$skipArr = array('xml','LI_id','old_id','is_active','client_name','comments','product_type','licensing_mode','administrative_mode','created','modified','company','brand_names','generic_names','code_names','approvals','search_name','administration_mode','discontinuation_status','is_key','discontinuation_status_comment','mesh_name');
 }
 
-$addEdit_flag = (($db->user->userlevel == 'admin') || ($db->user->userlevel == 'root')) ? TRUE : FALSE;
-
 $entity=$_REQUEST['entity'];
 pagePagination($limit,$totalCount,$table,$script,$ignoreFields, array('import'=>true,'searchDataCheck'=>true,'add_new_record'=>true,'search'=>true,$entity, 'addEdit_flag' => $addEdit_flag));
 //pagination controller
@@ -237,7 +244,7 @@ if($_REQUEST['add_new_record']=='Add New Record' || $_REQUEST['id'] && !$_REQUES
 	$addEditGlobalInputStyle = 'style="width:99%;min-width:200px;"';
 	$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 	echo '<div>';
-	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true,'formStyle'=>$addEditFormStyle,'mainTableStyle'=>$mainTableStyle,'addEditGlobalInputStyle'=>$addEditGlobalInputStyle,'saveStatus'=>$saveStatus,'preindexProgress'=>$entityPreindexProgress,'preindexStatus'=>$entityStatus),$skipArr);
+	addEditUpm($id,$table,$script,array("formOnSubmit"=>"onsubmit=\"return chkbox(this,'delsearch','searchdata');\"",'deletebox'=>true,'formStyle'=>$addEditFormStyle,'mainTableStyle'=>$mainTableStyle,'addEditGlobalInputStyle'=>$addEditGlobalInputStyle,'saveStatus'=>$saveStatus,'preindexProgress'=>$entityPreindexProgress,'preindexStatus'=>$entityStatus, 'addEdit_flag' => $addEdit_flag),$skipArr);
 	echo '</div>';
 	echo '<br/>';
 }
