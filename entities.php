@@ -139,8 +139,6 @@ $(document).ready(function(){
 <?php
 
 $addEdit_flag = (($db->user->userlevel == 'admin') || ($db->user->userlevel == 'root')) ? TRUE : FALSE;
-$addEdit_flag = FALSE;
-//$addEdit_flag = TRUE;
 
 //Start controller area
 //delete controller should come above save controller if delete box is added in the add edit form
