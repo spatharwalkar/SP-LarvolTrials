@@ -48,9 +48,15 @@
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
 	
+	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'company.php?CompanyId='.$CompanyId;
 	
-	$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
+	if($categoryFlag == 1){
+		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($CompanyId, 'Institution' ));
+	}else{
+		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
+	}
+	
 	$TabProductCount = count(GetProductsFromCompany($CompanyId, 'CPT', array()));
 	
 	$meta_title = 'Larvol Sigma'; //default value
@@ -179,8 +185,12 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 		<table cellpadding="0" cellspacing="0" id="disease_tabs">
 			<tr>
 				'; 
+				if($categoryFlag == 1){
+					$CountExt = (($TabDiseaseCount == 1) ? 'Disease Category':'Disease Categories');
+				}else{
+					$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+				}
 				
-				$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
 				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
 				$companyLinkName = '<a href="'.$tabCommonUrl.'&tab=company" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
@@ -205,7 +215,7 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 {
 	print '<div id="diseaseTab_content" align="center">';
 	if($tab == 'diseasetrac')
-		print showDiseaseTracker($CompanyId, 'CDT', $page);		//CDT= COMPANY DISEASE TRACKER
+		print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag);		//CDT= COMPANY DISEASE TRACKER
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 	
 	print '</div>';
@@ -214,6 +224,8 @@ else
 {	 
 	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DCPT')
 		print showProductTracker($CompanyId, $dwcount, 'DCPT', $page, $OptionArray);	//DCPT - DISEASE COMPANY PRODUCT TRACKER
+	else if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCT')
+		print showProductTracker($CompanyId, $dwcount, 'DISCATCT', $page, $OptionArray);	//DISCATCT - DISEASE CATEGORY COMPANY TRACKER
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 
 }

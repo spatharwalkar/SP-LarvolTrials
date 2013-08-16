@@ -194,7 +194,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$entity2Type = 'Disease';
 		}
 	}
-	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER
+	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DCMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -3071,6 +3071,44 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 		}
 		return array_filter(array_unique($Products));
 	}
+	/*
+	else if($TrackerType == 'DCMPT')
+	{
+		$productIds = GetProductsFromMOA($moaID, 'MPT', array());
+		$PhaseArray = GetPhaseArray($OptionArray['Phase']);
+		$DiseaseIds = getDiseaseIdsFromDiseaseCat( $OptionArray['DiseaseCatId'] );
+		$ImplodeDiseaseIds = implode("','", $DiseaseIds);
+	
+		$query = "SELECT rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`count_total` > 0) AND (((rpt.`entity1` IN ('". $ImplodeDiseaseIds ."') AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` IN ('". $ImplodeDiseaseIds ."')))) ";
+	
+		if(isset($OptionArray['Phase']) && $OptionArray['Phase'] != NULL)
+		{
+			$Return = GetIncludeExcludePhaseArray($phase);
+				
+			if($OptionArray['Phase'] != 'na')
+				$subQuery = " AND rpt.`highest_phase` IN ('". implode('\', \'',$PhaseArray) ."')";
+			else
+				$subQuery = " AND (rpt.`highest_phase` NOT IN ('". implode('\', \'',$Return['exclude']) ."') OR rpt.`highest_phase` IS NULL)";
+		}
+	
+		$query = $query.$subQuery;
+	
+		$res = mysql_query($query) or die('Bad SQL query getting products from moa id, disease id and phase in PT');
+	
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				if(in_array($row['entity1'], $productIds))
+					$Products[] = $row['entity1'];
+				else if(in_array($row['entity2'], $productIds))
+					$Products[] = $row['entity2'];
+			}
+		}
+	
+		return array_filter(array_unique($Products));
+	}
+	*/
 	else
 	{
 		$productIds = GetProductsFromMOA($moaID, 'MPT', array());

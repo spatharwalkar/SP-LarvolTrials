@@ -34,23 +34,34 @@
 		$DiseaseId = mysql_real_escape_string($_REQUEST['DiseaseId']);
 	}
 	
+	$DiseaseCatId = NULL;
+	if(isset($_REQUEST['DiseaseCatId']))
+	{
+		$DiseaseCatId = mysql_real_escape_string($_REQUEST['DiseaseCatId']);
+	}
+	
 	$phase = NULL;
 	if(isset($_REQUEST['phase']))
 	{
 		$phase = mysql_real_escape_string($_REQUEST['phase']);
 	}
 
-	$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
+	$OptionArray = array('DiseaseId'=>$DiseaseId, 'DiseaseCatId' => $DiseaseCatId, 'Phase'=> $phase);
 	
 	$tab = 'moa';
 	if(isset($_REQUEST['tab']))
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
-	
+	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'moa.php?MoaId='.$MoaId;
 	
-	$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaId, 'MOA'));
+	if($categoryFlag == 1){
+		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($MoaId, 'MOA'));
+	}else{
+		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaId, 'MOA'));
+	}	
+	
 	$TabProductCount = count(GetProductsFromMOA($MoaId, 'MPT', array()));
 	
 	$meta_title = 'Larvol Sigma'; //default value
@@ -175,8 +186,11 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 		<table cellpadding="0" cellspacing="0" id="disease_tabs">
 			<tr>
 				'; 
-				
-				$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+				if($categoryFlag == 1){
+					$CountExt = (($TabDiseaseCount == 1) ? 'Disease Category':'Disease Categories');
+				}else{
+					$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+				}
 				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
 				$moaLinkName = '<a href="'.$tabCommonUrl.'&tab=moa" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
@@ -201,7 +215,7 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 {
 	print '<div id="diseaseTab_content" align="center">';
 	if($tab == 'diseasetrac')
-		print showDiseaseTracker($MoaId, 'MDT', $page);		//MDT= MOA DISEASE TRACKER
+		print showDiseaseTracker($MoaId, 'MDT', $page, $categoryFlag);		//MDT= MOA DISEASE TRACKER
 	else
 		print showProductTracker($MoaId, $dwcount, 'MPT', $page, $OptionArray);	//MPT= MOA PRODUCT TRACKER 	
 	print '</div>';
@@ -209,7 +223,9 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 else
 {	 
 	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DMPT')
-		print showProductTracker($MoaId, $dwcount, 'DMPT', $page, $OptionArray);	//DMPT= DISEASE MOA PRODUCT TRACKER 
+		print showProductTracker($MoaId, $dwcount, 'DMPT', $page, $OptionArray);	//DMPT= DISEASE MOA PRODUCT TRACKER
+	else if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATPT')
+		print showProductTracker($MoaId, $dwcount, 'DISCATPT', $page, $OptionArray);	//DISCATPT :DISEASE CATEGORY PRODUCT TRACKER  //DCMPT= DISEASE CATEGORY MOA PRODUCT TRACKER
 	else
 		print showProductTracker($MoaId, $dwcount, 'MPT', $page, $OptionArray);	//MPT= MOA PRODUCT TRACKER 	
 }

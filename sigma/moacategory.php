@@ -47,9 +47,16 @@
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
+	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'moacategory.php?MoaCatId='.$MoaCatId;
 	
-	$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
+	
+	if($categoryFlag == 1){	
+		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
+	}else{
+		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
+	}
+	
 	$TabProductCount = count(GetProductsFromMOACategory($MoaCatId, 'MCPT', array()));
 	
 	$meta_title = 'Larvol Sigma'; //default value
@@ -174,8 +181,11 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 		<table cellpadding="0" cellspacing="0" id="disease_tabs">
 			<tr>
 				'; 
-				
-				$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+				if($categoryFlag == 1){
+					$CountExt = (($TabDiseaseCount == 1) ? 'Disease Category':'Disease Categories');
+				}else{
+					$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+				}
 				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
 				$moacatLinkName = '<a href="'.$tabCommonUrl.'&tab=moacat" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
@@ -201,7 +211,7 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 {
 	print '<div id="diseaseTab_content" align="center">';
 	if($tab == 'diseasetrac')
-		print showDiseaseTracker($MoaCatId, 'MCDT', $page);		//MCDT= MOA CATEGORY DISEASE TRACKER
+		print showDiseaseTracker($MoaCatId, 'MCDT', $page, $categoryFlag);		//MCDT= MOA CATEGORY DISEASE TRACKER
 		//print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER
 	else
 		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
