@@ -386,7 +386,7 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `LI_id` varchar(63) COLLATE utf8_unicode_ci DEFAULT NULL,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `class` enum('Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area','Disease_Category') CHARACTER SET latin1 NOT NULL,
+  `class` enum('Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area','Disease_Category','Investigator') CHARACTER SET latin1 NOT NULL,
   `description` text COLLATE utf8_unicode_ci,
   `display_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `client_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -410,6 +410,7 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
   `approvals` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
   `xml` text CHARACTER SET latin1,
   `mesh_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `affiliation` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name` ASC, `class` ASC),
   UNIQUE KEY `LI_id` (`LI_id` ASC, `class` ASC) 

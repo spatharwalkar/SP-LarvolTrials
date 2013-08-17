@@ -19,6 +19,7 @@ function tableColumns($table)
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'investigator': $actual_table = "entities"; break;
 		}	
 	
 	$query = "SHOW COLUMNS FROM $actual_table";	
@@ -72,6 +73,7 @@ function tableColumnDetails($table)
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'investigator': $actual_table = "entities"; break;
 		}	
 	$query = "SHOW COLUMNS FROM $actual_table";
 	$res = mysql_query($query);
@@ -115,6 +117,7 @@ switch($table)
 		case 'institutions': $actual_table = "entities"; break;
 		case 'moas': $actual_table = "entities"; break;
 		case 'moacategories': $actual_table = "entities"; break;
+		case 'investigator': $actual_table = "entities"; break;
 		case 'diseases': 
 			
 			/****** MESH ********/
@@ -690,6 +693,7 @@ function calculateWhere($table,$orig_table="")
 			case 'moas': $class = "MOA"; break;
 			case 'moacategories': $class = "MOA_Category"; break;
 			case 'diseases': $class = "Disease"; break;
+			case 'investigator': $class = "Investigator"; break;
 		}
 
 	if(!empty($class))
@@ -721,6 +725,8 @@ function getTotalCount($table)
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'investigator': $actual_table = "entities"; break;
+			
 		}
 	$where = calculateWhere($actual_table,$table);
 	if($table == 'upm')
@@ -768,6 +774,7 @@ function deleteData($id,$table)
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
 		}
+		if($table=='investigator') return false;
 	$query = "delete from $actual_table where id=$id";
 	mysql_query($query) or softDieSession('Cannot delete '.$table.'. '.$query);
 	echo 'Successfully deleted '.$table.'.';
@@ -964,6 +971,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
 			case 'therapeuticareas': $actual_table = "entities"; break;
+			case 'investigator': $actual_table = "entities"; break;
+			
 		}
 	if($import ==1 && $table=='redtags')
 	{
@@ -1047,6 +1056,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'diseases': $class = "Disease"; break;
 					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
+				if($table=='investigator') return false;
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
 					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$redTagArray).")";
@@ -1166,6 +1176,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'diseases': $class = "Disease"; break;
 					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
+				if($table=='investigator') return false;
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
 					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
@@ -1424,6 +1435,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'diseases': $class = "Disease"; break;
 					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
+				if($table=='investigator') return false;
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
 					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
@@ -1522,6 +1534,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'diseases': $class = "Disease"; break;
 					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
+				if($table=='investigator') return false;
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
 					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
@@ -1682,6 +1695,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'diseases': $class = "Disease"; break;
 					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
+				if($table=='investigator') return false;
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
 					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
@@ -1781,6 +1795,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'diseases': $class = "Disease"; break;
 					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
+				if($table=='investigator') return false;
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
 					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
@@ -1878,6 +1893,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'diseases': $class = "Disease"; break;
 					case 'therapeuticareas': $class = "Therapeutic_Area"; break;
 				}
+				if($table=='investigator') return false;
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
 					$query = "insert into `entities` (".implode(',',$importKeys).") values (".implode(',',$importVal).")";
@@ -2092,6 +2108,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					case 'moacategories': $class = "MOA_Category"; break;
 					case 'diseases': $class = "Disease"; break;
 				}
+				if($table=='investigator') return false;
 				if( $table == 'moacategories' or $table == 'moas'  )
 				{
 					$query = "insert into entities (`".implode('`,`',$newpostKeys)."`) values (".implode(',',$newpost).")";
@@ -2430,6 +2447,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		case 'moas': $actual_table = "entities"; break;
 		case 'moacategories': $actual_table = "entities"; break;
 		case 'diseases': $actual_table = "entities"; break;
+		case 'investigator': $actual_table = "entities"; break;
 	}
 	
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
@@ -2635,6 +2653,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'investigator': $actual_table = "entities"; break;
 		}
 	$searchType = calculateSearchType($db->sources,unserialize(base64_decode($searchData)));
 	$insertEdit = 'Insert';
