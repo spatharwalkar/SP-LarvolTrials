@@ -278,24 +278,22 @@ class DatabaseManager
 		$query = 'SELECT id FROM users WHERE username="' . $username . '" AND email="' . $email . '" LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL query looking up user');
 		$res = mysql_fetch_array($res);
-		if($res === false) return 'Bad username/email combination.';
-		
+		if($res === false) return 'Bad username/email combination.';		
 		//Now we know the combination is valid, so proceed with the reset
 		$password = generateCode();
 		//send email
 		$headers = 'From: ' . SITE_NAME . ' <no-reply@' . $_SERVER['SERVER_NAME'] . '>' . "\r\n" . 'X-Mailer: PHP/' . phpversion();
 		$mailmsg = 'Your password on ' . SITE_NAME . " has been reset. Here are your new credentials:\r\n"
-					. 'Username: ' . $unescaped_username . "\r\nPassword: " . $password . "\r\n";
-					
-		if(!MAIL_ENABLED && $this->loggedIn()) //Used when Admin Resets Passwords && Mail Not Enabled
-		{	global $now;
+					. 'Username: ' . $unescaped_username . "\r\nPassword: " . $password . "\r\n";		
+		if(!MAIL_ENABLED || $this->loggedIn()) //Used when Admin Resets Passwords && Mail Not Enabled
+		{	
+			global $now;
 			$filename='PW_Reset_'.date('Y-m-d_H.i.s',$now);
 			$MyText  = 'To:'. $unescaped_email ."\r\n";
 			$MyText .= 'Subject:'.SITE_NAME . ' Password Reset ' .''. "\r\n\r\n";
 			$MyText .=  $mailmsg."\r\n\r\n";
 			
 			if(!is_dir('logs/email_files')) mkdir("logs/email_files") or die("could not create directory to write.");
-		
 			$myFile = 'logs/email_files/'.$filename.'.txt';
 			$fh = fopen($myFile, 'w') or die("can't open file");
 			fwrite($fh, $MyText);
@@ -303,8 +301,8 @@ class DatabaseManager
 		}
 		else
 		{	//For Forgot Password - Reset		
-		$mailres = mail($unescaped_email, SITE_NAME.' Password Reset', $mailmsg, $headers);
-		if($mailres === false) return 'Email could not be sent sue to server error, so password was not reset.';
+			$mailres = mail($unescaped_email, SITE_NAME.' Password Reset', $mailmsg, $headers);
+			if($mailres === false) return 'Email could not be sent sue to server error, so password was not reset.';
 		}
 		//email was succesful at this point, so make the change.		
 		$query = 'UPDATE users SET password="' . hash(HASH_ALGO, $password.$username) . '" WHERE id=' . $res['id']
