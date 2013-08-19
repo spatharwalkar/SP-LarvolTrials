@@ -77,7 +77,7 @@ display:inline;
 				if(isset($e2) && $e2 != NULL)
 				{
 					$LinkDetails = GetLinkNClass($e2);
-					if($LinkDetails['class'] == 'Disease')
+					if($LinkDetails['class'] == 'Disease' || $LinkDetails['class'] == 'Disease_Category')
 					{
 						print '<td><a style="color:#FFFFFF; display:inline;" href="ott.php?e1='.$e1. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 						print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e2).'</a>&nbsp;</td><td style="vertical-align:top;"> >> </td>';
@@ -102,7 +102,7 @@ display:inline;
 				if(isset($e2) && $e2 != NULL)
 				{
 					$LinkDetails = GetLinkNClass($e2);
-					if($LinkDetails['class'] != 'Disease')
+					if($LinkDetails['class'] != 'Disease' && $LinkDetails['class'] != 'Disease_Category')
 					{
 						print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="ott.php?e1='.$e1. ((isset($phase) && $phase != NULL) ? '&phase='.$phase:'').'&sourcepg=TZ"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 						print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="'.$LinkDetails['link'].'">'.GetEntityName($e2).'</a>&nbsp;</td>';
@@ -156,6 +156,8 @@ function GetLinkNClass($id)
 		$LinkNClass['link'] = 'disease.php?DiseaseId='. $header['id'];
 	else if($header['class'] == 'Institution')
 		$LinkNClass['link'] = 'company.php?CompanyId='. $header['id'];
+	else if($header['class'] == 'Disease_Category')
+		$LinkNClass['link'] = 'disease_category.php?DiseaseCatId='. $header['id'];
 	else if($header['class'] == 'MOA')
 		$LinkNClass['link'] = 'moa.php?MoaId='. $header['id'];
 	else if($header['class'] == 'MOA_Category')

@@ -28,11 +28,6 @@
 		$page = mysql_real_escape_string($_REQUEST['page']);
 	}
 	
-	$DiseaseId = NULL;
-	if(isset($_REQUEST['DiseaseId']))
-	{
-		$DiseaseId = mysql_real_escape_string($_REQUEST['DiseaseId']);
-	}
 	
 	$phase = NULL;
 	if(isset($_REQUEST['phase']))
@@ -40,7 +35,23 @@
 		$phase = mysql_real_escape_string($_REQUEST['phase']);
 	}
 
-	$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
+	$DiseaseId = NULL;
+	if(isset($_REQUEST['DiseaseId']))
+	{
+		$DiseaseId = mysql_real_escape_string($_REQUEST['DiseaseId']);
+		$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
+	}
+	
+	if(isset($_REQUEST['DiseaseCatId']))
+	{
+		$DiseaseCatId = mysql_real_escape_string($_REQUEST['DiseaseCatId']);
+		$OptionArray = array('DiseaseCatId'=>$DiseaseCatId, 'Phase'=> $phase);
+	}
+	if(!isset($_REQUEST['DiseaseCatId']) && !isset($_REQUEST['DiseaseId']) ){
+		$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
+	}
+	
+	
 	
 	$tab = 'company';
 	if(isset($_REQUEST['tab']))
@@ -161,6 +172,15 @@ display:inline;
 				{
 					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="disease.php?DiseaseId='.$DiseaseId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 				}
+				if(isset($DiseaseCatId) && $DiseaseCatId != NULL)
+				{
+					print '<td><a style="color:#FFFFFF; display:inline;" href="company.php?CompanyId='.$CompanyId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=CPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="disease_category.php?DiseaseCatId='.$DiseaseCatId.'">'.GetEntityName($DiseaseCatId).'</a>&nbsp;</td>';
+				}
+				if(isset($DiseaseCatId) && $DiseaseCatId != NULL)
+				{
+					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="disease_category.php?DiseaseCatId='.$DiseaseCatId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+				}
 				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="company.php?CompanyId='.$CompanyId.'">'.$CompanyName.'</a>&nbsp;</td>';
 				if(isset($phase) && $phase != NULL)
 				{
@@ -224,8 +244,9 @@ else
 {	 
 	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DCPT')
 		print showProductTracker($CompanyId, $dwcount, 'DCPT', $page, $OptionArray);	//DCPT - DISEASE COMPANY PRODUCT TRACKER
-	else if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCT')
-		print showProductTracker($CompanyId, $dwcount, 'DISCATCT', $page, $OptionArray);	//DISCATCT - DISEASE CATEGORY COMPANY TRACKER
+	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCT')
+		print showProductTracker($CompanyId, $dwcount, 'DISCATCPT', $page, $OptionArray);	//DISCATCT - DISEASE CATEGORY COMPANY PRODUCT TRACKER
+		
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 
 }

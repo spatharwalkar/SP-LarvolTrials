@@ -37,6 +37,7 @@ if($_POST['download'])
 function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray = array())
 {
 	$HTMLContent = '';
+	
 	$Return = DataGenerator($id, $TrackerType, $page, $OptionArray);
 	$uniqueId = uniqid();
 
@@ -158,10 +159,26 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			exit();
 		}
 	}
+	else if($TrackerType == 'DISCATCPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER 
+	{
+	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$Report_DisplayName = $header['display_name'];	
+		$productIds = GetProductsFromCompany($header['id'], $TrackerType, $OptionArray);
+		$id=$header['id'];
+		$ExtName = GetReportNameExtension($OptionArray);
+		
+		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];
+		$entity2Id = $OptionArray['DiseaseCatId'];
+		$entity2Type = 'Disease_Category';
+		
+	}
 	else if($TrackerType == 'DISCATPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
 	{
 		global $productIds;
-		
 		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
@@ -310,6 +327,12 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			else if($TrackerType == 'DPT' || $TrackerType=='DCPT' || $TrackerType=='DMCPT' || $TrackerType=='DMPT')
 			{
 				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . (($TrackerType == 'DPT') ? $id : $entity2Id) ."'";	
+			}
+			else if($TrackerType == 'DISCATCPT')
+			{
+				$arrDiseaseIds   = getAllDiseaseIdsFromDiseaseCat($entity2Id);
+				$impArr=implode("','", $arrDiseaseIds);
+				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity` IN ('" .  $impArr ."')";
 			}
 			else
 			{
@@ -478,7 +501,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 	
 	if($max_count > 0)
 	$ratio = ($columns * $inner_columns) / $max_count;
-	
+
 	///All Data send
 	$Return['matrix'] = $data_matrix;
 	$Return['report_name'] = $Report_DisplayName;
@@ -1172,11 +1195,20 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '<option value="excelchartdown">Excel Chart</option>'
 					. '<option value="tsvdown">TSV</option>'
 					. '</select></li>'
-					. '</ul>'
-					. (($TrackerType=='DCPT' || $TrackerType=='DMPT' || $TrackerType=='DMCPT' || ($TrackerType=='CPT' && isset($phase) && $phase != NULL && $phase != '') || ($TrackerType=='MCPT' && isset($phase) && $phase != NULL && $phase != '') || ($TrackerType=='MPT' && isset($phase) && $phase != NULL && $phase != '') ) ? '<input type="hidden" value="'.$phase.'" name="phase" /><input type="hidden" value="'.$OptionArray['DiseaseId'].'" name="DiseaseId" />' : '')
+					. '</ul>';
+	if($TrackerType=='DCPT' || $TrackerType=='DMPT' || $TrackerType=='DMCPT' || ($TrackerType=='CPT' && isset($phase) && $phase != NULL && $phase != '') || ($TrackerType=='MCPT' && isset($phase) && $phase != NULL && $phase != '') || ($TrackerType=='MPT' && isset($phase) && $phase != NULL && $phase != '') ){
+	
+$htmlContent .= 	'<input type="hidden" value="'.$phase.'" name="phase" /><input type="hidden" value="'.$OptionArray['DiseaseId'].'" name="DiseaseId" />'
 					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
-					. '</div></div>'
-					. '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
+					. '</div></div>';
+} 	elseif($TrackerType=='DISCATCPT'){
+	
+$htmlContent .= 	'<input type="hidden" value="'.$phase.'" name="phase" /><input type="hidden" value="'.$OptionArray['DiseaseCatId'].'" name="DiseaseCatId" />'
+					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
+					. '</div></div>';
+}
+
+$htmlContent .= '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
 					. '</form>';
 				
 						
@@ -1242,6 +1274,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
 		if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
 		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT') $commonPart2 = '&e2=' . $entity2Id;
+		if($TrackerType == 'DISCATCPT') $commonPart2 = '&e2=' . $entity2Id;
 		if($TrackerType != 'PTH') $commonPart2 .= '&sourcepg=TZ';
 		
 		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
@@ -3004,6 +3037,46 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 	
 		return array_filter(array_unique($Products));
 	}
+	elseif ($TrackerType == 'DISCATCPT')
+	{
+		$productIds = GetProductsFromCompany($companyID, 'CPT', array());
+		$PhaseArray = GetPhaseArray($OptionArray['Phase']);
+		$DiseaseCatId = $OptionArray["DiseaseCatId"];
+		
+		$arrDiseaseIds   = getAllDiseaseIdsFromDiseaseCat($DiseaseCatId);
+		
+		$impArr=implode("','", $arrDiseaseIds);
+		$query = "SELECT rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`count_total` > 0) AND (((rpt.`entity1` IN ( '". $impArr ."') AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` IN ( '". $impArr ."')))) ";
+		
+		if(isset($OptionArray['Phase']) && $OptionArray['Phase'] != NULL)
+		{
+			$Return = GetIncludeExcludePhaseArray($phase);
+				
+			if($OptionArray['Phase'] != 'na')
+				$subQuery = " AND rpt.`highest_phase` IN ('". implode('\', \'',$PhaseArray) ."')";
+			else
+				$subQuery = " AND (rpt.`highest_phase` NOT IN ('". implode('\', \'',$Return['exclude']) ."') OR rpt.`highest_phase` IS NULL)";
+		}
+	
+		$query = $query.$subQuery;
+		
+		//echo $query; die;
+	
+		$res = mysql_query($query) or die('Bad SQL query getting products from institution id, disease id and phase in PT');
+	
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				if(in_array($row['entity1'], $productIds))
+					$Products[] = $row['entity1'];
+				else if(in_array($row['entity2'], $productIds))
+					$Products[] = $row['entity2'];
+			}
+		}
+	
+		return array_filter(array_unique($Products));
+	}
 	else
 	{
 		$productIds = GetProductsFromCompany($companyID, 'CPT', array());
@@ -3295,6 +3368,12 @@ function GetReportNameExtension($OptionArray)
 		$ReportName1 = $DiseaseName . " >> ";		
 	}
 	
+	if(isset($OptionArray['DiseaseCatId']) && $OptionArray['DiseaseCatId'] != NULL)
+	{
+		$DiseaseCatName = GetEntityName($OptionArray['DiseaseCatId']);
+		$ReportName1 = $DiseaseCatName . " >> ";
+	}
+	
 	$ReportName2 = '';
 	if(isset($OptionArray['Phase']) && $OptionArray['Phase'] != NULL)
 	{
@@ -3357,5 +3436,24 @@ function GetProductsFromDiseaseCat($DiseaseCatID)
 	}
 	return array_filter(array_unique($Products));
 }
+
+
+/* Function to get Diseases count based on Disease_Category id */
+function getAllDiseaseIdsFromDiseaseCat($dcid)
+{
+	global $db;
+	global $now;
+	$ProductsCount = 0;
+	$query = "SELECT child FROM `entity_relations` WHERE parent =$dcid";
+	$res = mysql_query($query) or die('Bad SQL query for counting diseases by a disease category ID ');
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+			$arrDiseaseIds[] = $row['child'];
+	}
+	return $arrDiseaseIds;
+}
+
 
 ?>
