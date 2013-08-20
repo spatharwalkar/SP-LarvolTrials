@@ -244,8 +244,8 @@ else
 {	 
 	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DCPT')
 		print showProductTracker($CompanyId, $dwcount, 'DCPT', $page, $OptionArray);	//DCPT - DISEASE COMPANY PRODUCT TRACKER
-	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCT')
-		print showProductTracker($CompanyId, $dwcount, 'DISCATCPT', $page, $OptionArray);	//DISCATCT - DISEASE CATEGORY COMPANY PRODUCT TRACKER
+	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCPT')
+		print showProductTracker($CompanyId, $dwcount, 'DISCATCPT', $page, $OptionArray);	//DISCATCPT - DISEASE CATEGORY COMPANY PRODUCT TRACKER
 		
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 

@@ -223,7 +223,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 						$data_matrix[$key]['HeaderLink'] = 'disease_category.php?DiseaseCatId=' . $data_matrix[$key]['ID'];
 						$identifierKey = 'DiseaseCatId=';
 						//$trackerType = array('Institution' => 'DCCPT', 'MOA' => 'DCMPT', 'MOA_Category' => 'DCMCPT');
-						$trackerType = array('Institution' => 'DISCATCT', 'MOA' => 'DISCATMT', 'MOA_Category' => 'DISCATMCT');
+						$trackerType = array('Institution' => 'DISCATCPT', 'MOA' => 'DISCATMPT', 'MOA_Category' => 'DISCATMCT');
 					}else{
 						$data_matrix[$key]['HeaderLink'] = 'disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
 						$identifierKey = 'DiseaseId=';
@@ -1227,7 +1227,7 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 					. '</td>';
 					
 	global $tabCommonUrl;
-	if(isset($_REQUEST['category'])){
+	if(isset($_REQUEST['category']) && $_REQUEST['category'] == 1){
 		$catDisabled = ' disabled="disabled"';
 		$catHidden = '<input type="hidden" name="category" id="category" value="1" />';
 		$diseaseDisabled = '';
