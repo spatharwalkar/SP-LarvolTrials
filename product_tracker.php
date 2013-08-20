@@ -40,7 +40,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	
 	$Return = DataGenerator($id, $TrackerType, $page, $OptionArray);
 	$uniqueId = uniqid();
-
+	
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
 	$Report_DisplayName = $Return['report_name'];
@@ -64,7 +64,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 		$MainPageURL = 'disease_category.php';	
 	else if($TrackerType == 'CPT' || $TrackerType == 'DCPT')	//CPT=COMPANY PRODUCT TRACKER || DCPT=DISEASE COMPANY PRODUCT TRACKER
 		$MainPageURL = 'company.php';
-	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER
+	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DISCATMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 		$MainPageURL = 'moa.php';
 	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER
 		$MainPageURL = 'moacategory.php';
@@ -211,7 +211,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$entity2Type = 'Disease';
 		}
 	}
-	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DCMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
+	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT' )	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DCMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -223,6 +223,11 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 		$id=$header['id'];
 		$ExtName = GetReportNameExtension($OptionArray);	
 		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];		
+		if($TrackerType == 'DISCATMPT')
+		{
+			$entity2Id = $OptionArray['DiseaseCatId'];
+			$entity2Type = 'Disease_Category';
+		}
 		if($TrackerType == 'DMPT')
 		{
 			$entity2Id = $OptionArray['DiseaseId'];
@@ -328,7 +333,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			{
 				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . (($TrackerType == 'DPT') ? $id : $entity2Id) ."'";	
 			}
-			else if($TrackerType == 'DISCATCPT')
+			else if($TrackerType == 'DISCATCPT'|| $TrackerType=='DISCATMPT')
 			{
 				$arrDiseaseIds   = getAllDiseaseIdsFromDiseaseCat($entity2Id);
 				$impArr=implode("','", $arrDiseaseIds);
@@ -338,7 +343,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			{
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'";
 			}
-			
+						
 			$phase_res = mysql_query($phase_query) or die(mysql_error());
 			while($phase_row=mysql_fetch_array($phase_res))
 			{
@@ -1201,10 +1206,10 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 $htmlContent .= 	'<input type="hidden" value="'.$phase.'" name="phase" /><input type="hidden" value="'.$OptionArray['DiseaseId'].'" name="DiseaseId" />'
 					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 					. '</div></div>';
-} 	elseif($TrackerType=='DISCATCPT'){
-	
-$htmlContent .= 	'<input type="hidden" value="'.$phase.'" name="phase" /><input type="hidden" value="'.$OptionArray['DiseaseCatId'].'" name="DiseaseCatId" />'
-					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
+} 	elseif($TrackerType=='DISCATCPT' || $TrackerType=='DISCATMPT'){
+		if(isset($phase) && $phase != NULL && $phase != '')
+			$htmlContent .= 	'<input type="hidden" value="'.$phase.'" name="phase" />';
+		$htmlContent .= '<input type="hidden" value="'.$OptionArray['DiseaseCatId'].'" name="DiseaseCatId" />'.'<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
 					. '</div></div>';
 }
 
@@ -1273,7 +1278,7 @@ $htmlContent .= '</div><script type="text/javascript">cssdropdown.startchrome("'
 		$commonPart2 = '';
 		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
 		if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
-		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT') $commonPart2 = '&e2=' . $entity2Id;
+		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT' || $TrackerType=='DISCATMPT') $commonPart2 = '&e2=' . $entity2Id;
 		if($TrackerType == 'DISCATCPT') $commonPart2 = '&e2=' . $entity2Id;
 		if($TrackerType != 'PTH') $commonPart2 .= '&sourcepg=TZ';
 		
@@ -3182,6 +3187,43 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 		return array_filter(array_unique($Products));
 	}
 	*/
+	elseif ($TrackerType == 'DISCATMPT')
+	{
+		$productIds = GetProductsFromMOA($moaID, 'MPT', array());
+		$PhaseArray = GetPhaseArray($OptionArray['Phase']);
+		$arrDiseaseIds= getAllDiseaseIdsFromDiseaseCat($OptionArray['DiseaseCatId']);
+		$arrImp = implode("','", $arrDiseaseIds);
+		
+	    $query = "SELECT rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`count_total` > 0) AND (((rpt.`entity1` IN ( '". $arrImp ."') AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` IN ( '". $arrImp ."')))) ";
+	
+		if(isset($OptionArray['Phase']) && $OptionArray['Phase'] != NULL)
+		{
+			$Return = GetIncludeExcludePhaseArray($phase);
+				
+			if($OptionArray['Phase'] != 'na')
+				$subQuery = " AND rpt.`highest_phase` IN ('". implode('\', \'',$PhaseArray) ."')";
+			else
+				$subQuery = " AND (rpt.`highest_phase` NOT IN ('". implode('\', \'',$Return['exclude']) ."') OR rpt.`highest_phase` IS NULL)";
+		}
+	
+		$query = $query.$subQuery;
+	
+		$res = mysql_query($query) or die('Bad SQL query getting products from moa id, disease id and phase in PT');
+	
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				if(in_array($row['entity1'], $productIds))
+					$Products[] = $row['entity1'];
+				else if(in_array($row['entity2'], $productIds))
+					$Products[] = $row['entity2'];
+			}
+		}
+	
+		return array_filter(array_unique($Products));
+	}
+	
 	else
 	{
 		$productIds = GetProductsFromMOA($moaID, 'MPT', array());

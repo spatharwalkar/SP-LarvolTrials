@@ -148,7 +148,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 								if($TrackerType == 'DMT')
 									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseId=' . $id . '&TrackerType=DMPT';
 								else if($TrackerType == 'DISCATMT')
-									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseCatId=' . $id . '&TrackerType=DISCATMT';
+									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&DiseaseCatId=' . $id . '&TrackerType=DISCATMPT';
 								else
 									$data_matrix[$key]['ColumnsLink'] = 'moa.php?MoaId=' . $data_matrix[$key]['ID'] . '&TrackerType=MPT';
 							}

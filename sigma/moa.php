@@ -162,10 +162,25 @@ a:visited {color:#6600bc;}  /* visited link */
 				{
 					print '<td><a style="color:#FFFFFF; display:inline;" href="disease.php?DiseaseId='.$DiseaseId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 				}
+				if(isset($DiseaseCatId) && $DiseaseCatId != NULL)
+				{
+					print '<td><a style="color:#FFFFFF; display:inline;" href="moa.php?MoaId='.$MoaId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=MPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="disease_category.php?DiseaseCatId='.$DiseaseCatId.'">'.GetEntityName($DiseaseCatId).'</a>&nbsp;</td><td style="vertical-align:top;"> >> </td>';
+				}
+				if(isset($DiseaseCatId) && $DiseaseCatId != NULL)
+				{
+					print '<td><a style="color:#FFFFFF; display:inline;" href="disease_category.php?DiseaseCatId='.$DiseaseCatId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+				}
 				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="moa.php?MoaId='.$MoaId.'">'.$MoaName.'</a>&nbsp;</td>';
 				if(isset($phase) && $phase != NULL)
 				{
-					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="moa.php?MoaId='.$MoaId . ((isset($DiseaseId) && $DiseaseId != NULL) ? '&DiseaseId='.$DiseaseId.'&TrackerType=DMPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+					if(isset($DiseaseId) && $DiseaseId != NULL)
+						$pURL='&DiseaseId='.$DiseaseId.'&TrackerType=DMPT';
+					elseif(isset($DiseaseCatId) && $DiseaseCatId != NULL)
+						$pURL='&DiseaseCatId='.$DiseaseCatId.'&TrackerType=DISCATMPT';
+					else 
+						$pURL='';
+					print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="moa.php?MoaId='.$MoaId .$pURL.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline;" href="#">'.GetPhaseName($phase).'</a></td>';
 				} 
 			?>
@@ -224,6 +239,8 @@ else
 {	 
 	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DMPT')
 		print showProductTracker($MoaId, $dwcount, 'DMPT', $page, $OptionArray);	//DMPT= DISEASE MOA PRODUCT TRACKER
+	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATMPT')
+		print showProductTracker($MoaId, $dwcount, 'DISCATMPT', $page, $OptionArray);	//DMPT= DISEASE MOA PRODUCT TRACKER
 	else if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATPT')
 		print showProductTracker($MoaId, $dwcount, 'DISCATPT', $page, $OptionArray);	//DISCATPT :DISEASE CATEGORY PRODUCT TRACKER  //DCMPT= DISEASE CATEGORY MOA PRODUCT TRACKER
 	else
