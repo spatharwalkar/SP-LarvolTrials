@@ -193,7 +193,7 @@ a:visited {color:#6600bc;}  /* visited link */
 	<?php if($tab == 'Products') 
 	{
 	chdir ("..");
-	print '<div id="Products" align="center">'.showProductTracker($DiseaseCatId, $dwcount, 'DISCATPT', $page).'</div>'; //DPT=DISEASE PRODUCT TRACKER   //showDiseaseCatProductTracker($arrDiseaseIds, $dwcount, 'DCPT', $page,$DiseaseCatId) 
+	print '<div id="Products" align="center">'.showProductTracker($DiseaseCatId, $dwcount, 'DISCATPT', $page).'</div>'; //DISCATPT=DISEASE CATEGORY PRODUCT TRACKER   
 	chdir ("$cwd");
 	}
 	?>

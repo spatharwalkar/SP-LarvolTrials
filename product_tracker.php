@@ -187,10 +187,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$Report_DisplayName = $header['display_name'];
 	
 		$id=$header['id'];
-		$ExtName = GetReportNameExtension($OptionArray);
-		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];
-		$entity2Id = $OptionArray['DiseaseCatId'];
-		$entity2Type = 'Disease Category';
+		$entity2Id = $id;
+		$entity2Type = 'Disease_Category';
 	
 	}
 	else if($TrackerType == 'CPT' || $TrackerType=='DCPT')	//CPT=COMPANY PRODUCT TRACKER	//DCPT=DISEASE COMPANY PRODUCT TRACKER
@@ -532,6 +530,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 	
 	return $Return;
 }
+///End of Process Report Tracker
 //// End of Data Generator	
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -1153,7 +1152,7 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 }
 
 function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $OptionArray)
-{				
+{			
 	if(count($productIds) == 0) return 'No Products Found';
 		global $cwd;
 	if(isset($cwd) && stripos($cwd,'sigma')!==false)
@@ -1206,20 +1205,12 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					. '<option value="excelchartdown">Excel Chart</option>'
 					. '<option value="tsvdown">TSV</option>'
 					. '</select></li>'
-					. '</ul>';
-	if($TrackerType=='DCPT' || $TrackerType=='DMPT' || $TrackerType=='DMCPT' || ($TrackerType=='CPT' && isset($phase) && $phase != NULL && $phase != '') || ($TrackerType=='MCPT' && isset($phase) && $phase != NULL && $phase != '') || ($TrackerType=='MPT' && isset($phase) && $phase != NULL && $phase != '') ){
-	
-$htmlContent .= 	'<input type="hidden" value="'.$phase.'" name="phase" /><input type="hidden" value="'.$OptionArray['DiseaseId'].'" name="DiseaseId" />'
+					. '</ul>'
+					. (($TrackerType=='DCPT' || $TrackerType=='DMPT' || $TrackerType=='DMCPT' || ($TrackerType=='CPT' && isset($phase) && $phase != NULL && $phase != '') || ($TrackerType=='MCPT' && isset($phase) && $phase != NULL && $phase != '') || ($TrackerType=='MPT' && isset($phase) && $phase != NULL && $phase != '') ) ? '<input type="hidden" value="'.$phase.'" name="phase" /><input type="hidden" value="'.$OptionArray['DiseaseId'].'" name="DiseaseId" />' : '')
+					. (($TrackerType=='DISCATPT' || $TrackerType=='DISCATCPT' || $TrackerType=='DISCATMPT') ? '<input type="hidden" value="'.(!empty($phase) ? $phase : 'na').'" name="phase" /><input type="hidden" value="'.$entity2Id.'" name="DiseaseCatId" />' : '')
 					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
-					. '</div></div>';
-} 	elseif($TrackerType=='DISCATCPT' || $TrackerType=='DISCATMPT'){
-		if(isset($phase) && $phase != NULL && $phase != '')
-			$htmlContent .= 	'<input type="hidden" value="'.$phase.'" name="phase" />';
-		$htmlContent .= '<input type="hidden" value="'.$OptionArray['DiseaseCatId'].'" name="DiseaseCatId" />'.'<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
-					. '</div></div>';
-}
-
-$htmlContent .= '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
+					. '</div></div>'
+					. '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
 					. '</form>';
 				
 						
@@ -1284,8 +1275,7 @@ $htmlContent .= '</div><script type="text/javascript">cssdropdown.startchrome("'
 		$commonPart2 = '';
 		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
 		if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
-		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT' || $TrackerType=='DISCATMPT') $commonPart2 = '&e2=' . $entity2Id;
-		if($TrackerType == 'DISCATCPT') $commonPart2 = '&e2=' . $entity2Id;
+		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT' || $TrackerType=='DISCATMPT' || $TrackerType == 'DISCATCPT' || $TrackerType == 'DISCATPT') $commonPart2 = '&e2=' . $entity2Id;
 		if($TrackerType != 'PTH') $commonPart2 .= '&sourcepg=TZ';
 		
 		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
@@ -3070,8 +3060,6 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 		}
 	
 		$query = $query.$subQuery;
-		
-		//echo $query; die;
 	
 		$res = mysql_query($query) or die('Bad SQL query getting products from institution id, disease id and phase in PT');
 	
@@ -3228,8 +3216,7 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 		}
 	
 		return array_filter(array_unique($Products));
-	}
-	
+	}	
 	else
 	{
 		$productIds = GetProductsFromMOA($moaID, 'MPT', array());

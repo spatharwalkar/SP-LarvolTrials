@@ -127,7 +127,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 						
 					$data_matrix[$key]['HeaderLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'];
 		
-					$data_matrix[$key]['ColumnsLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseCatId=' . $id . '&TrackerType=DISCATCT';
+					$data_matrix[$key]['ColumnsLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&DiseaseCatId=' . $id . '&TrackerType=DISCATCPT';
 		
 					///// Initialize data
 					$data_matrix[$key]['phase_na']=0;

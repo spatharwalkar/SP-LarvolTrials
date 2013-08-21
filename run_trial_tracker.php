@@ -8223,8 +8223,6 @@ class TrialTracker
 		if(!isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
 		$this->displayHeader($Arr['tHeader']);
 		
-		
-			
 		$ottType = $Arr['ottType'];
 		$productSelector = $Arr['productSelector'];
 	    
@@ -11299,8 +11297,10 @@ class TrialTracker
 				{
 					$naUpms = $Values['Data'][$sectionId]['naUpms'];
 				}
-				if (empty($sectionHeader) && !empty($_REQUEST["DiseaseCatId"]))
-					$sectionHeader = $Values["Data"][$_REQUEST["DiseaseCatId"]]["sectionHeader"];
+			
+				if (empty($sectionHeader) && !empty($globalOptions["DiseaseCatId"]))
+					$sectionHeader = $Values["Data"][$globalOptions["DiseaseCatId"]]["sectionHeader"];
+				
 				//Rendering Upms
 				$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms, 'n');
 			}

@@ -92,6 +92,15 @@ function DisplayOTT()
 		$globalOptions['pageLocation'] = $dir."sigma/disease_category";
 		$_REQUEST['e1'] = $globalOptions['DiseaseCatId'];
 	}
+	if((isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ') && (isset($_REQUEST['e1']) && !isset($_REQUEST['e2']) ) ){
+		$query = 'SELECT `class` FROM `entities` WHERE `id`=' . mysql_real_escape_string($_REQUEST['e1']);
+		$res = mysql_query($query);
+		$header = mysql_fetch_array($res);
+		if($header['class'] == "Disease_Category") {
+			$globalOptions['DiseaseCatId'] = $_REQUEST['e1'];
+		}
+			
+	}
 	if(isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ')
 	{
 		$globalOptions['sourcepg'] = $_REQUEST['sourcepg'];
