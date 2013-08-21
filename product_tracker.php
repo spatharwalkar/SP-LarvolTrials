@@ -66,7 +66,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 		$MainPageURL = 'company.php';
 	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DISCATMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 		$MainPageURL = 'moa.php';
-	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER
+	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' ||  $TrackerType == 'DISCATMCPT' )	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER
 		$MainPageURL = 'moacategory.php';
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$MainPageURL = 'disease.php';
@@ -234,7 +234,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$entity2Type = 'Disease';
 		}
 	}
-	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER
+	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DISCATMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER || DISCATMCPT==DISEASE CATEGORY MOA CATEGORY PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA_Category" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -246,6 +246,12 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 		$id=$header['id'];
 		$ExtName = GetReportNameExtension($OptionArray);	
 		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];	
+		
+		if($TrackerType == 'DISCATMCPT')
+		{
+			$entity2Id = $OptionArray['DiseaseCatId'];
+			$entity2Type = 'Disease_Category';
+		}
 		if($TrackerType == 'DMCPT')
 		{
 			$entity2Id = $OptionArray['DiseaseId'];
@@ -3208,7 +3214,7 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 	
 		$query = $query.$subQuery;
 	
-		$res = mysql_query($query) or die('Bad SQL query getting products from moa id, disease id and phase in PT');
+		$res = mysql_query($query) or die('Bad SQL query getting products from moa id, disease category id and phase in PT');
 	
 		if($res)
 		{
@@ -3309,6 +3315,41 @@ function GetProductsFromMOACategory($moaCatID, $TrackerType, $OptionArray)
 				$Products[] = $row['id'];
 			}
 		}
+		return array_filter(array_unique($Products));
+	}
+	else if($TrackerType == 'DISCATMCPT')
+	{
+		$productIds = GetProductsFromMOACategory($moaCatID, 'MCPT', array());
+		$PhaseArray = GetPhaseArray($OptionArray['Phase']);
+		$arrDiseaseIds= getAllDiseaseIdsFromDiseaseCat($OptionArray['DiseaseCatId']);
+		$arrImp = implode("','", $arrDiseaseIds);
+	
+		$query = "SELECT rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`count_total` > 0) AND (((rpt.`entity1` IN ('". $arrImp ."') AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` IN ('". $arrImp ."')))) ";
+	
+		if(isset($OptionArray['Phase']) && $OptionArray['Phase'] != NULL)
+		{
+			$Return = GetIncludeExcludePhaseArray($phase);
+				
+			if($OptionArray['Phase'] != 'na')
+				$subQuery = " AND rpt.`highest_phase` IN ('". implode('\', \'',$PhaseArray) ."')";
+			else
+				$subQuery = " AND (rpt.`highest_phase` NOT IN ('". implode('\', \'',$Return['exclude']) ."') OR rpt.`highest_phase` IS NULL)";
+		}
+	
+		$query = $query.$subQuery;
+		$res = mysql_query($query) or die('Bad SQL query getting products from moa category id, disease category id and phase in PT');
+	
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				if(in_array($row['entity1'], $productIds))
+					$Products[] = $row['entity1'];
+				else if(in_array($row['entity2'], $productIds))
+					$Products[] = $row['entity2'];
+			}
+		}
+	
 		return array_filter(array_unique($Products));
 	}
 	else

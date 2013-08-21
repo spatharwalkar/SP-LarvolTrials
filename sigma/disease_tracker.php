@@ -223,7 +223,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 						$data_matrix[$key]['HeaderLink'] = 'disease_category.php?DiseaseCatId=' . $data_matrix[$key]['ID'];
 						$identifierKey = 'DiseaseCatId=';
 						//$trackerType = array('Institution' => 'DCCPT', 'MOA' => 'DCMPT', 'MOA_Category' => 'DCMCPT');
-						$trackerType = array('Institution' => 'DISCATCPT', 'MOA' => 'DISCATMPT', 'MOA_Category' => 'DISCATMCT');
+						$trackerType = array('Institution' => 'DISCATCPT', 'MOA' => 'DISCATMPT', 'MOA_Category' => 'DISCATMCPT');
 					}else{
 						$data_matrix[$key]['HeaderLink'] = 'disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
 						$identifierKey = 'DiseaseId=';

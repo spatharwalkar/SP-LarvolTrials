@@ -34,13 +34,19 @@
 		$DiseaseId = mysql_real_escape_string($_REQUEST['DiseaseId']);
 	}
 	
+	$DiseaseCatId = NULL;
+	if(isset($_REQUEST['DiseaseCatId']))
+	{
+		$DiseaseCatId = mysql_real_escape_string($_REQUEST['DiseaseCatId']);
+	}
+		
 	$phase = NULL;
 	if(isset($_REQUEST['phase']))
 	{
 		$phase = mysql_real_escape_string($_REQUEST['phase']);
 	}
 
-	$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
+	$OptionArray = array('DiseaseId'=>$DiseaseId, 'DiseaseCatId' => $DiseaseCatId, 'Phase'=> $phase);
 	
 	$tab = 'diseasetrac';
 	if(isset($_REQUEST['tab']))
@@ -221,6 +227,8 @@ else
 {	 
 	if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DMCPT')
 		print showProductTracker($MoaCatId, $dwcount, 'DMCPT', $page, $OptionArray);	//DMCPT= DISEASE MOA CATEGORY PRODUCT TRACKER
+	else if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATMCPT')
+		print showProductTracker($MoaCatId, $dwcount, 'DISCATMCPT', $page, $OptionArray);	//DISCATMCPT= DISEASE CATEGORY MOA CATEGORY PRODUCT TRACKER
 	else
 		print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 	
 }
