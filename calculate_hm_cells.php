@@ -276,8 +276,8 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				
 				$diseaseids = implode(",", $diseaseids);
 				$overall_statuses=calculateDCcell($diseaseids,$pv['id']);
-				
-				add_data($av['id'],$pv['id'],$overall_statuses[$cnt_total],$overall_statuses[$cnt_active],$overall_statuses[$cnt_active_indlead],$overall_statuses[$cnt_active_owner_sponsored],"none",$overall_statuses[$max_phase],$overall_statuses,false);
+
+				add_data($av['id'],$pv['id'],$overall_statuses['cnt_total'],$overall_statuses['cnt_active'],$overall_statuses['cnt_active_indlead'],$overall_statuses['cnt_active_owner_sponsored'],"none",$overall_statuses['max_phase'],$overall_statuses,false,true);
 				continue;
 			}
 			
@@ -725,11 +725,10 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 
 //
 
-function add_data($entity1id,$entity2id,$cnt_total,$cnt_active,$cnt_active_indlead,$cnt_active_owner_sponsored,$bomb,$max_phase,$overall_statuses=null,$ignore_changes=null)
+function add_data($entity1id,$entity2id,$cnt_total,$cnt_active,$cnt_active_indlead,$cnt_active_owner_sponsored,$bomb,$max_phase,$overall_statuses=null,$ignore_changes=null,$dc=false)
 {
 /*********/
-	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
-
+if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	$query=	'	SELECT 	`entity1`,`entity2`,`count_total`
 				FROM 	rpt_masterhm_cells
 				WHERE	`entity1` IN ("' . $entity1id . '","' . $entity2id . '") 
@@ -771,7 +770,7 @@ function add_data($entity1id,$entity2id,$cnt_total,$cnt_active,$cnt_active_indle
 							AND `entity2` IN ("' . $entity1id . '","' . $entity2id . '") 
 				';
 					
-					
+		
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
