@@ -337,7 +337,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			{
 				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity`='" . (($TrackerType == 'DPT') ? $id : $entity2Id) ."'";	
 			}
-			else if($TrackerType == 'DISCATCPT'|| $TrackerType=='DISCATMPT')
+			else if($TrackerType == 'DISCATCPT'|| $TrackerType=='DISCATMPT' || $TrackerType=='DISCATPT')
 			{
 				$arrDiseaseIds   = getAllDiseaseIdsFromDiseaseCat($entity2Id);
 				$impArr=implode("','", $arrDiseaseIds);
@@ -347,7 +347,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			{
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'";
 			}
-						
+									
 			$phase_res = mysql_query($phase_query) or die(mysql_error());
 			while($phase_row=mysql_fetch_array($phase_res))
 			{

@@ -9112,24 +9112,24 @@ class TrialTracker
 		{
 			$where .= " AND ((dt.`firstreceived_date` BETWEEN '" . $startRange . "' AND '" . $endRange . "') OR (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
 		}
-		$Query = $query . $where .$where1;	
+		$Query   = $query . $where .$where1;
+		$groupBy = " group by dt.`larvol_id` ";
 		//limit clause for pagination in webpage display and unsetting section headers which are not required in each page
 		if($display == 'web')
 		{
-			$Query .= $filters . $orderBy . $limit;
+			$Query .= $filters. $groupBy . $orderBy . $limit;
 		}
 		else//without limit clause for file exports
 		{
 			if($globalOptions['dOption'] == 'all')
 			{
-				$Query .= $orderBy;
+				$Query .= $groupBy . $orderBy;
 			}
 			else
 			{
-				$Query .= $filters . $orderBy;
+				$Query .= $filters . $groupBy . $orderBy;
 			}
 		}
-		
 		$Values['Data'] = $TrialsInfo;
 		unset($TrialsInfo);
 		
