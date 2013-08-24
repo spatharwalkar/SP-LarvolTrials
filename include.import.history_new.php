@@ -4,6 +4,7 @@ require_once('db.php');
 require_once('include.import_new.php');
 require_once('nct_common.php');
 require_once('preindex_trial.php');
+require_once('detect_investigator.php');
 //require_once('preindex_trial_old.php');  // TO BE REMOVED LATER
 ini_set('max_execution_time', '36000'); //10 hours
 ob_implicit_flush(true);
@@ -28,6 +29,7 @@ function scrape_history($id)
 	
 	tindex(padnct($id),'areas');
 	//tindex_old(padnct($id),'areas');  // to be removed
+	detect_inv(padnct($id),null,null);
 	
 	$query = 'UPDATE update_status SET `end_time`="' . date("Y-m-d H:i:s", strtotime('now')) . '" WHERE `update_id`="' . $update_id . '"';
 	if(!$res = mysql_query($query))

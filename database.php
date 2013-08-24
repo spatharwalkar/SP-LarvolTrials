@@ -165,6 +165,40 @@ if (isset($_POST['l_id']))
 	
 	return;
 }
+// single trial INVESTIGATOR DETECTION using LARVOLID
+if (isset($_POST['inv_l_id'])) 
+{
+	require_once('detect_investigator.php');
+	if(strpos($_POST['inv_l_id'], ",")===false) 
+	{
+		detect_inv(null,$_POST['inv_l_id'],null);
+	}
+	else
+	{
+		$listOfIds=explode( ',' , $_POST['inv_l_id'] );
+		if(!is_array($listOfIds)) return false;
+		foreach ($listOfIds as $larvolId)
+		{
+			detect_inv(null,$larvolId,null);
+		}
+	}
+	
+	return;
+}
+// single trial INVESTIGATOR DETECTION using NCTID
+if (isset($_POST['inv_t_id'])) 
+{
+	require_once('detect_investigator.php');
+	detect_inv($_POST['inv_t_id'],null,null);
+	return;
+}
+// INVESTIGATOR DETECTION for ALL trials.
+if (isset($_POST['detect_source'])) 
+{
+	require_once('detect_investigator.php');
+	detect_inv(null,null,$_POST['detect_source']);
+	return;
+}
 // REMAP a source 
 if (isset($_POST['map_source'])) 
 {
@@ -1009,7 +1043,29 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	. '<br><input type="submit" value="Import" />'
 	. '</form></formset></fieldset></div>';
 	
-	$out .= '<div style="clear:both">&nbsp;</div><br /><br /><br />';
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+	//  INVESTIGATOR DETECTION
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> INVESTIGATOR DETECTION <font color="red">(NCT) </font></b></legend>'
+			. '<form action="database.php" method="post">'
+			. 'Enter NCT Id : <input type="text" name="inv_t_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+			. ''
+			. '<input type="submit" name="inv_singletrial" value="Detect Investigator" />'
+			. '</form>'
+			
+			. '<form action="database.php" method="post">'
+			. 'Enter Larvol Id : <input type="text" name="inv_l_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+			. ''
+			. '<input type="submit" name="inv_singletrial" value="Detect Investigator" />'
+			. '</form>'
+			
+			. '<form action="database.php" method="post">'
+			. 'Click <b>Detect ALL</b> button to detect investigators of all trials (NCT) &nbsp; &nbsp;&nbsp;&nbsp;'
+			. ' <input type="hidden" name="detect_source" value="ALL"/>'
+			. '<input type="submit" name="detect_all" value="Detect ALL" />'
+			. '</form>';
+			
+	$out .= '</fieldset></div><br /><br /><br />';
 		
 	return $out;
 
