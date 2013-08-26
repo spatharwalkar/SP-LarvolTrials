@@ -169,8 +169,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 		}
 		
 		
-		$key = 0;	
-		//print_r($results);
+		$key = 0;
 		foreach($results as $result)
 		{
 			if($categoryFlag){
@@ -298,15 +297,21 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 							}
 								
 							$MAXPhasePNTR = $CurrentPhasePNTR;
-							$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
-								
-							$data_matrix[$key]['productIds'][] = $rowDisease['ProdId'];
+
+							if(!in_array($rowDisease['ProdId'], $data_matrix[$key]['productIds']))//to avoid duplicates
+							{
+								if($rowDisease['phase'] != '' && $rowDisease['phase'] != NULL){
+									$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+								}
+								$data_matrix[$key]['productIds'][] = $rowDisease['ProdId'];
+							}
 								
 							$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
 							if($max_count < $data_matrix[$key]['TotalCount'])
 								$max_count = $data_matrix[$key]['TotalCount'];
 						}	//End of if Product Existsnace
-					}		
+					}	
+						
 				}else{
 					if((($result['entity1'] == $key && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $key && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
 					{
@@ -450,7 +455,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 						{
 							//print_r($rowDisease); die;
 							//$rowDisease['id'] == $key && 
-							if( !in_array($rowDisease['larvol_id'],$data_matrix[$key]['TrialExistance']))	//Avoid duplicates like (1,2) and (2,1) type
+							if(!in_array($rowDisease['larvol_id'],$data_matrix[$key]['TrialExistance']))	//Avoid duplicates like (1,2) and (2,1) type
 							{
 								$data_matrix[$key]['TrialExistance'][] = $rowDisease['larvol_id'];
 									
@@ -541,6 +546,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 			} //END OF IF - Disease ID NULL OR NOT			
 		}	//END OF While - Fetch data		
 	}	
+	//print_r($data_matrix);
 	/// This function willl Sort multidimensional array according to Total count
 	$data_matrix = sortTwoDimensionArrayByKeyDiseaseTracker($data_matrix,'TotalCount');
 //print_r($data_matrix);	
