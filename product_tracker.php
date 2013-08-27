@@ -62,7 +62,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	
 	if($TrackerType == 'DISCATPT')	//DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
 		$MainPageURL = 'disease_category.php';	
-	else if($TrackerType == 'CPT' || $TrackerType == 'DCPT')	//CPT=COMPANY PRODUCT TRACKER || DCPT=DISEASE COMPANY PRODUCT TRACKER
+	else if($TrackerType == 'CPT' || $TrackerType == 'DCPT' || $TrackerType == 'DISCATCPT')	//CPT=COMPANY PRODUCT TRACKER || DCPT=DISEASE COMPANY PRODUCT TRACKER
 		$MainPageURL = 'company.php';
 	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DISCATMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 		$MainPageURL = 'moa.php';
@@ -854,12 +854,16 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL,
 	$phase = $OptionArray['Phase'];	
 	if($TrackerType=='DISCATPT')	//DISCATPT=DISEASE CATEGORY COMPANY PRODUCT TRACKER
 		$url = 'DiseaseCatId=' . $id .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;	
-	else if($TrackerType=='DCPT')	//CPT=DISEASE COMPANY PRODUCT TRACKER
-		$url = 'CompanyId=' . $id .'&DiseaseId='. $OptionArray['DiseaseId'] .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
+	else if($TrackerType=='DISCATCPT')	//CPT=DISEASE Category COMPANY PRODUCT TRACKER
+		$url = 'CompanyId=' . $id .'&DiseaseCatId='. $OptionArray['DiseaseCatId'] .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
 	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER
 		$url = 'CompanyId=' . $id . ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
-	else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
+	else if($TrackerType=='DCPT')	//DCPT=DISEASE COMPANY PRODUCT TRACKER
+		$url = 'CompanyId=' . $id .'&DiseaseId='. $OptionArray['DiseaseId'] .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
+        else if($TrackerType == 'MPT')	//MPT=MOA PRODUCT TRACKER
 		$url = 'MoaId=' . $id . ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
+	else if($TrackerType == 'DISCATMPT')	//DMPT=DISEASE MOA PRODUCT TRACKER
+		$url = 'MoaId=' . $id .'&DiseaseCatId='. $OptionArray['DiseaseCatId'] .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
 	else if($TrackerType == 'DMPT')	//DMPT=DISEASE MOA PRODUCT TRACKER
 		$url = 'MoaId=' . $id .'&DiseaseId='. $OptionArray['DiseaseId'] .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
 	else if($TrackerType == 'MCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER

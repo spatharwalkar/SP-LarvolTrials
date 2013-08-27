@@ -1183,6 +1183,8 @@ function MOATrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $Mai
 			
 	if($TrackerType == 'DMT')	//DPT=DISEASE MOA TRACKER
 		$url = 'DiseaseId=' . $id .'&amp;tab=MOAs';
+	if($TrackerType == 'DISCATMT')	//DPT=DISEASE MOA TRACKER
+		$url = 'DiseaseCatId=' . $id .'&amp;tab=MOAs';
 		
 	
 	$rootUrl = $MainPageURL.'?';
