@@ -1,9 +1,10 @@
 <?php
 require_once('db.php');
 require_once('include.util.php');
+ini_set('memory_limit','-1');
 ini_set('max_execution_time', '360000'); //100 hours
 ignore_user_abort(true);
-
+$dc=false;
 $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 
 /*
@@ -113,7 +114,35 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 	{
 		// exclude mesh diseases from calculation.  their searchdata is empty.
 		//$query='select `id` from entities where class in ("Area","Disease" ) order by `id`';
-		$query='select `id` from entities where (searchdata is not null and searchdata<>\'\') and class in ("Area","Disease" ) order by `id`';
+		global $dc;
+		$dc=false;
+		if($parameters['entity2'])
+		{
+			$query='select `class` from entities where id= "'. $parameters['entity2'] .'" limit 1';
+			$res = mysql_query($query);
+			$row=mysql_fetch_assoc($res);
+			if($row['class']) $current_class=$row['class'];
+		}
+		// below queries exclude mesh diseases.  searchdata of mesh diseases are empty.
+		if($current_class == 'Disease_Category')
+		{
+		$dc=true;
+		$query='select `id` from entities where ((searchdata is not null and searchdata<>\'\') 
+		and class in ("Area","Product","Biomarker"))';
+		}
+		elseif($current_class == 'Investigator')
+		{
+		$query='select `id` from entities where ((searchdata is not null and searchdata<>\'\') 
+		and class in ("Disease","Product"))';
+		}
+		elseif($current_class)
+		{
+		$query='select `id` from entities where ((searchdata is not null and searchdata<>\'\') and class <> "'. $current_class . '")
+		order by `id`';
+		}
+		else
+		$query='select `id` from entities where ((searchdata is not null and searchdata<>\'\') and class in ("Area","Disease","Disease_Category" ))
+		order by `id`';
 		
 		// update query to fire the trigger (non-change)
 		$activate_trigger=' update upm set event_description=event_description
@@ -147,6 +176,8 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 	}
 	else // no id passed , select all .
 	{
+	global $dc;
+	$dc=false;
 		if($parameters['entity1'])
 		{
 			$query='select `class` from entities where id= "'. $parameters['entity1'] .'" limit 1';
@@ -155,10 +186,31 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			if($row['class']) $current_class=$row['class'];
 		}
 		// below queries exclude mesh diseases.  searchdata of mesh diseases are empty.
-		if($current_class) $query='select id from entities where `class`<>"'.$current_class.'" and class in 
-		("Area","Disease","Product","Biomarker") and (searchdata is not null and searchdata<>\'\') order by `id` ';
-		else $query='select id from entities where class in ("Product","Biomarker") and (searchdata is not null and searchdata<>\'\') order by `id` ';
-	}
+		if($current_class == 'Disease_Category')
+		{
+		$dc=true;
+		$query='select id from entities where (`class`<>"'.$current_class.'" and class in 
+		("Area","Product","Biomarker") and (searchdata is not null and searchdata<>\'\')) 
+		
+		order by `id` ';
+		}
+		elseif($current_class == 'Investigator')
+		{
+		$dc=true;
+		$query='select id from entities where (`class`<>"'.$current_class.'" and class in 
+		("Disease","Product") and (searchdata is not null and searchdata<>\'\')) 
+		
+		order by `id` ';
+		}
+		else
+		{
+		if($current_class) $query='select id from entities where (`class`<>"'.$current_class.'" and class in 
+		("Area","Disease","Product","Biomarker","Disease_Category") and (searchdata is not null and searchdata<>\'\')) 
+		
+		order by `id` ';
+		else $query='select id from entities where class in  (("Product","Biomarker") and (searchdata is not null and searchdata<>\'\')) order by `id` ';
+		}
+	}	
 	$res = mysql_query($query);
 	if($res === false)
 	{
@@ -221,7 +273,8 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				$Res = mysql_query($Query);
 				while($row = mysql_fetch_assoc($Res))
 				{
-					$entity1ids[]['id'] = $row['parent'];
+//Temporarily disabled auto-recalculation of disease categories 
+//					$entity1ids[]['id'] = $row['parent'];
 				}	
 			}		
 	}	
@@ -235,7 +288,8 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				$Res = mysql_query($Query);
 				while($row = mysql_fetch_assoc($Res))
 				{
-					$entity1ids[]['id'] = $row['parent'];
+//Temporarily disabled auto-recalculation of disease categories 
+//				$entity1ids[]['id'] = $row['parent'];
 				}	
 			}		
 	}		
@@ -247,7 +301,6 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 		{
 			continue;
 		}
-
 		
 		foreach($entity2ids as $pk=>$pv)
 		{
@@ -259,13 +312,14 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				continue;
 			}
 
-				
 			
 			//check if any of the entities is a Disease category, and if yes, then do a separate calculation 
 			
 			$DC=isDiseaseCategory($av['id'],$pv['id']);
 			if($DC)
 			{
+				global $dc;
+				$dc=true;
 				$Query = 'select child from entity_relations where parent ="' . $DC . '" ';
 				$Res = mysql_query($Query);
 				$diseaseids=array();
@@ -273,30 +327,35 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				{
 					$diseaseids[] = $row['child'];
 				}
-				
+				if($DC==$pv['id']) 
+					$nonDC=$av['id'];
+				else
+					$nonDC=$pv['id'];
 				$diseaseids = implode(",", $diseaseids);
+		//		$trialids=calculateDCforEntities($diseaseids,$pv['id']);
+				$trialids=calculatenonDCtrials($nonDC);
+				if(empty($trialids)) continue;
+				
+				$query_m=	'	SELECT 	distinct a.trial,d.source_id,d.is_active,p.relation_type as relation_type,d.institution_type,d.source_id,d.lastchanged_date,
+										d.firstreceived_date,d.phase,d.overall_status from entity_trials a 
+							JOIN 		entity_trials p ON a.`trial`=p.`trial`
+							LEFT JOIN 	data_trials d ON p.`trial`=d.`larvol_id`
+							WHERE 		a.trial in  ('. $trialids . ')   and p.`entity` in ('. $diseaseids . ')  ';
+				
+				/*
 				$overall_statuses=calculateDCcell($diseaseids,$pv['id']);
-
 				add_data($av['id'],$pv['id'],$overall_statuses['cnt_total'],$overall_statuses['cnt_active'],$overall_statuses['cnt_active_indlead'],$overall_statuses['cnt_active_owner_sponsored'],"none",$overall_statuses['max_phase'],$overall_statuses,false,true);
 				continue;
+				*/
 			}
-			
-			
-			/*
-			$query_m='	SELECT a.trial from area_trials a 
-						JOIN product_trials p
-						ON a.trial=p.trial
-						JOIN area_trials a
-						ON a.trial=p.trial
-						where a.area="'.$av['id'].'" and p.product="'.$pv['id'].'"';
-			*/
-			
-			
-			$query_m=	'	SELECT 		a.trial,d.source_id,d.is_active,p.relation_type as relation_type,d.institution_type,d.source_id,d.lastchanged_date,
+			else
+			{
+				$query_m=	'	SELECT 		a.trial,d.source_id,d.is_active,p.relation_type as relation_type,d.institution_type,d.source_id,d.lastchanged_date,
 										d.firstreceived_date,d.phase,d.overall_status from entity_trials a 
 							JOIN 		entity_trials p ON a.`trial`=p.`trial`
 							LEFT JOIN 	data_trials d ON p.`trial`=d.`larvol_id`
 							WHERE 		a.`entity`="'.$av['id'].'" and p.`entity`="'.$pv['id'].'" ';
+			}	
 			
 			if(!$res = mysql_query($query_m))
 					{
@@ -306,6 +365,8 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 						echo $log;
 						return false;
 					}
+			$row = mysql_fetch_assoc($res);
+			if(!$row) continue;
 			$phasez=array();
 			
 			$overall_statuses=array();
@@ -551,6 +612,8 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 					
 					/*********** END : trial counts according to overallstatus values ***********/
 				}
+				
+				 
 			}
 			
 			$cnt_total=count($data);
@@ -564,6 +627,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 					echo '<br>20000 records added, sleeping 1 second....'.str_repeat("  ",800);
 					sleep(1);
 				}
+				
 				add_data($av['id'],$pv['id'],0,0,0,'none','N/A',$overall_statuses,$ignore_changes);
 				$progress_count ++;
 				if($cron_run)
@@ -683,6 +747,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 		}
 
 	}
+	
 	if($cron_run)
 	{
 		/*
@@ -725,9 +790,11 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 
 //
 
-function add_data($entity1id,$entity2id,$cnt_total,$cnt_active,$cnt_active_indlead,$cnt_active_owner_sponsored,$bomb,$max_phase,$overall_statuses=null,$ignore_changes=null,$dc=false)
+function add_data($entity1id,$entity2id,$cnt_total,$cnt_active,$cnt_active_indlead,$cnt_active_owner_sponsored,$bomb,$max_phase,$overall_statuses=null,$ignore_changes=null,$dc1=false)
 {
 /*********/
+
+global $dc;
 if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	$query=	'	SELECT 	`entity1`,`entity2`,`count_total`
 				FROM 	rpt_masterhm_cells
@@ -749,6 +816,7 @@ if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_tot
 			echo $log;
 			return false;
 		}
+		
 	$row = mysql_fetch_assoc($res);
 	
 	if( is_null($max_phase) or empty($max_phase) )
@@ -894,6 +962,7 @@ if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_tot
 					WHERE	`entity1` IN ("' . $entity1id . '","' . $entity2id . '") 
 							AND `entity2` IN ("' . $entity1id . '","' . $entity2id . '") 
 					';
+					
 		}
 		else
 		{
@@ -981,6 +1050,7 @@ if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_tot
 					WHERE	`entity1` IN ("' . $entity1id . '","' . $entity2id . '") 
 						AND `entity2` IN ("' . $entity1id . '","' . $entity2id . '") 
 					';
+					
 		}
 		
 		if(!$res = mysql_query($query))
@@ -991,6 +1061,7 @@ if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_tot
 			echo $log;
 			return false;
 		}
+		
 	}
 	else
 	{
@@ -1076,6 +1147,7 @@ if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_tot
 							`last_update` = "'. $curtime .'"
 					';
 		//prevent inserting records with no data
+		
 		if( !is_null($cnt_total) && $cnt_total>0 )
 		{
 			if(!$res = mysql_query($query))
@@ -1087,6 +1159,7 @@ if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_tot
 				return false;
 			}
 		}
+		
 	}
 	/**************/
 	$curtime = date('Y-m-d H:i:s');
@@ -1156,6 +1229,7 @@ function getBombdtl()
 }
 function isDiseaseCategory($av,$pv)
 {
+
 	global $logger;
 	$exists=false;
 	if(!empty($av))
@@ -1192,6 +1266,7 @@ function isDiseaseCategory($av,$pv)
 }
 function isDisease($av)
 {
+
 	global $logger;
 	$exists=false;
 	if(!empty($av))
@@ -1313,6 +1388,60 @@ entity2 in (" . $diseaseids . ")
 	{
 		return $res;
 	}
+}
+
+function calculatenonDCtrials($pv)
+{
+
+if(empty($pv))	return false;
+$DC_query = 'SELECT distinct
+trial from entity_trials
+where entity ="' . $pv . '"';
+	if(!$res = mysql_query($DC_query))
+	{
+		global $logger;
+		$log='There seems to be a problem with the SQL Query:'.$DC_query.' Error:' . mysql_error();
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+	
+	$trialids=array();
+	while($row = mysql_fetch_assoc($res))
+	{
+		$trialids[] = $row['trial'];
+	}
+	
+	$trialids = implode(",", $trialids);
+	return $trialids;
+
+}
+function calculateDCforEntities($diseaseids,$pv)
+{
+
+if(empty($diseaseids) or empty($pv))	return false;
+$DC_query = "SELECT distinct
+trial from entity_trials
+where entity in (" . $diseaseids . ")
+";
+	if(!$res = mysql_query($DC_query))
+	{
+		global $logger;
+		$log='There seems to be a problem with the SQL Query:'.$DC_query.' Error:' . mysql_error();
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+	
+	$trialids=array();
+	while($row = mysql_fetch_assoc($res))
+	{
+		$trialids[] = $row['trial'];
+	}
+	
+	$trialids = implode(",", $trialids);
+	return $trialids;
+
 }
 
 ?>  
