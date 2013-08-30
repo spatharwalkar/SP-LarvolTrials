@@ -119,9 +119,11 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 			foreach($types as $type)
 			{
 				if($type == 'MOA')
-					$MOAOrMOACatIdQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname, e2.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` in(". $arrImplode .") OR rpt.`entity2` in(". $arrImplode .")) AND e2.`class`='MOA' AND e2.`id` IN ('".implode("','",$Return['moa'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+					$MOAOrMOACatIdQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname, e2.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND 
+					(rpt.`entity1` = ". $id ." OR rpt.`entity2` = ". $id .") AND e2.`class`='MOA' AND e2.`id` IN ('".implode("','",$Return['moa'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 				else
 					$MOAOrMOACatIdQuery = "SELECT e3.`id` AS id, e3.`name` AS name, e2.`display_name` AS dispname, e3.`class` AS class, e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) JOIN `entity_relations` er2 ON(er2.`child`=e2.`id`) JOIN `entities` e3 ON(e3.`id` = er2.`parent`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`class`='MOA' AND e3.`id` IN ('".implode("','",$Return['moacat'])."') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+					
 				$MOAOrMOACatIdResult = mysql_query($MOAOrMOACatIdQuery) or die(mysql_error());
 					
 				$key = 0;
@@ -176,7 +178,13 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 							$data_matrix[$key]['ProdExistance'] = array();
 						}
 							
-						if(((in_array($result['entity1'],$arrDiseaseIds)&& !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || (in_array($result['entity2'] ,$arrDiseaseIds) && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+						if	(
+								(
+									($result['entity1']==$id)&& !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])
+								) 
+								|| 
+									($result['entity2']==$id) && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance'])
+							)	//Avoid duplicates like (1,2) and (2,1) type
 						{
 							if($result['entity1'] == $id)
 								$data_matrix[$key]['ProdExistance'][] = $result['entity2'];

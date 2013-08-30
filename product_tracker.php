@@ -347,7 +347,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			{
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'";
 			}
-									
+			
 			$phase_res = mysql_query($phase_query) or die(mysql_error());
 			while($phase_row=mysql_fetch_array($phase_res))
 			{
@@ -3051,7 +3051,15 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 		$arrDiseaseIds   = getAllDiseaseIdsFromDiseaseCat($DiseaseCatId);
 		
 		$impArr=implode("','", $arrDiseaseIds);
-		$query = "SELECT rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`count_total` > 0) AND (((rpt.`entity1` IN ( '". $impArr ."') AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` IN ( '". $impArr ."')))) ";
+		$query = "SELECT rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt 
+		WHERE (rpt.`count_total` > 0) 
+		AND ( 
+					" . $DiseaseCatId . " IN ( rpt.`entity1`, rpt.`entity2` ) AND  
+					(
+						rpt.`entity1` IN ('". implode("','", $productIds) ."') OR rpt.`entity2` IN ('". implode("','", $productIds) ."')
+					)
+			)
+			 ";
 		
 		if(isset($OptionArray['Phase']) && $OptionArray['Phase'] != NULL)
 		{
@@ -3064,7 +3072,7 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 		}
 	
 		$query = $query.$subQuery;
-	
+		
 		$res = mysql_query($query) or die('Bad SQL query getting products from institution id, disease id and phase in PT');
 	
 		if($res)
@@ -3192,7 +3200,12 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 		$arrDiseaseIds= getAllDiseaseIdsFromDiseaseCat($OptionArray['DiseaseCatId']);
 		$arrImp = implode("','", $arrDiseaseIds);
 		
-	    $query = "SELECT rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`count_total` > 0) AND (((rpt.`entity1` IN ( '". $arrImp ."') AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) OR (rpt.`entity1` IN ('". implode("','", $productIds) ."') AND rpt.`entity2` IN ( '". $arrImp ."')))) ";
+	    $query = "SELECT rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt WHERE (rpt.`count_total` > 0) AND 
+		(
+			((rpt.`entity1` = ". $OptionArray['DiseaseCatId'] .") AND rpt.`entity2` IN ('". implode("','", $productIds) ."')) 
+			OR 
+			( rpt.`entity2` = ". $OptionArray['DiseaseCatId'] .") AND rpt.`entity1` IN ('". implode("','", $productIds) ."')
+		) ";
 	
 		if(isset($OptionArray['Phase']) && $OptionArray['Phase'] != NULL)
 		{
@@ -3205,7 +3218,7 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 		}
 	
 		$query = $query.$subQuery;
-	
+		
 		$res = mysql_query($query) or die('Bad SQL query getting products from moa id, disease category id and phase in PT');
 	
 		if($res)
