@@ -746,10 +746,10 @@ function TrackerCommonCSS($uniqueId, $TrackerType)
 						border-right:1px solid #CCCCCC;
 					}
 					
+					/* Changed By PK on 10th Aug 2013 2.26AM*/
 					.graph_rightWhite {
-						border-right:1px solid #FFFFFF;
+						/*border-right:1px solid #FFFFFF;*/
 					}
-					
 					.prod_col {
 						width:420px;
 						max-width:420px;
@@ -1230,8 +1230,10 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	}
 	$htmlContent .= '<th width="8px"></th></tr>';
 
-
-	$htmlContent .= '<tr><th class="prod_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+	/* 
+		Added the background color By PK on 10th Aug 2013 2.28AM to distingwish the header(scaling with lable) from the chart
+	*/
+	$htmlContent .= '<tr style="background-color:#CCCCCC;"><th class="prod_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
 	for($j=0; $j < $columns; $j++)
 	{

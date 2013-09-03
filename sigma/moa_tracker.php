@@ -619,7 +619,7 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 					}
 					
 					.graph_rightWhite {
-						border-right:1px solid #FFFFFF;
+						/*border-right:1px solid #FFFFFF;*/
 					}
 					
 					.RowHeader_col {
@@ -1032,7 +1032,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 	$htmlContent .= '<th width="8px"></th></tr>';
 
 
-	$htmlContent .= '<tr><th class="RowHeader_col" align="right">Products</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+	$htmlContent .= '<tr style="background-color:#CCCCCC;"><th class="RowHeader_col" align="right">Products</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
 	for($j=0; $j < $columns; $j++)
 	{
