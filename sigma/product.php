@@ -8,6 +8,7 @@
 	$cwd = getcwd();
 	chdir ("..");
 	require_once('db.php');
+	require_once('include.util.php');
 	require_once('intermediary.php');
 	chdir ($cwd);
 	require_once('disease_tracker.php');
@@ -17,11 +18,12 @@
 	if($_REQUEST['e1'] != NULL && $_REQUEST['e1'] != '' && isset($_REQUEST['e1']))
 	{
 		$e1 = $_REQUEST['e1'];
-		$query = 'SELECT `name`, `id` FROM `entities` WHERE `class` = "Product" AND `id`=' . mysql_real_escape_string($e1);
+		$query = 'SELECT `name`, `id`,company FROM `entities` WHERE `class` = "Product" AND `id`=' . mysql_real_escape_string($e1);
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$e1 = $header['id'];
 		$ProductName = $header['name'];
+		$CompanyName[] = $header['company'];
 	}
 	$page = 1;
 	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
@@ -139,7 +141,7 @@ display:inline;
     	<td width="100%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:middle;" align="left">
         	<table><tr>
         	<?php 
-				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="product.php?e1='.$e1.'">'.$ProductName.'</a>&nbsp;</td>';
+				print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="product.php?e1='.$e1.'">'.productFormatLI($ProductName, $CompanyName, $tag='').'</a>&nbsp;</td>';
 			?>
             </tr></table>
         </td>
