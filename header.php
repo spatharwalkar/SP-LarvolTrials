@@ -84,7 +84,7 @@ if($db->loggedIn())
 	.'<a href="entities.php?entity=institutions">Institutions</a><br/>'
 	.'<a href="entities.php?entity=investigator">Investigators</a><br/>')
 	;
-	if($db->user->userlevel=='admin'||$db->user->userlevel=='root')
+	if($db->user->userlevel=='admin'||$db->user->userlevel=='root' || $db->user->userlevel=='user')
 		echo ('<a href="entities.php?entity=entities">Entities</a><br/>');
 	echo ('<a href="redtags.php">Redtags</a><br/>'
 	.'</div>');
