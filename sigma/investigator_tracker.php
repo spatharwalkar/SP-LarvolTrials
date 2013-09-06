@@ -1069,13 +1069,13 @@ function InvTrackerHTMLContent($data_matrix, $id, $rows, $columns, $investigator
 		$row = $incr;
 		
 		if($TrackerType != 'PTH')
-		$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['investigatorIds'];
+		$commonPart1 = 'ott.php?sourcepg=TZP&e1=' . $data_matrix[$row]['investigatorIds'];
 		else
 		$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['investigatorIds'];
 		
 		
 		if($TrackerType != 'PTH')
-		$procommonPart1 = 'ott.php?e1=' . $data_matrix[$row]['investigatorIds'];
+		$procommonPart1 = 'ott.php?sourcepg=TZP&e1=' . $data_matrix[$row]['investigatorIds'];
 		else
 		$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['investigatorIds'];		
 		
@@ -1385,7 +1385,7 @@ function InvDownload_reports()
 			if(isset($data_matrix[$row]['investigatorIds']) && $data_matrix[$row]['investigatorIds'] != NULL && !empty($entity2Id))
 			{
 				if($TrackerType != 'PTH')
-				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['investigatorIds'];
+				$commonPart1 = 'ott.php?sourcepg=TZP&e1=' . $data_matrix[$row]['investigatorIds'];
 				else
 				$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['investigatorIds'];
 				
@@ -1730,12 +1730,12 @@ function InvDownload_reports()
 			$Place_Y = $pdf->GetY();
 			
 			if($TrackerType != 'PTH')
-			$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['investigatorIds'];
+			$commonPart1 = 'ott.php?sourcepg=TZP&e1=' . $data_matrix[$row]['investigatorIds'];
 			else
 			$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['investigatorIds'];
 			
 			if($TrackerType != 'PTH')
-				$procommonPart1 = 'ott.php?e1=' . $data_matrix[$row]['investigatorIds'];
+				$procommonPart1 = 'ott.php?sourcepg=TZP&e1=' . $data_matrix[$row]['investigatorIds'];
 			else
 				$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['investigatorIds'];
 			
