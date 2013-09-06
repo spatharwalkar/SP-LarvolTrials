@@ -1234,15 +1234,20 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	}
 	
 	if($GobalEntityType == 'Product')
-	$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
+	{
+			$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
 					. '<option value="total" '. (($CountType == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
 					. '<option value="indlead" '. (($CountType == 'indlead') ?  'selected="selected"' : '' ).'>Active industry trials</option>'
 					. '<option value="owner_sponsored" '. (($CountType == 'owner_sponsored') ?  'selected="selected"' : '' ).'>Active owner-sponsored trials</option>'
 					. '<option value="active" '. (($CountType == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
 					. '</select></td>';
-										
+	}							
 	$htmlContent .= '<td class="bottom right">'
-					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'../images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
+					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu">
+						<a rel="'.$uniqueId.'_dropmenu">
+						<span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'../images/save.png\'); cursor:pointer; ">
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a>
+						</div>'
 					. '</td>';
 					
 	global $tabCommonUrl;
