@@ -189,7 +189,6 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 	foreach($larvol_ids as $larvol_id)
 	{
 
-
 		if($cid > $larvol_id) continue; 
 		
 		$counter++;
@@ -227,55 +226,58 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			$exists = $res !== false;
 			$record_data = $res;
 			
+			/***** SKIP Industry lead sponsor trials */
+			if($res['institution_type']=='industry_lead_sponsor')
+			{
+				echo 'Industry lead sponsor trial, skipping ' . $res['source_id'] . '......<br>';
+				continue;
+			}
+			/****************************/
+			
 		}
 		
 		$i=0;
 		$overall_official_name = $record_data['overall_official_name'];
 		$overall_official_affiliation = $record_data['overall_official_affiliation'];
-
-		$query = 'SELECT * FROM entities where class="Investigator" and name = "'.$overall_official_name.'" limit 1';
+		
+		//skip if empty name
+		$overall_official_name=trim($overall_official_name);
+		if(empty($overall_official_name))
+			continue;
 			
-		if(!$res = mysql_query($query))
+		pr($nctid. ' => '. $overall_official_name . ' => '. $overall_official_affiliation);
+		/********** Split multiple investigator names in same field , and save them as separate entities */
+		$investigator_names=array();
+		$affiliations=array();
+		
+		//split investigator names
+		$pos = strpos($overall_official_name, '`');
+		if($pos === false)
 		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-		$res = mysql_fetch_assoc($res);
-		$exists = $res !== false;
-		if(!$exists)
-		{
-			$query = 'INSERT INTO entities 
-						set class="Investigator", name = "'.$overall_official_name.'", display_name = "'.$overall_official_name.'", affiliation = "'.$overall_official_affiliation.'" ';
-				
-			if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-			$eid = mysql_insert_id();
-			
-			$query = 'INSERT INTO entity_trials 
-						set entity= "'.$eid.'", trial = "'.$larvol_id.'"';
-				
-			if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
-				return false;
-			}
-			mysql_query('COMMIT');
-							
+			$investigator_names[]=$overall_official_name;
 		}
 		else
 		{
-			$eid=$res['id'];
-			$query = 'SELECT * FROM entity_trials where entity="'.$eid.'" and trial = "'.$larvol_id.'" limit 1'; 
-			
+			$investigator_names = explode("`", $overall_official_name);
+		}
+		
+		//split affiliations
+		$pos = strpos($overall_official_affiliation, '`');
+		if($pos === false)
+		{
+			$affiliations[]=$overall_official_affiliation;
+		}
+		else
+		{
+			$affiliations = explode("`", $overall_official_affiliation);
+		}
+		
+		foreach ($investigator_names as $key=>$overall_official_name)
+		{
+			$overall_official_affiliation = $affiliations[$key];
+		
+			$query = 'SELECT * FROM entities where class="Investigator" and name = "'.$overall_official_name.'" limit 1';
+				
 			if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -284,15 +286,24 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 				return false;
 			}
 			$res = mysql_fetch_assoc($res);
-			$exists = $res !== false;		
-			
-			
+			$exists = $res !== false;
 			if(!$exists)
 			{
+				$query = 'INSERT IGNORE INTO entities 
+							set class="Investigator", name = "'.$overall_official_name.'", display_name = "'.$overall_official_name.'", affiliation = "'.$overall_official_affiliation.'" ';
+					
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+				$eid = mysql_insert_id();
 				
-				$query = 'INSERT INTO entity_trials 
-								set entity= "'.$eid.'", trial = "'.$larvol_id.'"';
-				
+				$query = 'INSERT IGNORE INTO entity_trials 
+							set entity= "'.$eid.'", trial = "'.$larvol_id.'"';
+					
 				if(!$res = mysql_query($query))
 				{
 					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -301,12 +312,45 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 					return false;
 				}
 				mysql_query('COMMIT');
+								
 			}
-			
-		}			
-			$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($totalncts >= $updateitems+$counter) ? ($updateitems+$counter) : $totalncts  ) . '" , status="2", current_nctid="'. $larvol_id .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="INVESTIGATOR"  ;' ;
-			
-			$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+			else
+			{
+				$eid=$res['id'];
+				$query = 'SELECT * FROM entity_trials where entity="'.$eid.'" and trial = "'.$larvol_id.'" limit 1'; 
+				
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+				$res = mysql_fetch_assoc($res);
+				$exists = $res !== false;		
+				
+				
+				if(!$exists)
+				{
+					
+					$query = 'INSERT IGNORE INTO entity_trials 
+									set entity= "'.$eid.'", trial = "'.$larvol_id.'"';
+					
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+					mysql_query('COMMIT');
+				}
+				
+			}			
+		}
+		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($totalncts >= $updateitems+$counter) ? ($updateitems+$counter) : $totalncts  ) . '" , status="2", current_nctid="'. $larvol_id .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="INVESTIGATOR"  ;' ;
+		
+		$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
 	//	return true;
 	}
 	return true;

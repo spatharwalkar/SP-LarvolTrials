@@ -179,15 +179,19 @@ a:visited {color:#6600bc;}  /* visited link */
 			<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 			<!-- <td><img id="DiseaseOHMImg" src="../images/afterTab.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td> 
 			<td></td>
+			
             <?php } else if($tab == 'DiseaseOTT') {  ?>
             <td><img id="ProductsImg" src="../images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td><td><img id="CompaniesImg" src="../images/afterTab.png" /></td><td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td><td><img id="MOAsImg" src="../images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?><td><img id="DiseaseOTTImg" src="../images/middleTab.png" /></td><td id="DiseaseOTTTab" class="selectTab"><?php print $ottLinkName; ?></td>
-			<td><img id="InvestigatorsImg" src="../images/afterTab.png" /></td><td id="InvestigatorsTab" class="Tab"><?php print $InvLinkName; ?></td>
+			<td><img id="InvestigatorsImg" src="../images/selectTabConn.png" /></td><td id="InvestigatorsTab" class="Tab"><?php print $InvLinkName; ?></td>
 			<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
-			<!-- <td><img id="DiseaseOHMImg" src="../images/selectTabConn.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>
+			<!-- <td><img id="DiseaseOHMImg" src="../images/selectTabConn.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td><td></td>
             <?php }  
+			
 			else if($tab == 'Investigators') {  ?>
             <td><img id="ProductsImg" src="../images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td><td><img id="CompaniesImg" src="../images/afterTab.png" /></td><td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td><td><img id="MOAsImg" src="../images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td><td><img id="DiseaseOTTImg" src="../images/afterTab.png" /></td><td id="DiseaseOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
-			<td><img id="InvestigatorsImg" src="../images/afterTab.png" /></td><td id="InvestigatorsTab" class="selectTab"><?php print $InvLinkName; ?></td>
+			<td><img id="InvestigatorsImg" src="../images/middleTab.png" /></td><td id="InvestigatorsTab" class="selectTab"><?php print $InvLinkName; ?></td>
+			<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
+			<!-- <td><img id="DiseaseOHMImg" src="../images/selectTabConn.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>
             <?php }
 			else if($tab == 'DiseaseOHM') {  ?>
             <td><img id="ProductsImg" src="../images/firstTab.png" /></td><td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td><td><img id="CompaniesImg" src="../images/afterTab.png" /></td><td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td><td><img id="MOAsImg" src="../images/afterTab.png" /></td><td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td><td><img id="DiseaseOTTImg" src="../images/afterTab.png" /></td><td id="DiseaseOTTTab" class="Tab"><?php print $ottLinkName; ?></td><td><img id="DiseaseOHMImg" src="../images/middleTab.png" /></td><td id="DiseaseOHMTab" class="selectTab"><?php print $ohmLinkName; ?></td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>
