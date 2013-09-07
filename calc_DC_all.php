@@ -7,20 +7,87 @@ ignore_user_abort(true);
 $dc=false;
 $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
 
-/*
-	if(isset($_GET['entity1']) or isset($_GET['entity2']))
+/************ get all DC ids */
+$query = 'select id from entities where class="Disease_Category" ';
+$DC_ids=array();
+$res = mysql_query($query);
+	if($res === false)
 	{
-		$parameters=$_GET;
-		if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
-		echo '<br>All done.<br>';
+	
+		$log = 'Bad SQL query getting `id` 
+				from entities mysql_error=' . mysql_error() . ' query=' . $query;
+		echo($log);
+		return false;
 	}
-	elseif( isset($_GET['calc']) and ($_GET['calc']=="all") )
+
+	while($DC_ids[]=mysql_fetch_assoc($res));
+/**************************************/	
+
+
+$parameters=array();
+/********************************** PRODUCT IDs	 */  
+$query = 'select distinct entity from entity_trials where entity in (select id from entities where class="product")';
+
+$res = mysql_query($query);
+	if($res === false)
 	{
-		$parameters=NULL;
-		if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
-		echo '<br>All done.<br>';
+	
+		$log = 'Bad SQL query getting `id` 
+				from entities mysql_error=' . mysql_error() . ' query=' . $query;
+		echo($log);
+		return false;
 	}
-*/
+
+	$prodids=array();
+	while($prodids[]=mysql_fetch_assoc($res));
+/****************/	
+
+/********************************** MOA IDs	 */
+$query = 'select distinct entity from entity_trials where entity in (select id from entities where class="MOA")';
+
+$res = mysql_query($query);
+	if($res === false)
+	{
+	
+		$log = 'Bad SQL query getting `id` 
+				from entities mysql_error=' . mysql_error() . ' query=' . $query;
+		echo($log);
+		return false;
+	}
+
+	while($prodids[]=mysql_fetch_assoc($res));
+/*********************/
+
+/********************************** INSTITUTION IDs	 */
+$query = 'select distinct entity from entity_trials where entity in (select id from entities where class="Institution")';
+
+$res = mysql_query($query);
+	if($res === false)
+	{
+	
+		$log = 'Bad SQL query getting `id` 
+				from entities mysql_error=' . mysql_error() . ' query=' . $query;
+		echo($log);
+		return false;
+	}
+
+	while($prodids[]=mysql_fetch_assoc($res));
+/*********************/
+
+foreach($DC_ids as $DC_id)
+{
+	pr('<b> Calculating Disease Category : '. $DC_id['id'] . '</b>');
+	$parameters['entity1']=$DC_id['id'];
+	$sno=0;
+	foreach($prodids as $pid)
+	{
+		$sno++;
+			$parameters['entity2']=$pid['entity'];
+			if(!calc_cells($parameters))	echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
+	}
+}
+$diseaseids=array();
+
 function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 {
 	
@@ -34,139 +101,14 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			}
 	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_total;
 	$data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();$ostatus=array();$cnt_total=0;
-	$cron_run = isset($update_id); 	// check if being run by cron.php
 	
 	$display_status='NO';
 	$id = mysql_real_escape_string($_GET['id']);
-	if($cron_run)
-	{
-		$query = 'UPDATE update_status SET start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", updated_days="0" WHERE update_id="' . $update_id . '"';
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	}
-	elseif(isset($parameters['entity1']))
-	{
-	
-		$display_status='YES';
-		$query = '	select max(update_id) as maxid from  update_status_fullhistory ';
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-		$row = mysql_fetch_assoc($res);
-		$update_id=$row['maxid']+1;
-		
-		
-		$query = '	select update_id,trial_type,status from update_status_fullhistory where 
-					trial_type="RECALC=' . $id . '" and status="2" ' ;
-		
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-		$x=mysql_fetch_assoc($res);
-		if(isset($x['update_id']))
-		{
-			$update_id=$x['update_id'];
 
-		}
-		else
-		{			
-			
-			
-			$query = '	INSERT into update_status_fullhistory SET 
-						start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", 
-						updated_days="0", status="2", trial_type="RECALC=' . $id . '", update_id="' . $update_id . '"';
-		}
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-		
-		 
-	}
-
-	//get entity1 id (It can be any entity eg. area, product, disease etc.)
-	if(isset($parameters['entity1']))
-	{
-		$query='select `id` from entities where `id`="'.$parameters['entity1'].'"';
-	}
-	
-	else // no entity1 id given, select all ids (Area & Disease for now.).
-	{
-		// exclude mesh diseases from calculation.  their searchdata is empty.
-		//$query='select `id` from entities where class in ("Area","Disease" ) order by `id`';
-		global $dc;
-		$dc=false;
-		if($parameters['entity2'])
-		{
-			$query='select `class` from entities where id= "'. $parameters['entity2'] .'" limit 1';
-			$res = mysql_query($query);
-			$row=mysql_fetch_assoc($res);
-			if($row['class']) $current_class=$row['class'];
-		}
-		// below queries exclude mesh diseases.  searchdata of mesh diseases are empty.
-		if($current_class == 'Disease_Category')
-		{
-		$dc=true;
-		$query='select `id` from entities where ((searchdata is not null and searchdata<>\'\') 
-		and class in ("Area","Product","Biomarker"))';
-		}
-		elseif($current_class == 'Investigator')
-		{
-		$query='select `id` from entities where ((searchdata is not null and searchdata<>\'\') 
-		and class in ("Disease","Product"))';
-		}
-		elseif($current_class)
-		{
-		$query='select `id` from entities where ((searchdata is not null and searchdata<>\'\') and class <> "'. $current_class . '")
-		order by `id`';
-		}
-		else
-		$query='select `id` from entities where ((searchdata is not null and searchdata<>\'\') and class in ("Area","Disease","Disease_Category" ))
-		order by `id`';
-		
-		// update query to fire the trigger (non-change)
-		$activate_trigger=' update upm set event_description=event_description
-							where 
-							(   
-								end_date <= left(now(),10) and 
-								id > 0 and 
-								status="Upcoming" 
-							)';
-	}
+	$query='select `id` from entities where `id`="'.$parameters['entity1'].'"';
 	$res = mysql_query($query);
-
-	if($res === false)
-	{
-	
-		$log = 'Bad SQL query getting `id` 
-				from entities mysql_error=' . mysql_error() . ' query=' . $query;
-		global $logger;
-		$logger->fatal($log);
-		echo($log);
-		return false;
-	}
-
 	$entity1ids=array();
+	
 	while($entity1ids[]=mysql_fetch_assoc($res));
 	
 	//get entity2 ids
@@ -174,43 +116,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 	{
 		$query='select `id` from entities where `id`="'.$parameters['entity2'].'"';
 	}
-	else // no id passed , select all .
-	{
-	global $dc;
-	$dc=false;
-		if($parameters['entity1'])
-		{
-			$query='select `class` from entities where id= "'. $parameters['entity1'] .'" limit 1';
-			$res = mysql_query($query);
-			$row=mysql_fetch_assoc($res);
-			if($row['class']) $current_class=$row['class'];
-		}
-		// below queries exclude mesh diseases.  searchdata of mesh diseases are empty.
-		if($current_class == 'Disease_Category')
-		{
-		$dc=true;
-		$query='select id from entities where (`class`<>"'.$current_class.'" and class in 
-		("Area","Product","Biomarker") and (searchdata is not null and searchdata<>\'\')) 
-		
-		order by `id` ';
-		}
-		elseif($current_class == 'Investigator')
-		{
-		$dc=true;
-		$query='select id from entities where (`class`<>"'.$current_class.'" and class in 
-		("Disease","Product") and (searchdata is not null and searchdata<>\'\')) 
-		
-		order by `id` ';
-		}
-		else
-		{
-		if($current_class) $query='select id from entities where (`class`<>"'.$current_class.'" and class in 
-		("Area","Disease","Product","Biomarker","Disease_Category") and (searchdata is not null and searchdata<>\'\')) 
-		
-		order by `id` ';
-		else $query='select id from entities where class in  (("Product","Biomarker") and (searchdata is not null and searchdata<>\'\')) order by `id` ';
-		}
-	}	
+
 	$res = mysql_query($query);
 	if($res === false)
 	{
@@ -222,78 +128,17 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 	}
 	$entity2ids=array();
 	while($entity2ids[]=mysql_fetch_assoc($res));
-
 	$x=count($entity1ids); $y=count($entity2ids);
-	
+
 	$totalcount=($x*$y)/4;
-	if($cron_run)
-	{
-	
-			$query = 	'UPDATE update_status 
-						SET update_items_total="' . $totalcount . '",update_items_start_time="' . 
-						date("Y-m-d H:i:s", strtotime('now')) . '" 
-						WHERE update_id="' . $update_id . '"
-						';
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	}
-	elseif($display_status=='YES')
-	{
-	    $query = '	UPDATE update_status_fullhistory SET update_items_total=update_items_total+' . $totalcount . ',
-					status="2", update_items_start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '" 
-					WHERE update_id="' . $update_id . '"';
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	}
 	
 //	pr($entity1ids);
 //	pr($entity2ids);
 	$counter=0;
 	$progress_count = 0;
 	//if it is a disease, do a recalculation for the category too.  so add the category to the array.
-	foreach ($entity1ids as $ak=>$av)
-	{
-		$Disease=isDisease($av['id']);
-		if($Disease)
-			{
 
-				$Query = 'select parent from entity_relations where child ="' . $Disease . '" and parent in (select id from entities where class="Disease_Category") ';
-				$Res = mysql_query($Query);
-				while($row = mysql_fetch_assoc($Res))
-				{
-//Temporarily disabled auto-recalculation of disease categories 
-//					$entity1ids[]['id'] = $row['parent'];
-				}	
-			}		
-	}	
-	foreach ($entity2ids as $ak=>$av)
-	{
-		$Disease=isDisease($av['id']);
-		if($Disease)
-			{
-
-				$Query = 'select parent from entity_relations where child ="' . $Disease . '" and parent in (select id from entities where class="Disease_Category") ';
-				$Res = mysql_query($Query);
-				while($row = mysql_fetch_assoc($Res))
-				{
-//Temporarily disabled auto-recalculation of disease categories 
-//				$entity1ids[]['id'] = $row['parent'];
-				}	
-			}		
-	}		
-			
+	global $diseaseids	;
 	foreach ($entity1ids as $ak=>$av)
 	{
 		
@@ -301,7 +146,21 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 		{
 			continue;
 		}
-		
+		$DC=$av['id'];
+			
+		$Query = 'select child from entity_relations where parent ="' . $DC . '" ';
+		$Res = mysql_query($Query);
+		$diseaseids=array();
+		while($row = mysql_fetch_assoc($Res))
+		{
+			$diseaseids[] = $row['child'];
+		}
+		if($DC==$pv['id']) 
+			$nonDC=$av['id'];
+		else
+			$nonDC=$pv['id'];
+		$diseaseids = implode(",", $diseaseids);
+				
 		foreach($entity2ids as $pk=>$pv)
 		{
 			
@@ -320,18 +179,10 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			{
 				global $dc;
 				$dc=true;
-				$Query = 'select child from entity_relations where parent ="' . $DC . '" ';
-				$Res = mysql_query($Query);
-				$diseaseids=array();
-				while($row = mysql_fetch_assoc($Res))
-				{
-					$diseaseids[] = $row['child'];
-				}
 				if($DC==$pv['id']) 
 					$nonDC=$av['id'];
 				else
 					$nonDC=$pv['id'];
-				$diseaseids = implode(",", $diseaseids);
 		//		$trialids=calculateDCforEntities($diseaseids,$pv['id']);
 				$trialids=calculatenonDCtrials($nonDC);
 				if(empty($trialids)) continue;
@@ -348,14 +199,6 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				continue;
 				*/
 			}
-			else
-			{
-				$query_m=	'	SELECT 		a.trial,d.source_id,d.is_active,p.relation_type as relation_type,d.institution_type,d.source_id,d.lastchanged_date,
-										d.firstreceived_date,d.phase,d.overall_status from entity_trials a 
-							JOIN 		entity_trials p ON a.`trial`=p.`trial`
-							LEFT JOIN 	data_trials d ON p.`trial`=d.`larvol_id`
-							WHERE 		a.`entity`="'.$av['id'].'" and p.`entity`="'.$pv['id'].'" ';
-			}	
 			
 			if(!$res = mysql_query($query_m))
 					{
@@ -365,6 +208,8 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 						echo $log;
 						return false;
 					}
+			$row = mysql_fetch_assoc($res);
+			if(!$row) continue;
 			$phasez=array();
 			
 			$overall_statuses=array();
@@ -628,35 +473,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				
 				add_data($av['id'],$pv['id'],0,0,0,'none','N/A',$overall_statuses,$ignore_changes);
 				$progress_count ++;
-				if($cron_run)
-				{
-					$query = '	UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",
-								update_items_progress="' . $progress_count . '", status="2" 
-								WHERE update_id="' . $update_id . '"';
-					if(!$res = mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						global $logger;
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-				}
-				elseif($display_status=='YES')
-				{
-					$query = '	UPDATE update_status_fullhistory SET status="2", 
-								updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",
-								update_items_progress=update_items_progress+' . $progress_count . ' 
-								WHERE update_id="' . $update_id . '"';
-					if(!$res = mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						global $logger;
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-				}
+				
 				
 				$counter++;
 				continue;
@@ -716,85 +533,18 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 				sleep(1);
 			}
 			
-			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$cnt_active_owner_sponsored,$bomb,$max_phase,$overall_statuses,$ignore_changes);
+			add_data($av['id'],$pv['id'],$cnt_total,$cnt_active,$cnt_active_indlead,$cnt_active_owner_sponsored,$bomb,$max_phase,$overall_statuses,true);
 			$progress_count ++;
-			if($cron_run)
-			{
-				$query = 'UPDATE update_status SET status="2", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress="' . $progress_count . '" WHERE update_id="' . $update_id . '"';
-				if(!$res = mysql_query($query))
-				{
-					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-					global $logger;
-					$logger->error($log);
-					echo $log;
-					return false;
-				}
-			}
-			elseif($display_status=='YES')
-			{
-				$query = 'UPDATE update_status_fullhistory SET status="2", updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress=update_items_progress+' . $progress_count . ' WHERE update_id="' . $update_id . '"';
-				if(!$res = mysql_query($query))
-				{
-					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-					global $logger;
-					$logger->error($log);
-					echo $log;
-					return false;
-				}
-			}
+			
 		}
 
 	}
 	
-	if($cron_run)
-	{
-		/*
-		$query = 'UPDATE update_status 
-		SET status="0", WHERE update_id="' . $update_id . '"';
-		
-		*/
-		
-		$query = 'UPDATE `update_status` 
-				  SET `status`="0", `end_time`="' . date("Y-m-d H:i:s", strtotime('now')) . '" 
-				  WHERE `update_id`="' . $update_id . '"';
-				  
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	}
-//	echo '<br>All Done.';
+	//	echo '<br>All Done.';
 
 	//activate the trigger if required.
-	if( isset($activate_trigger) and !empty($activate_trigger) )
-	{
-		echo '<br> Activating trigger to update status...<br>';
-		if(!$res = mysql_query($activate_trigger))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-	}
 	
-	/***** If this is a full HM-cell calculation, then also run the calculation for all Disease Categories. */
-	if( isset($parameters['entity1']) or isset($parameters['entity2'])  )
-		return true;
-	else
-	{
-		require_once('calc_DC_all.php');
-		return true;
-	}
-
-	/************************/	
-
-	
+	return true;
 }			
 
 //
@@ -865,6 +615,7 @@ if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_tot
 		$highest_phase_old = $row["highest_phase"];
 		//if there is a difference in counts, then update the _prev fields
 		$aa='';$bb='';$cc='';$dd='';
+		$ignore_changes='yes';
 		if(isset($ignore_changes) and $ignore_changes=='yes')
 		{
 			$aa='';
@@ -1172,8 +923,8 @@ if($dc===false)	global $data,$isactive,$instype,$ldate,$phases,$ostatus,$cnt_tot
 	}
 	/**************/
 	$curtime = date('Y-m-d H:i:s');
-	
-	echo '<br>'. $curtime . ' Entity1 id : '. $entity1id .' Entity2 id : '. $entity2id . ' - done.'. str_repeat("  ",800)  ;
+	global $sno;
+	echo '<br>'. $sno .'. '. $curtime . ' Entity1 id : '. $entity1id .' Entity2 id : '. $entity2id . ' - done.'. str_repeat("  ",800)  ;
 	
 	
 }
