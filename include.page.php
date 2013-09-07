@@ -818,6 +818,9 @@ function input_tag($row,$dbVal=null,$options=array())
 	$disabled = (isset($options['disabled']) && $options['disabled']===true)?'disabled="disabled"':null;
         //Not using $disabled var above seems to be being used as bool in the code below whereas its value is being set as non-boolean??
 	$input_disabled = (isset($options['input_disabled']) && $options['input_disabled']===true)?TRUE:FALSE;
+	if(strpos($_SERVER['REQUEST_URI'],'upm'))
+		$input_disabled=FALSE;
+	
 	$altTitle = (isset($options['alttitle']))?$options['alttitle']:null;
 	$style = (isset($options['style']))?$options['style']:null;
 	
