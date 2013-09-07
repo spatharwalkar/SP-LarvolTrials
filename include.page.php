@@ -1292,6 +1292,20 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 								}
 							}
 						}
+						else  // delete the institution assocition if no institution id is given in the xml
+						{
+							$qry=" DELETE FROM entity_relations where parent = '". $ProdID ."' and child in 
+								( select id from entities where class=\"Institution\") limit 10 ";
+							$delok = mysql_query($qry);
+							if(!$delok)
+							{
+								pr('Cannot remove old entity relations  <br> Query='.$qry.'<br>');
+								pr(mysql_errno());
+								pr(mysql_error());
+								return false;
+							}
+						
+						}
 					}
 					else
 					{
@@ -2482,9 +2496,11 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 	echo '<fieldset class="floatl">';
 	echo '<legend> Actions: </legend>';
 	if(isset($options['add_new_record']) && $options['add_new_record']!==false)
-            if($addEdit_flag == TRUE) { 
+	{
+     //       if($addEdit_flag == TRUE) { 
                 echo '<input type="submit" value="Add New Record" name="add_new_record">';
-            }
+     //       }
+	}
 		if($options['import'])
 		echo '<input type="submit" value="Import" name="import">';
 		echo '</fieldset>';
