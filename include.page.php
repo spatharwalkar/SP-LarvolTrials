@@ -2966,6 +2966,8 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo "&nbsp;<span>".((isset($options['preindexStatus']['er_message']) && $options['preindexStatus']['er_message']!='')? $options['preindexStatus']['er_message'].'.': '')."</span>";
 		echo "</td></tr>";	
 	}
+	if(strpos($_SERVER['REQUEST_URI'],'upm'))
+		$input_disabled=FALSE;
 	echo '<tr>&nbsp;<td></td><td>
 	<input type="hidden" name="entity" value="'.$_REQUEST['entity'].'"/>
 	'.($input_disabled ? '<input type="button" onclick="history.go(-1)" value="Go back" />' : '<input name ="save" type="submit" value="Save"/>').'</td>';
