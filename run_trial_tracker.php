@@ -8225,13 +8225,17 @@ class TrialTracker
 		
 		$ottType = $Arr['ottType'];
 		$productSelector = $Arr['productSelector'];
-	    
-	    if(!empty($globalOptions["sphinxSearch"]) && in_array($globalOptions["sphinxSearch"],$productSelector) && (false === in_array($globalOptions["sphinxSearch"],$globalOptions["product"])) ){
-	    	$arrKey = array_search($globalOptions["sphinxSearch"],$productSelector);
-	    	$arrKey = ( string ) $arrKey;
-	    	if(false === strpos($_REQUEST["pr"], $arrKey)) {
-	    	    array_push($globalOptions["product"],$arrKey);
-	    	}
+		
+		$searchProducts   = GetProductFromProducts($globalOptions["sphinxSearch"],$productSelector);
+		
+	    if(!empty($globalOptions["sphinxSearch"]) && (count($searchProducts) > 0) && (false === in_array($globalOptions["sphinxSearch"],$globalOptions["product"])) ){
+	    	if (count($searchProducts) > 0){
+	    		
+	    		$globalOptions["product"] = array_merge($globalOptions["product"],$searchProducts);
+	    		
+	    	} 
+		$globalOptions["product"] = array_unique($globalOptions["product"]);
+	
 	    	unset($globalOptions["sphinxSearch"]);
 		} 
 		
@@ -13721,4 +13725,21 @@ function track_time_diff($n,$q, $time_start, $time_end)
 	$logger->debug($log);
 	unset($log);
 }
+function GetProductFromProducts($ss,$productSelector){
+	global $globalOptions;
+	$keys=array_keys($productSelector);
+	$impArr = implode("','", $keys);
+	$sql = "select id from entities where id in('".$impArr."') and ( name like '%$ss%'  or display_name like '%$ss%' or description like '%$ss%' or search_name like '%$ss%' or brand_names like '%$ss%' or code_names like '%$ss%' )"; // use products table As story Says and  add  " or display_name like '%$ss%' " in where clause  for display_name field search
+	$Res = m_query(__LINE__,$sql);
+	$numRows=mysql_num_rows($Res);
+	$resArr = array();
+	if($numRows > 0){
+		while ($row = mysql_fetch_array($Res))
+			$resArr[]=$row["id"];
+		
+	} 	
+	
+	return $resArr;	
+}
+
 ?>
