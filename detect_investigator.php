@@ -287,6 +287,9 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			}
 			$res = mysql_fetch_assoc($res);
 			$exists = $res !== false;
+			$overall_official_name=mysql_real_escape_string($overall_official_name);
+			$overall_official_affiliation = mysql_real_escape_string($overall_official_affiliation);
+			
 			if(!$exists)
 			{
 				$query = 'INSERT IGNORE INTO entities 
