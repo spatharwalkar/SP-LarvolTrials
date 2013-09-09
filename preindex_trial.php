@@ -215,7 +215,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						$query = 'SELECT LI_id from '. 'entities' .' where `id`="' . $productID .'" limit 1' ;
 						$resu = mysql_query($query);
 						$row=mysql_fetch_array($resu);
-						if(!empty($row['LI_id'])) //delete only if they are not mesh related indexes
+						if(empty($row['mesh_name'])) //delete only if they are not mesh related indexes
 						{
 							$qry='DELETE from '. $table .' where `'. $field . '` = "'. $productID . '"';
 							if(!mysql_query($qry))
