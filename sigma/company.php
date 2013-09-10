@@ -205,9 +205,13 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 		<table cellpadding="0" cellspacing="0" id="disease_tabs">
 			<tr>
 				'; 
-				if($categoryFlag == 1){
+				if($categoryFlag == 1)
+				{
+					if($tab == 'diseasetrac') $tmp=showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag);	//to recalculate no. of DCs
 					$CountExt = (($TabDiseaseCount == 1) ? 'Disease Category':'Disease Categories');
-				}else{
+				}
+				else
+				{
 					$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
 				}
 				

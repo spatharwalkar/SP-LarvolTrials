@@ -597,7 +597,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 		}
 	}
 	global $TabDiseaseCount;
-	//$TabDiseaseCount = count($data_matrix);
+	$TabDiseaseCount = count($data_matrix);
 	//$TotalRecords = count($data_matrix);
 	$Return['matrix'] = $data_matrix;
 	$Return['report_name'] = $Report_DisplayName;

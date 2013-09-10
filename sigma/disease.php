@@ -28,6 +28,10 @@
 			$dwcount = $_REQUEST['dwcount'];
 		else
 			$dwcount = 'total';				
+		if(isset($_REQUEST['dwIcount']))
+			$dwcount = $_REQUEST['dwIcount'];
+		else
+			$dwcount = 'total';				
 	}
 	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 	{
