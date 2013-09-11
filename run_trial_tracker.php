@@ -9117,7 +9117,10 @@ class TrialTracker
 			$where .= " AND ((dt.`firstreceived_date` BETWEEN '" . $startRange . "' AND '" . $endRange . "') OR (`" . implode('` BETWEEN "' . $startRange . '" AND "' . $endRange . '") OR (`', $this->fieldNames) . "` BETWEEN '" . $startRange . "' AND '" . $endRange . "') )";
 		}
 		$Query   = $query . $where .$where1;
-		$groupBy = " group by dt.`larvol_id` ";
+		$groupBy = "";
+		if(stripos($_SERVER["REQUEST_URI"],'sigma')!==false)
+			$groupBy = " group by dt.`larvol_id` ";
+		
 		//limit clause for pagination in webpage display and unsetting section headers which are not required in each page
 		if($display == 'web')
 		{
