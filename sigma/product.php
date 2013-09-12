@@ -12,6 +12,7 @@
 	require_once('intermediary.php');
 	chdir ($cwd);
 	require_once('disease_tracker.php');
+	require_once('investigators_tracker.php');
 	
 	$e1 = NULL;
 	
@@ -45,7 +46,7 @@
 	}else{
 		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($e1, 'Product' ));
 	}
-	
+	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($e1, 'Product' ));//GetInvestigatorFromEntity_InvestigatorTracker
 	$TabTrialsCount = GetTrialsCountFromProduct($e1);
 	
 	$meta_title = 'Larvol Sigma'; //default value
@@ -165,13 +166,18 @@ print '
 				}
 				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabTrialsCount == 1) ? 'Trial':'Trials');
-				$companyLinkName = '<a href="'.$tabCommonUrl.'&tab=ott&sourcepg=TZP" title="'.$TabTrialsCount.' '.$CountExt.'">&nbsp;'.$TabTrialsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+				$trialsLinkName = '<a href="'.$tabCommonUrl.'&tab=ott&sourcepg=TZP" title="'.$TabTrialsCount.' '.$CountExt.'">&nbsp;'.$TabTrialsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+				$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
+				$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				
 				if($tab == 'diseasetrac') {  
-				print '<td><img id="DiseaseImg" src="../images/firstSelectTab.png" /></td><td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td><td><img id="CompanyImg" src="../images/selectTabConn.png" /></td><td id="CompanyTab" class="Tab">'. $companyLinkName .'</td><td><img id="lastImg" src="../images/lastTab.png" /></td> 
+				print '<td><img id="investigatorImg" src="../images/firstTab.png" /></td><td id="InvestigatortracTab" class="Tab">' . $investigatorLinkName .'</td><td><img id="CompanyImg" src="../images/middleTab.png" /></td><td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td><td><img id="CompanyImg" src="../images/selectTabConn.png" /></td><td id="DiseaseTab" class="Tab">'. $trialsLinkName .'</td><td><img id="lastImg" src="../images/lastTab.png" /></td> 
 				<td></td>';
-				 } else if($tab == 'ott') { 
-				print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td><td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td><td><img id="CompanyImg" src="../images/middleTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+				} else if($tab == 'investigatortrac') {
+					print '<td><img id="investigatorImg" src="../images/firstSelectTab.png" /></td><td id="InvestigatortracTab" class="selectTab">' . $investigatorLinkName .'</td><td><img id="CompanyImg" src="../images/selectTabConn.png" /></td><td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td><td><img id="CompanyImg" src="../images/afterTab.png" /></td><td id="InvestigatorTab" class="Tab">'. $trialsLinkName .'</td><td><img id="lastImg" src="../images/lastTab.png" /></td>
+					<td></td>';
+				} else if($tab == 'ott') { 
+				print '<td><img id="investigatorImg" src="../images/firstTab.png" /></td><td id="InvestigatortracTab" class="Tab">' . $investigatorLinkName .'</td><td><img id="CompanyImg" src="../images/afterTab.png" /></td><td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td><td><img id="CompanyImg" src="../images/middleTab.png" /></td><td id="CompanyTab" class="selectTab">'. $trialsLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
 				// print '<td><img id="CompanyImg" src="../images/firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
 				 } 
 	print	'            
@@ -185,6 +191,9 @@ print '
 print '<div id="diseaseTab_content" align="center">';
 if($tab == 'diseasetrac'){
 	print showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
+}
+else if($tab == 'investigatortrac'){
+	print showInvestigatorTracker($e1, 'PIT', $page);		//PDT = PRODUCT INVESTIGATOR TRACKER  showInvestigatorTracker
 }	
 else
 {
