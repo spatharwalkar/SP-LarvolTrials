@@ -32,6 +32,7 @@
 		$NonActiveProductArray = array();
 		$NonMeshDiseaseArray = array();
 		$DiseaseCategory=array();
+		$Investigator=array();
 		if(is_array($ResultArr))
 		{
 			$GetDataQuery = "SELECT `id`, `name`, `class`, `category`, `is_active`, `mesh_name` FROM `entities` WHERE id IN (" . implode(',',$ResultArr) . ") ";
@@ -67,6 +68,10 @@
 					{
 						if(trim($GetDataResult['mesh_name']) == '' && $GetDataResult['mesh_name'] == NULL)	//Remove Non Mesh Diseases
 						$DiseaseCategory[] = $GetDataResult['id'];	
+					}
+					if($GetDataResult['class'] == 'Investigator')
+					{
+						$Investigator[] = $GetDataResult['id'];	
 					}
 				}
 			}
@@ -110,11 +115,12 @@
 			
 			foreach($CurrentPageResultArr as $index=> $value)
 			{
-				$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `class`, `display_name` FROM `entities` WHERE id = '" . mysql_real_escape_string($value) . "' "));
+				$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `class`, `display_name`, `affiliation` FROM `entities` WHERE id = '" . mysql_real_escape_string($value) . "' "));
 				$DataArray[$index]['index'] = $index;
 				$DataArray[$index]['name'] = $result['name'];
 				$DataArray[$index]['id'] = $result['id'];
 				$DataArray[$index]['type'] = $result['class'];
+				$DataArray[$index]['affiliation'] = $result['affiliatiion'];
 				if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
 					$DataArray[$index]['name'] = $result['display_name'];
 			}
@@ -139,7 +145,7 @@
 		else if($globalOptions['class'] == 'Product')
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category` FROM `entities` WHERE `class` = '".$globalOptions['class']."'  AND (`is_active` <> '0' OR `is_active` IS NULL)";
 		else
-		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
+		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
 		
 		$QueryResult = mysql_query($ResultArrQuery);
 		
@@ -169,12 +175,12 @@
 		 * @var $arrTZBarLink 
 		*/
 		
-		$arrTZBarLink =array("Institution"=> array("url"=>"index.php?class=Institution","name"=>"Companies"),
-							 "MOA"		  => array("url"=>"index.php?class=MOA","name"=>"Mechanisms of Action"),
-							 "Disease"	  => array("url"=>"index.php?class=Disease","name"=>"Diseases"),
-							 "Product"	  => array("url"=>"index.php?class=Product", "name"=>"Products")				
+		$arrTZBarLink =array("Institution"    => array("url"=>"index.php?class=Institution","name"=>"Companies"),
+							 "MOA"		  	  => array("url"=>"index.php?class=MOA","name"=>"Mechanisms of Action"),
+							 "Disease"	  	  => array("url"=>"index.php?class=Disease","name"=>"Diseases"),
+							 "Product"	  	  => array("url"=>"index.php?class=Product", "name"=>"Products"),				
+							 "Investigator"	  => array("url"=>"index.php?class=Investigator", "name"=>"Investigators")
 							);
-		
 		
 		if($globalOptions['class'] == 'MOA')	//IN CASE OF MOA  - GET MOA ID AS WELL WHO DOES NOT HAVE CATEGORY OR has Other Category
 		{
@@ -227,7 +233,7 @@
 $meta_title = "Larvol Sigma";
 if(isset($_GET['class'])) {
 	$class=strtolower($_GET['class']);
-	$meta_titles_arr = array('institution' => 'List of Companies', 'product' => 'Products', 'moa' => 'Mechanisms of Action', 'disease' => 'Disease List');
+	$meta_titles_arr = array('institution' => 'List of Companies', 'product' => 'Products', 'moa' => 'Mechanisms of Action', 'disease' => 'Disease List', 'investigator' => 'List of Investigators');
 	$meta_title = (isset($meta_titles_arr[$class]) ? $meta_titles_arr[$class].' : ' : '').$meta_title;
 } else if(isset($_REQUEST['TzSearch']) && $_REQUEST['TzSearch'] != '') {
 	$meta_title = $_REQUEST['TzSearch'].' : '.$meta_title;
@@ -486,7 +492,7 @@ if($ClassFlg)
 	{
 		if($DataArray[$index]['id'] != '' && $DataArray[$index]['id'] != '' && $FoundRecords > 0)
 		{
-			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category')	// avoid displying row for other types
+			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category' || $DataArray[$index]['type'] == 'Investigator')	// avoid displying row for other types
 			{
 				print'<table width="100%" border="0" cellspacing="0" cellpadding="0">
 						<tr>
@@ -512,7 +518,10 @@ if($ClassFlg)
 				{
 						print ' 	<a href="moacategory.php?MoaCatId='. trim($DataArray[$index]['id']) .'" title="MOA Category" ><b>'.$DataArray[$index]['name'] .'</b></a>&nbsp;&nbsp;('.GetProductsCountFromMOACat(trim($DataArray[$index]['id'])).' Products)';
 				}
-				
+				else if($DataArray[$index]['type'] == 'Investigator')
+				{
+						print ' 	<a href="investigator.php?id='. trim($DataArray[$index]['id']) .'" title="Investigator" ><b>'.$DataArray[$index]['name'] .'</b> / <i>'.$DataArray[$index]['name'].' </a>';
+				}
 				if($DataArray[$index]['type'] != 'MOA_Category') print '<br /><br style="line-height:6px;" />';
     			print ' </td>
     				  </tr>
