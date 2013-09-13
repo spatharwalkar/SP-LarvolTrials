@@ -138,7 +138,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 
 		$Ids = array_filter(array_unique(GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType)));
 		$InvestigatorIds =  $Ids;
-		$InvestigatorQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Investigator') WHERE et.`entity` IN ('" . implode("','",$InvestigatorIds) . "') AND et2.`entity`='" . $id ."'";
+		$InvestigatorQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname, e.`affiliation` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Investigator') WHERE et.`entity` IN ('" . implode("','",$InvestigatorIds) . "') AND et2.`entity`='" . $id ."'";
 		$InvestigatorQueryResult = mysql_query($InvestigatorQuery) or die(mysql_error());
 		
 		$key = 0;	
@@ -158,7 +158,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					else
 						$data_matrix[$key]['RowHeader'] = $result['name'];
 					
-					$data_matrix[$key]['RowHeader'] = ' / <i>'.$result['affiliation'].'</i>';
+					$data_matrix[$key]['RowHeader'] .= ' / <i>'.$result['affiliation'].'</i>';
 					
 					
 					$data_matrix[$key]['ID'] = $result['id'];
@@ -181,7 +181,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					}
 					
 
-					$data_matrix[$key]['HeaderLink'] = 'product.php?InvestigatorId=' . $data_matrix[$key]['ID'];
+					$data_matrix[$key]['HeaderLink'] = 'invesigator.php?id=' . $data_matrix[$key]['ID'];
 					$data_matrix[$key]['ColumnsLink'] = 'ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
 					
 					///// Initialize data
@@ -897,7 +897,7 @@ function InvestigatorTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 					   . '<br/><span style="font-weight:normal;">Send feedback to '
 					   . '<a style="display:inline;color:#0000FF;" target="_self" href="mailto:larvoltrials@larvol.com">'
 					   . 'larvoltrials@larvol.com</a></span></td>'
-					   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' Disease Tracker</td></tr></table><br/>';
+					   . '<td width="33%" align="right" style="background-color:#FFFFFF; padding-right:20px;" class="report_name">Name: ' . htmlspecialchars($Report_Name) . ' Investigator Tracker</td></tr></table><br/>';
 	}
 	return $htmlContent;
 }
@@ -915,7 +915,7 @@ function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, 
 	
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
-					.'<form action="disease_tracker.php" method="post">'
+					.'<form action="investigators_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
@@ -931,8 +931,6 @@ function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, 
 	if($GobalEntityType == 'Product')
 	$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
 					. '<option value="total" '. (($CountType == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
-					. '<option value="indlead" '. (($CountType == 'indlead') ?  'selected="selected"' : '' ).'>Active industry trials</option>'
-					. '<option value="owner_sponsored" '. (($CountType == 'owner_sponsored') ?  'selected="selected"' : '' ).'>Active owner-sponsored trials</option>'
 					. '<option value="active" '. (($CountType == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
 					. '</select></td>';
 										
@@ -942,12 +940,7 @@ function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, 
 					
 	global $tabCommonUrl;
 
-	$htmlContent .= '<td class="bottom right">'
-					. '<input type="button" value="Category View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac&category=1\'"' .'>'
-					. '&nbsp;&nbsp;'
-					. '<input type="button" value="Disease View"  onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac\'"' .'>'
-					. '</td>'
-					. '</tr>'
+	$htmlContent .= '</tr>'
 					. '</table>';
 				
 	$htmlContent  .= '<div id="'.$uniqueId.'_dropmenu" class="dropmenudiv" style="width: 310px;">'
@@ -1036,7 +1029,7 @@ function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, 
 		}
 		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
 		
-		$Err = CountErr($data_matrix, $key, $ratio);
+		$Err = CountErrInvestigator($data_matrix, $key, $ratio);
 			
 		$Max_ValueKey = Max_ValueKeyInvestigatorTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 			
@@ -1348,7 +1341,7 @@ function DownloadInvestigatorTrackerReports()
      											'rotation'   => 0,
       											'wrap'       => false));
 
-			$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Disease Tracker');
+			$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Investigator Tracker');
 
 		
 		if($GobalEntityType == 'Product')
@@ -1408,7 +1401,7 @@ function DownloadInvestigatorTrackerReports()
 			$from++;
 				
 			//// Graph starts
-			$Err = CountErr($data_matrix, $key, $ratio);
+			$Err = CountErrInvestigator($data_matrix, $key, $ratio);
 			
 			$Max_ValueKey = Max_ValueKeyInvestigatorTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 			
@@ -1556,7 +1549,7 @@ function DownloadInvestigatorTrackerReports()
 		header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0");
 		header("Content-type: application/force-download"); 
 		header("Content-Type: application/tsv");
-		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Disease_Tracker_' . date('Y-m-d_H.i.s'). '.tsv"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Investigator_Tracker_' . date('Y-m-d_H.i.s'). '.tsv"');
 		header("Content-Transfer-Encoding: binary ");
 		echo $TSV_data;
 	}	/// TSV FUNCTION ENDS HERE
@@ -1601,7 +1594,7 @@ function DownloadInvestigatorTrackerReports()
 		
 		$pdf->SetFont('verdanab', '', 8);	//Set font size as 8
 		
-		$Repo_Heading = $Report_Name.$TrackerName.' Disease Tracker' . (($GobalEntityType == 'Product') ? ', '.$pdftitle:'');
+		$Repo_Heading = $Report_Name.$TrackerName.' Investigator Tracker' . (($GobalEntityType == 'Product') ? ', '.$pdftitle:'');
 		$current_StringLength = $pdf->GetStringWidth($Repo_Heading, 'verdanab', '', 8);
 		$pdf->MultiCell($Page_Width, '', $Repo_Heading, $border=0, $align='C', $fill=0, $ln=1, '', '', $reseth=true, $stretch=0, $ishtml=true, $autopadding=true, $maxh=0);
 		$pdf->Ln(5);
@@ -1734,7 +1727,7 @@ function DownloadInvestigatorTrackerReports()
 			$Place_X = $Middle_Place;
 			
 			//// Graph starts
-			$Err = CountErr($data_matrix, $key, $ratio);
+			$Err = CountErrInvestigator($data_matrix, $key, $ratio);
 			$Max_ValueKey = Max_ValueKeyInvestigatorTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 				
 			$total_cols = $inner_columns * $columns;
@@ -1869,7 +1862,7 @@ function DownloadInvestigatorTrackerReports()
 			
 		ob_end_clean();
 		//Close and output PDF document
-		$pdf->Output(''. substr($Report_Name,0,20) .'_Disease_Tracker_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
+		$pdf->Output(''. substr($Report_Name,0,20) .'_Investigator_Tracker_'. date("Y-m-d_H.i.s") .'.pdf', 'D');
 	}	/// End of PDF Function
 	
 	//Start of Real Chart Excel
@@ -2027,7 +2020,7 @@ function DownloadInvestigatorTrackerReports()
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/download");
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Disease_Tracker_' . date('Y-m-d_H.i.s') . '.xlsx"');
+		header('Content-Disposition: attachment;filename="' . substr($Report_Name,0,20) . '_Investigator_Tracker_' . date('Y-m-d_H.i.s') . '.xlsx"');
 		header("Content-Transfer-Encoding: binary ");
 		
 		$Writer->save('php://output');
@@ -2330,8 +2323,8 @@ $max = $valna;
 	
 	return $key;
 }
-/*
-function CountErr($data_matrix, $key, $ratio)
+
+function CountErrInvestigator($data_matrix, $key, $ratio)
 {
 	$Rounded = (($data_matrix[$key]['phase_4'] > 0 && round($ratio * $data_matrix[$key]['phase_4']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_4'])) + (($data_matrix[$key]['phase_3'] > 0 && round($ratio * $data_matrix[$key]['phase_3']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_3'])) + (($data_matrix[$key]['phase_2'] > 0 && round($ratio * $data_matrix[$key]['phase_2']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_2'])) + (($data_matrix[$key]['phase_1'] > 0 && round($ratio * $data_matrix[$key]['phase_1']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_1'])) + (($data_matrix[$key]['phase_0'] > 0 && round($ratio * $data_matrix[$key]['phase_0']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_0'])) + (($data_matrix[$key]['phase_na'] > 0 && round($ratio * $data_matrix[$key]['phase_na']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_na']));
 	$Actual = ($ratio * $data_matrix[$key]['phase_4']) + ($ratio * $data_matrix[$key]['phase_3']) + ($ratio * $data_matrix[$key]['phase_2']) + ($ratio * $data_matrix[$key]['phase_1']) + ($ratio * $data_matrix[$key]['phase_0'])+ ($ratio * $data_matrix[$key]['phase_na']);
@@ -2339,7 +2332,7 @@ function CountErr($data_matrix, $key, $ratio)
 
 	return $Err;
 }
-*/
+
 function sortTwoDimensionArrayByKeyInvestigatorTracker($arr, $arrKey, $sortOrder=SORT_DESC)
 {
 	if(is_array($arr) && count($arr) > 0)
@@ -2412,5 +2405,6 @@ function CalculateMiniBarWidthInvestigatorTracker($Ratio, $countValue, $Key, $Ma
 		
 		return $Mini_Bar_Width;
 }
+
 
 ?>
