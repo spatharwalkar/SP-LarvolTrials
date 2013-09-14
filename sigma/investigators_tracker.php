@@ -159,8 +159,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 						$data_matrix[$key]['RowHeader'] = $result['name'];
 					
 					$data_matrix[$key]['RowHeader'] .= ' / <i>'.$result['affiliation'].'</i>';
-					
-					
+										
 					$data_matrix[$key]['ID'] = $result['id'];
 					$NewInvestigatorIds[] = $result['id'];
 					if($CountType=='active')
