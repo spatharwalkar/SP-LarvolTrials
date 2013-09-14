@@ -181,7 +181,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					}
 					
 
-					$data_matrix[$key]['HeaderLink'] = 'invesigator.php?id=' . $data_matrix[$key]['ID'];
+					$data_matrix[$key]['HeaderLink'] = 'investigator.php?id=' . $data_matrix[$key]['ID'];
 					$data_matrix[$key]['ColumnsLink'] = 'ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
 					
 					///// Initialize data
