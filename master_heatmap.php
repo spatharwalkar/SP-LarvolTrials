@@ -1650,7 +1650,6 @@ function Download_reports()
 	}else{
 		$ohm = 'SOHM';
 	}
-	
 	if($ohm == 'SOHM')
 	{
 		$query = 'SELECT `name`, `user`, `footnotes`, `description`, `category`, `shared`, `total`, `dtt`, `display_name` FROM `rpt_masterhm` WHERE id=' . $id . ' LIMIT 1';
@@ -1969,7 +1968,6 @@ function Download_reports()
 	// SELECT MAX ROW AND MAX COL
 	$max_row = count($entity1Ids);
 	$max_column = count($entity2Ids);
-	
 	/////Remove last column at start only //////////
 	$new_columns = array();
 	foreach($columns as $col => $cval)
@@ -1989,7 +1987,6 @@ function Download_reports()
 	
 	$columns=$new_columns;
 	/////Rearrange Completes //////////
-	
 	if(isset($_REQUEST['sr']) && isset($_REQUEST['er']))
 	{
 		$sr = $_REQUEST['sr'];
@@ -2014,14 +2011,15 @@ function Download_reports()
 		$er = '1 month';
 	}
 
-/* 	echo '<pre>';
-	print_r($rows);
-	print_r($columnsDisplayName);
-	print_r($columnsDescription);
-	print_r($rowsDisplayName);
-	print_r($rowsDescription);
-	die; */
-	
+	/*
+		echo '<pre>';
+		print_r($rows);
+		print_r($columnsDisplayName);
+		print_r($columnsDescription);
+		print_r($rowsDisplayName);
+		print_r($rowsDescription);
+		die(); 
+	*/	
 	
 	$row_total=array();
 	$col_total=array();
@@ -2042,8 +2040,6 @@ function Download_reports()
 	                    
 	                     );
 	$tidy = new tidy(); /// Create Tidy Object
-	
-	
 	foreach($rows as $row => $rid)
 	{
 		$PhaseRowMatrix[$row]['oldrow'] = $row;
@@ -2058,7 +2054,6 @@ function Download_reports()
 				$cell_query = 'SELECT * FROM rpt_masterhm_cells WHERE (`entity1`=' . $entity1Ids[$row] . ' AND `entity2`='. $entity2Ids[$col] .') OR (`entity2`=' . $entity1Ids[$row] . ' AND `entity1`='. $entity2Ids[$col] .')';
 				$cell_res = mysql_query($cell_query) or die(mysql_error());
 				$cell_data = mysql_fetch_array($cell_res);
-				
 				$col_active_total[$col]=$cell_data['count_active']+$col_active_total[$col];
 				$row_active_total[$row]=$cell_data['count_active']+$row_active_total[$row];
 				$col_count_total[$col]=$cell_data['count_total']+$col_count_total[$col];
@@ -2150,7 +2145,7 @@ function Download_reports()
 				$data_matrix[$rid][$cid]['preclinical']=$cell_data['preclinical'];
 				
 				$Width = 0;
-				
+
 				if($cell_data['bomb_auto'] == 'small')
 				{
 					$data_matrix[$rid][$cid]['bomb_auto']['value']=$cell_data['bomb_auto'];
@@ -2345,12 +2340,12 @@ function Download_reports()
 				}
 				
 				$data_matrix[$rid][$cid]['new_trials']=$cell_data['new_trials'];
-				
+
 				////// Remaining Width calculation
 				require_once('tcpdf/config/lang/eng.php');
 				require_once('tcpdf/tcpdf.php');  
 				$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, 'LETTER', true, 'UTF-8', false);
-		
+
 				if($_POST['dwcount']=='active')
 				{
 					if($data_matrix[$rid][$cid]['active'] != NULL && $data_matrix[$rid][$cid]['active'] != '')
@@ -2379,7 +2374,6 @@ function Download_reports()
 						$Width = $Width + $pdf->GetStringWidth($data_matrix[$rid][$cid]['indlead'], 'freesansb', 'B', 8) + 0.6;
 					}
 				}
-				
 				if(trim($data_matrix[$rid][$cid]['filing']) != '' && $data_matrix[$rid][$cid]['filing'] != NULL)
 				$Width = $Width + 3.4 + 0.2;
 				
@@ -2523,7 +2517,7 @@ function Download_reports()
 		$LastEntity2 = $entity2Ids[count($entity2Ids)];
 		// END OF - SORT COLS AND REARRANGE ALL ROW RELATED DATA
 	}//END OF SORT IF
-	
+
 	$count_fillbomb=0;	
 	if($_POST['dwcount']=='active' || $_GET['view_type'] == 'active')
 	{
@@ -2558,19 +2552,18 @@ function Download_reports()
 	}
 	if($ohm == 'SOHM')
 	$link_part .= '&hm=' . $id;
-	
+
 	if($ohm == 'SOHM' || $ohm == 'EOHMH')
 		$CommonLinkForAll = urlPath() .'intermediary.php?';
 	else
 		$CommonLinkForAll = urlPath() .'sigma/ott.php?sourcepg=TZ&';	
 	
 	$link_part=str_replace(' ','+',$link_part);	
-	
+
 	$Report_Name = $ReportDisplayName;
-	
+
 	if($_POST['dwformat']=='pdfdown' || isset($_GET['pdf_x']))
-	{
-	
+	{	
 		require_once('tcpdf/config/lang/eng.php');
 		require_once('tcpdf/tcpdf.php');  
 		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, 'LETTER', true, 'UTF-8', false);
@@ -4070,11 +4063,9 @@ function Download_reports()
 		
 	if($_POST['dwformat']=='exceldown' || isset($_GET['excel_x']))
 	{
-	  	$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));
-		
+		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));		
 		// Create excel file object
 		$objPHPExcel = new PHPExcel();
-	
 		// Set properties
 		$objPHPExcel->getProperties()->setCreator(SITE_NAME);
 		$objPHPExcel->getProperties()->setLastModifiedBy(SITE_NAME);
@@ -4084,7 +4075,7 @@ function Download_reports()
 		
 		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setSize(8);
 		$objPHPExcel->getActiveSheet()->getDefaultStyle()->getFont()->setName('Verdana'); 
-	
+
 		// Build sheet
 		$objPHPExcel->setActiveSheetIndex(0);
 		$objPHPExcel->getActiveSheet()->setTitle(substr(str_replace('/',' ',stripslashes($Report_Name)),0,20).' Heatmap');
@@ -4115,9 +4106,7 @@ function Download_reports()
 			$objPHPExcel->getActiveSheet()->freezePane('B6');
 		}else{
 			$objPHPExcel->getActiveSheet()->freezePane('B5');
-		}
-		
-		
+		}	
 		if($entity2_Category_Presence)
 		{
 			$Excel_HMCounter++;
@@ -4165,9 +4154,7 @@ function Download_reports()
 					
 				}
 			}
-		}
-		
-		
+		}		
 		$Excel_HMCounter++;
 		foreach($columns as $col => $val)
 		{
@@ -4182,7 +4169,6 @@ function Download_reports()
 			);	
 				
 			$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackAreaBorderOutline); 
-				
 			if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && !empty($entity1Ids))
 			{
 				if($mode=='active')
@@ -4232,7 +4218,6 @@ function Download_reports()
       											'wrap'       => true));
 			}
 		}
-		
 		if(isset($total_fld) && $total_fld == "1")
 		{
 			$cell = num2char($col+1);
@@ -4242,9 +4227,7 @@ function Download_reports()
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
      											'rotation'   => 0,
       											'wrap'       => true));
-		}
-		
-		
+		}		
 		foreach($rows as $row => $rid)
 		{
 			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
@@ -4296,10 +4279,7 @@ function Download_reports()
 				'bottom' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
 									),
 			);	
-			
 			$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackProductBorderOutline); 			    
-				
-				
 			if(isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL && !empty($entity2Ids))
 			{
 				
@@ -4323,11 +4303,50 @@ function Download_reports()
 				//TODO
 				$rdesc = (isset($rowsDescription[$row]) && $rowsDescription[$row] != '')?$rowsDescription[$row]:null;
 				$raltTitle = (isset($rdesc) && $rdesc != '')?' alt="'.$rdesc.'" title="'.$rdesc.'" ':null;
+				/*
+					Modified By: Pravat Kumar Sahoo(PK)
+					Modified Date: 15th Sept 2013
+					Desc:To use standard formatting for product names and to make the initial names bold.
+				*/
+				$objProductFormatLI = new PHPExcel_RichText();
 				
-				$objPHPExcel->getActiveSheet()->setCellValue($cell, $rowsDisplayName[$row].$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''));
+				$rowsDisplayName[$row] = htmlspecialchars($rowsDisplayName[$row]);
+				$paren = strpos($rowsDisplayName[$row], '(');
+				
+				if($paren === false)
+				{
+					$productNameLiPart = $objProductFormatLI->createTextRun($rowsDisplayName[$row]);
+					$productNameLiPart->getFont()->setBold(true); 
+				
+				}else{
+					$productNameLiPart = $objProductFormatLI->createTextRun(substr($rowsDisplayName[$row],0,$paren));
+					$productNameLiPart->getFont()->setBold(true); 
+					$objProductFormatLI->createText(substr($rowsDisplayName[$row],$paren));							
+				}	
+				$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row]);
+				$companyName->getFont()->setItalic(true);
+				
+				if(strlen($rowsTagName[$row])){
+					$rowsTagName[$row] = "[".$rowsTagName[$row]."]";
+				}else{
+					$rowsTagName[$row] = "";
+				}
+				$objProductFormatLI->createText($rowsTagName[$row]);				
+				
+				/* 
+					$tagName = $objProductFormatLI->createTextRun($rowsTagName[$row]);
+					$tagName->getFont()->setColor( new PHPExcel_Style_Color( PHPExcel_Style_Color::COLOR_GRAY ) );
+				*/
+				
+				$objPHPExcel->getActiveSheet()->getCell($cell)->setValue($objProductFormatLI);			
+				
+				//$objPHPExcel->getActiveSheet()->setCellValue($cell, $rowsDisplayName[$row].$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''));
+				
+				//Modified End PK
+				
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?e1=' . $entity1Ids[$row] .$link_part); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
- 			    
+
  			    if($rdesc)
  			    {
  			    	$objPHPExcel->getActiveSheet()->getComment($cell)->setAuthor('Description:');
@@ -4404,8 +4423,8 @@ function Download_reports()
 					if(($row >= 1  && $row < count($rows) && ($data_matrix[$rows[$row+1]][$columns[$col]]['update_flag'] != 1 || (isset($rowsCategoryName[$row+1]) && $rowsCategoryName[$row+1] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row+1] > 0))) || ($row == count($rows)))
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackBottomBorderOutline);
 						
-				}
-					
+				}					
+
 				if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL)
 				{
 					if($mode=='active')
@@ -4502,8 +4521,7 @@ function Download_reports()
 					
 					
 					$Status_Indlead_Flg=0;
-					$Status_Indlead = "Status changes to:\n";
-					
+					$Status_Indlead = "Status changes to:\n";					
 					foreach($allTrialsStatusArray as $currentStatus)
 					{
 						if($data_matrix[$rid][$cid][$currentStatus.'_active_indlead'] > 0)
@@ -4521,8 +4539,7 @@ function Download_reports()
 						
 						
 					$Status_Active_Owner_Sponsored_Flg=0;
-					$Status_Active_Owner_Sponsored = "Status changes to:\n";
-					
+					$Status_Active_Owner_Sponsored = "Status changes to:\n";					
 					foreach($allTrialsStatusArray as $currentStatus)
 					{
 						if($data_matrix[$rid][$cid][$currentStatus.'_active_owner_sponsored'] > 0)
@@ -4542,7 +4559,6 @@ function Download_reports()
 					$annotation_text = $annotation_text.$annotation_text2;
 					
 					$annotation_text = htmlspecialchars_decode(strip_tags($annotation_text));	///Strip HTML tags then Convert special HTML entities back to characters like &amp; to &
-					
 					$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip(substr($annotation_text,0,255) );
 					$bomb_PR = 0;
 					if($data_matrix[$rid][$cid]['exec_bomb']['src'] != '' && $data_matrix[$rid][$cid]['exec_bomb']['src'] != NULL && $data_matrix[$rid][$cid]['exec_bomb']['src'] !='new_square.png')
@@ -4673,8 +4689,7 @@ function Download_reports()
 		
 		$helpTabImage_Header = array('Discontinued', 'Filing details', '  Red border (record updated)');
 		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'outline.png');
-		$helpTabImages_Desc = array('Bomb', 'Filing', 'Red Border');
-		
+		$helpTabImages_Desc = array('Bomb', 'Filing', 'Red Border');		
 		foreach($helpTabImage_Header as $key => $Header)
 		{
 			$objDrawing = new PHPExcel_Worksheet_Drawing();
@@ -4699,7 +4714,7 @@ function Download_reports()
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . ++$Excel_HMCounter, 'Phase:  ');
 		$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-		$col = 'B';
+		$col = 'B';		
 		//get search results
 		$phases = array('N/A', 'Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4');
 		$phasenums = array(); foreach($phases as $k => $p)  $phasenums[$k] = str_ireplace(array('phase',' '),'',$p);
@@ -4716,9 +4731,9 @@ function Download_reports()
 			$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 			$objPHPExcel->getActiveSheet()->getCell($cell)->setValueExplicit($phasenums[$key], PHPExcel_Cell_DataType::TYPE_STRING);
 		}
-			
+		
 		$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
-			
+	
 		ob_end_clean(); 
 		
 		header("Pragma: public");
