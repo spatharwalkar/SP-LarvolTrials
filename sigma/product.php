@@ -15,6 +15,8 @@
 	require_once('investigators_tracker.php');
 	
 	$e1 = NULL;
+	if( ($_REQUEST['er']=='1%20month') or ($_REQUEST['er']=='1 month') )
+		$_REQUEST['er']='1 month';
 	
 	if($_REQUEST['e1'] != NULL && $_REQUEST['e1'] != '' && isset($_REQUEST['e1']))
 	{
