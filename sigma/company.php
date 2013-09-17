@@ -5,6 +5,7 @@
 	require_once('product_tracker.php');
 	chdir ($cwd);
 	require_once('disease_tracker.php');
+	require_once('investigators_tracker.php');
 	$page = 1;
 	if($_REQUEST['CompanyId'] != NULL && $_REQUEST['CompanyId'] != '' && isset($_REQUEST['CompanyId']))
 	{
@@ -50,7 +51,12 @@
 	if(!isset($_REQUEST['DiseaseCatId']) && !isset($_REQUEST['DiseaseId']) ){
 		$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
 	}
-	
+	$InvestigatorId = null;
+	if(isset($_REQUEST['InvestigatorId']))
+	{
+		$InvestigatorId = mysql_real_escape_string($_REQUEST['InvestigatorId']);
+		$OptionArray = array('InvestigatorId'=>$InvestigatorId, 'Phase'=> $phase);
+	}
 	
 	
 	$tab = 'company';
@@ -69,6 +75,7 @@
 	}
 	
 	$TabProductCount = count(GetProductsFromCompany($CompanyId, 'CPT', array()));
+	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($CompanyId, 'Institution'));
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($CompanyName) ? $CompanyName. ' - '.$meta_title : $meta_title;	
@@ -216,16 +223,40 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				}
 				
 				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
-				$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
+				$CountExt = (($TabProductCount == 1) ? 'Product':'Products');				
 				$companyLinkName = '<a href="'.$tabCommonUrl.'&tab=company" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
-				
+				$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
+				$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';				
+
 				if($tab == 'diseasetrac') {  
-				print '<td><img id="DiseaseImg" src="../images/firstSelectTab.png" /></td><td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td><td><img id="CompanyImg" src="../images/selectTabConn.png" /></td><td id="CompanyTab" class="Tab">'. $companyLinkName .'</td><td><img id="lastImg" src="../images/lastTab.png" /></td> 
+				print '<td><img id="DiseaseImg" src="../images/firstSelectTab.png" /></td>
+				<td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td>
+				<td><img id="CompanyImg" src="../images/selectTabConn.png" /></td>
+				<td id="CompanyTab" class="Tab">'. $companyLinkName .'</td>
+				<td><img id="lastImg" src="../images/afterTab.png" /></td> 
+	 			<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+	 			<td><img id="lastImg" src="../images/lastTab.png" /></td>
 				<td></td>';
 				 } else if($tab == 'company') { 
-				print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td><td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td><td><img id="CompanyImg" src="../images/middleTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+				print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td>
+				<td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td>
+				<td><img id="CompanyImg" src="../images/middleTab.png" /></td>
+				<td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td>
+				</td><td><img id="lastImg" src="../images/selectTabConn.png" /></td>
+	 			<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+	 			<td><img id="lastImg" src="../images/lastTab.png" /></td>
+				<td></td>';
 				// print '<td><img id="CompanyImg" src="../images//firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images//selectLastTab.png" /></td><td></td>';
-				 } 
+				 }  else if($tab == 'investigatortrac') {
+				 	print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td>
+				 			<td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td>
+				 			<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+				 			<td id="CompanyTab" class="Tab">'. $companyLinkName .'</td>
+				 			<td><img id="lastImg" src="../images/middleTab.png" /></td>
+				 			<td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
+				 			<td><img id="lastImg" src="../images/selectLastTab.png" /></td>
+				 			<td></td>';				 	
+				 }
 	print	'            
 			</tr>
 		</table>
@@ -235,11 +266,13 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 ?>
 <tr><td align="center">
 <?php
-if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NULL))
+if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $InvestigatorId == NULL) && (!isset($phase) || $phase == NULL))
 {
 	print '<div id="diseaseTab_content" align="center">';
 	if($tab == 'diseasetrac')
 		print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag);		//CDT= COMPANY DISEASE TRACKER
+	else if($tab == 'investigatortrac')
+		print showInvestigatorTracker($CompanyId, $dwcount, 'CIT', $page);		//CDT= COMPANY INVESTIGATOR TRACKER
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 	
 	print '</div>';
@@ -250,7 +283,9 @@ else
 		print showProductTracker($CompanyId, $dwcount, 'DCPT', $page, $OptionArray);	//DCPT - DISEASE COMPANY PRODUCT TRACKER
 	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCPT')
 		print showProductTracker($CompanyId, $dwcount, 'DISCATCPT', $page, $OptionArray);	//DISCATCPT - DISEASE CATEGORY COMPANY PRODUCT TRACKER
-		
+	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'CIPT')
+	print showProductTracker($InvestigatorId, $dwcount, 'CIPT', $page, $OptionArray);	//CIPT - COMPANY INVESTIGATOR PRODUCT TRACKER
+	
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 
 }
