@@ -912,7 +912,10 @@ function text_equal($field,$value)
 		
 		// return 'PREG_RLIKE("' . '%s' . '",' . '%f' . ')';
 		// Put all regexes in unicode mode since there is no disadvantage!
-		return 'PREG_RLIKE("' . '%s' . 'u' . '",' . '%f' . ')';
+		if(UNICODE_MODE_ENABLED)
+			return 'PREG_RLIKE("' . '%s' . 'u' . '",' . '%f' . ')';
+		else
+			return 'PREG_RLIKE("' . '%s' . '",' . '%f' . ')';
 	}
 	//	else{
 	//		return '%f' . '="' . '%s' . '"';

@@ -18,7 +18,8 @@ $settingsFailSafe = array(
 	'YOURLS_PASS'=>'password',
 	'YOURLS_URL'=>'http://localhost/s/yourls-api.php',
 	'SITE_NAME'=>'Larvol Trials',
-	'LI_API'=>'http://api.larvolinsight.com/api.ashx'
+	'LI_API'=>'http://api.larvolinsight.com/api.ashx',
+	'UNICODE_MODE_ENABLED'=>'false'
 );
 $settingsFailSafeKeys = array_keys($settingsFailSafe);
 
