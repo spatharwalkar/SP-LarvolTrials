@@ -4886,7 +4886,7 @@ function PrintFooterPDFExport(&$pdf, $Place_X, $Place_Y, $Height, $Width, $PageN
 	
 	$Place_X = $Place_X + 14 + 3;
 	$Place_Y = $Place_Y - 0.2;
-	$copyRight = '&copy; The Larvol Group, 2012';
+	$copyRight = '&copy; The Larvol Group,'.date('Y');
 	$current_StringLength = $pdf->GetStringWidth($copyRight, 'freesans', ' ', 8) + 3;
 	$pdf->MultiCell($current_StringLength, 3, '<font style="color:#332b66; font-size:25px; font-style:italic; font-weight:normal;">'.$copyRight.'</font>', $border=0, $align='L', $fill=0, $ln=0, $Place_X, $Place_Y, $reseth=true, $stretch=0, $ishtml=true, $autopadding=false, $maxh=$Height, 'T');
 	

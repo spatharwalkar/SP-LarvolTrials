@@ -18,7 +18,7 @@ display:inline;
 			
 </style>
 <div id="footer" style="display:none">
-	<span style="float:left"> &copy; The Larvol Group, LLC | </span><span style="padding: 0 0 0 5px; float:left;"><a href="http://www.larvol.com" target="_blank">About Us</a> | </span>
+	<span style="float:left"> &copy;&nbsp;<?php echo date('Y'); ?> The Larvol Group, LLC | </span><span style="padding: 0 0 0 5px; float:left;"><a href="http://www.larvol.com" target="_blank">About Us</a> | </span>
     <span style="padding: 0 0 0 5px; float:left;"><a href="tos_ott.php" target="_blank">Terms of Use</a></span>
 </div> 
 <script type="text/javascript">
