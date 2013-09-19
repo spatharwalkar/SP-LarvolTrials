@@ -2045,20 +2045,7 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		$str['exclusion']=mysql_real_escape_string($str['exclusion']);
 		
 		/*********/
-		if( !is_null($cdate) and  $cdate <>'0000-00-00' )	// completion date
-		{
-			$cdate=normalize('date',$cdate);
-			$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'", end_date = "' . $cdate . '"  where `larvol_id`="' .$larvol_id . '" limit 1' ;
-			
-			if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-		}
-		elseif( !is_null($pcdate) and  $pcdate <>'0000-00-00') 	// primary completion date
+		if( !is_null($pcdate) and  $pcdate <>'0000-00-00') 	// primary completion date
 		{
 			$pcdate=normalize('date',$pcdate);
 			$query = 'update `data_trials` set  `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" , end_date = "' . $pcdate . '" where `larvol_id`="' .$larvol_id . '" limit 1' ;
@@ -2071,6 +2058,20 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						return false;
 					}
 		}
+		elseif( !is_null($cdate) and  $cdate <>'0000-00-00' )	// completion date
+		{
+			$cdate=normalize('date',$cdate);
+			$query = 'update `data_trials` set `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'", end_date = "' . $cdate . '"  where `larvol_id`="' .$larvol_id . '" limit 1' ;
+			
+			if(!mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+		}
+
 		
 		
 		else	
@@ -2118,7 +2119,21 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 		}
 		/*************/
 				
-		if( !is_null($cdate) and  $cdate <>'0000-00-00' and $fieldname=='end_date')	// completion date
+		
+		if( !is_null($pcdate) and  $pcdate <>'0000-00-00' and $fieldname=='end_date') 	// primary completion date
+		{
+			$pcdate=normalize('date',$pcdate);
+			$query = 'update `data_trials` set `end_date` = "' . $pcdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
+//			$query = 'update data_trials set end_date = "' . $pcdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
+			if(!mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
+		}
+		elseif( !is_null($cdate) and  $cdate <>'0000-00-00' and $fieldname=='end_date')	// completion date
 		{
 			$cdate=normalize('date',$cdate);
 			$query = 'update `data_trials` set `end_date` = "' . $cdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
@@ -2132,20 +2147,6 @@ function addval($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_
 						return false;
 					}
 		}
-		elseif( !is_null($pcdate) and  $pcdate <>'0000-00-00' and $fieldname=='end_date') 	// primary completion date
-		{
-			$pcdate=normalize('date',$pcdate);
-			$query = 'update `data_trials` set `end_date` = "' . $pcdate . '", `inclusion_criteria` = "'. $str['inclusion'] . '", `exclusion_criteria` = "'. $str['exclusion'] .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//			$query = 'update data_trials set end_date = "' . $pcdate . '" where larvol_id="' .$larvol_id . '"  limit 1' ;
-			if(!mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						echo $log;
-						return false;
-					}
-		}
-		
 		
 		else	
 		{

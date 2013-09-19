@@ -835,16 +835,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		
 		/*************/
 				
-		if( !is_null($cdate) and  $cdate <>'0000-00-00' and $fieldname=='end_date')	// completion date
-		{
-			$cdate=normalize('date',$cdate);
-			update_history($larvol_id,'end_date',$cdate,$lastchanged_date);
-			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
-					
-		}
-		
-		elseif( !is_null($pcdate) and  $pcdate <>'0000-00-00' and $fieldname=='end_date') 	// primary completion date
+		if( !is_null($pcdate) and  $pcdate <>'0000-00-00' and $fieldname=='end_date') 	// primary completion date
 		{
 		
 			$pcdate=normalize('date',$pcdate);
@@ -852,7 +843,15 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
 			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 		}
-		
+		elseif( !is_null($cdate) and  $cdate <>'0000-00-00' and $fieldname=='end_date')	// completion date
+		{
+			$cdate=normalize('date',$cdate);
+			update_history($larvol_id,'end_date',$cdate,$lastchanged_date);
+			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
+					
+		}
+	
 		else	
 		{
 		
