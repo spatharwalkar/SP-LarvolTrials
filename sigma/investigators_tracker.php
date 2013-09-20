@@ -1067,7 +1067,9 @@ function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, 
 	
 	if($TotalPages > 1)
 	{
-		$paginate = DiseaseTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
+		//
+		//$paginate = DiseaseTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
+		$paginate = InvestigatorTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
 		$htmlContent .= '<td style="padding-left:0px; vertical-align:top; border:0px;">'.$paginate[1].'</td>';
 	}
 	
