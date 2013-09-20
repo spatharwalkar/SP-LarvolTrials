@@ -3,6 +3,7 @@
 require_once('db.php');
 require_once('include.util.php');
 $Sphinx_search=null;
+
 switch($_REQUEST['op']){
 
 	case 'load':
@@ -367,12 +368,14 @@ function listSearchProc()
 
 function testQuery($jsonOp=0,$scriptCall=0,$data=null)
 {
-	$jsonData=$_REQUEST['data'];
+	$jsonData=$_REQUEST['data'];	
+	
 	if($scriptCall==1)
 	{
 		$jsonData = $data;
 	}
 	$actual_query= "";
+	
 	try {
 		$actual_query= buildQuery($jsonData, false);
 	}
@@ -525,28 +528,36 @@ function buildQuery($data, $isCount=false)
 {
 	$actual_query = "";
 	try {
+	
 		$jsonData=$data;
 		$filterData = json_decode($jsonData, true, 10);
-		foreach($filterData["wheredata"] as $ky => $vl)
-		{
-			if($vl['columnname']=='All')
+		
+		if(is_array($filterData["wheredata"])) {
+			foreach($filterData["wheredata"] as $ky => $vl)
 			{
-				$Sphinx_search=$vl['columnvalue'];
-				unset($filterData["wheredata"][$ky]);
+				if($vl['columnname']=='All')
+				{
+					$Sphinx_search=$vl['columnvalue'];
+					unset($filterData["wheredata"][$ky]);
+				}
 			}
 		}
-		foreach($filterData["columndata"] as $ky => $vl)
-		{
-			if($vl['columnname']=='All')
+		if(is_array($filterData["columndata"])) {
+			foreach($filterData["columndata"] as $ky => $vl)
 			{
-				unset($filterData["columndata"][$ky]);
+				if($vl['columnname']=='All')
+				{
+					unset($filterData["columndata"][$ky]);
+				}
 			}
 		}
-		foreach($filterData["sortdata"] as $ky => $vl)
-		{
-			if($vl['columnname']=='All')
+		if(is_array($filterData["sortdata"])) {
+			foreach($filterData["sortdata"] as $ky => $vl)
 			{
-				unset($filterData["sortdata"][$ky]);
+				if($vl['columnname']=='All')
+				{
+					unset($filterData["sortdata"][$ky]);
+				}
 			}
 		}
 		if(is_array($filterData))
