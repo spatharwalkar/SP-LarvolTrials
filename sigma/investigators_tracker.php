@@ -2512,12 +2512,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 			}
 		}
 		
-		if(count($trials) > 0){
-			$trials_implode = implode(",", $trials);
-		}else{
-			$trials_implode = "";
-		}
-		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN (". $trials_implode .") AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
+		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN ('". implode('","', $trials) ."') AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
 		$res = mysql_query($query) or die('Bad SQL query getting investigators');
 		
 	}else if($GobalEntityType == 'Institution'){
