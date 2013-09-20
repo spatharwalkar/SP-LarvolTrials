@@ -1047,7 +1047,7 @@ function InvestigatorTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 
 function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $GobalEntityType, $CountType)
 {				
-	if(count($IdsArray) == 0) return 'No Investogator Found';
+	if(count($IdsArray) == 0) return 'No Investigator Found';
 	
 	require_once('../tcpdf/config/lang/eng.php');
 	require_once('../tcpdf/tcpdf.php');  
