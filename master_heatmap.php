@@ -4081,10 +4081,12 @@ function Download_reports()
 		$objPHPExcel->getActiveSheet()->setTitle(substr(str_replace('/',' ',stripslashes($Report_Name)),0,20).' Heatmap');
 		//$objPHPExcel->getActiveSheet()->getStyle('A1:AA2000')->getAlignment()->setWrapText(true);
 		$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(36);
+		$objPHPExcel->getActiveSheet()->getStyle('A')->getAlignment()->setWrapText(true);
 		
 		$Excel_HMCounter = 0;
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Report name:');
+		$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 		$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
@@ -4093,6 +4095,7 @@ function Download_reports()
 		$objPHPExcel->getActiveSheet()->mergeCells('B' . $Excel_HMCounter . ':M' . $Excel_HMCounter);
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $Report_Name.' Heatmap')->getStyle('B1')->getFont()->setBold(true);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, 'Display Mode:');
+		$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 		$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
@@ -4100,6 +4103,7 @@ function Download_reports()
       											'wrap'       => false));
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . $Excel_HMCounter, $tooltip);
 		$objPHPExcel->getActiveSheet()->SetCellValue('A' . ++$Excel_HMCounter, '');
+		$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 		//freezepane
 		//$entity2_Category_Presence decides over the position of freeze pane
 		if($entity2_Category_Presence){
@@ -4159,7 +4163,7 @@ function Download_reports()
 		foreach($columns as $col => $val)
 		{
 			$cell= num2char($col).$Excel_HMCounter;
-					
+			echo "<pre>";print_r(num2char($col));			
 			$styleThinBlackAreaBorderOutline = array(
 				'borders' => array(
 				'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
@@ -4168,7 +4172,7 @@ function Download_reports()
 									),
 			);	
 				
-			$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackAreaBorderOutline); 
+			//$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackAreaBorderOutline); 
 			if(isset($entity2Ids[$col]) && $entity2Ids[$col] != NULL && !empty($entity1Ids))
 			{
 				if($mode=='active')
@@ -4209,7 +4213,10 @@ function Download_reports()
 				}
 				
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
-				$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col))->setWidth(18);
+				//$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col))->setWidth(18);
+				/* Modified the width from 18 to 12 to set the width 80px*/
+				$objPHPExcel->getActiveSheet()->getColumnDimension(num2char($col))->setWidth(12);
+				$objPHPExcel->getActiveSheet()->getStyle(num2char($col))->getAlignment()->setWrapText(true);
 				
 				$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
@@ -4221,7 +4228,9 @@ function Download_reports()
 		if(isset($total_fld) && $total_fld == "1")
 		{
 			$cell = num2char($col+1);
-			$objPHPExcel->getActiveSheet()->getColumnDimension($cell)->setWidth(18);
+			//$objPHPExcel->getActiveSheet()->getColumnDimension($cell)->setWidth(18);
+			$objPHPExcel->getActiveSheet()->getColumnDimension($cell)->setWidth(12);
+			$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->setWrapText(true);
 			$objPHPExcel->getActiveSheet()->getStyle($cell)->getAlignment()->applyFromArray(
       									array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
       											'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER,
@@ -4268,7 +4277,7 @@ function Download_reports()
 			}
 			
 			$Excel_HMCounter++;
-			
+			$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 			$cell='A'.($Excel_HMCounter);
 			
 			$styleThinBlackProductBorderOutline = array(
@@ -4279,7 +4288,7 @@ function Download_reports()
 				'bottom' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
 									),
 			);	
-			$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackProductBorderOutline); 			    
+			//$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackProductBorderOutline); 			    
 			if(isset($entity1Ids[$row]) && $entity1Ids[$row] != NULL && !empty($entity2Ids))
 			{
 				
@@ -4323,20 +4332,14 @@ function Download_reports()
 					$productNameLiPart->getFont()->setBold(true); 
 					$objProductFormatLI->createText(substr($rowsDisplayName[$row],$paren));							
 				}	
-				$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row]);
-				$companyName->getFont()->setItalic(true);
 				
 				if(strlen($rowsTagName[$row])){
 					$rowsTagName[$row] = "[".$rowsTagName[$row]."]";
 				}else{
 					$rowsTagName[$row] = "";
 				}
-				$objProductFormatLI->createText($rowsTagName[$row]);				
-				
-				/* 
-					$tagName = $objProductFormatLI->createTextRun($rowsTagName[$row]);
-					$tagName->getFont()->setColor( new PHPExcel_Style_Color( PHPExcel_Style_Color::COLOR_GRAY ) );
-				*/
+				$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row].$rowsTagName[$row]);
+				$companyName->getFont()->setItalic(true);			
 				
 				$objPHPExcel->getActiveSheet()->getCell($cell)->setValue($objProductFormatLI);			
 				
@@ -4362,7 +4365,6 @@ function Download_reports()
      											'rotation'   => 0,
       											'wrap'       => true));*/
 			}
-			
 			foreach($columns as $col => $cid)
 			{
 				$cell = num2char($col) . ($Excel_HMCounter);
@@ -4407,7 +4409,7 @@ function Download_reports()
 				}
 				else
 				{
-					//Apply Left Border
+					/*//Apply Left Border
 					if(($col > 1  && $data_matrix[$rows[$row]][$columns[$col-1]]['update_flag'] != 1) || ($col == 1))
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackLeftBorderOutline);
 					
@@ -4417,11 +4419,10 @@ function Download_reports()
 					
 					//Apply Top Border
 					if(($row > 1  && ($data_matrix[$rows[$row-1]][$columns[$col]]['update_flag'] != 1 || (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row] > 0))) || ($row == 1))
-					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackTopBorderOutline);
-					
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackTopBorderOutline);					
 					//Apply Bottom Border
 					if(($row >= 1  && $row < count($rows) && ($data_matrix[$rows[$row+1]][$columns[$col]]['update_flag'] != 1 || (isset($rowsCategoryName[$row+1]) && $rowsCategoryName[$row+1] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row+1] > 0))) || ($row == count($rows)))
-					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackBottomBorderOutline);
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackBottomBorderOutline)*/
 						
 				}					
 
@@ -4685,7 +4686,9 @@ function Download_reports()
 		}
 		
 		++$Excel_HMCounter;
+		$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 		++$Excel_HMCounter;
+		$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 		
 		$helpTabImage_Header = array('Discontinued', 'Filing details', '  Red border (record updated)');
 		$helpTabImages_Src = array('new_lbomb.png', 'new_file.png', 'outline.png');
@@ -4701,6 +4704,7 @@ function Download_reports()
 			$objDrawing->setWidth(12); 
 			$objDrawing->setDescription($helpTabImages_Desc[$key]);
 			$objDrawing->setCoordinates('B' . ++$Excel_HMCounter);
+			$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 			if($key == 2)
 			{
 				$objPHPExcel->getActiveSheet()->mergeCells('B'. $Excel_HMCounter. ':C'. $Excel_HMCounter);
@@ -4713,6 +4717,7 @@ function Download_reports()
 		}
 		
 		$objPHPExcel->getActiveSheet()->SetCellValue('B' . ++$Excel_HMCounter, 'Phase:  ');
+		$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 		$objPHPExcel->getActiveSheet()->getStyle('B' . $Excel_HMCounter)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 		$col = 'B';		
 		//get search results
