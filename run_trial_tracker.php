@@ -10530,7 +10530,7 @@ class TrialTracker
 					 . '<th style="width:100px;">Conditions</th>'
 					 . '<th title="MM/YY" style="width:33px;">End</th>'
 					 . '<th style="width:25px;">Ph</th>'
-					 . '<th style="width:25px;">Res</th>'
+					 . '<th style="width:25px;">Data</th>'
 					 . '<th colspan="3" style="width:12px;">-</th>'
 					 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
 					 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
