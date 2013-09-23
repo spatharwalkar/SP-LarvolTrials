@@ -384,7 +384,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 		}else{
 			$Ids = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($id, $GobalEntityType)));
 			$DiseaseIds =  $Ids;
-			$DiseaseQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";
+			$DiseaseQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') GROUP BY e.id";
 			$DiseaseQueryResult = mysql_query($DiseaseQuery) or die(mysql_error());
 		}
 		
