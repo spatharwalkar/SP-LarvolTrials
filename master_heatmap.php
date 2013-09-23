@@ -4163,7 +4163,6 @@ function Download_reports()
 		foreach($columns as $col => $val)
 		{
 			$cell= num2char($col).$Excel_HMCounter;
-			echo "<pre>";print_r(num2char($col));			
 			$styleThinBlackAreaBorderOutline = array(
 				'borders' => array(
 				'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
