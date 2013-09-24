@@ -932,7 +932,10 @@ function input_tag($row,$dbVal=null,$options=array())
 			{
 				foreach($dbVal as $dbValIndividual)
 				{
-					$out .= '<tr><td></td><td><input class="'.$nameIndex.$row['Field'].'_autosuggest_multiple" name="'.$nameIndex.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> '.$dbValIndividual.' <img style="border:0" title="Delete '.ucfirst($row['Field']).'" alt="Delete '.ucfirst($row['Field']).'" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
+					if(trim($dbValIndividual) != '') 
+					{
+						$out .= '<tr><td></td><td><input class="'.$nameIndex.$row['Field'].'_autosuggest_multiple" name="'.$nameIndex.$row['Field'].'[]" value="'.$dbValIndividual.'" checked="checked" type="checkbox"> '.$dbValIndividual.' <img style="border:0" title="Delete '.ucfirst($row['Field']).'" alt="Delete '.ucfirst($row['Field']).'" src="images/not.png" class="auto_suggest_multiple_delete"></td></tr>';
+					}
 				}
 				return $out;
 			}
