@@ -120,7 +120,7 @@
 				$DataArray[$index]['name'] = $result['name'];
 				$DataArray[$index]['id'] = $result['id'];
 				$DataArray[$index]['type'] = $result['class'];
-				$DataArray[$index]['affiliation'] = $result['affiliatiion'];
+				$DataArray[$index]['affiliation'] = $result['affiliation'];
 				if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
 					$DataArray[$index]['name'] = $result['display_name'];
 			}
@@ -520,7 +520,11 @@ if($ClassFlg)
 				}
 				else if($DataArray[$index]['type'] == 'Investigator')
 				{
-						print ' 	<a href="investigator.php?id='. trim($DataArray[$index]['id']) .'" title="Investigator" ><b>'.$DataArray[$index]['name'] .'</b> / <i>'.$DataArray[$index]['name'].' </a>';
+						print ' 	<a href="investigator.php?id='. trim($DataArray[$index]['id']) .'" title="Investigator" ><b>'.$DataArray[$index]['name'] .'</b>';
+						if(!empty($DataArray[$index]['affiliation']))
+							print '/ <i>'.$DataArray[$index]['affiliation'].' </a>';
+						else
+							print ' </a>';
 				}
 				if($DataArray[$index]['type'] != 'MOA_Category') print '<br /><br style="line-height:6px;" />';
     			print ' </td>
