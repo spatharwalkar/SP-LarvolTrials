@@ -4276,7 +4276,7 @@ function Download_reports()
 			}
 			
 			$Excel_HMCounter++;
-			$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
+			//$objPHPExcel->getActiveSheet()->getRowDimension($Excel_HMCounter)->setRowHeight(15);
 			$cell='A'.($Excel_HMCounter);
 			
 			$styleThinBlackProductBorderOutline = array(
