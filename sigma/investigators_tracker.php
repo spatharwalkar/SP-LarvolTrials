@@ -203,7 +203,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 				
 						$data_matrix[$key]['HeaderLink'] = 'investigator.php?id=' . $data_matrix[$key]['ID'];
 				
-						$data_matrix[$key]['ColumnsLink'] = '#'; 'company.php?investigatorId=' . $data_matrix[$key]['ID'] . '&CompanyId=' . $id . '&TrackerType=CIPT';
+						$data_matrix[$key]['ColumnsLink'] = 'company.php?InvestigatorId=' . $data_matrix[$key]['ID'] . '&CompanyId=' . $id . '&TrackerType=CIPT';
 				
 						///// Initialize data
 						$data_matrix[$key]['phase_na']=0;
@@ -221,10 +221,13 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					{
 						//print_r($products);
 						//if($result['entity1'] == $id)
-						if(in_array($result['entity2'],$products))
-							$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-						else
-							$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+						if(in_array($result['entity2'],$products)){
+							if(!in_array($result['entity2'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
+								$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+						}else{
+							if(!in_array($result['entity1'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
+								$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+						}
 					
 						if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
 						{
@@ -1273,6 +1276,7 @@ function DrawExtraHTMLCellsInvestigatorTracker($phase_space, $inner_columns, $re
 
 function InvestigatorTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $MainPageURL, $GobalEntityType, $CountType)
 {	
+
 	$url = '';
 	$stages = 1;
 			
@@ -1281,7 +1285,7 @@ function InvestigatorTrackerpagination($TrackerType, $totalPages, $id, $CurrentP
 	$url = 'id='.$id;
 	if($TrackerType == 'PIT')	//PDT = PRODUCT Investigator TRACKER
 		$url = 'e1='.$id.'&amp;tab=investigatortrac';
-	else if($TrackerType == 'CIT')	//CDT = COMPANY Investigator TRACKER
+	else if($TrackerType == 'CIT')	//CIT = COMPANY Investigator TRACKER
 		$url = 'CompanyId='.$id.'&amp;tab=investigatortrac';
 	else if($TrackerType == 'MIT')	//MDT = MOA Investigator TRACKER
 		$url = 'MoaId='.$id.'&amp;tab=investigatortrac';

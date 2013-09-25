@@ -272,7 +272,7 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $In
 	if($tab == 'diseasetrac')
 		print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag);		//CDT= COMPANY DISEASE TRACKER
 	else if($tab == 'investigatortrac')
-		print showInvestigatorTracker($CompanyId, $dwcount, 'CIT', $page);		//CDT= COMPANY INVESTIGATOR TRACKER
+		print showInvestigatorTracker($CompanyId, 'CIT', $page);		//CDT= COMPANY INVESTIGATOR TRACKER
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 	
 	print '</div>';
@@ -284,7 +284,7 @@ else
 	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCPT')
 		print showProductTracker($CompanyId, $dwcount, 'DISCATCPT', $page, $OptionArray);	//DISCATCPT - DISEASE CATEGORY COMPANY PRODUCT TRACKER
 	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'CIPT')
-	print showProductTracker($InvestigatorId, $dwcount, 'CIPT', $page, $OptionArray);	//CIPT - COMPANY INVESTIGATOR PRODUCT TRACKER
+		print showProductTracker($CompanyId, $dwcount, 'CIPT', $page, $OptionArray);	//CIPT - COMPANY INVESTIGATOR PRODUCT TRACKER
 	
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 
