@@ -2540,7 +2540,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 				$trials[] = $row['trial'];
 			}
 		}
-		if(empty($trials)) return false;
+		if(empty($trials)) return $Investigators;
 		$query = "SELECT DISTINCT entity from entity_trials where trial IN (".implode(',',$trials).") and entity in (select id from entities where class='Investigator') ";
 		
 		$res = mysql_query($query) or die('Bad SQL query getting investigators from Company id in Investigator Tracker');
