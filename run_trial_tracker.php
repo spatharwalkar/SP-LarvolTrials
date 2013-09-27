@@ -8225,20 +8225,24 @@ class TrialTracker
 		
 		$ottType = $Arr['ottType'];
 		$productSelector = $Arr['productSelector'];
+		$globalOptions["sphinxSearch"] = trim($globalOptions["sphinxSearch"]);
+		if(!empty($globalOptions["sphinxSearch"])) {
 		
-		$searchProducts   = GetProductFromProducts($globalOptions["sphinxSearch"],$productSelector);
+			$searchProducts   = GetProductFromProducts($globalOptions["sphinxSearch"],$productSelector);
+			
+		    if( (count($searchProducts["ids"]) > 0) && (false === in_array($globalOptions["sphinxSearch"],$globalOptions["product"])) ){
+		    	if (count($searchProducts["ids"]) > 0){
+		    		
+		    		$globalOptions["product"] = array_merge($globalOptions["product"],$searchProducts["ids"]);
+		    		
+		    	} 
+			$globalOptions["product"] = array_unique($globalOptions["product"]);
 		
-	    if(!empty($globalOptions["sphinxSearch"]) && (count($searchProducts) > 0) && (false === in_array($globalOptions["sphinxSearch"],$globalOptions["product"])) ){
-	    	if (count($searchProducts) > 0){
-	    		
-	    		$globalOptions["product"] = array_merge($globalOptions["product"],$searchProducts);
-	    		
-	    	} 
-		$globalOptions["product"] = array_unique($globalOptions["product"]);
-	
-	    	unset($globalOptions["sphinxSearch"]);
-		} 
-		
+		    	unset($globalOptions["sphinxSearch"]);
+			if(!empty($searchProducts["ss"]))
+				$globalOptions["sphinxSearch"] = $searchProducts["ss"];
+			} 
+		}
 		$Ids = $Arr['Ids'];
 		$TrialsInfo = $Arr['TrialsInfo'];
 		
@@ -13730,18 +13734,44 @@ function track_time_diff($n,$q, $time_start, $time_end)
 }
 function GetProductFromProducts($ss,$productSelector){
 	global $globalOptions;
+	$resArr = array();
+	$pos1 = strpos($ss,"/");
+	if(false !== $pos1) 
+		$ss = substr($ss,0,$pos1);
+    $ss = trim($ss);
 	$keys=array_keys($productSelector);
 	$impArr = implode("','", $keys);
-	$sql = "select id from entities where id in('".$impArr."') and ( name like '%$ss%'  or display_name like '%$ss%' or description like '%$ss%' or search_name like '%$ss%' or brand_names like '%$ss%' or code_names like '%$ss%' )"; // use products table As story Says and  add  " or display_name like '%$ss%' " in where clause  for display_name field search
+	$sql = "select id,name from entities where id in('".$impArr."') and ( name like '%$ss%'  or display_name like '%$ss%' or description like '%$ss%' or search_name like '%$ss%' or brand_names like '%$ss%' or code_names like '%$ss%' )"; // use products table As story Says and  add  " or display_name like '%$ss%' " in where clause  for display_name field search
 	$Res = m_query(__LINE__,$sql);
 	$numRows=mysql_num_rows($Res);
-	$resArr = array();
 	if($numRows > 0){
-		while ($row = mysql_fetch_array($Res))
-			$resArr[]=$row["id"];
+		while ($row = mysql_fetch_array($Res)) {
+			$resArr["ids"][]=$row["id"];			
+		}
 		
-	} 	
-	
+	} else {
+		$expArr = explode(" ",$ss);
+		if(count($expArr) > 1) {
+			$sql = "select id,name from entities where id in('".$impArr."') and ( name like '%$expArr[0]%'  or display_name like '%$expArr[0]%' or description like '%$expArr[0]%' or search_name like '%$expArr[0]%' or brand_names like '%$expArr[0]%' or code_names like '%$expArr[0]%' )"; 
+			$Res = m_query(__LINE__,$sql);
+			$numRows=mysql_num_rows($Res);
+			if($numRows > 0){
+				while ($row = mysql_fetch_array($Res)) {
+					$resArr["ids"][]=$row["id"];
+					       $name    =$row["name"];       
+				}
+				$arr = explode($name,$ss);
+				if(count($arr) > 1) {
+				     $resArr["ss"]=trim($arr[1]);
+				} else { 
+				  $arr = explode($expArr[0],$ss);
+				  $resArr["ss"]=trim($arr[1]);
+				}
+			}
+		
+		}
+
+	}
 	return $resArr;	
 }
 
