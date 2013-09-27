@@ -43,11 +43,12 @@
 	global $tabCommonUrl;
 	$tabCommonUrl = 'product.php?e1='.$e1;
 	
+	$disTrackerData = showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
+	
 	if($categoryFlag == 1){
 		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($e1, 'Product' ));
-	}else{
-		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($e1, 'Product' ));
-	}
+	}	
+	
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($e1, 'Product' ));//GetInvestigatorFromEntity_InvestigatorTracker
 	$TabTrialsCount = GetTrialsCountFromProduct($e1);
 	
@@ -192,7 +193,7 @@ print '
 <?php
 print '<div id="diseaseTab_content" align="center">';
 if($tab == 'diseasetrac'){
-	print showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
+	print $disTrackerData;		//PDT = PRODUCT DISEASE TRACKER
 }
 else if($tab == 'investigatortrac'){
 	print showInvestigatorTracker($e1, 'PIT', $page);		//PDT = PRODUCT INVESTIGATOR TRACKER  showInvestigatorTracker
