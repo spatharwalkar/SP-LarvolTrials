@@ -10241,8 +10241,39 @@ class TrialTracker
 		return $result;
 	}
 	
+	
+	// to check if the entity is a product, return 0 if not a product
+	function checkproductContext($resultIds) {
+		
+		if(count($resultIds)) {
+		
+			$entityIds = trim(implode(',', $resultIds), ',');
+			$query = "SELECT `LI_id` from entities where id IN ($entityIds) and `class` = 'Product'";
+			$res = mysql_query($query) or die('Bad SQL query for counting diseases by a disease category ID ');
+			$numRows = mysql_num_rows($res);
+			
+			if($numRows > 0)
+			return 1;
+			
+		}
+		return 0;
+		
+	}
+	
+	
 	function displayWebPage($ottType, $resultIds, $Values, $productSelector = array(), $globalOptions)
 	{
+	
+		if(count($resultIds) && array_key_exists('e1', $resultIds) && ($resultIds['e1'][0] > 0)) {
+			$entityIds[] = $resultIds['e1'][0];
+		}
+		if(count($resultIds) && array_key_exists('e2', $resultIds) && ($resultIds['e2'][0] > 0)) {
+			$entityIds[] = $resultIds['e2'][0];
+		}
+		
+		// checking if any of the entity is a product
+		$productContextFlag = $this->checkproductContext($entityIds);
+		
 		global $db, $maxEnrollLimit;
 		$loggedIn	= $db->loggedIn();
 		global $cwd;
@@ -10266,7 +10297,7 @@ class TrialTracker
 		
 		natcasesort($productSelector);
 		
-		$this->displayFilterControls($productSelector, $count, $Values['activecount'], $Values['inactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn);
+		$this->displayFilterControls($productSelector, $count, $Values['activecount'], $Values['inactivecount'], $Values['totalcount'], $globalOptions, $ottType, $loggedIn, $productContextFlag);
 		echo '<div id="parent">';
 		echo '<div class="advanced" id="togglefilters"><img src="'.$dir.'images/funnel.png" alt="Show Filter" style="vertical-align:bottom;" />&nbsp;Advanced</div>'
 				. '<div class="records">' . $count . '&nbsp;Trials</div>';
@@ -10779,7 +10810,7 @@ class TrialTracker
 		}
 	}
 	
-	function displayFilterControls($productSelector = array(), $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn)
+	function displayFilterControls($productSelector = array(), $shownCount, $activeCount, $inactiveCount, $totalCount, $globalOptions = array(), $ottType, $loggedIn, $productContextFlag = 0)
 	{	
 		echo '<table border="0" cellspacing="0" class="controls" align="center" style="_width:100%; table-layout: fixed;display: none;">'
 				. '<tr><td colspan="5" style="border: none;height:29px;"></td></tr>'
@@ -10954,9 +10985,10 @@ class TrialTracker
 				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
 		}
 		
+		if($productContextFlag) {
 		echo '<br/><input type="checkbox" id="osflt" name="osflt" ' . (($globalOptions['ownersponsoredfilter'] == "on") ? 'checked="checked"' : '') . ' />'
 		. '<label style="font-size:x-small;" for="osflt">Show only owner-sponsored trials</label>';
-		
+		}
 		echo  '</td></tr><tr>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
