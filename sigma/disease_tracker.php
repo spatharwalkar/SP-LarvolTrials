@@ -564,6 +564,8 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	$data_matrix = sortTwoDimensionArrayByKeyDiseaseTracker($data_matrix,'TotalCount');
 //print_r($data_matrix);	
 	///////////PAGING DATA
+	global $TabDiseaseCount;
+	$TabDiseaseCount = count($data_matrix);	
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
 	$TotalRecords = count($NewDiseaseIds);
@@ -596,8 +598,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 			unset($NewDiseaseIds[$key]);
 		}
 	}
-	global $TabDiseaseCount;
-	$TabDiseaseCount = count($data_matrix);
+	
 	//$TotalRecords = count($data_matrix);
 	$Return['matrix'] = $data_matrix;
 	$Return['report_name'] = $Report_DisplayName;
