@@ -147,7 +147,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 				SELECT DISTINCT et2.trial FROM entity_trials et2 WHERE et2.entity = ".$InvestigatorId."
 				)
 			";
-			$InvestigatorTrialProductsResult = mysql_query($InvestigatorTrialProductsQuery) or die(mysql_error());
+			$InvestigatorTrialProductsResult = m_query(__LINE__,$InvestigatorTrialProductsQuery);//mysql_query($InvestigatorTrialProductsQuery) or die(mysql_error());
 			$products = array();
 			$products_implode = '';
 			if($InvestigatorTrialProductsResult)
@@ -177,7 +177,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 				AND (e.`is_active` <> '0' 
 				OR e.`is_active` IS NULL)
 			";
-			$InvestigatorQueryResult = mysql_query($InvestigatorQuery) or die(mysql_error());
+			$InvestigatorQueryResult = m_query(__LINE__,$InvestigatorQuery);//mysql_query($InvestigatorQuery) or die(mysql_error());
 			
 			$key = 0;
 			while($result = mysql_fetch_array($InvestigatorQueryResult))
@@ -2516,7 +2516,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 			}
 		}
 		
-		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN ('". implode('","', $trials) ."') AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
+		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN ('". implode("','", $trials) ."') AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
 		$res = mysql_query($query) or die('Bad SQL query getting investigators');
 		
 	}else if($GobalEntityType == 'Institution'){
@@ -2541,7 +2541,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 			}
 		}
 		if(empty($trials)) return $Investigators;
-		$query = "SELECT DISTINCT entity from entity_trials where trial IN (".implode(',',$trials).") and entity in (select id from entities where class='Investigator') ";
+		$query = "SELECT DISTINCT entity from entity_trials where trial IN ('".implode("','",$trials)."') and entity in (select id from entities where class='Investigator') ";
 		
 		$res = mysql_query($query) or die('Bad SQL query getting investigators from Company id in Investigator Tracker');
 		
