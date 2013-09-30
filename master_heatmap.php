@@ -2017,7 +2017,7 @@ function Download_reports()
 		print_r($columnsDisplayName);
 		print_r($columnsDescription);
 		print_r($rowsDisplayName);
-		print_r($rowsDescription);
+		print_r($rowsEntityType);
 		die(); 
 	*/	
 	
@@ -4239,7 +4239,6 @@ function Download_reports()
 		foreach($rows as $row => $rid)
 		{
 			$cat = (isset($rowsCategoryName[$row]) && $rowsCategoryName[$row] != '')? $rowsCategoryName[$row]:'Undefined';
-	
 			if($rows_Span[$row] > 0 && $cat != 'Undefined')
 			{
 				$Excel_HMCounter++;
@@ -4327,9 +4326,14 @@ function Download_reports()
 					$productNameLiPart->getFont()->setBold(true); 
 				
 				}else{
-					$productNameLiPart = $objProductFormatLI->createTextRun(substr($rowsDisplayName[$row],0,$paren));
-					$productNameLiPart->getFont()->setBold(true); 
-					$objProductFormatLI->createText(substr($rowsDisplayName[$row],$paren));							
+					if($rowsEntityType[$row]=='Product'){
+						$productNameLiPart = $objProductFormatLI->createTextRun(substr($rowsDisplayName[$row],0,$paren));
+						$productNameLiPart->getFont()->setBold(true); 
+						$objProductFormatLI->createText(substr($rowsDisplayName[$row],$paren));					
+					}else{
+						$productNameLiPart = $objProductFormatLI->createTextRun($rowsDisplayName[$row]);
+						$productNameLiPart->getFont()->setBold(true); 
+					}											
 				}	
 				
 				if(strlen($rowsTagName[$row])){
@@ -4337,14 +4341,21 @@ function Download_reports()
 				}else{
 					$rowsTagName[$row] = "";
 				}
-				$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row].$rowsTagName[$row]);
-				$companyName->getFont()->setItalic(true);			
+				
+				if($rowsEntityType[$row]=='Product'){
+					$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row].$rowsTagName[$row]);
+					$companyName->getFont()->setItalic(true);	
+				}else{
+					$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row].$rowsTagName[$row]);
+					$companyName->getFont()->setBold(true);
+				}
+						
 				
 				$objPHPExcel->getActiveSheet()->getCell($cell)->setValue($objProductFormatLI);			
 				
 				//$objPHPExcel->getActiveSheet()->setCellValue($cell, $rowsDisplayName[$row].$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''));
 				
-				//Modified End PK
+				//Modified End PK		
 				
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?e1=' . $entity1Ids[$row] .$link_part); 
  			    $objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
@@ -4656,7 +4667,6 @@ function Download_reports()
 				}
 			}
 		}
-		
 		if(isset($total_fld) && $total_fld == "1")
 		{
 			if($mode=='active')
