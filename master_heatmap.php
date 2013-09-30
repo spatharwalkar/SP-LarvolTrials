@@ -4379,25 +4379,25 @@ function Download_reports()
 					
 				$styleThinBlackLeftBorderOutline = array(
 					'borders' => array(
-					'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+					'left' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'DADCDD'),),
 										),
 				);
 					
 				$styleThinBlackTopBorderOutline = array(
 					'borders' => array(
-					'top' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+					'top' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'DADCDD'),),
 										),
 				);
 					
 				$styleThinBlackRightBorderOutline = array(
 					'borders' => array(
-					'right' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+					'right' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'DADCDD'),),
 										),
 				);
 					
 				$styleThinBlackBottomBorderOutline = array(
 					'borders' => array(
-					'bottom' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => '000000'),),
+					'bottom' => array('style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => array('argb' => 'DADCDD'),),
 										),
 				);
 							
@@ -4408,7 +4408,7 @@ function Download_reports()
 				}
 				else
 				{
-					/*//Apply Left Border
+					//Apply Left Border
 					if(($col > 1  && $data_matrix[$rows[$row]][$columns[$col-1]]['update_flag'] != 1) || ($col == 1))
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackLeftBorderOutline);
 					
@@ -4421,7 +4421,7 @@ function Download_reports()
 					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackTopBorderOutline);					
 					//Apply Bottom Border
 					if(($row >= 1  && $row < count($rows) && ($data_matrix[$rows[$row+1]][$columns[$col]]['update_flag'] != 1 || (isset($rowsCategoryName[$row+1]) && $rowsCategoryName[$row+1] != '' && $rowsCategoryName[$row] != 'Undefined' && $rows_Span[$row+1] > 0))) || ($row == count($rows)))
-					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackBottomBorderOutline)*/
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($styleThinBlackBottomBorderOutline);
 						
 				}					
 
