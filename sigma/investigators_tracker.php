@@ -132,12 +132,14 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	{
 		$Ids = array_filter(array_unique(GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType)));
 		$InvestigatorIds =  $Ids;
+	//print_r($InvestigatorIds);
 		foreach($InvestigatorIds as $InvestigatorId){
 			$queryinvestigator = "SELECT `name`, `display_name`, `id`, `class`, affiliation FROM `entities` WHERE id='" . $InvestigatorId ."'";
 			$resinvestigator = mysql_query($queryinvestigator) or die(mysql_error());
 			$headerinvestigator = mysql_fetch_array($resinvestigator);
 			$NewInvestigatorIds[] = $headerinvestigator['id'];
 			//get investigator trials
+			/*
 			 $InvestigatorTrialProductsQuery = "
 			SELECT DISTINCT id  FROM entities e
 				JOIN entity_relations er ON (e.id=er.parent)
@@ -157,7 +159,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					$products[] = $row['id'];
 				}	
 			}
-			$products_implode = implode("','",$products);
+
 			//get products from selected trials
 			 $InvestigatorQuery = "
 				SELECT 
@@ -172,61 +174,90 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 				WHERE 
 				(rpt.`count_total` > 0)  
 				AND e2.`id` = ".$id." 
-				AND e.`id` IN ('".$products_implode."') 
+				AND e.`id` IN ('".implode("','",$products)."') 
 				AND e2.`class`='Institution' 
 				AND (e.`is_active` <> '0' 
 				OR e.`is_active` IS NULL)
 			";
-			$InvestigatorQueryResult = m_query(__LINE__,$InvestigatorQuery);//mysql_query($InvestigatorQuery) or die(mysql_error());
+			*/
 			
-			$key = 0;
+			//get products from selected trials
+			 $InvestigatorQuery ="SELECT 
+				e.`id` AS ProdId, e.class 
+				, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` 
+				FROM `rpt_masterhm_cells` rpt 
+				JOIN `entities` e 
+				ON((rpt.`entity1`=e.`id` AND e.`class`='Product') 
+				OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) 
+				JOIN `entity_relations` er ON(e.`id` = er.`parent`) 
+				JOIN `entities` e2 ON(e2.`id` = er.`child`) 
+				JOIN entity_trials et1 ON (e.id=et1.entity)
+				JOIN entity_trials et2 ON (et1.trial=et2.trial && et2.entity='".$InvestigatorId."')
+				WHERE 
+				(rpt.`count_total` > 0)  
+				AND e2.`id` = '".$id."' 
+				AND e2.`class`='".$GobalEntityType."' 
+				AND (e.`is_active` <> '0' 
+				OR e.`is_active` IS NULL)";
+			
+			$InvestigatorQueryResult = m_query(__LINE__,$InvestigatorQuery);//mysql_query($InvestigatorQuery) or die(mysql_error());
+//			print_r($headerinvestigator);
+			$key = $InvestigatorId;// = $result['CompId'];
+			if(isset($InvestigatorId) && $InvestigatorId != NULL)
+			{
+				if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
+				{
+					/// Fill up all data in Data Matrix only, so we can sort all data at one place
+					if($headerinvestigator['display_name'] != NULL && trim($headerinvestigator['display_name']) != '')
+						$data_matrix[$key]['RowHeader'] = $headerinvestigator['display_name'];
+					else
+						$data_matrix[$key]['RowHeader'] = $headerinvestigator['name'];
+						
+					$data_matrix[$key]['ID'] = $result['id'];
+			
+					//$data_matrix[$key]['RowHeader'] = $headerinvestigator['name'];
+					$data_matrix[$key]['RowHeader'] .= ' / <i>'.$headerinvestigator['affiliation'].'</i>';
+					$data_matrix[$key]['ID'] = $key;//$result['ProdId'];
+					//$NewCompanyIds[] = $result['ProdId'];
+					//echo $data_matrix[$key]['RowHeader'].'<br>';
+					$data_matrix[$key]['HeaderLink'] = 'investigator.php?id=' . $data_matrix[$key]['ID'];
+					
+					if($GobalEntityType == "Institution"){
+						$data_matrix[$key]['ColumnsLink'] = 'company.php?InvestigatorId=' . $data_matrix[$key]['ID'] . '&CompanyId=' . $id . '&TrackerType=ICPT';
+					}else if($GobalEntityType =="MOA"){
+						$data_matrix[$key]['ColumnsLink'] = 'moa.php?InvestigatorId=' . $data_matrix[$key]['ID'] . '&MoaId=' . $id . '&TrackerType=IMPT';						
+					}
+					
+			
+					///// Initialize data
+					$data_matrix[$key]['phase_na']=0;
+					$data_matrix[$key]['phase_0']=0;
+					$data_matrix[$key]['phase_1']=0;
+					$data_matrix[$key]['phase_2']=0;
+					$data_matrix[$key]['phase_3']=0;
+					$data_matrix[$key]['phase_4']=0;
+			
+					$data_matrix[$key]['TotalCount'] = 0;
+					$data_matrix[$key]['productIds'] = array();
+					$data_matrix[$key]['ProdExistance'] = array();
+				}
+			}				
+			//$key = 0;
 			while($result = mysql_fetch_array($InvestigatorQueryResult))
 			{
 				//print_r($result);
-				$key = $InvestigatorId;// = $result['CompId'];
-				if(isset($InvestigatorId) && $InvestigatorId != NULL)
-				{
-					if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
-					{
-						/// Fill up all data in Data Matrix only, so we can sort all data at one place
-						if($result['dispname'] != NULL && trim($result['dispname']) != '')
-							$data_matrix[$key]['RowHeader'] = $result['dispname'];
-						else
-							$data_matrix[$key]['RowHeader'] = $result['name'];
-							
-						$data_matrix[$key]['ID'] = $result['id'];
-						
-						$data_matrix[$key]['RowHeader'] = $headerinvestigator['name'];
-						$data_matrix[$key]['RowHeader'] .= ' / <i>'.$headerinvestigator['affiliation'].'</i>';				
-						$data_matrix[$key]['ID'] = $key;//$result['ProdId'];
-						//$NewCompanyIds[] = $result['ProdId'];
-				
-						$data_matrix[$key]['HeaderLink'] = 'investigator.php?id=' . $data_matrix[$key]['ID'];
-				
-						$data_matrix[$key]['ColumnsLink'] = 'company.php?InvestigatorId=' . $data_matrix[$key]['ID'] . '&CompanyId=' . $id . '&TrackerType=CIPT';
-				
-						///// Initialize data
-						$data_matrix[$key]['phase_na']=0;
-						$data_matrix[$key]['phase_0']=0;
-						$data_matrix[$key]['phase_1']=0;
-						$data_matrix[$key]['phase_2']=0;
-						$data_matrix[$key]['phase_3']=0;
-						$data_matrix[$key]['phase_4']=0;
-				
-						$data_matrix[$key]['TotalCount'] = 0;
-						$data_matrix[$key]['productIds'] = array();
-						$data_matrix[$key]['ProdExistance'] = array();
-					}
+
 					if((( !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || (!in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
 					{
 						//print_r($products);
 						//if($result['entity1'] == $id)
-						if(in_array($result['entity2'],$products)){
-							if(!in_array($result['entity2'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
-								$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-						}else{
-							if(!in_array($result['entity1'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
-								$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+						//if(in_array($result['entity2'],$products)){
+						if(!in_array($result['entity2'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
+						{		$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+						//}else{
+						}elseif(!in_array($result['entity1'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
+						{
+							$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
 						}
 					
 						if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
@@ -274,7 +305,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 						if($max_count < $data_matrix[$key]['TotalCount'])
 							$max_count = $data_matrix[$key]['TotalCount'];
 					}	//End of if Product Existsnace
-				}
+				//}
 			}
 		}
 			
@@ -2519,9 +2550,9 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN ('". implode("','", $trials) ."') AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
 		$res = mysql_query($query) or die('Bad SQL query getting investigators');
 		
-	}else if($GobalEntityType == 'Institution'){
-		$CompanyId = $EntityID;
-		$query = "SELECT DISTINCT e.id FROM entities e JOIN entity_relations er  ON(er.parent = e.id) WHERE e.class='Product' AND er.child = '" . mysql_real_escape_string($CompanyId) . "'";
+	}else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA'){
+
+		$query = "SELECT DISTINCT e.id FROM entities e JOIN entity_relations er  ON(er.parent = e.id) WHERE e.class='Product' AND er.child = '" . mysql_real_escape_string($EntityID) . "' and (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 		$res = mysql_query($query) or die('Bad SQL query getting products from entity company in IT');
 		if($res)
 		{
@@ -2530,6 +2561,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 				$products[] = $row['id'];
 			}
 		}
+		/*
 		$query = "SELECT DISTINCT trial from entity_trials where  entity IN ('" . implode("','", $products) . "') ";
 		$res = mysql_query($query) or die('Bad SQL query getting trials from entity products in IT');
 		
@@ -2541,7 +2573,11 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 			}
 		}
 		if(empty($trials)) return $Investigators;
-		$query = "SELECT DISTINCT entity from entity_trials where trial IN ('".implode("','",$trials)."') and entity in (select id from entities where class='Investigator') ";
+		*/
+		//$query = "SELECT DISTINCT entity from entity_trials where trial IN ('".implode("','",$trials)."') and entity in (select id from entities where class='Investigator') ";
+		$query = "SELECT DISTINCT et1.entity from entity_trials et1 
+		JOIN entities e on (e.id=et1.entity)
+		JOIN entity_trials et2 on et1.trial=et2.trial and et2.entity IN ('".implode("','",$products)."') and e.class='Investigator' ";
 		
 		$res = mysql_query($query) or die('Bad SQL query getting investigators from Company id in Investigator Tracker');
 		

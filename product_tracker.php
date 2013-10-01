@@ -62,9 +62,9 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	
 	if($TrackerType == 'DISCATPT')	//DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
 		$MainPageURL = 'disease_category.php';	
-	else if($TrackerType == 'CPT' || $TrackerType == 'DCPT' || $TrackerType == 'DISCATCPT' ||  $TrackerType == 'CIPT')	//CPT=COMPANY PRODUCT TRACKER || DCPT=DISEASE COMPANY PRODUCT TRACKER || CIPT=COMPANY INVESTIGATOR PRODUCT TRACKER
+	else if($TrackerType == 'CPT' || $TrackerType == 'DCPT' || $TrackerType == 'DISCATCPT' ||  $TrackerType == 'ICPT')	//CPT=COMPANY PRODUCT TRACKER || DCPT=DISEASE COMPANY PRODUCT TRACKER || ICPT=COMPANY INVESTIGATOR PRODUCT TRACKER
 		$MainPageURL = 'company.php';
-	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DISCATMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
+	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT' ||  $TrackerType == 'IMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DISCATMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 		$MainPageURL = 'moa.php';
 	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' ||  $TrackerType == 'DISCATMCPT' )	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER
 		$MainPageURL = 'moacategory.php';
@@ -209,7 +209,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$entity2Type = 'Disease';
 		}
 	}
-	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT' )	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DCMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
+	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT' || $TrackerType == 'IMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DCMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -267,7 +267,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 		$productIds = GetProductsFromDisease($header['id']);
 		$id=$header['id'];
 	}
-	else if($TrackerType == 'CIPT')	//CIPT=COMPANY INVESTIGATOR PRODUCT TRACKER
+	else if($TrackerType == 'ICPT')	//ICPT=COMPANY INVESTIGATOR PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -1294,7 +1294,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		$commonPart2 = '';
 		if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
 		if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
-		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT' || $TrackerType=='DISCATMPT' || $TrackerType == 'DISCATCPT' || $TrackerType == 'DISCATPT'| $TrackerType == 'CIPT') $commonPart2 = '&e2=' . $entity2Id;
+		if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DMPT' || $TrackerType=='DISCATMPT' || $TrackerType == 'DISCATCPT' || $TrackerType == 'DISCATPT'| $TrackerType == 'ICPT') $commonPart2 = '&e2=' . $entity2Id;
 		if($TrackerType != 'PTH') $commonPart2 .= '&sourcepg=TZ';
 		
 		$industryLink = $commonPart1 . $commonPart2 . '&list=1&itype=0';
@@ -1732,7 +1732,7 @@ function Download_reports()
 	$commonPart2 = '';
 	if($TrackerType == 'PTH') $commonPart2 = '&e2=' . $entity2Id . '&hm='.$id;
 	if($TrackerType == 'DPT') $commonPart2 = '&e2=' . $id;
-	if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT'  || $TrackerType == 'DMPT' || $TrackerType == 'CIPT') $commonPart2 = '&e2=' . $entity2Id;
+	if($TrackerType == 'DCPT' || $TrackerType == 'DMCPT'  || $TrackerType == 'DMPT' || $TrackerType == 'ICPT') $commonPart2 = '&e2=' . $entity2Id;
 	if($TrackerType != 'PTH') $commonPart2 .= '&sourcepg=TZ';
 	
 	if($_POST['dwcount']=='active')
@@ -3104,7 +3104,7 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 	
 		return array_filter(array_unique($Products));
 	}
-	elseif ($TrackerType == 'CIPT')
+	elseif ($TrackerType == 'ICPT')
 	{
 		$InvestigatorId = $OptionArray["InvestigatorId"];
 		$CompanyProductIds = GetProductsFromCompany($companyID, 'CPT', array());
@@ -3278,7 +3278,34 @@ function GetProductsFromMOA($moaID, $TrackerType, $OptionArray)
 		}
 	
 		return array_filter(array_unique($Products));
-	}	
+	}else if ($TrackerType == 'IMPT'){
+		$InvestigatorId = $OptionArray["InvestigatorId"];
+		$moaProductIds = GetProductsFromMOA($moaID, 'MPT', array());
+		//print_r($CompanyProductIds);
+		$PhaseArray = GetPhaseArray($OptionArray['Phase']);
+		// get trial from investigator id
+		$query  = "SELECT trial FROM entity_trials WHERE entity = '". $InvestigatorId ."'";
+		$res = mysql_query($query) or die('Bad SQL query getting trials from investigator id in PT');
+		
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				$Trials[] = $row['trial'];
+			}
+		}
+		$query = "SELECT DISTINCT e.id  FROM entity_trials et JOIN entities e ON (et.entity = e.id) WHERE et.trial IN ('". implode("','", $Trials) ."') AND e.class='Product' AND e.id IN ('". implode("','", $moaProductIds) ."')";
+		$res = mysql_query($query) or die('Bad SQL query getting products from moa id and investigator in PT');
+		
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				$Products[] = $row['id'];
+			}
+		}
+		return array_filter(array_unique($Products));
+	}			
 	else
 	{
 		$productIds = GetProductsFromMOA($moaID, 'MPT', array());

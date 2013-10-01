@@ -272,7 +272,7 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $In
 	if($tab == 'diseasetrac')
 		print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag);		//CDT= COMPANY DISEASE TRACKER
 	else if($tab == 'investigatortrac')
-		print showInvestigatorTracker($CompanyId, 'CIT', $page);		//CDT= COMPANY INVESTIGATOR TRACKER
+		print showInvestigatorTracker($CompanyId, 'CIT', $page);		//CIT= COMPANY INVESTIGATOR TRACKER
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 	
 	print '</div>';
@@ -283,8 +283,8 @@ else
 		print showProductTracker($CompanyId, $dwcount, 'DCPT', $page, $OptionArray);	//DCPT - DISEASE COMPANY PRODUCT TRACKER
 	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCPT')
 		print showProductTracker($CompanyId, $dwcount, 'DISCATCPT', $page, $OptionArray);	//DISCATCPT - DISEASE CATEGORY COMPANY PRODUCT TRACKER
-	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'CIPT')
-		print showProductTracker($CompanyId, $dwcount, 'CIPT', $page, $OptionArray);	//CIPT - COMPANY INVESTIGATOR PRODUCT TRACKER
+	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'ICPT')
+		print showProductTracker($CompanyId, $dwcount, 'ICPT', $page, $OptionArray);	//ICPT - COMPANY INVESTIGATOR PRODUCT TRACKER
 	
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 
@@ -298,3 +298,17 @@ else
 
 </body>
 </html>
+<?php 
+function m_query($n,$q)
+{
+	global $logger;
+	$time_start = microtime(true);
+	$res = mysql_query($q);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'TIME:'.$time_taken.'  QUERY:'.$q.'  LINE# '.$n;
+	$logger->debug($log);
+	unset($log);
+	return $res;
+}
+?>
