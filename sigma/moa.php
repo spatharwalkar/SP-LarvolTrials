@@ -5,6 +5,7 @@
 	require_once('product_tracker.php');
 	chdir ($cwd);
 	require_once('disease_tracker.php');
+	require_once('investigators_tracker.php');	
 	$page = 1;
 	if($_REQUEST['MoaId'] != NULL && $_REQUEST['MoaId'] != '' && isset($_REQUEST['MoaId']))
 	{
@@ -39,14 +40,20 @@
 	{
 		$DiseaseCatId = mysql_real_escape_string($_REQUEST['DiseaseCatId']);
 	}
-	
+	$InvestigatorId = null;
+	if(isset($_REQUEST['InvestigatorId']))
+	{
+		$InvestigatorId = mysql_real_escape_string($_REQUEST['InvestigatorId']);
+		//$OptionArray = array('InvestigatorId'=>$InvestigatorId, 'Phase'=> $phase);
+	}
+		
 	$phase = NULL;
 	if(isset($_REQUEST['phase']))
 	{
 		$phase = mysql_real_escape_string($_REQUEST['phase']);
 	}
 
-	$OptionArray = array('DiseaseId'=>$DiseaseId, 'DiseaseCatId' => $DiseaseCatId, 'Phase'=> $phase);
+	$OptionArray = array('InvestigatorId'=>$InvestigatorId, 'DiseaseId'=>$DiseaseId, 'DiseaseCatId' => $DiseaseCatId, 'Phase'=> $phase);
 	
 	$tab = 'moa';
 	if(isset($_REQUEST['tab']))
@@ -63,6 +70,7 @@
 	}	
 	
 	$TabProductCount = count(GetProductsFromMOA($MoaId, 'MPT', array()));
+	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($MoaId, 'MOA'));
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaName) ? $MoaName. ' - '.$meta_title : $meta_title;		
@@ -209,12 +217,35 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
 				$moaLinkName = '<a href="'.$tabCommonUrl.'&tab=moa" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+				$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
+				$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				
 				if($tab == 'diseasetrac') {  
-				print '<td><img id="DiseaseImg" src="../images/firstSelectTab.png" /></td><td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td><td><img id="MoaImg" src="../images/selectTabConn.png" /></td><td id="moaTab" class="Tab">'. $moaLinkName .'</td><td><img id="lastImg" src="../images/lastTab.png" /></td> 
-				<td></td>';
+				print '<td><img id="DiseaseImg" src="../images/firstSelectTab.png" /></td>
+				<td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td>
+				<td><img id="MoaImg" src="../images/selectTabConn.png" /></td>
+				<td id="moaTab" class="Tab">'. $moaLinkName .'</td>
+				<td><img id="lastImg" src="../images/afterTab.png" /></td> 
+				<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				<td><img id="lastImg" src="../images/lastTab.png" /></td>';
 				 } else if($tab == 'moa') { 
-				print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td><td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td><td><img id="MoaImg" src="../images/middleTab.png" /></td><td id="moaTab" class="selectTab">'. $moaLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+				print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td>
+				<td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td>
+				<td><img id="MoaImg" src="../images/middleTab.png" /></td>
+				<td id="moaTab" class="selectTab">'. $moaLinkName .'</td>
+				</td>
+				<td><img id="lastImg" src="../images/selectTabConn.png" /></td>
+				<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				<td><img id="lastImg" src="../images/lastTab.png" /></td>';
+				// print '<td><img id="MoaImg" src="images/firstSelectTab.png" /></td><td id="moaTab" class="selectTab">'. $moaLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
+				 }  else if($tab == 'investigatortrac') { 
+				print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td>
+				<td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td>
+				<td><img id="MoaImg" src="../images/afterTab.png" /></td>
+				<td id="moaTab" class="Tab">'. $moaLinkName .'</td>
+				<td><img id="lastImg" src="../images/middleTab.png" /></td>
+	 			<td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
+	 			<td><img id="lastImg" src="../images/selectLastTab.png" /></td>';
 				// print '<td><img id="MoaImg" src="images/firstSelectTab.png" /></td><td id="moaTab" class="selectTab">'. $moaLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
 				 } 
 	print	'            
@@ -226,11 +257,13 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 ?>
 <tr><td align="center">
 <?php
-if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NULL))
+if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $InvestigatorId == NULL)  && (!isset($phase) || $phase == NULL))
 {
 	print '<div id="diseaseTab_content" align="center">';
 	if($tab == 'diseasetrac')
 		print showDiseaseTracker($MoaId, 'MDT', $page, $categoryFlag);		//MDT= MOA DISEASE TRACKER
+	else if($tab == 'investigatortrac')
+		print showInvestigatorTracker($MoaId, 'MIT', $page);		//MIT= COMPANY INVESTIGATOR TRACKER
 	else
 		print showProductTracker($MoaId, $dwcount, 'MPT', $page, $OptionArray);	//MPT= MOA PRODUCT TRACKER 	
 	print '</div>';
@@ -243,6 +276,9 @@ else
 		print showProductTracker($MoaId, $dwcount, 'DISCATMPT', $page, $OptionArray);	//DMPT= DISEASE MOA PRODUCT TRACKER
 	else if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATPT')
 		print showProductTracker($MoaId, $dwcount, 'DISCATPT', $page, $OptionArray);	//DISCATPT :DISEASE CATEGORY PRODUCT TRACKER  //DCMPT= DISEASE CATEGORY MOA PRODUCT TRACKER
+	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'IMPT')
+		print showProductTracker($MoaId, $dwcount, 'IMPT', $page, $OptionArray);	//CIPT - COMPANY INVESTIGATOR PRODUCT TRACKER
+	
 	else
 		print showProductTracker($MoaId, $dwcount, 'MPT', $page, $OptionArray);	//MPT= MOA PRODUCT TRACKER 	
 }
@@ -255,3 +291,17 @@ else
 
 </body>
 </html>
+<?php 
+function m_query($n,$q)
+{
+	global $logger;
+	$time_start = microtime(true);
+	$res = mysql_query($q);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'TIME:'.$time_taken.'  QUERY:'.$q.'  LINE# '.$n;
+	$logger->debug($log);
+	unset($log);
+	return $res;
+}
+?>
