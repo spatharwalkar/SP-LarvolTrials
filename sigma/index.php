@@ -144,7 +144,7 @@
 		$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e JOIN `entity_relations` er ON(er.`parent`=e.`id`) JOIN `entities` e2 ON(e2.`id`=er.`child`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product'  AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')";
 		else if($globalOptions['class'] == 'Product')
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category` FROM `entities` WHERE `class` = '".$globalOptions['class']."'  AND (`is_active` <> '0' OR `is_active` IS NULL)";
-		else
+		else if($globalOptions['class'] == 'Investigator')
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
 		
 		$QueryResult = mysql_query($ResultArrQuery);
@@ -159,6 +159,7 @@
 				$DataArray[$i]['name'] = $result['name'];
 				$DataArray[$i]['id'] = $result['id'];
 				$DataArray[$i]['type'] = $result['class'];
+				$DataArray[$i]['affiliation'] = $result['affiliation'];
 				if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
 					$DataArray[$i]['name'] = $result['display_name'];
 				
@@ -522,9 +523,10 @@ if($ClassFlg)
 				{
 						print ' 	<a href="investigator.php?id='. trim($DataArray[$index]['id']) .'" title="Investigator" ><b>'.$DataArray[$index]['name'] .'</b>';
 						if(!empty($DataArray[$index]['affiliation']))
-							print '/ <i>'.$DataArray[$index]['affiliation'].' </a>';
+							print ' / <i>'.$DataArray[$index]['affiliation'].'</a>';
 						else
-							print ' </a>';
+							print '</a>';
+						print '&nbsp;&nbsp;('.GetTrialsCountFromInvestigator(trim($DataArray[$index]['id'])).' Trials)';
 				}
 				if($DataArray[$index]['type'] != 'MOA_Category') print '<br /><br style="line-height:6px;" />';
     			print ' </td>
@@ -641,6 +643,25 @@ function GetProductsCountFromMOA($moaID)
 	}
 	return $ProductsCount;
 }
+
+
+/* Function to get Trials count from investigator id */
+function GetTrialsCountFromInvestigator($invID)
+{
+	global $db;
+	global $now;
+	$TrialsCount = 0;
+	$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity`='" . mysql_real_escape_string($invID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting trials count from product id in TZ');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		$TrialsCount = $row['trialCount'];
+	}
+	return $TrialsCount;
+}
+
 
 /* Function to get Trials count from MOA id */
 function GetTrialsCountFromProduct($productID)
