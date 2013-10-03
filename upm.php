@@ -181,9 +181,26 @@ if($_REQUEST['save']=='Save')
 	$_REQUEST = array_merge($_GET, $_POST); 
 	$_REQUEST['product'] = $pid;
 	$_REQUEST['area'] = $aid;
-	$_REQUEST['redtag'] = $rid;
+	$_REQUEST['redtag'] = $rid;	
 	
-	$saveStatus = saveData($_REQUEST,$table);
+	$end_date_status = 0;
+	
+	//checking end date for empty or wrong format 
+	if (preg_match("/^(\d{4})-(\d{2})-(\d{2})$/", $_REQUEST['end_date'], $matches)) {
+		if (checkdate($matches[2], $matches[3], $matches[1])) {
+			$end_date_status = 1;
+		}
+	}
+	
+	if(!$end_date_status)
+	{
+		softDieSession('End date can not be set blank.');
+	}
+	
+	if($end_date_status) { // if end date set blank we are not saving the edit as 	
+		$saveStatus = saveData($_REQUEST,$table);
+	}
+	
 	if(!$pid) 
 	{
 		softDieSession('Wrong/no product name selected.');
@@ -195,7 +212,7 @@ if($_REQUEST['save']=='Save')
 	}
 	
 	$_GET['id'] = $_REQUEST['id'];	//After saving, keep that upm opened for further editing
-	if($saveStatus === 0 || !$pid || $Wrong_redtag)
+	if($saveStatus === 0 || !$pid || $Wrong_redtag || !$end_date_status)
 		$UPMSaveSuccess = false;	//Turn OFF save success flag
 	else
 		$UPMSaveSuccess = true;	//Turn ON save success flag
