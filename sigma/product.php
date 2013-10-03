@@ -46,7 +46,7 @@
 	$disTrackerData = showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
 	
 	if($categoryFlag == 1){
-		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($e1, 'Product' ));
+		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($e1, 'Product'));
 	}	
 	
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($e1, 'Product' ));//GetInvestigatorFromEntity_InvestigatorTracker

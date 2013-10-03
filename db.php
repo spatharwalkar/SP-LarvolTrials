@@ -1,7 +1,8 @@
 <?php
 require_once('settings.php');
 require_once('include.util.php');
-ini_set('error_reporting', E_ALL ^ E_NOTICE);
+//ini_set('error_reporting', E_ALL ^ E_NOTICE);
+error_reporting(0);
 $db = new DatabaseManager();
 $db->loggedIn();	//check login status and load userinfo
 $now = strtotime('now');
@@ -24,7 +25,7 @@ class DatabaseManager
 	public function __construct()
 	{
 		$this->db_link = mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
-		mysql_select_db(DB_NAME) or die("Could not find database on server!");
+		mysql_select_db(DB_NAME) or die(mysql_error());
 		mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");
 		
 		@$this->types = unserialize(file_get_contents('cache/types.dat'));
