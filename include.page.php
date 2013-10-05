@@ -2209,6 +2209,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			//last update not needed for upm_history
 			unset($historyArr['last_update']);
 			unset($historyArr['status']);
+			unset($historyArr['event_type']);
 			//remove post action name from insert query.
 			//no longer required as input column filtering is in place now. unset($post['save']);
 			global $post_tmp;
