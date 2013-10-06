@@ -315,6 +315,10 @@ jdPicker.prototype = {
     this.rootLayers.slideDown();
     $([window, document.body]).click(this.hideIfClickOutside);
     this.input.unbind("focus", this.show);
+	var makeReadOnly = 1;
+	// To make end date field in Upm editor editable
+	if(this.input.parents("form").attr('name') == 'umpInput' && this.input.attr('name') == 'end_date'){makeReadOnly = 0;}	
+	if(makeReadOnly)
 	this.input.attr('readonly', true);
     $(document.body).keydown(this.keydownHandler);
     this.setPosition();

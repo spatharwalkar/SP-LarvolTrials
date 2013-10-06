@@ -192,14 +192,11 @@ if($_REQUEST['save']=='Save')
 		}
 	}
 	
-	if(!$end_date_status)
-	{
-		softDieSession('End date can not be set blank.');
+	if(!$end_date_status) { // assign end date as NULL to avoid storing 0000-00-00 in case of invalid date entered by user
+		$_REQUEST['end_date'] = NULL;
 	}
 	
-	if($end_date_status) { // if end date set blank we are not saving the edit as 	
-		$saveStatus = saveData($_REQUEST,$table);
-	}
+	$saveStatus = saveData($_REQUEST,$table);
 	
 	if(!$pid) 
 	{
@@ -212,7 +209,7 @@ if($_REQUEST['save']=='Save')
 	}
 	
 	$_GET['id'] = $_REQUEST['id'];	//After saving, keep that upm opened for further editing
-	if($saveStatus === 0 || !$pid || $Wrong_redtag || !$end_date_status)
+	if($saveStatus === 0 || !$pid || $Wrong_redtag)
 		$UPMSaveSuccess = false;	//Turn OFF save success flag
 	else
 		$UPMSaveSuccess = true;	//Turn ON save success flag
