@@ -93,7 +93,6 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	global $db;
 	global $now;
 	global $logger;
-	
 	//IMP DATA
 	$DiseaseIds = array();
 	$NewInvestigatorIds = array();
@@ -133,90 +132,72 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 		$Ids = array_filter(array_unique(GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType)));
 		$InvestigatorIds =  $Ids;
 	//print_r($InvestigatorIds);
-		foreach($InvestigatorIds as $InvestigatorId){
-			$queryinvestigator = "SELECT `name`, `display_name`, `id`, `class`, affiliation FROM `entities` WHERE id='" . $InvestigatorId ."'";
-			$resinvestigator = mysql_query($queryinvestigator) or die(mysql_error());
-			$headerinvestigator = mysql_fetch_array($resinvestigator);
-			$NewInvestigatorIds[] = $headerinvestigator['id'];
-			//get investigator trials
-			/*
-			 $InvestigatorTrialProductsQuery = "
-			SELECT DISTINCT id  FROM entities e
-				JOIN entity_relations er ON (e.id=er.parent)
-				JOIN entity_trials et ON (e.id=et.entity)
-				WHERE e.class = 'Product' AND 
-				et.trial IN(
-				SELECT DISTINCT et2.trial FROM entity_trials et2 WHERE et2.entity = ".$InvestigatorId."
-				)
-			";
-			$InvestigatorTrialProductsResult = m_query(__LINE__,$InvestigatorTrialProductsQuery);//mysql_query($InvestigatorTrialProductsQuery) or die(mysql_error());
-			$products = array();
-			$products_implode = '';
-			if($InvestigatorTrialProductsResult)
-			{
-				while($row = mysql_fetch_array($InvestigatorTrialProductsResult))
-				{
-					$products[] = $row['id'];
-				}	
-			}
-
-			//get products from selected trials
-			 $InvestigatorQuery = "
-				SELECT 
-				e.`id` AS ProdId, e.class 
-				, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` 
-				FROM `rpt_masterhm_cells` rpt 
-				JOIN `entities` e 
-				ON((rpt.`entity1`=e.`id` AND e.`class`='Product') 
-				OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) 
-				JOIN `entity_relations` er ON(e.`id` = er.`parent`) 
-				JOIN `entities` e2 ON(e2.`id` = er.`child`) 
-				WHERE 
-				(rpt.`count_total` > 0)  
-				AND e2.`id` = ".$id." 
-				AND e.`id` IN ('".implode("','",$products)."') 
-				AND e2.`class`='Institution' 
-				AND (e.`is_active` <> '0' 
-				OR e.`is_active` IS NULL)
-			";
-			*/
-			
-			//get products from selected trials
-			 $InvestigatorQuery ="SELECT 
-				e.`id` AS ProdId, e.class 
-				, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` 
-				FROM `rpt_masterhm_cells` rpt 
-				JOIN `entities` e 
-				ON((rpt.`entity1`=e.`id` AND e.`class`='Product') 
-				OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) 
+	$cIds = implode(",", $InvestigatorIds);
+	if(!empty($cIds))
+	{
+	// New Single query 
+	$InvestigatorQuery =
+				"SELECT distinct e.`id` AS ProdId, e.class ,et2.entity as investigator, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` 
+				FROM `rpt_masterhm_cells` rpt  JOIN `entities` e 
+				ON	( 
+						(
+							(rpt.`entity2`=e.`id`) 
+							AND e.`class` in ('Product')
+						)
+					) 
 				JOIN `entity_relations` er ON(e.`id` = er.`parent`) 
 				JOIN `entities` e2 ON(e2.`id` = er.`child`) 
 				JOIN entity_trials et1 ON (e.id=et1.entity)
-				JOIN entity_trials et2 ON (et1.trial=et2.trial && et2.entity='".$InvestigatorId."')
+				JOIN entity_trials et2 ON (et1.trial=et2.trial && et2.entity in (".$cIds."))
 				WHERE 
-				(rpt.`count_total` > 0)  
+				(rpt.`count_total` > 0) 
+				AND rpt.entity1 in (".$cIds.")
 				AND e2.`id` = '".$id."' 
 				AND e2.`class`='".$GobalEntityType."' 
 				AND (e.`is_active` <> '0' 
 				OR e.`is_active` IS NULL)";
 			
+			$results=array();
 			$InvestigatorQueryResult = m_query(__LINE__,$InvestigatorQuery);//mysql_query($InvestigatorQuery) or die(mysql_error());
-//			print_r($headerinvestigator);
-			$key = $InvestigatorId;// = $result['CompId'];
-			if(isset($InvestigatorId) && $InvestigatorId != NULL)
+			while ($res = @mysql_fetch_array($InvestigatorQueryResult))
 			{
-				if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
-				{
-					/// Fill up all data in Data Matrix only, so we can sort all data at one place
-					if($headerinvestigator['display_name'] != NULL && trim($headerinvestigator['display_name']) != '')
-						$data_matrix[$key]['RowHeader'] = $headerinvestigator['display_name'];
+				$results[]=$res;
+			}
+			//pr($InvestigatorQuery);
+			$headerinvestigator=array();
+			$queryinvestigator = "SELECT `name`, `display_name`, `id`, `class`, affiliation FROM `entities` WHERE id  in (".$cIds.")";
+			$resinvestigator = mysql_query($queryinvestigator) or die(mysql_error());
+			while($headinv = mysql_fetch_array($resinvestigator))
+			{
+				$headerinvestigator[$headinv['id']]=$headinv;
+				$NewInvestigatorIds[] = $headinv['id'];
+			}
+			$cnt=count($results);
+			$cnt1=count($NewInvestigatorIds);
+			//pr($results);
+			//die();
+	}
+	else
+	{	
+		$results=null;
+		$NewInvestigatorIds=null;
+	}
+	
+	
+		foreach($InvestigatorIds as $InvestigatorId)
+		{
+			$key = $InvestigatorId;// = $result['CompId'];
+			if( isset($InvestigatorId) && $InvestigatorId != NULL and ($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL) )
+			{
+					if($headerinvestigator[$InvestigatorId]['display_name'] != NULL && trim($headerinvestigator[$InvestigatorId]['display_name']) != '')
+						$data_matrix[$key]['RowHeader'] = $headerinvestigator[$InvestigatorId]['display_name'];
 					else
-						$data_matrix[$key]['RowHeader'] = $headerinvestigator['name'];
+						$data_matrix[$key]['RowHeader'] = $headerinvestigator[$InvestigatorId]['name'];
 						
 					$data_matrix[$key]['ID'] = $result['id'];
 			
-					//$data_matrix[$key]['RowHeader'] = $headerinvestigator['name'];
-					$data_matrix[$key]['RowHeader'] .= ' / <i>'.$headerinvestigator['affiliation'].'</i>';
+					//$data_matrix[$key]['RowHeader'] = $headerinvestigator[$InvestigatorId]['name'];
+					$data_matrix[$key]['RowHeader'] .= ' / <i>'.$headerinvestigator[$InvestigatorId]['affiliation'].'</i>';
 					$data_matrix[$key]['ID'] = $key;//$result['ProdId'];
 					//$NewCompanyIds[] = $result['ProdId'];
 					//echo $data_matrix[$key]['RowHeader'].'<br>';
@@ -239,74 +220,74 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 			
 					$data_matrix[$key]['TotalCount'] = 0;
 					$data_matrix[$key]['productIds'] = array();
-					$data_matrix[$key]['ProdExistance'] = array();
-				}
-			}				
-			//$key = 0;
-			while($result = mysql_fetch_array($InvestigatorQueryResult))
-			{
-				//print_r($result);
-
-					if((( !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || (!in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
-					{
-						//print_r($products);
-						//if($result['entity1'] == $id)
-						//if(in_array($result['entity2'],$products)){
-						if(!in_array($result['entity2'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
-						{		$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-						//}else{
-						}elseif(!in_array($result['entity1'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
-						{
-							$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
-						}
 					
-						if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
-						{
-							$CurrentPhasePNTR = 0;
-						}
-						else if($result['phase'] == '0')
-						{
-							$CurrentPhasePNTR = 1;
-						}
-						else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
-								|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
-						{
-							$CurrentPhasePNTR = 2;
-						}
-						else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
-								|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
-								|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
-						{
-							$CurrentPhasePNTR = 3;
-						}
-						else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
-								|| $result['phase'] == '3a' || $result['phase'] == '3b')
-						{
-							$CurrentPhasePNTR = 4;
-						}
-						else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
-						{
-							$CurrentPhasePNTR = 5;
-						}
-					
-						$MAXPhasePNTR = $CurrentPhasePNTR;
-						//$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
-						if(!in_array($result['ProdId'], $data_matrix[$key]['productIds']))//to avoid duplicates
-						{
-							
-							//if($result['phase'] != '' && $result['phase'] != NULL){
-								$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
-							//}
-							$data_matrix[$key]['productIds'][] = $result['ProdId'];
-						}
-						//$data_matrix[$key]['productIds'][] = $result['ProdId'];
-					
-						$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
-						if($max_count < $data_matrix[$key]['TotalCount'])
-							$max_count = $data_matrix[$key]['TotalCount'];
-					}	//End of if Product Existsnace
-				//}
 			}
+			foreach($results as $key2=>$result)
+			{
+				/// Fill up all data in Data Matrix only, so we can sort all data at one place
+				
+				if($result['investigator']<>$InvestigatorId) continue;
+			
+				if((( !@in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || (!@in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+				{
+					//print_r($products);
+					//if($result['entity1'] == $id)
+					//if(in_array($result['entity2'],$products)){
+					if(!@in_array($result['entity2'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
+					{		$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
+					//}else{
+					}elseif(!in_array($result['entity1'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
+					{
+						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+					}
+				
+					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+					{
+						$CurrentPhasePNTR = 0;
+					}
+					else if($result['phase'] == '0')
+					{
+						$CurrentPhasePNTR = 1;
+					}
+					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
+							|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+					{
+						$CurrentPhasePNTR = 2;
+					}
+					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
+							|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
+							|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+					{
+						$CurrentPhasePNTR = 3;
+					}
+					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
+							|| $result['phase'] == '3a' || $result['phase'] == '3b')
+					{
+						$CurrentPhasePNTR = 4;
+					}
+					else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+					{
+						$CurrentPhasePNTR = 5;
+					}
+				
+					$MAXPhasePNTR = $CurrentPhasePNTR;
+					//$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+					if(!in_array($result['ProdId'], $data_matrix[$key]['productIds']))//to avoid duplicates
+					{
+						
+						//if($result['phase'] != '' && $result['phase'] != NULL){
+							$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+						//}
+						$data_matrix[$key]['productIds'][] = $result['ProdId'];
+					}
+					//$data_matrix[$key]['productIds'][] = $result['ProdId'];
+				
+					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+					if($max_count < $data_matrix[$key]['TotalCount'])
+						$max_count = $data_matrix[$key]['TotalCount'];
+				}	//End of if Product Existsnace
+			}
+		
 		}
 			
 		
@@ -446,7 +427,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewInvestigatorIds = array_slice($NewInvestigatorIds, $StartSlice, $RecordsPerPage);
+		$NewInvestigatorIds = @array_slice($NewInvestigatorIds, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
