@@ -578,7 +578,14 @@ if (isset($_POST['import_industries']) and $_POST['import_industries']=="YES")
 	return;
 }
 
-//Tmport Therapeutic Area
+//Recalcualte Investigators (All)
+if (isset($_POST['recalc_investigators']) and $_POST['recalc_investigators']=="YES")
+{
+	require_once('calc_Inv_all.php');
+	return;
+}
+
+//Import Therapeutic Area
 if (isset($_POST['li_therapeuticarea']) and $_POST['li_therapeuticarea']=="1") 
 {
 	require_once('fetch_li_therapeuticareas.php');
@@ -1063,7 +1070,14 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			. 'Click <b>Detect ALL</b> button to detect investigators of all trials (NCT) &nbsp; &nbsp;&nbsp;&nbsp;'
 			. ' <input type="hidden" name="detect_source" value="ALL"/>'
 			. '<input type="submit" name="detect_all" value="Detect ALL" />'
-			. '</form>';
+			. '</form></formset></fieldset></div>';
+			
+	// RECALCULATE INVESTIGATOR CELLS
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b>RECALCULATE INVESTIGATORS (ALL)</b></legend>'
+	. '<formset><form action="database.php" method="post">'
+	. '<input type="hidden" name="recalc_investigators" value="YES">'
+	. '<br><input type="submit" value="Recalculate" />'
+	. '</form></formset></fieldset></div>';
 			
 	$out .= '</fieldset></div><br /><br /><br />';
 		
