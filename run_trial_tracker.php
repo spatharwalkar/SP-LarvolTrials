@@ -10985,17 +10985,17 @@ class TrialTracker
 				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
 		}
 		
-		if($productContextFlag) {
-		echo '<br/><input type="checkbox" id="osflt" name="osflt" ' . (($globalOptions['ownersponsoredfilter'] == "on") ? 'checked="checked"' : '') . ' />'
-		. '<label style="font-size:x-small;" for="osflt">Show only owner-sponsored trials</label>';
+		if($productContextFlag  || (!empty($productSelector) && ($ottType != 'indexed'))) 
+		{
+			echo '<br/><input type="checkbox" id="osflt" name="osflt" ' . (($globalOptions['ownersponsoredfilter'] == "on") ? 'checked="checked"' : '') . ' />'
+			. '<label style="font-size:x-small;" for="osflt">Show only owner-sponsored trials</label>';
 		}
 		echo  '</td></tr><tr>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="right bottom">';
 		
-		if(!empty($productSelector)
-		&& ($ottType != 'indexed'))
+		if(!empty($productSelector) && ($ottType != 'indexed'))
 		{
 			echo '<div id="menuwrapper" style="vertical-align:bottom;margin-left: 2px;"><ul>';
 			if(isset($globalOptions['product']) && !empty($globalOptions['product']))
