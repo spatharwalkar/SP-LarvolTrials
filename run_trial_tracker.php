@@ -10911,7 +10911,15 @@ class TrialTracker
 						. (in_array($ikey, $globalOptions['itype']) ? ' checked="checked" ' : '' ) . '/>'
 						. '<label for="institution_type_' . $ikey . '">' . str_replace('_', ' ', ucfirst($ivalue)) . '</label><br />';
 			}
-			echo '</div></td>';
+			echo '</div>';
+			
+			if($productContextFlag  || (!empty($productSelector) && ($ottType != 'indexed'))) 
+			{
+				echo '<div id="osflt_div">
+						<input type="checkbox" id="osflt" name="osflt" ' . (($globalOptions['ownersponsoredfilter'] == "on") ? 'checked="checked"' : '') . ' />'
+				. '<label style="font-size:x-small;" for="osflt">Show only owner-sponsored trials</label> </div>';
+			}
+			echo '</td>';
 		}
 		
 		echo '<td class="bottom"><div style="width:80px">'
@@ -10985,11 +10993,6 @@ class TrialTracker
 				. '<label style="font-size:x-small;" for="ipwnd">Include ' . $title . ' with no data</label>';
 		}
 		
-		if($productContextFlag  || (!empty($productSelector) && ($ottType != 'indexed'))) 
-		{
-			echo '<br/><input type="checkbox" id="osflt" name="osflt" ' . (($globalOptions['ownersponsoredfilter'] == "on") ? 'checked="checked"' : '') . ' />'
-			. '<label style="font-size:x-small;" for="osflt">Show only owner-sponsored trials</label>';
-		}
 		echo  '</td></tr><tr>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'
 				. '<td class="bottom">&nbsp;</td><td class="bottom">&nbsp;</td>'

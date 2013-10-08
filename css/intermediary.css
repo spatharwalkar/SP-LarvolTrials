@@ -627,3 +627,12 @@ tr.upms td {
 	margin-right: 10px;
 	margin-top: -2px;
 }
+
+#osflt_div {
+	border-top: 1px solid #4444FF;
+	margin: 5px 5px 0px 0px;
+	padding-top: 5px;
+}
+#osflt_div label {
+	vertical-align: text-top;
+}
