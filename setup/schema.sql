@@ -277,7 +277,7 @@ DELIMITER ;
 CREATE TABLE IF NOT EXISTS `upm_history` (
   `id` int(10) unsigned NOT NULL,
   `change_date` datetime NOT NULL,
-  `field` enum('event_type','event_description','event_link','result_link','corresponding_trial','start_date','start_date_type','end_date','end_date_type','last_update','product','area','status', 'larvol_id', 'redtag', 'new') COLLATE utf8_unicode_ci NOT NULL,
+  `field` enum('event_type','event_description','event_link','result_link','corresponding_trial','start_date','start_date_type','end_date','end_date_type','last_update','product','area','status','larvol_id','redtag','new','condition') COLLATE utf8_unicode_ci NOT NULL,
   `old_value` text COLLATE utf8_unicode_ci,
   `new_value` text COLLATE utf8_unicode_ci,
   `user` int(10) unsigned DEFAULT NULL,
