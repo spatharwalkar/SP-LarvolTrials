@@ -10912,8 +10912,7 @@ class TrialTracker
 						. '<label for="institution_type_' . $ikey . '">' . str_replace('_', ' ', ucfirst($ivalue)) . '</label><br />';
 			}
 			echo '</div>';
-			
-			if($productContextFlag  || (!empty($productSelector) && ($ottType != 'indexed'))) 
+			if($productContextFlag  || (!empty($productSelector) && ($ottType == 'colstacked')))
 			{
 				echo '<div id="osflt_div">
 						<input type="checkbox" id="osflt" name="osflt" ' . (($globalOptions['ownersponsoredfilter'] == "on") ? 'checked="checked"' : '') . ' />'
