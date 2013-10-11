@@ -38,7 +38,7 @@ function showInvestigatorTracker($id, $TrackerType, $page=1)
 		$CountType = $_REQUEST['dwcount'];
 	else
 		$CountType = 'total';
-		
+	
 	$Return = DataGeneratorForInvestigatorTracker($id, $TrackerType, $page, $CountType);
 	
 	$uniqueId = uniqid();
@@ -129,11 +129,11 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	//$GobalEntityType == 'Institution'
 	if($GobalEntityType != 'Product')	//FOR OTHER THAH
 	{
-		$Ids = array_filter(array_unique(GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType)));
-		$InvestigatorIds =  $Ids;
-	//print_r($InvestigatorIds);
-	$cIds = implode(",", $InvestigatorIds);
-	if(!empty($cIds))
+		//$Ids = array_filter(array_unique(GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType)));
+		$Inv_data = GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType,true);
+		$Idquery = $Inv_data['query'];
+		$InvestigatorIds = $Inv_data['Ids'];
+	if(!empty($Idquery))
 	{
 	// New Single query 
 	$InvestigatorQuery =
@@ -148,24 +148,24 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 				JOIN `entity_relations` er ON(e.`id` = er.`parent`) 
 				JOIN `entities` e2 ON(e2.`id` = er.`child`) 
 				JOIN entity_trials et1 ON (e.id=et1.entity)
-				JOIN entity_trials et2 ON (et1.trial=et2.trial && et2.entity in (".$cIds."))
+				JOIN entity_trials et2 ON (et1.trial=et2.trial && et2.entity in ( ".$Idquery." ))
 				WHERE 
 				(rpt.`count_total` > 0) 
-				AND rpt.entity1 in (".$cIds.")
+				AND rpt.entity1 in ( ".$Idquery." )
 				AND e2.`id` = '".$id."' 
 				AND e2.`class`='".$GobalEntityType."' 
 				AND (e.`is_active` <> '0' 
 				OR e.`is_active` IS NULL)";
 			
 			$results=array();
+			//die();
 			$InvestigatorQueryResult = m_query(__LINE__,$InvestigatorQuery);//mysql_query($InvestigatorQuery) or die(mysql_error());
 			while ($res = @mysql_fetch_array($InvestigatorQueryResult))
 			{
 				$results[]=$res;
 			}
-			//pr($InvestigatorQuery);
 			$headerinvestigator=array();
-			$queryinvestigator = "SELECT `name`, `display_name`, `id`, `class`, affiliation FROM `entities` WHERE id  in (".$cIds.")";
+			$queryinvestigator = "SELECT `name`, `display_name`, `id`, `class`, affiliation FROM `entities` WHERE id  in (".$Idquery.")";
 			$resinvestigator = mysql_query($queryinvestigator) or die(mysql_error());
 			while($headinv = mysql_fetch_array($resinvestigator))
 			{
@@ -338,7 +338,6 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 						$link_part = '&list=1&itype=0';
 					}
 					
-
 					$data_matrix[$key]['HeaderLink'] = 'investigator.php?id=' . $data_matrix[$key]['ID'];
 					$data_matrix[$key]['ColumnsLink'] = 'ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
 					
@@ -2508,7 +2507,7 @@ function sortTwoDimensionArrayByKeyInvestigatorTracker($arr, $arrKey, $sortOrder
 }
 
 //Get Diseases from Disease
-function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityType)
+function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityType,$returnquery=false)
 {
 	global $db;
 	global $now;
@@ -2534,6 +2533,8 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 	}else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA'){
 
 		$query = "SELECT DISTINCT e.id FROM entities e JOIN entity_relations er  ON(er.parent = e.id) WHERE e.class='Product' AND er.child = '" . mysql_real_escape_string($EntityID) . "' and (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+		
+		/*
 		$res = mysql_query($query) or die('Bad SQL query getting products from entity company in IT');
 		if($res)
 		{
@@ -2542,23 +2543,10 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 				$products[] = $row['id'];
 			}
 		}
-		/*
-		$query = "SELECT DISTINCT trial from entity_trials where  entity IN ('" . implode("','", $products) . "') ";
-		$res = mysql_query($query) or die('Bad SQL query getting trials from entity products in IT');
-		
-		if($res)
-		{
-			while($row = mysql_fetch_array($res))
-			{
-				$trials[] = $row['trial'];
-			}
-		}
-		if(empty($trials)) return $Investigators;
 		*/
-		//$query = "SELECT DISTINCT entity from entity_trials where trial IN ('".implode("','",$trials)."') and entity in (select id from entities where class='Investigator') ";
 		$query = "SELECT DISTINCT et1.entity from entity_trials et1 
 		JOIN entities e on (e.id=et1.entity)
-		JOIN entity_trials et2 on et1.trial=et2.trial and et2.entity IN ('".implode("','",$products)."') and e.class='Investigator' ";
+		JOIN entity_trials et2 on et1.trial=et2.trial and et2.entity IN ( ". $query . ") and e.class='Investigator' ";
 		
 		$res = mysql_query($query) or die('Bad SQL query getting investigators from Company id in Investigator Tracker');
 		
@@ -2572,8 +2560,13 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 			$Investigators[] = $row['entity'];
 		}
 	}
-
-		return array_filter(array_unique($Investigators));
+		if($returnquery)
+		{
+			$Ids=array_filter(array_unique($Investigators));
+			return( array('query'=>$query,'Ids'=>$Ids) );
+		}
+		else
+			return array_filter(array_unique($Investigators));
 	
 }
 

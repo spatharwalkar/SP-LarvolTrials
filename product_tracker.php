@@ -356,6 +356,11 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 				$impArr=implode("','", $arrDiseaseIds);
 				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity` IN ('" .  $impArr ."')";
 			}
+			else if($TrackerType=='IMPT')
+			{
+				
+				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'  and dt.larvol_id in (select trial from entity_trials where entity=" .$OptionArray['InvestigatorId']  ." )";
+			}
 			else
 			{
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'";
@@ -1280,7 +1285,12 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		$row = $incr;
 		
 		if($TrackerType != 'PTH')
-		$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
+		{
+			if(isset($TrackerType) & $TrackerType == 'IMPT')
+				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
+			else
+				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
+		}
 		else
 		$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 		
@@ -1844,9 +1854,14 @@ function Download_reports()
 			if(isset($data_matrix[$row]['productIds']) && $data_matrix[$row]['productIds'] != NULL && !empty($entity2Id))
 			{
 				if($TrackerType != 'PTH')
-				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
+				{
+					if(isset($TrackerType) & $TrackerType == 'IMPT')
+						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
+					else
+						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
+				}
 				else
-				$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+					$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 				
 				if($TrackerType != 'PTH')
 					$procommonPart1 = 'product.php?e1=' . $data_matrix[$row]['productIds'];
@@ -2236,9 +2251,14 @@ function Download_reports()
 			$Place_Y = $pdf->GetY();
 			
 			if($TrackerType != 'PTH')
-			$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
+				{
+					if(isset($TrackerType) & $TrackerType == 'IMPT')
+						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
+					else
+						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
+				}
 			else
-			$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
+				$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['productIds'];
 			
 			if($TrackerType != 'PTH')
 				$procommonPart1 = 'product.php?e1=' . $data_matrix[$row]['productIds'];

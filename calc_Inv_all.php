@@ -9,7 +9,8 @@ $data=array();$isactive=array();$instype=array();$ldate=array();$phases=array();
 $DC_ids=array();
 
 	$query = 'select id from entities where class="Investigator" ';
-	
+	if($_REQUEST['id'])
+		$query = 'select id from entities where class="Investigator" and id = "'. $_REQUEST['id'] . '"' ;
 	$res = mysql_query($query);
 		if($res === false)
 		{

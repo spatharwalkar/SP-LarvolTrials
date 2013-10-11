@@ -277,7 +277,7 @@ else
 	else if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATPT')
 		print showProductTracker($MoaId, $dwcount, 'DISCATPT', $page, $OptionArray);	//DISCATPT :DISEASE CATEGORY PRODUCT TRACKER  //DCMPT= DISEASE CATEGORY MOA PRODUCT TRACKER
 	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'IMPT')
-		print showProductTracker($MoaId, $dwcount, 'IMPT', $page, $OptionArray);	//CIPT - COMPANY INVESTIGATOR PRODUCT TRACKER
+		print showProductTracker($MoaId, $dwcount, 'IMPT', $page, $OptionArray);	//IMPT - INVESTIGATOR MOA PRODUCT TRACKER
 	
 	else
 		print showProductTracker($MoaId, $dwcount, 'MPT', $page, $OptionArray);	//MPT= MOA PRODUCT TRACKER 	
