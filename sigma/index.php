@@ -181,7 +181,8 @@
 							 "MOA"		  	  => array("url"=>"index.php?class=MOA","name"=>"Mechanisms of Action"),
 							 "Disease"	  	  => array("url"=>"index.php?class=Disease","name"=>"Diseases"),
 							 "Product"	  	  => array("url"=>"index.php?class=Product", "name"=>"Products"),				
-							 "Investigator"	  => array("url"=>"index.php?class=Investigator", "name"=>"Investigators")
+							 "Investigator"	  => array("url"=>"index.php?class=Investigator", "name"=>"Investigators"),
+"Disease_Category"	  => array("url"=>"index.php?class=Disease_Category", "name"=>"Disease Categories")
 							);
 		
 		if($globalOptions['class'] == 'MOA')	//IN CASE OF MOA  - GET MOA ID AS WELL WHO DOES NOT HAVE CATEGORY OR has Other Category
@@ -227,6 +228,8 @@
 		
 		if($globalOptions['class'] == 'Institution')
 			$globalOptions['classType'] = 'Companies';
+		elseif($globalOptions['class'] == 'Disease_Category')
+			$globalOptions['classType'] = 'Disease Categories';
 		else
 			$globalOptions['classType'] = $globalOptions['class'].'s';
 	}
@@ -235,7 +238,7 @@
 $meta_title = "Larvol Sigma";
 if(isset($_GET['class'])) {
 	$class=strtolower($_GET['class']);
-	$meta_titles_arr = array('institution' => 'List of Companies', 'product' => 'Products', 'moa' => 'Mechanisms of Action', 'disease' => 'Disease List', 'investigator' => 'List of Investigators');
+	$meta_titles_arr = array('institution' => 'List of Companies', 'product' => 'Products', 'moa' => 'Mechanisms of Action', 'disease' => 'Disease List', 'investigator' => 'List of Investigators','disease_category'=>'Disease Category List');
 	$meta_title = (isset($meta_titles_arr[$class]) ? $meta_titles_arr[$class].' : ' : '').$meta_title;
 } else if(isset($_REQUEST['TzSearch']) && $_REQUEST['TzSearch'] != '') {
 	$meta_title = $_REQUEST['TzSearch'].' : '.$meta_title;
@@ -480,9 +483,14 @@ if($ClassFlg)
 	print '<a href="index.php?class='.$globalOptions['class'].'" style="background-color: #4f2683; color:#FFFFFF;">All</a>';
 	else
 	print '<a href="index.php?class='.$globalOptions['class'].'">All</a>';
-	
-	print '			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></td>
-				</tr>
+
+	if('Disease' == $globalOptions['class'])
+		print '&nbsp;&nbsp;<a href="index.php?class=Disease_Category">View Disease Categories</a></div></td>';
+	elseif('Disease_Category' == $globalOptions['class'])
+		print '&nbsp;&nbsp;<a href="index.php?class=Disease">View Individual Diseases</a></div></td>';
+	else 
+		print '			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></td>';
+	print '</tr>
 			</table><br/>';
 }
 ?>
@@ -490,11 +498,13 @@ if($ClassFlg)
 <!-- Displaying Records -->
 <br/>
 <?php
+
 	foreach($CurrentPageResultArr as $index=> $data)
 	{
 		if($DataArray[$index]['id'] != '' && $DataArray[$index]['id'] != '' && $FoundRecords > 0)
 		{
-			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category' || $DataArray[$index]['type'] == 'Investigator')	// avoid displying row for other types
+
+			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category' || $DataArray[$index]['type'] == 'Investigator' || $DataArray[$index]['type'] == 'Disease_Category')	// avoid displying row for other types
 			{
 				print'<table width="100%" border="0" cellspacing="0" cellpadding="0">
 						<tr>
@@ -514,6 +524,8 @@ if($ClassFlg)
 					$ProdRelateCompany = GetCompanyNames($DataArray[$index]['id']);
 					print ' 		<a href="product.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" ><b>'.$DataArray[$index]['name'] . '</b>' . ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'') .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
 				}
+				else if($DataArray[$index]['type'] == 'Disease_Category')
+						print ' 		<a href="disease_category.php?DiseaseCatId='. trim($DataArray[$index]['id']) .'" title="Disease Category" >'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDiseaseCat(trim($DataArray[$index]['id'])).' Products)';
 				else if($DataArray[$index]['type'] == 'Disease')
 						print ' 		<a href="disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" >'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDisease(trim($DataArray[$index]['id'])).' Products)';
 				else if($DataArray[$index]['type'] == 'MOA_Category')
@@ -716,6 +728,22 @@ function GetProductsCountFromMOACat($moaCatID)
 		$ProductsCount = $row['proCount'];
 	}
 	return $ProductsCount;
+}
+/* Function to get Product count from Disease category id */
+function GetProductsCountFromDiseaseCat($DiseaseCatID){
+	global $db;
+	global $now;
+	$ProductsCount = 0;
+	$query = "SELECT count(Distinct(e.`id`)) as productCount FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent` in(SELECT child FROM `entity_relations` WHERE parent =".mysql_real_escape_string($DiseaseCatID).") AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		$productsCount = $row['productCount'];
+	}
+	return $productsCount;
+
 }
 
 /* Function to get Product count from Disease id */
