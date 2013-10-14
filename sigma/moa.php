@@ -221,31 +221,30 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				
 				if($tab == 'diseasetrac') {  
-				print '<td><img id="DiseaseImg" src="../images/firstSelectTab.png" /></td>
-				<td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td>
-				<td><img id="MoaImg" src="../images/selectTabConn.png" /></td>
+				print '<td><img id="MoaImg" src="../images/firstTab.png" /></td>
 				<td id="moaTab" class="Tab">'. $moaLinkName .'</td>
-				<td><img id="lastImg" src="../images/afterTab.png" /></td> 
+				<td><img id="DiseaseImg" src="../images/middleTab.png" /></td>
+				<td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td>
+				<td><img id="lastImg" src="../images/selectTabConn.png" /></td> 
 				<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
 				<td><img id="lastImg" src="../images/lastTab.png" /></td>';
 				 } else if($tab == 'moa') { 
-				print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td>
-				<td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td>
-				<td><img id="MoaImg" src="../images/middleTab.png" /></td>
+				print '<td><img id="MoaImg" src="../images/firstSelectTab.png" /></td>
 				<td id="moaTab" class="selectTab">'. $moaLinkName .'</td>
-				</td>
-				<td><img id="lastImg" src="../images/selectTabConn.png" /></td>
+				<td><img id="DiseaseImg" src="../images/selectTabConn.png" /></td>
+				<td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td>
+				<td><img id="lastImg" src="../images/afterTab.png" /></td> 
 				<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
 				<td><img id="lastImg" src="../images/lastTab.png" /></td>';
 				// print '<td><img id="MoaImg" src="images/firstSelectTab.png" /></td><td id="moaTab" class="selectTab">'. $moaLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
 				 }  else if($tab == 'investigatortrac') { 
-				print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td>
-				<td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td>
-				<td><img id="MoaImg" src="../images/afterTab.png" /></td>
+				print '<td><img id="MoaImg" src="../images/firstTab.png" /></td>
 				<td id="moaTab" class="Tab">'. $moaLinkName .'</td>
-				<td><img id="lastImg" src="../images/middleTab.png" /></td>
-	 			<td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
-	 			<td><img id="lastImg" src="../images/selectLastTab.png" /></td>';
+				<td><img id="DiseaseImg" src="../images/afterTab.png" /></td>
+				<td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td>
+				<td><img id="lastImg" src="../images/middleTab.png" /></td> 
+				<td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
+				<td><img id="lastImg" src="../images/selectLastTab.png" /></td>';
 				// print '<td><img id="MoaImg" src="images/firstSelectTab.png" /></td><td id="moaTab" class="selectTab">'. $moaLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
 				 } 
 	print	'            
