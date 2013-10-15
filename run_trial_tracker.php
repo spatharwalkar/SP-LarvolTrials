@@ -6581,7 +6581,8 @@ class TrialTracker
 			$upmTitle = htmlformat($value['event_description']);
 			
 			$upmBorderLeft = '';
-			if(isset($value['edited']) && $value['edited']['field'] == 'start_date')
+			//if(isset($value['edited']) && $value['edited']['field'] == 'start_date')
+			if(isset($value['edited']) && !empty($value['edited']['start_date'])) 
 			{
 				$upmBorderLeft = 'startdatehighlight';
 			}
@@ -6618,7 +6619,8 @@ class TrialTracker
 			//field upm event description
 			$title = '';
 			$attr = '';	
-			if(isset($value['edited']) && ($value['edited']['field'] == 'event_description')) 
+			//if(isset($value['edited']) && ($value['edited']['field'] == 'event_description')) 
+			if(isset($value['edited']) && !empty($value['edited']['event_description'])) 
 			{
 				$titleLinkColor = 'style="color:#FF0000;"';
 				$attr = ' highlight'; 
@@ -6632,7 +6634,8 @@ class TrialTracker
 					$title = ' title="No Previous value" ';
 				}
 			} 
-			else if(isset($value['edited']) && ($value['edited']['field'] == 'event_link')) 
+			//else if(isset($value['edited']) && ($value['edited']['field'] == 'event_link')) 
+			elseif(isset($value['edited']) && !empty($value['edited']['event_link'])) 
 			{
 				$titleLinkColor = 'style="color:#FF0000;"';
 				$attr = ' highlight'; 
@@ -6676,7 +6679,8 @@ class TrialTracker
 			//field upm event type
 			$title = '';
 			$attr = '';	
-			if(isset($value['edited']) && ($value['edited']['field'] == 'event_type')) 
+			//if(isset($value['edited']) && ($value['edited']['field'] == 'event_type')) 
+			if(isset($value['edited']) && !empty($value['edited']['event_type'])) 
 			{
 
 				$attr = ' highlight'; 
@@ -6701,7 +6705,8 @@ class TrialTracker
 			$attr = '';	
 			$upmBorderRight = '';
 			
-			if(isset($value['edited']) && ($value['edited']['field'] == 'end_date'))
+			//if(isset($value['edited']) && ($value['edited']['field'] == 'end_date'))
+			if(isset($value['edited']) && !empty($value['edited']['end_date'])) 
 			{
 				$attr = ' highlight';
 				$upmBorderRight = 'border-right-color:red;';
@@ -6715,7 +6720,8 @@ class TrialTracker
 					$title = ' title="No Previous value" ';
 				}
 			} 
-			else if(isset($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
+			//else if(isset($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
+			elseif(isset($value['edited']) && !empty($value['edited']['end_date_type'])) 
 			{
 				$attr = ' highlight';
 				if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
@@ -6757,7 +6763,8 @@ class TrialTracker
 					$value['result_link'] = NULL;
 				}
 							
-				if((isset($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
+				//if((isset($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
+				if((isset($value['edited']) && !empty($value['edited']['result_link'])) ||  ($value['new'] == 'y'))  
 						$imgColor = 'red';
 				else 
 					$imgColor = 'black'; 
@@ -10208,7 +10215,7 @@ class TrialTracker
 		
 		$query = "SELECT `id`, `field`, `old_value`, MAX(`change_date`) AS change_date FROM `upm_history` "
 					. " WHERE `id` IN ('" . implode("','", $upmIds) . "') AND (CAST(`change_date` AS DATE) <= '" . $endRange . "' AND "
-					. " CAST(`change_date` AS DATE) >= '" . $startRange . "') GROUP BY `id` ";
+					. " CAST(`change_date` AS DATE) >= '" . $startRange . "') GROUP BY `id`,`field` ORDER BY `change_date` desc ";
 		$res = m_query(__LINE__,$query);
 		if($res)
 		{
@@ -13314,7 +13321,8 @@ class TrialTracker
 			$upmTitle = htmlformat($value['event_description']);
 			
 			$upmBorderLeft = '';
-			if(isset($value['edited']) && $value['edited']['field'] == 'start_date')
+			//if(isset($value['edited']) && $value['edited']['field'] == 'start_date')
+			if(isset($value['edited']) && !empty($value['edited']['start_date'])) 
 			{
 				$upmBorderLeft = 'startdatehighlight';
 			}
@@ -13362,7 +13370,7 @@ class TrialTracker
 			//field upm event description
 			$title = '';
 			$attr = '';	
-			if(isset($value['edited']) && ($value['edited']['field'] == 'event_description')) 
+			if(isset($value['edited']) && !empty($value['edited']['event_description'])) 
 			{
 				$titleLinkColor = 'style="color:#FF0000;"';
 				$attr = ' highlight'; 
@@ -13376,7 +13384,7 @@ class TrialTracker
 					$title = ' title="No Previous value" ';
 				}
 			} 
-			else if(isset($value['edited']) && ($value['edited']['field'] == 'event_link')) 
+			else if(isset($value['edited']) && !empty($value['edited']['event_link'])) 
 			{
 				$titleLinkColor = 'style="color:#FF0000;"';
 				$attr = ' highlight'; 
@@ -13421,9 +13429,9 @@ class TrialTracker
 			//field upm event type
 			$title = '';
 			$attr = '';	
-			if(isset($value['edited']) && ($value['edited']['field'] == 'condition')) 
+			//if(isset($value['edited']) && ($value['edited']['field'] == 'condition')) 
+			if(isset($value['edited']) && !empty($value['edited']['condition'])) 
 			{
-
 				$attr = ' highlight'; 
 				if($value['edited']['condition'] != '' && $value['edited']['condition'] !== NULL)
 				{
@@ -13446,7 +13454,8 @@ class TrialTracker
 			$attr = '';	
 			$upmBorderRight = '';
 			
-			if(isset($value['edited']) && ($value['edited']['field'] == 'end_date'))
+			//if(isset($value['edited']) && ($value['edited']['field'] == 'end_date'))
+			if(isset($value['edited']) && !empty($value['edited']['end_date'])) 
 			{
 				$attr = ' highlight';
 				$upmBorderRight = 'border-right-color:red;';
@@ -13460,7 +13469,8 @@ class TrialTracker
 					$title = ' title="No Previous value" ';
 				}
 			} 
-			else if(isset($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
+			//else if(isset($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
+			elseif(isset($value['edited']) && !empty($value['edited']['end_date_type'])) 
 			{
 				$attr = ' highlight';
 				if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
@@ -13502,7 +13512,8 @@ class TrialTracker
 					$value['result_link'] = NULL;
 				}
 							
-				if((isset($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
+				//if((isset($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
+				if((isset($value['edited']) && !empty($value['edited']['result_link']))  || ($value['new'] == 'y')) 
 						$imgColor = 'red';
 				else 
 					$imgColor = 'black'; 
