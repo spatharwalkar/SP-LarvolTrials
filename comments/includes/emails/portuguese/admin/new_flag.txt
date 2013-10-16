@@ -1,0 +1,19 @@
+﻿Olá,
+
+Um novo comentário foi relatado na página [page reference], localizada no seguinte endereço:
+[page url]
+
+O comentário relatado foi feito por [poster] e é o seguinte:
+
+************************
+
+[comment]
+
+************************
+
+E este é o link para seu Painel de Administração:
+[admin link]
+
+Obrigado,
+
+[signature]

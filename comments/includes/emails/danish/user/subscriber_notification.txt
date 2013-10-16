@@ -1,0 +1,19 @@
+﻿Hej [name],
+
+Der er blevet indsendt en ny kommentar på siden [page reference]:
+[page url]
+
+Kommentaren er indsendt af [poster], her er kommentaren:
+
+************************
+
+[comment]
+
+************************
+
+Hvis du ikke længere vil modtage besked om nye kommentarer, kan du afmelde ved at klikke her:
+[unsubscribe link]
+
+Venligst,
+
+[signature]

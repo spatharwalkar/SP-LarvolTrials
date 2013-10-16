@@ -1,0 +1,13 @@
+﻿Hej [name],
+
+Du har bedt om at modtage besked om nye kommentarer på siden [page reference]:
+[page url]
+
+Bekræft ved at klikke på linket nedenfor:
+[confirmation link]
+
+Hvis du ikke har bedt om at modtage besked om nye kommentaret, skal du ikke gøre noget. Du vil ikke modtage flere mails som denne, medmindre du bekræfter.
+
+Venligst,
+
+[signature]

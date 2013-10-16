@@ -1227,6 +1227,161 @@ CREATE TABLE `li_login` (
   PRIMARY KEY (`ip`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
+CREATE TABLE `commentics_bans` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(250) NOT NULL DEFAULT '',
+  `reason` varchar(250) NOT NULL DEFAULT '',
+  `unban` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_version` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `version` varchar(10) NOT NULL DEFAULT '',
+  `type` varchar(250) NOT NULL DEFAULT '',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_attempts` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(250) NOT NULL DEFAULT '',
+  `amount` int(10) unsigned NOT NULL DEFAULT '0',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_viewers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_agent` varchar(250) NOT NULL DEFAULT '',
+  `ip_address` varchar(250) NOT NULL DEFAULT '',
+  `page_reference` varchar(250) NOT NULL DEFAULT '',
+  `page_url` varchar(1000) NOT NULL DEFAULT '',
+  `timestamp` int(50) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_reporters` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `comment_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `ip_address` varchar(250) NOT NULL DEFAULT '',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_admins` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(250) NOT NULL DEFAULT '',
+  `password` varchar(250) NOT NULL DEFAULT '',
+  `email` varchar(250) NOT NULL DEFAULT '',
+  `ip_address` varchar(250) NOT NULL DEFAULT '',
+  `cookie_key` varchar(250) NOT NULL DEFAULT '',
+  `detect_admin` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `detect_method` varchar(250) NOT NULL DEFAULT 'both',
+  `receive_email_new_ban` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `receive_email_new_comment_approve` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `receive_email_new_comment_okay` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `receive_email_new_flag` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `login_attempts` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `resets` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `last_login` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `restrict_pages` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `allowed_pages` text NOT NULL,
+  `is_super` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `is_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_comments` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) NOT NULL DEFAULT '',
+  `email` varchar(250) NOT NULL DEFAULT '',
+  `website` varchar(250) NOT NULL DEFAULT '',
+  `town` varchar(250) NOT NULL DEFAULT '',
+  `country` varchar(250) NOT NULL DEFAULT '',
+  `rating` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `reply_to` int(10) unsigned NOT NULL DEFAULT '0',
+  `comment` text NOT NULL,
+  `reply` text NOT NULL,
+  `ip_address` varchar(250) NOT NULL DEFAULT '',
+  `page_id` int(10) NOT NULL DEFAULT '0',
+  `is_approved` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `approval_reasoning` text NOT NULL,
+  `is_admin` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `is_sent` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `sent_to` int(10) unsigned NOT NULL DEFAULT '0',
+  `likes` int(10) unsigned NOT NULL DEFAULT '0',
+  `dislikes` int(10) unsigned NOT NULL DEFAULT '0',
+  `reports` int(10) unsigned NOT NULL DEFAULT '0',
+  `is_sticky` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `is_locked` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `is_verified` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_questions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `question` varchar(250) NOT NULL DEFAULT '',
+  `answer` varchar(250) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_access` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `admin_id` int(10) unsigned NOT NULL DEFAULT '1',
+  `username` varchar(250) NOT NULL DEFAULT '',
+  `ip_address` varchar(250) NOT NULL DEFAULT '',
+  `page` varchar(250) NOT NULL DEFAULT '',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_subscribers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(250) NOT NULL DEFAULT '',
+  `email` varchar(250) NOT NULL DEFAULT '',
+  `page_id` int(10) NOT NULL DEFAULT '0',
+  `token` varchar(20) NOT NULL DEFAULT '',
+  `is_confirmed` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_pages` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `identifier` varchar(250) NOT NULL DEFAULT '',
+  `reference` varchar(250) NOT NULL DEFAULT '',
+  `url` varchar(1000) NOT NULL DEFAULT '',
+  `is_form_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_settings` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `category` varchar(250) NOT NULL DEFAULT '',
+  `title` varchar(250) NOT NULL DEFAULT '',
+  `value` varchar(250) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=341 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_logins` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `commentics_voters` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `comment_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `ip_address` varchar(250) NOT NULL DEFAULT '',
+  `dated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 ALTER TABLE `products_moas`
   ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;

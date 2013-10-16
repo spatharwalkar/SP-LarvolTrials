@@ -1,0 +1,18 @@
+﻿Pozdravljeni [name],
+
+Novi komentar je objavljen na stranici [page reference], nalazi se na sljedećem adresu:
+[page url]
+
+Komentar je objavio [poster] i bio kako slijedi:
+
+************************
+
+[comment]
+
+************************
+
+Da biste otkazali pretplatu, možete odjaviti klikom ovdje:
+[unsubscribe link]
+
+Pozdrav,
+

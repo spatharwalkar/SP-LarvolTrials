@@ -1,0 +1,11 @@
+﻿Hello,
+
+A new user, with the IP address [ip address], has been banned for the following reason:
+[ban reasoning]
+
+Here is the link to your admin panel:
+[admin link]
+
+Regards,
+
+[signature]

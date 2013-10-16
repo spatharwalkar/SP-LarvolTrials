@@ -1,10 +1,4 @@
 <?php
-//initiate logging actions
-require_once dirname(__FILE__).'/log4php/Logger.php';
-Logger::configure(dirname(__FILE__).'/setup/log.properties');
-$logger = Logger::getLogger('tlg');
-//	
-
 //failsafe settings array just in case settings array fails to load or values are missing.
 $settingsFailSafe = array(
 	'DB_SERVER'=>'127.0.0.1',
@@ -26,7 +20,8 @@ $settingsFailSafeKeys = array_keys($settingsFailSafe);
 $settingsArray = parse_ini_file('setup/settings.ini');
 if($settingsArray===false || !is_array($settingsArray) || count($settingsArray)<1)
 {
-	$logger->error('Settings.ini parsing failed.Loading values from settings_temp.ini Loading values from failsafe array.');
+	if(isset($logger))
+		$logger->error('Settings.ini parsing failed.Loading values from settings_temp.ini Loading values from failsafe array.');
 	foreach($settingsFailSafe as $settings=>$value)
 	{
 		define($settings,$value);
@@ -38,7 +33,8 @@ else
 	$extraFailSafe = array_diff($settingsFailSafeKeys,$settingsArrayKeys);
 	foreach($extraFailSafe as $extraFailSafeKey)
 	{
-		$logger->warn('Settings.ini failed to load the essential data for '.$extraFailSafeKey.'. Loading the data from fail safe array.');
+		if(isset($logger))
+			$logger->warn('Settings.ini failed to load the essential data for '.$extraFailSafeKey.'. Loading the data from fail safe array.');
 		$settingsArray[$extraFailSafeKey] = $settingsFailSafe[$extraFailSafeKey];
 	}
 	foreach($settingsArray as $settings=>$value)

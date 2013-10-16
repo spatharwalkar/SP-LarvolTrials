@@ -1,0 +1,13 @@
+The server must have:
+
+    * PHP 5.2 or higher
+    * MySQL 5.0.7 or higher
+    * Apache
+
+The server should have:
+
+    * cURL
+
+The server should not have:
+
+    * Magic Quotes

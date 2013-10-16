@@ -1,0 +1,19 @@
+﻿Hello,
+
+A new comment has been flagged on the page [page reference], located at the following address:
+[page url]
+
+The flagged comment was made by [poster] and was as follows:
+
+************************
+
+[comment]
+
+************************
+
+Here is the link to your admin panel:
+[admin link]
+
+Regards,
+
+[signature]

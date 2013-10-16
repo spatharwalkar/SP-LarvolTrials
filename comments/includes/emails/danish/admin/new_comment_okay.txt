@@ -1,0 +1,21 @@
+﻿Hej,
+
+En ny kommentar er blevet indsendt på siden [page reference] på denne adresse:
+[page url]
+
+Kommentaren er skrevet af [poster] og kommer her:
+
+************************
+
+[comment]
+
+************************
+
+Kommentaren kræver ikke godkendelse.
+
+Her er et link til din administratorside:
+[admin link]
+
+Hilsen,
+
+[signature]

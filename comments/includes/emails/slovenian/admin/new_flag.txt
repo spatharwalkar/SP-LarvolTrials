@@ -1,0 +1,19 @@
+﻿Pozdravljeni,
+
+en izmed komentarjev na strani [page reference] je bil z zastavico označen kot neprimeren:
+[page url]
+
+Označeni komentar je dodal [poster] in ima sledečo vsebino:
+
+************************
+
+[comment]
+
+************************
+
+Link do vaše nadzorne plošče:
+[admin link]
+
+Lep pozdrav,
+
+[signature]

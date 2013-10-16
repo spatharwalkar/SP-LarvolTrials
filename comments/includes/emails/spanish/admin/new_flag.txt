@@ -1,0 +1,19 @@
+﻿Hola,
+
+Un nuevo comentario ha sido remarcado en la página [page reference], localizada en la siguiente dirección web:
+[page url]
+
+El comentario remarcado ha sido publicado por [poster] y dice lo siguiente:
+
+************************
+
+[comment]
+
+************************
+
+Este es el enlace a su panel de administración:
+[admin link]
+
+Saludos,
+
+[signature]

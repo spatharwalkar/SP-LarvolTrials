@@ -1,0 +1,19 @@
+﻿Hallo,
+
+Een bericht is gerapporteerd op de pagina [page reference], gevonden op het volgende adres:
+[page url]
+
+Het gerapporteerde bericht was gemaakt door [poster] en bevat het volgende:
+
+************************
+
+[comment]
+
+************************
+
+Hier is de link naar je admin panel:
+[admin link]
+
+Met vriendelijke groet,
+
+[signature]

@@ -1,0 +1,19 @@
+﻿Hallo [name],
+
+Es wurde ein neuer Kommentar auf der Seite [page reference], mit folgender Adresse:
+[page url]
+
+Der Kommentar wurde von [poster] mit folgendem Inhalt erstellt:
+
+************************
+
+[comment]
+
+************************
+
+Um Ihr Abonnement zu kündigen, können Sie, indem Sie hier abmelden:
+[unsubscribe link]
+
+Aufrichtig,
+
+[signature]

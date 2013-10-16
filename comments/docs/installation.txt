@@ -1,0 +1,11 @@
+INSTALLATION (detailed guide at commentics.org/wiki)
+
+1. Download and unzip the programme.
+2. Create a database for Commentics on your server.
+3. Open /comments/includes/db/details.php and enter your database details.
+4. Upload the programme (comments folder) to your website root.
+5. Change the permissions of http://www.domain.com/comments/includes/db/details.php to 444.
+6. Rename the admin folder http://www.domain.com/comments/admin/
+7. Run the installer http://www.domain.com/comments/installer/
+
+In the future, to access the admin panel, go to http://www.domain.com/comments/renamed_admin/

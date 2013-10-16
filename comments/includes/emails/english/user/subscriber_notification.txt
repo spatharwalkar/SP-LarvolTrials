@@ -1,0 +1,19 @@
+﻿Hello [name],
+
+A new comment has been posted on the page [page reference], located at the following address:
+[page url]
+
+The comment was made by [poster] and was as follows:
+
+************************
+
+[comment]
+
+************************
+
+To cancel your subscription, you may unsubscribe by clicking here:
+[unsubscribe link]
+
+Regards,
+
+[signature]

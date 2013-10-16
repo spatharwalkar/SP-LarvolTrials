@@ -1,0 +1,19 @@
+﻿Hola [name],
+
+Un nuevo comentario ha sido publicado en la página [page reference], localizada en la siguiente dirección web:
+[page url]
+
+El comentario ha sido publicado por [poster] y dice lo siguiente:
+
+************************
+
+[comment]
+
+************************
+
+Para cancelar su suscripción, puede cancelar la suscripción haciendo clic aquí:
+[unsubscribe link]
+
+Saludos,
+
+[signature]

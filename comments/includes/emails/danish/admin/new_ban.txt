@@ -1,0 +1,11 @@
+﻿Hej,
+
+En ny bruger med IP-adressem [ip address] er blevet spærret af fordi:
+[ban reasoning]
+
+Her er et link til din administratorside:
+[admin link]
+
+Hilsen,
+
+[signature]

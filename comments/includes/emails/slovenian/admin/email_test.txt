@@ -1,0 +1,12 @@
+﻿Pozdravljeni,
+
+to je testno sporočilo, ki je bilo nastavljeno na nadzorni strani 'Settings -> Email -> Setup'.
+
+Če ste to sporočilo prejeli pomeni, da so 'Commentics' e-poštne nastavitve pravilne.
+
+Tu je link do vaše Admin nadzorne strani:
+[admin link]
+
+pozdrav,
+
+[signature]

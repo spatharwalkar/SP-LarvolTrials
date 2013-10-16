@@ -1,0 +1,19 @@
+﻿Bonjour [name],
+
+Un nouveau commentaire a été posté sur la page [page reference], situé à l'adresse suivante:
+[page url]
+
+Le commentaire a été faite par [poster] et se présente comme suit:
+
+************************
+
+[comment]
+
+************************
+
+Pour annuler votre abonnement, vous pouvez vous désabonner en cliquant ici:
+[unsubscribe link]
+
+Cordialement,
+
+[signature]

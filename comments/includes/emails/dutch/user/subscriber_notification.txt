@@ -1,0 +1,19 @@
+﻿Hallo [name],
+
+Een nieuw bericht is geplaatst op de pagina [page reference], gevonden op volgend adres:
+[page url]
+
+Het bericht is gemaakt door [poster] en bevat het volgende:
+
+************************
+
+[comment]
+
+************************
+
+Als u uw abonnement wilt opzeggen, kunt u zich afmelden door hier te klikken:
+[unsubscribe link]
+
+Met vriendelijke groet,
+
+[signature]

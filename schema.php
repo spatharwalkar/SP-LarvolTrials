@@ -3,6 +3,12 @@ require_once('settings.php');
 require_once('class.dbsync.php');
 require_once 'include.util.php';
 ini_set('max_execution_time','360000');	//100 hours
+
+//initiate logging actions
+require_once dirname(__FILE__).'/log4php/Logger.php';
+Logger::configure(dirname(__FILE__).'/setup/log.properties');
+$logger = Logger::getLogger('tlg');
+
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>

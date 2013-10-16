@@ -1,0 +1,23 @@
+INTEGRATION (detailed guide at commentics.org/wiki)
+
+Add the following to the very top of your page:
+
+<?php
+session_start();
+ob_start();
+?>
+
+Add the following inside the head tag of your page:
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link rel="stylesheet" type="text/css" href="comments/css/stylesheet.css"/>
+
+Add the following inside the body tag of your page:
+
+<?php
+$cmtx_identifier = '1';
+$cmtx_reference = 'Page One';
+$cmtx_path = 'comments/';
+define('IN_COMMENTICS', 'true'); //no need to edit this line
+require $cmtx_path . 'includes/commentics.php'; //no need to edit this line
+?>

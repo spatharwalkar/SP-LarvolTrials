@@ -1,0 +1,12 @@
+﻿Dobrodošli,
+
+ovo je testni mejl, koji je bio podešen na Admin stranici 'Settings -> Email -> Setup'.
+
+Ako je ovaj mejl stigao znači, da su 'Commentics' e-mail parametri korektno podešeni.
+
+Ovdje se nalazi link do vaše nadzorne ploče:
+[admin link]
+
+Pozdrav,
+
+[signature]

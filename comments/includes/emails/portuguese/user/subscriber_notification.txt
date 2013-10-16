@@ -1,0 +1,19 @@
+﻿Olá [name],
+
+Um novo comentário foi postado na página [page reference], localizada no seguinte endereço:
+[page url]
+
+O comentário foi feito por [poster] e é o seguinte:
+
+************************
+
+[comment]
+
+************************
+
+Para cancelar sua assinatura, você pode cancelar a assinatura, clicando aqui:
+[unsubscribe link]
+
+Obrigado,
+
+[signature]

@@ -1,0 +1,19 @@
+﻿Hallo,
+
+Ein neuer Kommentar wurde auf der Seite ausgeflaggt [page reference], mit folgender Adresse:
+[page url]
+
+Die Flagge Kommentar wurde erstellt von [poster] mit folgendem Inhalt erstellt:
+
+************************
+
+[comment]
+
+************************
+
+Hier der direkte Link zum Admin-Panel:
+[admin link]
+
+Aufrichtig,
+
+[signature]
