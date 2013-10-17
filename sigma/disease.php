@@ -27,11 +27,7 @@
 		if(isset($_REQUEST['dwcount']))
 			$dwcount = $_REQUEST['dwcount'];
 		else
-			$dwcount = 'total';				
-		if(isset($_REQUEST['dwIcount']))
-			$dwcount = $_REQUEST['dwIcount'];
-		else
-			$dwcount = 'total';				
+			$dwcount = 'total';		
 	}
 	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 	{
@@ -334,25 +330,39 @@
 			<td align="center">
 				<div id="diseaseTab_content" align="center">             
 					
-					<?php if($tab == 'Products') 
-					{
-					chdir ("..");
-					print '<div id="Products" align="center">'.showProductTracker($DiseaseId, $dwcount, 'DPT', $page).'</div>'; //DPT=DISEASE PRODUCT TRACKER 
-					chdir ("$cwd");
-					}
-					?>
-					<?php if($tab == 'Investigators') print '<div id="Investigators" align="center">'.showInvestigatorTracker($DiseaseId, $dwcount, 'DIT', $page).'</div>'; //DIT=DISEASE INVESTIGATOR TRACKER ?>
+					<?php
 					
-					<?php if($tab == 'Companies') print '<div id="Companies" align="center">'.showCompanyTracker($DiseaseId, 'DCT', $page).'</div>'; //DCT=DISEASE COMPANY TRACKER ?>
-					<?php if($tab == 'MOAs') print '<div id="MOAs" align="center">'.showMOATracker($DiseaseId, 'DMT', $page).'</div>'; //DMT=DISEASE MOA TRACKER ?>
-					<?php 
-						if($tab == 'DiseaseOTT') { 
+					//DPT=DISEASE PRODUCT TRACKER 
+					if($tab == 'Products')
+					{
+						chdir ("..");
+						print '<div id="Products" align="center">'.showProductTracker($DiseaseId, $dwcount, 'DPT', $page).'</div>';
+						chdir ("$cwd");
+					}
+					
+					//DIT=DISEASE INVESTIGATOR TRACKER
+					if($tab == 'Investigators')
+						print '<div id="Investigators" align="center">'.showInvestigatorTracker($DiseaseId, $dwcount, 'DIT', $page).'</div>'; 
+					
+					//DCT=DISEASE COMPANY TRACKER
+					if($tab == 'Companies') 
+						print '<div id="Companies" align="center">'.showCompanyTracker($DiseaseId, 'DCT', $page).'</div>';  
+					
+					//DMT=DISEASE MOA TRACKER 
+					if($tab == 'MOAs') 
+						print '<div id="MOAs" align="center">'.showMOATracker($DiseaseId, 'DMT', $page).'</div>'; 
+					
+					if($tab == 'DiseaseOTT') { 
 						chdir ("..");
 						print '<div id="DiseaseOTT" align="center">'; DisplayOTT(); print '</div>'; 
 						chdir ("$cwd");
-						} 
+					}
+					
+					//DOHM=DISEASE ONLINE HEATMAP 
+					if($tab == 'DiseaseOHM')
+						print '<div id="DiseaseOHM" align="center">'; DisplayOHM($DiseaseId, 'DOHM').'</div>';
 					?>
-					 <?php if($tab == 'DiseaseOHM') { print '<div id="DiseaseOHM" align="center">'; DisplayOHM($DiseaseId, 'DOHM'); print '</div>'; } //DOHM=DISEASE ONLINE HEATMAP ?>
+					
 				</div>
 			</td>
 		</tr>
