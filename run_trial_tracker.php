@@ -7468,11 +7468,14 @@ class TrialTracker
 			}
 			else if(empty($resultIds['e2']))
 			{
+				global $productIds;
 				$ottType = 'indexed';
 				$tHeader = '';
+				if ($globalOptions["sourcepg"] != "TZC")
+					$productIds = $resultIds['e1'];
 				
-				$productIds = $resultIds['e1'];
 				$pDetails = $this->getProductHeaders($productIds);
+				
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
 					$pDetails['Ids'][$ikey]['area'] = '';
@@ -8211,6 +8214,10 @@ class TrialTracker
 		echo '<input type="hidden" name="sourcepg" value="TZP" />'
 				. '<input type="hidden" name="tab" value="ott" />';
 		
+		if($globalOptions['sourcepg'] == 'TZC')
+			echo '<input type="hidden" name="sourcepg" value="TZC" />'
+					. '<input type="hidden" name="tab" value="OTTtrac" />';
+		
 		$resultIds['e1'] = explode(',', trim($resultIds['e1']));
 		$resultIds['e2'] = explode(',', trim($resultIds['e2']));
 		
@@ -8227,7 +8234,7 @@ class TrialTracker
 			$Arr = $this->processNonHmParams($resultIds, $globalOptions, 'webPage');
 		}
 		
-		if(!isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
+		if(!isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP'  && $globalOptions['sourcepg'] != 'TZC')
 		$this->displayHeader($Arr['tHeader']);
 		
 		$ottType = $Arr['ottType'];
@@ -10625,7 +10632,7 @@ class TrialTracker
 				. $this->downloadOptions($count, $Values['totalcount'], $ottType, $resultIds, $globalOptions)
 				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 		}
-		if(!isset($globalOptions['DiseaseId']) && !isset($globalOptions['DiseaseCatId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP')
+		if(!isset($globalOptions['DiseaseId']) && !isset($globalOptions['DiseaseCatId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP'  && $globalOptions['sourcepg'] != 'TZC')
 		echo '<br/><br/><div style="height:50px;"></div>';
 		
 	}
@@ -11060,6 +11067,9 @@ class TrialTracker
 		
 		if($globalOptions['sourcepg'] == 'TZP')
 		$url .= '&amp;sourcepg=TZP&amp;tab=ott';
+		
+		if($globalOptions['sourcepg'] == 'TZC')
+			$url .= '&amp;sourcepg=TZC&amp;tab=OTTtrac';
 		
 		if(isset($globalOptions['startrange']))
 		{

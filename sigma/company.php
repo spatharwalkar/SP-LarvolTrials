@@ -3,6 +3,7 @@
 	chdir ("..");
 	require_once('db.php');
 	require_once('product_tracker.php');
+	require_once('intermediary.php');
 	chdir ($cwd);
 	require_once('disease_tracker.php');
 	require_once('investigators_tracker.php');
@@ -22,6 +23,21 @@
 			$dwcount = $_REQUEST['dwcount'];
 		else
 			$dwcount = 'total';					
+	} elseif($_REQUEST['e1'] != NULL && $_REQUEST['e1'] != '' && isset($_REQUEST['e1']))
+	{
+		$CompanyId = $_REQUEST['e1'];
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Institution" AND `id`=' . mysql_real_escape_string($CompanyId);
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$CompanyId = $header['id'];
+		$CompanyName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+			$CompanyName = $header['display_name'];
+		
+		if(isset($_REQUEST['dwcount']))
+			$dwcount = $_REQUEST['dwcount'];
+		else
+			$dwcount = 'total';
 	}
 	
 	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
@@ -67,14 +83,18 @@
 	
 	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'company.php?CompanyId='.$CompanyId;
+	$tabOTTUrl    = 'company.php?e1='.$CompanyId;
 	
 	if($categoryFlag == 1){
 		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($CompanyId, 'Institution' ));
 	}else{
 		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
-	}
+	}	
 	
-	$TabProductCount = count(GetProductsFromCompany($CompanyId, 'CPT', array()));
+	$productIds      = GetProductsFromCompany($CompanyId, 'CPT', array());
+	
+	$TabTrialCount = GetTrialsCountForCompany($productIds);	
+	$TabProductCount = count($productIds);
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($CompanyId, 'Institution'));
 	
 	$meta_title = 'Larvol Sigma'; //default value
@@ -225,6 +245,8 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabProductCount == 1) ? 'Product':'Products');				
 				$companyLinkName = '<a href="'.$tabCommonUrl.'&tab=company" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+				$CountExt = (($TabTrialCount == 1) ? 'Trial':'Trials');
+				$ottLinkName = '<a href="'.$tabOTTUrl.'&tab=OTTtrac&sourcepg=TZC" title="'.$TabTrialCount.' '.$CountExt.'">&nbsp;'.$TabTrialCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
 				$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';				
 
@@ -233,7 +255,9 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				<td id="CompanyTab" class="Tab">'. $companyLinkName .'</td>
 				<td><img id="DiseaseImg" src="../images/middleTab.png" /></td>
 				<td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td>
-				<td><img id="lastImg" src="../images/selectTabConn.png" /></td> 
+				<td><img id="lastImg" src="../images/selectTabConn.png" /></td>
+			        <td id="CompanyOTTTab" class="Tab">'.$ottLinkName.'</td>
+			        <td><img id="InvestigatorsImg" src="../images/afterTab.png" /></td>
 	 			<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
 	 			<td><img id="lastImg" src="../images/lastTab.png" /></td>
 				<td></td>';
@@ -243,19 +267,34 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				<td><img id="DiseaseImg" src="../images/selectTabConn.png" /></td>
 				<td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td>
 				<td><img id="lastImg" src="../images/afterTab.png" /></td> 
+			        <td id="CompanyOTTTab" class="Tab">'.$ottLinkName.'</td>
+			        <td><img id="InvestigatorsImg" src="../images/afterTab.png" /></td>
 	 			<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
 	 			<td><img id="lastImg" src="../images/lastTab.png" /></td>
 				<td></td>';
 				// print '<td><img id="CompanyImg" src="../images//firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images//selectLastTab.png" /></td><td></td>';
-				 }  else if($tab == 'investigatortrac') {
+				 }  else if($tab == 'OTTtrac') {
 				 	print '<td><img id="CompanyImg" src="../images/firstTab.png" /></td>
 				<td id="CompanyTab" class="Tab">'. $companyLinkName .'</td>
 				<td><img id="DiseaseImg" src="../images/afterTab.png" /></td>
 				<td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td>
-				<td><img id="lastImg" src="../images/middleTab.png" /></td> 
-	 			<td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
-	 			<td><img id="lastImg" src="../images/selectLastTab.png" /></td>
+		                <td><img id="lastImg" src="../images/middleTab.png" /></td>
+			        <td id="CompanyOTTTab" class="selectTab">'.$ottLinkName.'</td>
+			        <td><img id="InvestigatorsImg" src="../images/selectTabConn.png" /></td>
+				<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+	 			<td><img id="lastImg" src="../images/lastTab.png" /></td>
 				<td></td>';			 	
+				 }   else if($tab == 'investigatortrac') {
+				 	print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td>
+				 			<td id="DiseaseTab" class="Tab">'. $companyLinkName .'</td>
+				 			<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+				 			<td id="CompanyTab" class="Tab">'. $diseaseLinkName .'</td>
+				 			<td><img id="lastImg" src="../images/afterTab.png" /></td>
+		<td id="CompanyOTTTab" class="Tab">'.$ottLinkName.'</td>
+			   <td><img id="InvestigatorsImg" src="../images/middleTab.png" /></td>
+				 			<td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
+				 			<td><img id="lastImg" src="../images/selectLastTab.png" /></td>
+				 			<td></td>';				 	
 				 }
 	print	'            
 			</tr>
@@ -273,6 +312,11 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $In
 		print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag);		//CDT= COMPANY DISEASE TRACKER
 	else if($tab == 'investigatortrac')
 		print showInvestigatorTracker($CompanyId, 'CIT', $page);		//CIT= COMPANY INVESTIGATOR TRACKER
+	else if($tab == 'OTTtrac'){
+		chdir ("..");
+		DisplayOTT(); //SHOW OTT
+		chdir ("$cwd");
+	}
 	else
 		print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 	
 	print '</div>';
@@ -299,6 +343,7 @@ else
 </body>
 </html>
 <?php 
+/*
 function m_query($n,$q)
 {
 	global $logger;
@@ -310,5 +355,23 @@ function m_query($n,$q)
 	$logger->debug($log);
 	unset($log);
 	return $res;
+}*/
+
+/* Function to get Trials count from Products id */
+function GetTrialsCountForCompany($productIds)
+{
+	global $db;
+	global $now;
+	$impArr = implode("','", $productIds);	
+	$TrialsCount = 0;
+	$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity` in('" . $impArr . "')";
+	$res = mysql_query($query) or die('Bad SQL query getting trials count for Products ids in Sigma Companys Page');
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+			$TrialsCount = $row['trialCount'];
+	}
+	return $TrialsCount;
 }
 ?>
