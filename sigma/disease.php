@@ -364,7 +364,7 @@
 					
 					//DOHM=DISEASE ONLINE HEATMAP 
 					if($tab == 'DiseaseOHM')
-						print '<div id="DiseaseOHM" align="center">'; DisplayOHM($DiseaseId, 'DOHM').'</div>';
+						//print '<div id="DiseaseOHM" align="center">'; DisplayOHM($DiseaseId, 'DOHM').'</div>';
 					?>
 					
 				</div>

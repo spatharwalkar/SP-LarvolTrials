@@ -33,14 +33,11 @@ if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 function showInvestigatorTracker($id, $TrackerType, $page=1)
 {
 	$HTMLContent = '';
-	
 	if(isset($_REQUEST['dwcount']))
 		$CountType = $_REQUEST['dwcount'];
 	else
 		$CountType = 'total';
-	
 	$Return = DataGeneratorForInvestigatorTracker($id, $TrackerType, $page, $CountType);
-	
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -107,8 +104,8 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	$Report_DisplayName = NULL;
 	
 	//END DATA
-	
 	$query = "SELECT `name`, `display_name`, `id`, `class` FROM `entities` WHERE id='" . $id ."'";
+	
 	$res = mysql_query($query) or die(mysql_error());
 	$header = mysql_fetch_array($res);
 	
@@ -136,41 +133,38 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	if(!empty($Idquery))
 	{
 	// New Single query 
-	$InvestigatorQuery =
-				"SELECT distinct e.`id` AS ProdId, e.class ,et2.entity as investigator, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` 
-				FROM `rpt_masterhm_cells` rpt  JOIN `entities` e 
-				ON	( 
-						(
-							(rpt.`entity2`=e.`id`) 
-							AND e.`class` in ('Product')
-						)
-					) 
-				JOIN `entity_relations` er ON(e.`id` = er.`parent`) 
-				JOIN `entities` e2 ON(e2.`id` = er.`child`) 
-				JOIN entity_trials et1 ON (e.id=et1.entity)
-				JOIN entity_trials et2 ON (et1.trial=et2.trial && et2.entity in ( ".$Idquery." ))
-				WHERE 
-				(rpt.`count_total` > 0) 
-				AND rpt.entity1 in ( ".$Idquery." )
-				AND e2.`id` = '".$id."' 
-				AND e2.`class`='".$GobalEntityType."' 
-				AND (e.`is_active` <> '0' 
-				OR e.`is_active` IS NULL)";
-			
+				
+		
+		$InvestigatorQuery = "
+		SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type, et2.`entity` AS ProdId,  et.`entity` AS id, et.entity as investigator,e.`name` AS name, e.`display_name` AS dispname, e.class,e.`affiliation` 
+		FROM data_trials dt 
+		JOIN entity_trials et ON (dt.`larvol_id` = et.`trial` and et.entity in ('" . implode("','",$InvestigatorIds) . "') ) 
+		JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial` and et2.`entity` in (select parent from entity_relations where child ='" . $id ."')) 
+		JOIN entities e ON (et.`entity` = e.id AND e.`class` = 'Investigator') ";
+		
+		
+		//pr($InvestigatorQuery);
+		
 			$results=array();
 			//die();
 			$InvestigatorQueryResult = m_query(__LINE__,$InvestigatorQuery);//mysql_query($InvestigatorQuery) or die(mysql_error());
+			$headerinvestigator=array();
 			while ($res = @mysql_fetch_array($InvestigatorQueryResult))
 			{
 				$results[]=$res;
+				$headerinvestigator[$res['id']]=$res;
+				$NewInvestigatorIds[] = $res['id'];
 			}
-			$headerinvestigator=array();
+			
+			/*
 			$queryinvestigator = "SELECT `name`, `display_name`, `id`, `class`, affiliation FROM `entities` WHERE id  in (".$Idquery.")";
+			
 			$resinvestigator = mysql_query($queryinvestigator) or die(mysql_error());
-			while($headinv = mysql_fetch_array($resinvestigator))
+			pr( __LINE__ .'  ' .date("D M d, Y G:i:s a"));
+			*/
+			while ($headinv = @mysql_fetch_array($InvestigatorQueryResult))
 			{
-				$headerinvestigator[$headinv['id']]=$headinv;
-				$NewInvestigatorIds[] = $headinv['id'];
+				
 			}
 			$cnt=count($results);
 			$cnt1=count($NewInvestigatorIds);
@@ -182,7 +176,6 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 		$results=null;
 		$NewInvestigatorIds=null;
 	}
-	
 	
 		foreach($InvestigatorIds as $InvestigatorId)
 		{
@@ -289,7 +282,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 			}
 		
 		}
-			
+		
 		
 	}//End of Product as golbal entity
 	else if($GobalEntityType == 'Product')
@@ -2532,7 +2525,8 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 		
 	}else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA'){
 
-		$query = "SELECT DISTINCT e.id FROM entities e JOIN entity_relations er  ON(er.parent = e.id) WHERE e.class='Product' AND er.child = '" . mysql_real_escape_string($EntityID) . "' and (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+		$query = "SELECT DISTINCT parent from entity_relations where child = " . mysql_real_escape_string($EntityID) . " and parent in (select id from entities where class='Product'  and (is_active <> '0' OR is_active IS NULL)) ";
+//		$query = "SELECT DISTINCT e.id FROM entities e JOIN entity_relations er  ON(er.parent = e.id) WHERE e.class='Product' AND er.child = '" . mysql_real_escape_string($EntityID) . "' and (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 		
 		/*
 		$res = mysql_query($query) or die('Bad SQL query getting products from entity company in IT');
@@ -2544,11 +2538,33 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 			}
 		}
 		*/
-		$query = "SELECT DISTINCT et1.entity from entity_trials et1 
+		
+		/*$query = "SELECT DISTINCT et1.entity from entity_trials et1 
 		JOIN entities e on (e.id=et1.entity)
 		JOIN entity_trials et2 on et1.trial=et2.trial and et2.entity IN ( ". $query . ") and e.class='Investigator' ";
+		*/
+		$query = "SELECT DISTINCT trial from entity_trials where  entity in (". $query . ")  ";
 		
-		$res = mysql_query($query) or die('Bad SQL query getting investigators from Company id in Investigator Tracker');
+		/*
+		$res = mysql_query($query) or die('Bad SQL query getting trials from entity trials in IT '.$query );
+		
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				$trials[] = $row['trial'];
+			}
+		}
+		*/
+		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN (". $query . ") AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
+		$query = "
+		SELECT DISTINCT et.entity from entity_trials et
+		JOIN entity_trials et2 on (et.trial = et2.trial)
+		JOIN entity_relations er on (et2.entity=er.parent and er.child= " . mysql_real_escape_string($EntityID) . ")
+		JOIN entities e on (er.parent = e.id and e.class='Product' and (e.is_active<>0 or e.is_active IS NULL) )
+		JOIN entities e2 on (et.entity = e2.id and e2.class='Investigator')";
+		$res = mysql_query($query) or die('Bad SQL query getting investigators');
+//		$res = mysql_query($query) or die('Bad SQL query getting investigators from Company id in Investigator Tracker');
 		
 	}
 		
