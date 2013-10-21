@@ -215,25 +215,13 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					$data_matrix[$key]['productIds'] = array();
 					
 			}
+			//pr($results);
 			foreach($results as $key2=>$result)
 			{
 				/// Fill up all data in Data Matrix only, so we can sort all data at one place
 				
 				if($result['investigator']<>$InvestigatorId) continue;
-			
-				if((( !@in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || (!@in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
-				{
-					//print_r($products);
-					//if($result['entity1'] == $id)
-					//if(in_array($result['entity2'],$products)){
-					if(!@in_array($result['entity2'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
-					{		$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-					//}else{
-					}elseif(!in_array($result['entity1'], $data_matrix[$key]['ProdExistance']))//to avoid duplicates
-					{
-						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
-					}
-				
+								
 					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
 					{
 						$CurrentPhasePNTR = 0;
@@ -278,7 +266,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
 					if($max_count < $data_matrix[$key]['TotalCount'])
 						$max_count = $data_matrix[$key]['TotalCount'];
-				}	//End of if Product Existsnace
+
 			}
 		
 		}
