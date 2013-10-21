@@ -1,7 +1,7 @@
 <?php 
 //Below lines are lines should be kept on top of all like session start gives session error, sphinx also gives query related error
 // - so incase of TZ we place in these pages itself
-if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && $_REQUEST['sourcepg'] != 'TZC' && !isset($_REQUEST['CompanyId']) && (false === strpos($_SERVER["REQUEST_URI"], 'sigma/company.php')))
+if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && $_REQUEST['sourcepg'] != 'TZC' && !isset($_REQUEST['CompanyId']) && (false === strpos($_SERVER["REQUEST_URI"], 'company.php')))
 {
 	header('P3P: CP="CAO PSA OUR"');
 	session_start();
@@ -41,7 +41,7 @@ if(isset($_POST['btnDownload']))
 	exit;
 }
 
-if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && !isset($_REQUEST['CompanyId']) && (false === strpos($_SERVER["REQUEST_URI"], 'sigma/company.php')))
+if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && !isset($_REQUEST['CompanyId']) && (false === strpos($_SERVER["REQUEST_URI"], 'company.php')))
 	DisplayOTT();
 function DisplayOTT()
 {
