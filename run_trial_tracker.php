@@ -10220,9 +10220,14 @@ class TrialTracker
 		$startRange = date('Y-m-d', strtotime($this->timeInterval ,$this->timeMachine));
 		$endRange = date('Y-m-d', $this->timeMachine);
 		
-		$query = "SELECT `id`, `field`, `old_value`, MAX(`change_date`) AS change_date FROM `upm_history` "
-					. " WHERE `id` IN ('" . implode("','", $upmIds) . "') AND (CAST(`change_date` AS DATE) <= '" . $endRange . "' AND "
-					. " CAST(`change_date` AS DATE) >= '" . $startRange . "') GROUP BY `id`,`field` ORDER BY `change_date` desc ";
+		$query = "SELECT uh1.`id`, uh1.`field`, uh1.`old_value` FROM `upm_history` AS uh1
+					JOIN (SELECT id, field, max( `change_date` ) AS datec FROM `upm_history` 
+							WHERE CAST(`change_date` AS DATE) <= '" . $endRange . "' 
+							AND  CAST(`change_date` AS DATE) >= '" . $startRange . "'
+							GROUP BY id, field ) 
+					uh2 ON uh1.id = uh2.id AND uh1.change_date = uh2.datec AND uh1.field = uh2.field
+					WHERE uh1.`id` IN ('".implode("','", $upmIds)."')";
+		
 		$res = m_query(__LINE__,$query);
 		if($res)
 		{
