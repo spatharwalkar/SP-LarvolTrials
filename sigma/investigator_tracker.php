@@ -2213,7 +2213,7 @@ function Ipagination($TrackerType, $totalPages, $id, $dwIcount, $CurrentPage, $M
 	}
 	elseif($totalPages > 5 + ($stages * 2))
 	{
-		if($CurrentPage < 1 + ($stages * 2))
+		if($CurrentPage <= 1 + ($stages * 2))
 		{
 			for($counter = 1; $counter < 4 + ($stages * 2); $counter++)
 			{
