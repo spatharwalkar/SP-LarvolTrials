@@ -66,7 +66,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 		$MainPageURL = 'company.php';
 	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT' ||  $TrackerType == 'IMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DISCATMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 		$MainPageURL = 'moa.php';
-	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' ||  $TrackerType == 'DISCATMCPT' )	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER
+	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' ||  $TrackerType == 'DISCATMCPT' ||  $TrackerType == 'IMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER || IMCPT=INVESTIGATOR MOA CATEGORY PRODUCT TRACKER
 		$MainPageURL = 'moacategory.php';
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$MainPageURL = 'disease.php';
@@ -232,7 +232,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 			$entity2Type = 'Disease';
 		}
 	}
-	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DISCATMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER || DISCATMCPT==DISEASE CATEGORY MOA CATEGORY PRODUCT TRACKER
+	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DISCATMCPT' || $TrackerType == 'IMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER || DISCATMCPT==DISEASE CATEGORY MOA CATEGORY PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA_Category" and id=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -356,7 +356,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 				$impArr=implode("','", $arrDiseaseIds);
 				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity` IN ('" .  $impArr ."')";
 			}
-			else if($TrackerType=='IMPT')
+			else if($TrackerType=='IMPT' || $TrackerType=='IMCPT')
 			{
 				
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'  and dt.larvol_id in (select trial from entity_trials where entity=" .$OptionArray['InvestigatorId']  ." )";
@@ -1287,6 +1287,8 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		if($TrackerType != 'PTH')
 		{
 			if(isset($TrackerType) & $TrackerType == 'IMPT')
+				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
+			elseif(isset($TrackerType) & $TrackerType == 'IMCPT')
 				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
 			else
 				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
@@ -3446,6 +3448,33 @@ function GetProductsFromMOACategory($moaCatID, $TrackerType, $OptionArray)
 			}
 		}
 	
+		return array_filter(array_unique($Products));
+	}
+	else if ($TrackerType == 'IMCPT'){
+		$InvestigatorId = $OptionArray["InvestigatorId"];
+		// get trial from investigator id
+		$moaCatproductIds = GetProductsFromMOACategory($moaCatID, 'MCPT', array());
+		$PhaseArray = GetPhaseArray($OptionArray['Phase']);
+		$query  = "SELECT trial FROM entity_trials WHERE entity = '". $InvestigatorId ."'";
+		$res = mysql_query($query) or die('Bad SQL query getting trials from investigator id in PT');
+	
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				$Trials[] = $row['trial'];
+			}
+		}
+		$query = "SELECT DISTINCT e.id  FROM entity_trials et JOIN entities e ON (et.entity = e.id) WHERE et.trial IN ('". implode("','", $Trials) ."') AND e.class='Product' AND e.id IN ('". implode("','", $moaCatproductIds) ."')";
+		$res = mysql_query($query) or die('Bad SQL query getting products from moa category id and investigator in PT');
+	
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+			{
+				$Products[] = $row['id'];
+			}
+		}
 		return array_filter(array_unique($Products));
 	}
 	else

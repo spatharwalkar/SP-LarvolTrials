@@ -128,20 +128,28 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	{
 		//$Ids = array_filter(array_unique(GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType)));
 		$Inv_data = GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType,true);
+	
 		$Idquery = $Inv_data['query'];
 		$InvestigatorIds = $Inv_data['Ids'];
 	if(!empty($Idquery))
 	{
 	// New Single query 
 				
-		
-		$InvestigatorQuery = "
-		SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type, et2.`entity` AS ProdId,  et.`entity` AS id, et.entity as investigator,e.`name` AS name, e.`display_name` AS dispname, e.class,e.`affiliation` 
-		FROM data_trials dt 
-		JOIN entity_trials et ON (dt.`larvol_id` = et.`trial` and et.entity in ('" . implode("','",$InvestigatorIds) . "') ) 
-		JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial` and et2.`entity` in (select parent from entity_relations where child ='" . $id ."')) 
-		JOIN entities e ON (et.`entity` = e.id AND e.`class` = 'Investigator') ";
-		
+		if($GobalEntityType == "MOA_Category"){
+			$InvestigatorQuery = "
+				SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type, et2.`entity` AS ProdId,  et.`entity` AS id, et.entity as investigator,e.`name` AS name, e.`display_name` AS dispname, e.class,e.`affiliation`
+				FROM data_trials dt
+				JOIN entity_trials et ON (dt.`larvol_id` = et.`trial` and et.entity in ('" . implode("','",$InvestigatorIds) . "') )
+				JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial` and et2.`entity` in (select parent from entity_relations where child in(select child from entity_relations where parent=" . $id .")))
+				JOIN entities e ON (et.`entity` = e.id AND e.`class` = 'Investigator') ";
+		} else {
+			$InvestigatorQuery = "
+				SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type, et2.`entity` AS ProdId,  et.`entity` AS id, et.entity as investigator,e.`name` AS name, e.`display_name` AS dispname, e.class,e.`affiliation` 
+				FROM data_trials dt 
+				JOIN entity_trials et ON (dt.`larvol_id` = et.`trial` and et.entity in ('" . implode("','",$InvestigatorIds) . "') ) 
+				JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial` and et2.`entity` in (select parent from entity_relations where child ='" . $id ."')) 
+				JOIN entities e ON (et.`entity` = e.id AND e.`class` = 'Investigator') ";
+		}
 		
 		//pr($InvestigatorQuery);
 		
@@ -200,7 +208,10 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 						$data_matrix[$key]['ColumnsLink'] = 'company.php?InvestigatorId=' . $data_matrix[$key]['ID'] . '&CompanyId=' . $id . '&TrackerType=ICPT';
 					}else if($GobalEntityType =="MOA"){
 						$data_matrix[$key]['ColumnsLink'] = 'moa.php?InvestigatorId=' . $data_matrix[$key]['ID'] . '&MoaId=' . $id . '&TrackerType=IMPT';						
+					}else if($GobalEntityType =="MOA_Category"){
+						$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?InvestigatorId=' . $data_matrix[$key]['ID'] . '&MoaCatId=' . $id . '&TrackerType=IMCPT';						
 					}
+					
 					
 			
 					///// Initialize data
@@ -2511,7 +2522,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN ('". implode("','", $trials) ."') AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
 		$res = mysql_query($query) or die('Bad SQL query getting investigators');
 		
-	}else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA'){
+	}else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA' || $GobalEntityType == 'MOA_Category'){
 
 		$query = "SELECT DISTINCT parent from entity_relations where child = " . mysql_real_escape_string($EntityID) . " and parent in (select id from entities where class='Product'  and (is_active <> '0' OR is_active IS NULL)) ";
 //		$query = "SELECT DISTINCT e.id FROM entities e JOIN entity_relations er  ON(er.parent = e.id) WHERE e.class='Product' AND er.child = '" . mysql_real_escape_string($EntityID) . "' and (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
@@ -2545,12 +2556,22 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 		}
 		*/
 		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN (". $query . ") AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
-		$query = "
-		SELECT DISTINCT et.entity from entity_trials et
-		JOIN entity_trials et2 on (et.trial = et2.trial)
-		JOIN entity_relations er on (et2.entity=er.parent and er.child= " . mysql_real_escape_string($EntityID) . ")
-		JOIN entities e on (er.parent = e.id and e.class='Product' and (e.is_active<>0 or e.is_active IS NULL) )
-		JOIN entities e2 on (et.entity = e2.id and e2.class='Investigator')";
+		if($GobalEntityType == 'MOA_Category'){
+			$query = "
+				SELECT DISTINCT et.entity from entity_trials et
+				JOIN entity_trials et2 on (et.trial = et2.trial)
+				JOIN entity_relations er on (et2.entity=er.parent and er.child in ( select child from entity_relations where parent= " . mysql_real_escape_string($EntityID) . "))
+				JOIN entities e on (er.parent = e.id and e.class='Product' and (e.is_active<>0 or e.is_active IS NULL) )
+				JOIN entities e2 on (et.entity = e2.id and e2.class='Investigator')";
+		
+		} else {
+			$query = "
+				SELECT DISTINCT et.entity from entity_trials et
+				JOIN entity_trials et2 on (et.trial = et2.trial)
+				JOIN entity_relations er on (et2.entity=er.parent and er.child= " . mysql_real_escape_string($EntityID) . ")
+				JOIN entities e on (er.parent = e.id and e.class='Product' and (e.is_active<>0 or e.is_active IS NULL) )
+				JOIN entities e2 on (et.entity = e2.id and e2.class='Investigator')";
+		}
 		$res = mysql_query($query) or die('Bad SQL query getting investigators');
 //		$res = mysql_query($query) or die('Bad SQL query getting investigators from Company id in Investigator Tracker');
 		

@@ -5,6 +5,7 @@
 	require_once('product_tracker.php');
 	chdir ($cwd);
 	require_once('disease_tracker.php');
+	require_once('investigators_tracker.php');
 	$page = 1;
 	if($_REQUEST['MoaCatId'] != NULL && $_REQUEST['MoaCatId'] != '' && isset($_REQUEST['MoaCatId']))
 	{
@@ -39,6 +40,12 @@
 	{
 		$DiseaseCatId = mysql_real_escape_string($_REQUEST['DiseaseCatId']);
 	}
+	$InvestigatorId = null;
+	if(isset($_REQUEST['InvestigatorId']))
+	{
+		$InvestigatorId = mysql_real_escape_string($_REQUEST['InvestigatorId']);
+		//$OptionArray = array('InvestigatorId'=>$InvestigatorId, 'Phase'=> $phase);
+	}
 		
 	$phase = NULL;
 	if(isset($_REQUEST['phase']))
@@ -46,7 +53,7 @@
 		$phase = mysql_real_escape_string($_REQUEST['phase']);
 	}
 
-	$OptionArray = array('DiseaseId'=>$DiseaseId, 'DiseaseCatId' => $DiseaseCatId, 'Phase'=> $phase);
+	$OptionArray = array('InvestigatorId'=>$InvestigatorId,'DiseaseId'=>$DiseaseId, 'DiseaseCatId' => $DiseaseCatId, 'Phase'=> $phase);
 	
 	$tab = 'moacat';
 	if(isset($_REQUEST['tab']))
@@ -64,7 +71,7 @@
 	}
 	
 	$TabProductCount = count(GetProductsFromMOACategory($MoaCatId, 'MCPT', array()));
-	
+	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($MoaCatId, 'MOA_Category'));
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaCatName) ? $MoaCatName. ' - '.$meta_title : $meta_title;		
 ?>
@@ -197,7 +204,8 @@
 						$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=diseasetrac" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
 						$moacatLinkName = '<a href="'.$tabCommonUrl.'&tab=moacat" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
-						
+						$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
+						$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						if($tab == 'diseasetrac') {  
 						print '
 							<td>
@@ -208,9 +216,9 @@
 									<img id="MoaCatImg" src="../images/middleTab.png" />
 								</td>
 								<td id="moacatTab" class="selectTab">'. $diseaseLinkName .'</td>
-								<td>
-									<img id="lastImg" src="../images/selectLastTab.png" />
-								</td>
+								<td><img id="lastImg" src="../images/selectTabConn.png" /></td> 
+				                <td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				                <td><img id="lastImg" src="../images/lastTab.png" /></td>
 							<td></td>';
 						  //print '<td><img id="MoaCatImg" src="../images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
 						} else if($tab == 'moacat') { 
@@ -223,9 +231,24 @@
 									<img id="MoaCatImg" src="../images/selectTabConn.png" />
 								</td>
 								<td id="moacatTab" class="Tab">'. $diseaseLinkName .'</td>
+								<td><img id="lastImg" src="../images/afterTab.png" /></td> 
+				                <td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				                <td><img id="lastImg" src="../images/lastTab.png" /></td> 
+								<td></td>';								
+							//  print '<td><img id="MoaCatImg" src="../images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+						 } else if($tab == 'investigatortrac') { 
+							print '
 								<td>
-									<img id="lastImg" src="../images/lastTab.png" />
-								</td> 
+									<img id="DiseaseImg" src="../images/firstTab.png" />
+								</td>
+								<td id="DiseaseTab" class="Tab">' . $moacatLinkName .'</td>
+								<td>
+									<img id="MoaCatImg" src="../images/afterTab.png" />
+								</td>
+								<td id="moacatTab" class="Tab">'. $diseaseLinkName .'</td>
+								<td><img id="lastImg" src="../images/middleTab.png" /></td> 
+				                <td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
+				                <td><img id="lastImg" src="../images/selectLastTab.png" /></td> 
 								<td></td>';								
 							//  print '<td><img id="MoaCatImg" src="../images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
 						 } 
@@ -245,6 +268,8 @@
 				if($tab == 'diseasetrac')
 					print showDiseaseTracker($MoaCatId, 'MCDT', $page, $categoryFlag);		//MCDT= MOA CATEGORY DISEASE TRACKER
 					//print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER
+				else if($tab == 'investigatortrac')
+					print showInvestigatorTracker($MoaCatId, 'MCIT', $page);
 				else
 					print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
 				print '</div>';
@@ -255,6 +280,9 @@
 					print showProductTracker($MoaCatId, $dwcount, 'DMCPT', $page, $OptionArray);	//DMCPT= DISEASE MOA CATEGORY PRODUCT TRACKER
 				else if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATMCPT')
 					print showProductTracker($MoaCatId, $dwcount, 'DISCATMCPT', $page, $OptionArray);	//DISCATMCPT= DISEASE CATEGORY MOA CATEGORY PRODUCT TRACKER
+				elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'IMCPT')
+				print showProductTracker($MoaCatId, $dwcount, 'IMCPT', $page, $OptionArray);	//IMPT - INVESTIGATOR MOA PRODUCT TRACKER
+				
 				else
 					print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 	
 			}
@@ -267,3 +295,17 @@
 
 </body>
 </html>
+<?php 
+function m_query($n,$q)
+{
+	global $logger;
+	$time_start = microtime(true);
+	$res = mysql_query($q);
+	$time_end = microtime(true);
+	$time_taken = $time_end-$time_start;
+	$log = 'TIME:'.$time_taken.'  QUERY:'.$q.'  LINE# '.$n;
+	$logger->debug($log);
+	unset($log);
+	return $res;
+}
+?>
