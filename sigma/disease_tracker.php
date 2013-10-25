@@ -654,7 +654,6 @@ function DiseaseTrackerCommonCSS($uniqueId, $TrackerType)
 						border-bottom:1px solid #44F;
 						border-right:1px solid #44F;
 						padding: 0px 0 0 15px;
-						vertical-align: top;
 					}
 					.controls th{
 						font-weight:normal;
@@ -1233,7 +1232,7 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
-					.'<form action="disease_tracker.php" method="post">'
+					.'<form action="disease_tracker.php" method="post" style="margin-bottom: 18px;">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
