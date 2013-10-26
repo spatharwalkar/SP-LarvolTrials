@@ -155,7 +155,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 		
 			$results=array();
 			//die();
-			$InvestigatorQueryResult = m_query(__LINE__,$InvestigatorQuery);//mysql_query($InvestigatorQuery) or die(mysql_error());
+			$InvestigatorQueryResult = mysql_query($InvestigatorQuery) or die(mysql_error());
 			$headerinvestigator=array();
 			while ($res = @mysql_fetch_array($InvestigatorQueryResult))
 			{
