@@ -38,7 +38,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 {
 	$HTMLContent = '';
 	
-	$Return = DataGenerator($id, $TrackerType, $page, $OptionArray);
+	$Return = DataGenerator($id, $TrackerType, $page, $OptionArray, $dwcount);
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -95,7 +95,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 }
 ///End of Process Report Tracker
 
-function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
+function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 {
 	global $db;
 	global $now;
@@ -499,9 +499,9 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray)
 	
 	/// This function willl Sort multidimensional array according to industry lead column
 	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
-		$data_matrix = sortTwoDimensionArrayByKey($data_matrix,'total');	//Sort according to default view as other than LI default view is total
+		$data_matrix = sortTwoDimensionArrayByKey($data_matrix, $dwcount);	//Sort according to default view as other than LI default view is total
 	else
-		$data_matrix = sortTwoDimensionArrayByKey($data_matrix,'indlead');
+		$data_matrix = sortTwoDimensionArrayByKey($data_matrix, 'indlead');
 	
 	///////////PAGING DATA
 	$RecordsPerPage = 50;
@@ -1727,8 +1727,13 @@ function Download_reports()
 	}
 	
 	$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
-		
-	$Return = DataGenerator($id, $TrackerType, 1, $OptionArray);
+	
+	$dwcount = 'total';
+	if(isset($_REQUEST['dwcount']))
+	$dwcount = $_REQUEST['dwcount'];
+	 
+	 $Return = DataGenerator($id, $TrackerType, 1, $OptionArray, $dwcount);
+
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
 	$Report_DisplayName = $Return['report_name'];
