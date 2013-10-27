@@ -506,7 +506,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	///////////PAGING DATA
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
-	$TotalRecords = count($rows);
+	$TotalRecords = count($data_matrix);
 	if(!isset($_POST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
@@ -514,8 +514,9 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 		//Get only those product Ids which we are planning to display on current page to avoid unnecessary queries
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
+		
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$rows = array_slice($rows, $StartSlice, $RecordsPerPage);
+		$rows = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
@@ -1175,7 +1176,7 @@ function TrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 
 function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwcount, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $OptionArray)
 {			
-	if(count($productIds) == 0) return 'No Products Found';
+	 if(count($rows) == 0) return 'No Products Found';
 		global $cwd;
 	if(isset($cwd) && stripos($cwd,'sigma')!==false)
 		$dir='../';
@@ -2999,11 +3000,15 @@ function sortTwoDimensionArrayByKey($arr, $arrKey, $sortOrder=SORT_DESC)
 	{
 		foreach ($arr as $key => $row)
 		{
-			$key_arr[$key] = $row[$arrKey];
+			if($row[$arrKey] > 0) 
+			{
+				$key_arr[$key] = $row[$arrKey];
+				$res[$key] = $arr[$key];
+			}
 		}
-		array_multisort($key_arr, $sortOrder, $arr);
+		array_multisort($key_arr, $sortOrder, $res);
 	}
-	return $arr;
+	return $res;
 }
 
 function CalculateMiniBarWidth($Ratio, $countValue, $Key, $Max_ValueKey, $Err, $Total_Bar_Width)
