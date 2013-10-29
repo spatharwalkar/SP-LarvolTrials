@@ -24,6 +24,7 @@ Text to help preserve UTF-8 file encoding: 汉语漢語.
 
 if (!defined('IN_COMMENTICS')) { die('Access Denied.'); }
 
+require_once('../../include.util.php');
 
 function cmtx_sanitize ($value, $stage_one = false, $stage_two = true) { //sanitizes data
     
@@ -768,6 +769,9 @@ function cmtx_email($to_email, $to_name, $subject, $body, $from_email, $from_nam
 
 
 function cmtx_setting($title) { //gets a setting
+
+	if($title == 'url_to_comments_folder')	//larvol: replaced hardcoded url with dynamic
+		return substr(urlPath(),0,strpos(urlPath(), '/comments')).'/comments/';
 
 	global $cmtx_mysql_table_prefix;
 	

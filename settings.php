@@ -13,7 +13,9 @@ $settingsFailSafe = array(
 	'YOURLS_URL'=>'http://localhost/s/yourls-api.php',
 	'SITE_NAME'=>'Larvol Trials',
 	'LI_API'=>'http://api.larvolinsight.com/api.ashx',
-	'UNICODE_MODE_ENABLED'=>'false'
+	'UNICODE_MODE_ENABLED'=>'false',
+	'LINKEDIN_KEY'=>'',
+	'LINKEDIN_SECRET'=>''
 );
 $settingsFailSafeKeys = array_keys($settingsFailSafe);
 

@@ -1,5 +1,4 @@
 <?php
-require_once('db.php');
 /* Generates a 'fingerprint' from the current user.
 	Is conceptually equivalent to using their IP address, but contains more information for increased security.
 */

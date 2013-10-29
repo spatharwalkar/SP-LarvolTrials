@@ -53,11 +53,22 @@ require 'includes/language/' . cmtx_setting('language_backend') . '/prompts.php'
 cmtx_error_reporting('includes/logs/errors.log'); //error reporting
 
 cmtx_set_time_zone(cmtx_setting('time_zone')); //set the time zone
-
+/*
 require_once 'includes/auth.php'; //authorise login
 
 if (isset($_GET['page']) && $_GET['page'] == "log_out") {
 	cmtx_log_out("logout");
+}
+*/
+
+$cwd = getcwd();
+chdir ('../..');
+require_once('db.php');
+chdir ($cwd);
+
+if(!$db->loggedIn() || ($db->user->userlevel != 'admin' && $db->user->userlevel != 'root'))
+{
+	die('Log in to LT as admin or root first');
 }
 
 if (!isset($_GET['page']) || (!file_exists("includes/pages/" . basename($_GET['page']) . ".php"))) {

@@ -2,3 +2,4 @@ RewriteEngine on
 RewriteRule .*\.svn/.* - [F]
 RequestHeader append X-UA-Compatible IE=edge
 AddType text/x-component .htc
+RedirectMatch 301 sigma/comments(.*) comments/$1

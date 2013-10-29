@@ -874,8 +874,8 @@ function cmtx_email($to_email, $to_name, $subject, $body, $from_email, $from_nam
 
 function cmtx_setting($title) { //gets a setting
 
-	if($title == "url_to_comments_folder")	//larvol: replaced hardcoded url with dynamic
-		return urlBase() . '/comments';
+	if($title == 'url_to_comments_folder')	//larvol: replaced hardcoded url with dynamic
+		return substr(urlPath(), 0, strrpos(urlPath(), '/')) . '/comments/';
 	
 	global $cmtx_mysql_table_prefix;
 	

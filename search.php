@@ -368,49 +368,7 @@ function multiField($allowedType = 'varchar')
 	global $db;
 	global $rmode;
 	$out = '';
-	$numericField = in_array($allowedType, array('int', 'date'));
-	if(isset($_POST['multifields']) && $_POST && !is_array($_POST['multifields'])) $_POST['multifields'] = array($_POST['multifields']);
-	$out .= '<fieldset><legend>Multi Field (' . $allowedType . ')</legend>'
-			. '<table cellspacing="2" cellpadding="2">'
-			. '<tr><th scope="col"' . ($numericField ? ' class="numeric"' : '') .'>Search Fields?</th>'
-			. '<th scope="col">Search value</th></tr>'
-			. '<tr><td>'
-			. '<select name="multifields[' . $allowedType . '][]" size="4" multiple="multiple" style="max-width:inherit;">'		
-			;//. '<option value=""> </option>';
-	$typeForQuery = '"' . implode('","', explode('+', $allowedType)) . '"';
-		
-	foreach($db->types as $field => $type)
-	{
-		$disp = $field;
-		if(substr($field,0,1) == '_')
-		{
-			$query = 'SELECT data_fields.name AS "field",data_categories.name AS "cat" FROM '
-					. 'data_fields LEFT JOIN data_categories ON data_fields.category=data_categories.id '
-					. 'WHERE data_fields.id=' . substr($field,1) . ' AND data_fields.`type` IN(' . $typeForQuery . ') LIMIT 1';
-			$res = mysql_query($query) or die('Bad SQL query getting field name');
-			$res = mysql_fetch_assoc($res);
-			if($res === false) continue;	//Custom field not found.
-			//in special modes, exclude fields not relevant to the mode
-			foreach($db->sources as $sourc=>$nam) { if($res['cat'] == $nam->categoryName) {$cat_exists=true; break;} else $cat_exists=false; }  
-			if($rmode && ($res['cat'] != 'NCT') && $cat_exists) continue;
-			$disp = $res['cat'] . '/' . $res['field'];
-		}
-		else if(strpos($field,'/') === false)
-		{
-			continue;
-			//$disp = 'clinical_study/' . $field;
-		}
-		$oldval = '';
-		if(isset($_POST['multifields'][$allowedType]) && in_array($field,$_POST['multifields'][$allowedType]))
-			$oldval = 'selected="selected"';
-		$out .= '<option value="' . $field . '"' . $oldval . '>' . $disp . '</option>';
-	}
-	$multiValuePost = (isset($_POST['multivalue'][$allowedType]))? $_POST['multivalue'][$allowedType]:'';
-	$out .= '</select>'
-			. '</td><td><input type="text" name="multivalue[' . $allowedType . ']" value="'
-			. htmlspecialchars($multiValuePost)
-			. '"/></td></tr></table>'
-			. '</fieldset>';
+
 	return $out;
 }
 
@@ -420,28 +378,6 @@ function CFCSearchControls()
 	global $db;
 	global $rmode;
 	$out = '';
-	mysql_query('BEGIN') or die("Couldn't begin SQL transaction");
-	$query = 'SELECT id,name FROM data_categories';
-	$res = mysql_query($query) or die('Bad SQL query getting categories');
-	$even = false;
-	
-	while($cat = mysql_fetch_assoc($res))
-	{
-		//in special modes, exclude fields not relevant to the mode
-		foreach($db->sources as $sourc=>$nam) { if($cat['name'] == $nam->categoryName) {$cat_exists=true; break;} else $cat_exists=false; }  
-		if($rmode && $cat_exists && ($cat['name'] != 'NCT')) continue;
-		$out .= openSection($cat['name']);
-		$query = 'SELECT id,name FROM data_fields WHERE category=' . $cat['id'];
-		$res2 = mysql_query($query) or die('Bad SQL query getting fields for category');
-		while($field = mysql_fetch_assoc($res2))
-		{	foreach($db->sources as $sourc=>$nam) { if( $cat['name'] . '/' . $field['name'] == $nam->categoryName.'/'.$nam->idFieldName) {$sourceid_exists=true; break;} else $sourceid_exists=false; }  
-			$is_id = $sourceid_exists;
-			$out .= searchControl('_'.$field['id'], str_replace('_',' ',$field['name']), $is_id);
-		}
-		$out .= '</table></fieldset>' . ($even ? '' : '<br clear="all" />');
-		$even = !$even;
-	}
-	mysql_query('COMMIT') or die("Couldn't commit SQL transaction");
 	return $out;
 }
 

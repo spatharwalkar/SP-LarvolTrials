@@ -49,7 +49,7 @@ function cmtx_get_comment_and_replies($id) {
 			$comments = mysql_fetch_assoc($comments_q);
 
 			//display comment
-			echo cmtx_generate_comment (false, $alternate, $comments["id"], $comments["name"], $comments["email"], $comments["website"], $comments["town"], $comments["country"], $comments["rating"], $comments["reply_to"], $comments["comment"], $comments["reply"], $comments["is_admin"], $comments["likes"], $comments["dislikes"], $comments["is_sticky"], $comments["is_locked"], $comments["dated"]);
+			echo cmtx_generate_comment (false, $alternate, $comments["id"], $comments["name"], $comments["email"], $comments["website"], $comments["town"], $comments["country"], $comments["rating"], $comments["reply_to"], $comments["comment"], $comments["reply"], $comments["is_admin"], $comments["likes"], $comments["dislikes"], $comments["is_sticky"], $comments["is_locked"], $comments["dated"], $comments['islarvol'], $comments['userid']);
 
 			$cmtx_comment_counter++; //increase comment counter by 1
 
@@ -77,7 +77,7 @@ function cmtx_get_comment_and_replies($id) {
 			$comments = mysql_fetch_assoc($comments_q);
 	
 			//display comment
-			echo cmtx_generate_comment (false, $alternate, $comments["id"], $comments["name"], $comments["email"], $comments["website"], $comments["town"], $comments["country"], $comments["rating"], $comments["reply_to"], $comments["comment"], $comments["reply"], $comments["is_admin"], $comments["likes"], $comments["dislikes"], $comments["is_sticky"], $comments["is_locked"], $comments["dated"]);
+			echo cmtx_generate_comment (false, $alternate, $comments["id"], $comments["name"], $comments["email"], $comments["website"], $comments["town"], $comments["country"], $comments["rating"], $comments["reply_to"], $comments["comment"], $comments["reply"], $comments["is_admin"], $comments["likes"], $comments["dislikes"], $comments["is_sticky"], $comments["is_locked"], $comments["dated"], $comments['islarvol'], $comments['userid']);
 
 			$cmtx_comment_counter++; //increase comment counter by 1
 
@@ -159,8 +159,9 @@ function cmtx_get_reply_depth($id) {
 } //end of get-reply-depth function
 
 
-function cmtx_generate_comment ($is_preview, $alternate, $id, $name, $email, $website, $town, $country, $rating, $reply_to, $comment, $reply, $is_admin, $likes, $dislikes, $is_sticky, $is_locked, $dated) { //generate comment
-
+function cmtx_generate_comment ($is_preview, $alternate, $id, $name, $email, $website, $town, $country, $rating, $reply_to, $comment, $reply, $is_admin, $likes, $dislikes, $is_sticky, $is_locked, $dated, $islarvol, $userid) { //generate comment
+	
+	
 	$cmtx_box = ""; //initialise box
 
 	for ($i = 1; $i <= cmtx_get_reply_depth($id); $i++) {
@@ -252,6 +253,14 @@ function cmtx_generate_comment ($is_preview, $alternate, $id, $name, $email, $we
 		$cmtx_website_attribute = ""; //initialize variable
 		if (cmtx_setting('website_new_window')) { $cmtx_website_attribute = " target='_blank'"; } //if website should open in new window
 		if (cmtx_setting('website_nofollow')) { $cmtx_website_attribute .= " rel='nofollow'";	} //if website should contain nofollow tag
+		
+		if($name == "")
+		{
+			$name = "Anonymous " . substr(hash(HASH_ALGO,$userid.$SERVER['PHP_SELF']),0,5);
+			$website="";
+		}else{
+			$cmtx_box .= ($islarvol?'<img src="images/larvoltag.png" style="vertical-align:middle;"/> ':'');
+		}
 		$cmtx_box .= "<a class='cmtx_name_with_website_text' href='" . $website . "'$cmtx_website_attribute>" . $name . "</a>";
 	} else {
 		$cmtx_box .= "<span class='cmtx_name_without_website_text'>";
@@ -331,7 +340,8 @@ function cmtx_generate_comment ($is_preview, $alternate, $id, $name, $email, $we
 	$cmtx_box .= "<div class='cmtx_buttons_block'>";
 
 	//Reply
-	if (cmtx_setting('show_reply') && !$is_preview) {
+	global $db;
+	if (cmtx_setting('show_reply') && !$is_preview && $db->loggedIn()) { //larvol: must be logged in to reply
 		$cmtx_box .= "<div class='cmtx_reply_block'>";
 		$cmtx_box .= "<div class='cmtx_buttons'>";
 		if (cmtx_get_reply_depth($id) < cmtx_setting('reply_depth') && !$is_locked) {

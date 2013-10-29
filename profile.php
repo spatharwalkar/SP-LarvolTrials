@@ -1,4 +1,10 @@
 <?php
+if(isset($_GET['user']))
+{
+	header('Location: sigma/profile.php?' . $_SERVER['QUERY_STRING']);
+	exit;
+}
+
 require_once('db.php');
 if(!$db->loggedIn())
 {

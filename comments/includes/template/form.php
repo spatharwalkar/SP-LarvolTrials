@@ -496,11 +496,11 @@ foreach ($cmtx_elements as $cmtx_element) {
 <?php global $cmtx_default_name, $cmtx_set_name_value; ?>
 <?php if (isset($cmtx_set_name_value) && !empty($cmtx_set_name_value) && cmtx_setting('state_name') == 'hide') {} else { ?>
 <div class="cmtx_height_between_fields"></div>
-<label class="cmtx_label">
-<?php echo CMTX_LABEL_NAME ?>
-<?php if (cmtx_setting('display_required_symbol')) { ?><span class="cmtx_required_symbol"><?php echo " " . CMTX_REQUIRED_SYMBOL ?></span><?php } ?>
-</label>
-<input type="text" name="cmtx_name" class="cmtx_name_field" title="<?php echo CMTX_TITLE_NAME; ?>" maxlength="<?php echo cmtx_setting('field_maximum_name'); ?>" value="<?php echo $cmtx_default_name; ?>" <?php if (isset($cmtx_set_name_value) && !empty($cmtx_set_name_value) && cmtx_setting('state_name') == 'disable') { echo 'disabled="disabled"'; } ?> onkeypress="return cmtx_disable_enter_key(event)"/>
+<?php
+global $db;
+$islarvol = in_array($db->user->userlevel, array('user','admin','root'));
+echo('You are posting as ' . ($islarvol?'<img src="images/larvoltag.png" style="vertical-align:middle;"/> ':'') . '<span style="color:blue">' . $db->user->getName() . '</span>');
+?>
 <?php } } ?>
 
 <?php function cmtx_output_email () { ?>
@@ -732,7 +732,7 @@ foreach ($cmtx_elements as $cmtx_element) {
 	}
 }
 ?>
-
+<br /><label><input type="checkbox" name="cmtx_anonymous" id="cmtx_anonymous" />Post anonymously</label>
 <?php function cmtx_output_question () { ?>
 <?php if (cmtx_setting('enabled_question')) { ?>
 <?php if (cmtx_session_set() && isset($_SESSION['cmtx_question']) && $_SESSION['cmtx_question'] == cmtx_setting('session_key')) {} else { ?>

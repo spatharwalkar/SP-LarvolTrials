@@ -26,6 +26,7 @@ Text to help preserve UTF-8 file encoding: 汉语漢語.
 <?php if (!defined('IN_COMMENTICS')) { die('Access Denied.'); } ?>
 
 <?php
+
 if (cmtx_setting('sort_order_parts') == '1,2') { //display comments first
 
 	if (cmtx_setting('split_screen')) { //side-by-side layout
@@ -36,17 +37,16 @@ if (cmtx_setting('sort_order_parts') == '1,2') { //display comments first
 		require_once $cmtx_path . 'includes/template/comments.php'; //load comments
 		echo "</td>";
 		echo "<td style='width:530px; padding-left:75px; vertical-align:top;'>";
-		require_once $cmtx_path . 'includes/template/form.php'; //load form
+		includeform(); //load form
 		echo "</td>";
 		echo "</tr>";
 		echo "</table>";
 		
 	} else { //default vertical layout
-	
+
 		require_once $cmtx_path . 'includes/template/comments.php'; //load comments
 		echo "<div class='cmtx_height_for_divider'></div>"; //height between comments/form
-		require_once $cmtx_path . 'includes/template/form.php'; //load form
-		
+		includeform(); //load form
 	}
 	
 } else { //display form first
@@ -56,7 +56,7 @@ if (cmtx_setting('sort_order_parts') == '1,2') { //display comments first
 		echo "<table style='width:100%; padding:0px; border:none;'>";
 		echo "<tr>";
 		echo "<td style='width:450px; vertical-align:top;'>";
-		require_once $cmtx_path . 'includes/template/form.php'; //load form
+		includeform(); //load form
 		echo "</td>";
 		echo "<td style='width:50px;'></td>";
 		echo "<td style='vertical-align:top;'>";
@@ -67,11 +67,28 @@ if (cmtx_setting('sort_order_parts') == '1,2') { //display comments first
 		
 	} else { //default vertical layout
 	
-		require_once $cmtx_path . 'includes/template/form.php'; //load form
+		includeform(); //load form
 		echo "<div class='cmtx_height_for_divider'></div>"; //height between form/comments
 		require_once $cmtx_path . 'includes/template/comments.php'; //load comments
 		
 	}
 	
+}
+
+function includeform()
+{
+	global $cmtx_path;
+	global $db;
+	
+	$baseurl = urlPath();
+	$sigmapos = strpos($baseurl,"sigma");
+	if($sigmapos === false)	$baseurl .= 'sigma/';
+	$sigmalogin = $baseurl .= 'login.php';
+	
+	
+	if(!$db->loggedIn())
+		echo('Please <a href="' . $sigmalogin . '">login</a> to post a comment.');
+	else
+		require_once $cmtx_path . 'includes/template/form.php'; //load form
 }
 ?>

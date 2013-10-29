@@ -19,10 +19,6 @@ class DatabaseManager
 	public $db_link = 0;
 	public $set = array(); // array that holds settings from the "settings" table in the DB
 	public $user = NULL; //NULL = login status unknown. false = Not logged in. [User]object = logged in
-	public $types = array();
-	public $sourceCats = array('NCT', 'PubMed', 'EudraCT', 'isrctn');
-	public $sourceIdFields = array('NCT/nct_id', 'PubMed/PMID', 'EudraCT/eudract_id', 'isrctn/isrctn_id');
-	public $sources;	//Stores source category information as objects instead of the old method of parallel arrays
 	
 	// On making an instance, connect to the database.
 	public function __construct()
@@ -30,37 +26,8 @@ class DatabaseManager
 		$this->db_link = mysql_connect(DB_SERVER,DB_USER,DB_PASS) or die("Error connecting to database server!");
 		mysql_select_db(DB_NAME) or die(mysql_error());
 		mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");
-		
-		@$this->types = unserialize(file_get_contents('cache/types.dat'));
-		if($this->types === false) $this->refreshTypes();
-		
-		urlPath();	//update cache if necessary
-
+		oldurlPath();	//update cache if necessary
 		$this->reloadSettings();
-		$this->sources[] = new SourceCategory('NCT','nct_id','http://clinicaltrials.gov/ct2/show/');
-		$this->sources[] = new SourceCategory('PubMed', 'PMID', 'http://www.ncbi.nlm.nih.gov/pubmed/');		
-		$this->sources[] = new SourceCategory('EudraCT','eudract_id','https://www.clinicaltrialsregister.eu/ctr-search/index.xhtml?');
-		$this->sources[] = new sourceCategory('isrctn','isrctn_id','http://www.controlled-trials.com/');
-	}
-	
-	/* Refreshes the disk cache of XML field types from the database's information_schema
-		and also updates this object's "types" member.
-	*/
-	public function refreshTypes()
-	{
-		mysql_query('BEGIN') or die("Couldn't begin SQL transaction to get DB field types");
-		
-		$query = 'SELECT column_name AS "field",data_type AS "type"'
-					. ' FROM information_schema.columns WHERE table_schema="' . DB_NAME . '" AND table_name="clinical_study"';
-		$res = mysql_query($query) or die("Couldn't get column names of clinical_study");
-		while($col = mysql_fetch_array($res)) $this->types[$col['field']] = $col['type'];
-		
-		$query = 'SELECT id,type FROM data_fields';
-		$res = mysql_query($query) or die('Bad SQL query getting CF types');
-		while($field = mysql_fetch_assoc($res)) $this->types['_'.$field['id']] = $field['type'];
-		
-		mysql_query('COMMIT');
-		file_put_contents('cache/types.dat', serialize($this->types));
 	}
 	
 	/* Check if the current user is logged in, and to what account.
@@ -79,15 +46,19 @@ class DatabaseManager
 		/* A logged in user will have a cookie with their userid in it.
 			If they don't have one or if it isn't a number, stop here.
 		*/
-		if(!isset($_COOKIE['qw_login']) || !is_numeric($_COOKIE['qw_login']))	return $this->user = false;
-		
+		if(!isset($_COOKIE['qw_login']) || !is_numeric($_COOKIE['qw_login']))
+		{
+			$this->user = false;
+			return false;
+		}
+
 		/* Check the database to see if the user's fingerprint matches the one we saved
 			from their last successful login. If not, then they are not who they say
 			they are. Either they moved the cookie (portable PC or portable browser)
 			or they are an evil hacker. We don't discriminate yet -- just deny the login.
 		*/
 		$id = (int)$_COOKIE['qw_login'];
-		$query = 'SELECT username,userlevel,email FROM users WHERE id=' . $id
+		$query = 'SELECT username,userlevel,email,realname,country,linkedin_id,linkedin_url FROM users WHERE id=' . $id
 					. ' AND fingerprint="' . genPrint() . '" LIMIT 1';
 		$res = mysql_query($query);
 		if($res === false) return $this->user = false; //If the SQL query is bad here, just deny login instead of dying
@@ -100,6 +71,10 @@ class DatabaseManager
 		$this->user->username = $res['username'];
 		$this->user->email = $res['email'];
 		$this->user->userlevel = $res['userlevel'];
+		$this->user->realname = $res['realname'];
+		$this->user->country = $res['country'];
+		$this->user->linkedin_id = $res['linkedin_id'];
+		$this->user->linkedin_url = $res['linkedin_url'];
 		
 		$query = 'SELECT `name`,`level`,`user` FROM user_permissions AS ap LEFT JOIN '
 			. '(SELECT `user`,permission FROM user_grants WHERE `user`=' . $id . ') AS ug ON ug.permission=ap.id '
@@ -127,7 +102,7 @@ class DatabaseManager
 		// Check who the user is and if the password is right
 		$username = mysql_real_escape_string($username);
 		$password = hash(HASH_ALGO, $password . $username);
-		$query = 'SELECT id,username,userlevel,email FROM users WHERE username="' . $username
+		$query = 'SELECT id,username,userlevel,email,realname,country,linkedin_id,linkedin_url FROM users WHERE username="' . $username
 					. '" AND password="' . $password . '" LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL Query on login attempt');
 		$res = mysql_fetch_array($res);
@@ -139,10 +114,43 @@ class DatabaseManager
 		$this->user->username = $res['username'];
 		$this->user->email = $res['email'];
 		$this->user->userlevel = $res['userlevel'];
+		$this->user->realname = $res['realname'];
+		$this->user->country = $res['country'];
+		$this->user->linkedin_id = $res['linkedin_id'];
+		$this->user->linkedin_url = $res['linkedin_url'];
 		
 		$query = 'UPDATE users SET fingerprint="' . genPrint() . '" WHERE id=' . $this->user->id . ' LIMIT 1';
 		$res = mysql_query($query) or die('Bad SQL Query on login approval');
-		setcookie('qw_login', $this->user->id, time()+60*60*24*365);
+		setcookie('qw_login', $this->user->id, time()+60*60*24*365, '/');
+		return true;
+	}
+	
+	public function linkedInLogin($linkedin_id)
+	{
+		// Check who the user is and if the password is right
+		$linkedin_id = mysql_real_escape_string($linkedin_id);
+		$query = 'SELECT id,username,userlevel,email,realname,country,linkedin_id,linkedin_url FROM users WHERE linkedin_id="' . $linkedin_id
+			. '" LIMIT 1';
+		$res = mysql_query($query) or die('Bad SQL Query on login attempt'.$query);
+		$res = mysql_fetch_array($res);
+		if($res === false) return $this->user = false;
+
+		// Credentials OK. Approve the login.
+		$this->user = new User();
+		$this->user->id = $res['id'];
+		$this->user->username = $res['username'];
+		$this->user->email = $res['email'];
+		$this->user->userlevel = $res['userlevel'];
+		$this->user->realname = $res['realname'];
+		$this->user->country = $res['country'];
+		$this->user->linkedin_id = $res['linkedin_id'];
+		$this->user->linkedin_url = $res['linkedin_url'];
+		
+		$query = 'UPDATE users SET fingerprint="' . genPrint() . '" WHERE id=' . $this->user->id . ' LIMIT 1';
+		$res = mysql_query($query) or die('Bad SQL Query on login approval');
+		
+		setcookie('qw_login', $this->user->id, time()+60*60*24*365, '/');		
+
 		return true;
 	}
 	
@@ -152,8 +160,8 @@ class DatabaseManager
 		if(!$this->loggedIn()) return;
 		$query = 'UPDATE users SET fingerprint=NULL WHERE id=' . $this->user->id . ' LIMIT 1';
 		mysql_query($query);
-		setcookie('qw_login', '', time()-60*60*24);
-		setcookie('tree_grid_cookie', '', time()-60*60*24);
+		setcookie('qw_login', '', time()-60*60*24, '/');
+		setcookie('tree_grid_cookie', '', time()-60*60*24, '/');
 		$this->user = false;
 	}
 	
@@ -347,7 +355,23 @@ class User
 	public $username = NULL;
 	public $userlevel = NULL;
 	public $email = NULL;
+	
+	public $realname = NULL;
+	public $country = NULL;
+	public $linkedin_id = NULL;
+	public $linkedin_url = NULL;
+	
 	public $per = array();
+	
+	public function getName()
+	{
+		if($this->realname === NULL || empty($this->realname))
+		{
+			return $this->username;
+		}else{
+			return $this->realname;
+		}
+	}
 }
 
 class Result
@@ -365,67 +389,6 @@ class SearchParam
 	public $value;	// the value to search for
 	public $negate = false;	// exclude value from a search rather than include
 	public $strong = true;	//strength of Negation
-}
-
-class CustomField
-{
-	public $id;
-	public $name;
-	public $type;
-	
-	public $enumvals = array();
-	
-	function __construct($id,$name,$type,$enumvals = array())
-	{
-		foreach($this as $key => $val)
-		{
-			$this->$key = $$key;
-		}
-	}
-}
-
-class SourceCategory
-{
-	public $categoryName;
-	public $categoryId;
-	public $idFieldName;
-	public $idFieldId;
-	public $linkBase;
-	public $fieldId;
-	//public $categoryId;
-
-	function __construct($categoryName,$idFieldName,$linkBase)
-	{
-		global $db;
-		$this->categoryName = $categoryName;
-		$query = 'SELECT `id` FROM data_categories WHERE `name`="' . $categoryName . '" LIMIT 1';
-		$res = mysql_query($query) or die('Bad SQL query getting category ID');
-		$res = mysql_fetch_array($res);
-		$this->categoryId = $res['id'];
-		$this->idFieldName = $idFieldName;
-		ob_start();
-		$this->idFieldId = getFieldId($categoryName, $idFieldName);
-		ob_end_clean();
-		$this->linkBase = $linkBase;
-		
-		$query = "select df.id, dc.id FROM data_fields df, data_categories dc WHERE df.name='".$this->idFieldName."' and dc.name='".$this->categoryName."'";
-		$result  = mysql_query($query) or die('Bad sql Query '.$query);
-		$tmp = mysql_fetch_row($result);
-		$this->fieldId = $tmp[0];		
-		$this->categoryId = $tmp[1];
-		
-	}
-	//stub function gets source id of the already set source from db. 
-	public function getSourceId()
-	{
-		global $db;
-		$query = "select id from data_fields where name='".$this->idFieldName."'";
-		$result  = mysql_query($query) or die('Bad sql Query '.$query);
-		$tmp = mysql_fetch_row($result);
-		return $tmp[0];
-		
-	}
-	
 }
 
 ?>
