@@ -2998,6 +2998,8 @@ function sortTwoDimensionArrayByKey($arr, $arrKey, $sortOrder=SORT_DESC)
 {
 	if(is_array($arr) && count($arr) > 0)
 	{
+		$key_arr = array();
+		$res = array();
 		foreach ($arr as $key => $row)
 		{
 			if($row[$arrKey] > 0) 
