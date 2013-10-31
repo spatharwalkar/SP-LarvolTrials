@@ -13385,7 +13385,8 @@ class TrialTracker
 			//field upm event description
 			$title = '';
 			$attr = '';	
-			if(isset($value['edited']) && !empty($value['edited']['event_description'])) 
+						
+			if(isset($value['edited']['event_description']))
 			{
 				$titleLinkColor = 'style="color:#FF0000;"';
 				$attr = ' highlight'; 
@@ -13399,7 +13400,7 @@ class TrialTracker
 					$title = ' title="No Previous value" ';
 				}
 			} 
-			else if(isset($value['edited']) && !empty($value['edited']['event_link'])) 
+			else if(isset($value['edited']['event_link']))
 			{
 				$titleLinkColor = 'style="color:#FF0000;"';
 				$attr = ' highlight'; 
@@ -13413,7 +13414,7 @@ class TrialTracker
 					$title = ' title="No Previous value" ';
 				}
 			}
-			else if($value['new'] == 'y') 
+			else if($value['new'] == 'y')
 			{
 				$titleLinkColor = 'style="color:#FF0000;"';
 				$title = ' title = "New record" ';
@@ -13445,7 +13446,7 @@ class TrialTracker
 			$title = '';
 			$attr = '';	
 			//if(isset($value['edited']) && ($value['edited']['field'] == 'condition')) 
-			if(isset($value['edited']) && !empty($value['edited']['condition'])) 
+			if(isset($value['edited']['condition']))
 			{
 				$attr = ' highlight'; 
 				if($value['edited']['condition'] != '' && $value['edited']['condition'] !== NULL)
@@ -13470,7 +13471,7 @@ class TrialTracker
 			$upmBorderRight = '';
 			
 			//if(isset($value['edited']) && ($value['edited']['field'] == 'end_date'))
-			if(isset($value['edited']) && !empty($value['edited']['end_date'])) 
+			if(isset($value['edited']['end_date'])) 
 			{
 				$attr = ' highlight';
 				$upmBorderRight = 'border-right-color:red;';
@@ -13485,7 +13486,7 @@ class TrialTracker
 				}
 			} 
 			//else if(isset($value['edited']) && ($value['edited']['field'] == 'end_date_type'))
-			elseif(isset($value['edited']) && !empty($value['edited']['end_date_type'])) 
+			elseif(isset($value['edited']['end_date_type'])) 
 			{
 				$attr = ' highlight';
 				if($value['edited']['end_date_type'] != '' && $value['edited']['end_date_type'] !== NULL) 
@@ -13526,7 +13527,6 @@ class TrialTracker
 				{
 					$value['result_link'] = NULL;
 				}
-							
 				//if((isset($value['edited']) && $value['edited']['field'] == 'result_link') || ($value['new'] == 'y')) 
 				if((isset($value['edited']) && !empty($value['edited']['result_link']))  || ($value['new'] == 'y')) 
 						$imgColor = 'red';
