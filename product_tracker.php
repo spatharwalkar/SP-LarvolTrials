@@ -1191,17 +1191,9 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
 	$phase = $OptionArray['Phase'];
 	
-	//getting the url to check if its a sigma page or from HM page
-	$urlPath = parse_url($_SERVER['REQUEST_URI']);	
-	if(strpos($urlPath['path'], '/sigma/')) { //if its a sigma page
-		$formUrl = "../product_tracker.php";
-	}else {
-		$formUrl = "product_tracker.php";
-	}
-	
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
-					.'<form action="'.$formUrl.'" method="post">'
+					.'<form action="product_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
