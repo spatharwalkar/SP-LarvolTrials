@@ -310,7 +310,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `linkedin_url` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `username` (`username`)
+  UNIQUE KEY `username` (`username`),
   UNIQUE KEY `linkedin_id_UNIQUE` (`linkedin_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
