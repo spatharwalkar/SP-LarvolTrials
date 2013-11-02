@@ -1,3 +1,5 @@
+<!--feedback button-->
+<?php include "feedback.php";?>
 <!-- SearchBox & Logo -->
 <form action="index.php" method="post" name="trialzillaFrm" id="trialzillaFrm">
 <table width="100%" border="0" style="padding-top:2px;">
@@ -12,7 +14,6 @@
 <input type="submit" name="Search" title="Search" value="Search" style="vertical-align:bottom;" class="SearchBttn1" />
 </td>
 <td style="vertical-align:middle; padding-left:10px;padding-top:15px;" align="left">&nbsp;
-
 </td>
 </tr>
 <tr>
