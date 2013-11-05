@@ -873,7 +873,7 @@ print           '$("ul #productbox li").click(function () {
             }); 
         </script>';
 
-	if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) && (strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) && !isset($globalOptions['DiseaseId']) && !isset($globalOptions['DiseaseCatId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP' && $globalOptions['sourcepg'] != 'TZC')
+	if($db->loggedIn() && (strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE) && (strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) && !isset($globalOptions['DiseaseId']) && !isset($globalOptions['InvestigatorId']) && !isset($globalOptions['DiseaseCatId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP' && $globalOptions['sourcepg'] != 'TZC')
 	{
 		$cpageURL = 'http://';
 		$cpageURL .= $_SERVER["SERVER_NAME"].urldecode($_SERVER["REQUEST_URI"]);
