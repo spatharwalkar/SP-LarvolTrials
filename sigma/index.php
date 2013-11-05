@@ -534,7 +534,7 @@ if($ClassFlg)
 				}
 				else if($DataArray[$index]['type'] == 'Investigator')
 				{
-						print ' 	<a href="investigator.php?id='. trim($DataArray[$index]['id']) .'" title="Investigator" ><b>'.$DataArray[$index]['name'] .'</b>';
+						print ' 	<a href="investigator.php?InvestigatorId='. trim($DataArray[$index]['id']) .'" title="Investigator" ><b>'.$DataArray[$index]['name'] .'</b>';
 						if(!empty($DataArray[$index]['affiliation']))
 							print ' / <i>'.$DataArray[$index]['affiliation'].'</a>';
 						else

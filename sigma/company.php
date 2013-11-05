@@ -209,6 +209,15 @@
 						{
 							print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="disease_category.php?DiseaseCatId='.$DiseaseCatId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
 						}
+						if(isset($InvestigatorId) && $InvestigatorId != NULL)
+						{
+							print '<td><a style="color:#FFFFFF; display:inline;" href="company.php?CompanyId='.$CompanyId. ((isset($phase) && $phase != NULL) ? '&phase='.$phase.'&TrackerType=CPT':'').'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+							print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="investigator.php?InvestigatorId='.$InvestigatorId.'">'.GetEntityName($InvestigatorId).'</a>&nbsp;</td>';
+						}
+						if(isset($InvestigatorId) && $InvestigatorId != NULL)
+						{
+							print '<td style="vertical-align:top;"> >> </td><td><a style="color:#FFFFFF; display:inline;" href="investigator.php?InvestigatorId='.$InvestigatorId.'"><img src="../images/delicon.gif" width="15" height="15" style="padding-top:2px;" /></a>&nbsp;</td>';
+						}
 						print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="company.php?CompanyId='.$CompanyId.'">'.$CompanyName.'</a>&nbsp;</td>';
 						if(isset($phase) && $phase != NULL)
 						{
@@ -333,6 +342,8 @@
 						print showProductTracker($CompanyId, $dwcount, 'DISCATCPT', $page, $OptionArray);	//DISCATCPT - DISEASE CATEGORY COMPANY PRODUCT TRACKER
 					elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'ICPT')
 						print showProductTracker($CompanyId, $dwcount, 'ICPT', $page, $OptionArray);	//ICPT - COMPANY INVESTIGATOR PRODUCT TRACKER
+					elseif(isset($_REQUEST['TrackerType']) && ($_REQUEST['TrackerType'] == 'INVESTCT'))
+						print showProductTracker($CompanyId, $dwcount, 'INVESTCT', $page, $OptionArray);	
 					
 					else
 						print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 

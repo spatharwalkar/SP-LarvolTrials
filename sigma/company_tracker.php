@@ -33,6 +33,7 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 	$uniqueId = uniqid();
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
+	
 	$Report_DisplayName = $Return['report_name'];
 	$id = $Return['id'];
 	$columns = $Return['columns'];
@@ -51,6 +52,8 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 		$MainPageURL = 'disease.php';
 	if($TrackerType == 'DISCATCT')	//DPT=DISEASE COMPANY TRACKER
 		$MainPageURL = 'disease_category.php';
+	if($TrackerType == 'INVESTCT')	//INVESTIGATOR COMPANY TRACKER
+		$MainPageURL = 'investigator.php';
 	
 	$HTMLContent .= CompanyTrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -95,7 +98,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	{
 		global $CompanyIds;
 		global $arrDiseaseIds;
-		$arrImplode = implode(",", $arrDiseaseIds);
+		$arrImplode = @implode(",", $arrDiseaseIds);
 		
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' .$id;
 		$res = mysql_query($query) or die(mysql_error());
@@ -105,10 +108,12 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$CompanyIds = array_filter(array_unique($CompanyIds));
 		$id=$header['id'];
 		$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND ( ".$id. " in (rpt.`entity1`, rpt.`entity2` )) AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-       
-		$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
+		if($CompanyIds)
+			$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
+		else
+			$CompanyQueryResult = null;
 		$key = 0;
-		while($result = mysql_fetch_array($CompanyQueryResult))
+		while($result = @mysql_fetch_array($CompanyQueryResult))
 		{
 			$key = $CompanyId = $result['CompId'];
 			if(isset($CompanyId) && $CompanyId != NULL)
@@ -187,6 +192,116 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 					if($max_count < $data_matrix[$key]['TotalCount'])
 						$max_count = $data_matrix[$key]['TotalCount'];
 				}	//End of if Product Existsnace
+			} //END OF IF - COMPANY ID NULL OR NOT
+		}	//END OF While - Fetch data
+		
+	}
+	if($TrackerType == 'INVESTCT')	
+	{
+		global $CompanyIds;
+		global $arrDiseaseIds;
+		$arrImplode = @implode(",", $arrDiseaseIds);
+		
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Investigator" AND `id`=' .$id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+	
+		$CompanyIds = array_filter(array_unique($CompanyIds));
+		$id=$header['id'];
+
+		$CompanyQuery = "SELECT er.child AS CompId, e.`name` AS CompName, e.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
+						FROM entity_relations er 
+						JOIN entities e ON (er.child = e.id and e.class='Institution')
+						JOIN entity_trials et ON(er.parent = et.entity) 
+						JOIN entity_trials et2 ON(et.trial = et2.trial and et2.entity =" . $id . " ) 
+						JOIN data_trials dt on (et2.trial = dt.larvol_id)
+						group by CompId,ProdId
+						";	
+						
+		
+		
+		//die();
+		if($CompanyIds)
+			$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
+		else
+			$CompanyQueryResult = null;
+		$key = 0;
+		while($result = @mysql_fetch_array($CompanyQueryResult))
+		{
+			$key = $CompanyId = $result['CompId'];
+			
+			if(isset($CompanyId) && $CompanyId != NULL)
+			{
+		
+					/// Fill up all data in Data Matrix only, so we can sort all data at one place
+					if($result['CompDispName'] != NULL && trim($result['CompDispName']) != '')
+						$data_matrix[$key]['RowHeader'] = $result['CompDispName'];
+					else
+						$data_matrix[$key]['RowHeader'] = $result['CompName'];
+						
+					$data_matrix[$key]['ID'] = $result['CompId'];
+					$NewCompanyIds[] = $result['CompId'];
+						
+					$data_matrix[$key]['HeaderLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'];
+		
+					$data_matrix[$key]['ColumnsLink'] = 'company.php?CompanyId=' . $data_matrix[$key]['ID'] . '&InvestigatorId=' . $id . '&TrackerType=INVESTCT';
+		
+					///// Initialize data
+					if(empty($data_matrix[$key]))
+					{
+						$data_matrix[$key]['phase_na']=0;
+						$data_matrix[$key]['phase_0']=0;
+						$data_matrix[$key]['phase_1']=0;
+						$data_matrix[$key]['phase_2']=0;
+						$data_matrix[$key]['phase_3']=0;
+						$data_matrix[$key]['phase_4']=0;
+			
+						$data_matrix[$key]['TotalCount'] = 0;
+						$data_matrix[$key]['productIds'] = array();
+						$data_matrix[$key]['ProdExistance'] = array();
+					}
+					
+		
+					$data_matrix[$key]['ProdExistance'][] = $result['ProdId'];
+						
+					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+					{
+						$CurrentPhasePNTR = 0;
+					}
+					else if($result['phase'] == '0')
+					{
+						$CurrentPhasePNTR = 1;
+					}
+					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
+							|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+					{
+						$CurrentPhasePNTR = 2;
+					}
+					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
+							|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
+							|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+					{
+						$CurrentPhasePNTR = 3;
+					}
+					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
+							|| $result['phase'] == '3a' || $result['phase'] == '3b')
+					{
+						$CurrentPhasePNTR = 4;
+					}
+					else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+					{
+						$CurrentPhasePNTR = 5;
+					}
+						
+					$MAXPhasePNTR = $CurrentPhasePNTR;
+					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+						
+					$data_matrix[$key]['productIds'][] = $result['ProdId'];
+					
+					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+					if($max_count < $data_matrix[$key]['TotalCount'])
+						$max_count = $data_matrix[$key]['TotalCount'];
 			} //END OF IF - COMPANY ID NULL OR NOT
 		}	//END OF While - Fetch data
 		
@@ -919,7 +1034,7 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
-	if($TrackerType != 'DCT' && $TrackerType != 'DISCATCT')				
+	if($TrackerType != 'DCT' && $TrackerType != 'DISCATCT' &$TrackerType != 'INVESTCT')				
 	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;'. (($TotalRecords == 1) ? 'Company':'Companies') .'</div></td>';
 	
 	if($TotalPages > 1)
@@ -994,6 +1109,8 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	}
 	$htmlContent .= '<th width="8px"></th></tr>';
 
+
+	$IdsArray=array_unique($IdsArray);
 	foreach($IdsArray as $key => $Ids)
 	{	
 		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
@@ -1027,13 +1144,13 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		$total_cols = $inner_columns * $columns;
 		$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
 		$phase_space = 0;
-	
 		foreach($phase_legend_nums as $phase_nums)
 		{
 			if($data_matrix[$key]['phase_'.$phase_nums] > 0)
 			{
 				$Color = getClassNColorforPhaseCompanyTracker($phase_nums);
 				$Mini_Bar_Width = CalculateMiniBarWidthCompanyTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+				
 				$phase_space =  $phase_space + $Mini_Bar_Width;					
 				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="' . $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" class="Link" >&nbsp;</a></th>';
 			}
@@ -1052,13 +1169,14 @@ function CompanyTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		$htmlContent .= '<th></th></tr>';
 		
 		////// End Of - Color Graph - Bar Starts
-		
+		/*
 		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="'. (($key == (count($IdsArray)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
 		for($j=0; $j < $columns; $j++)
 		{
 			$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
 		}
 		$htmlContent .= '<th></th></tr>';
+		*/
 	}			   
 
 	//Draw scale			   
@@ -1126,7 +1244,8 @@ function CompanyTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, 
 		$url = 'DiseaseId=' . $id .'&amp;tab=Companies';
 	if($TrackerType == 'DISCATCT')	//DCT=DISEASE COMPANY TRACKER
 		$url = 'DiseaseCatId=' . $id .'&amp;tab=Companies';
-	
+	if($TrackerType == 'INVESTCT')	
+		$url = 'InvestigatorId=' . $id .'&amp;tab=Companies';
 	
 	$rootUrl = $MainPageURL.'?';
 	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
@@ -2293,6 +2412,37 @@ function GetCompaniesFromDiseaseCat_CompanyTracker($arrDiseaseIds)
 		while($row = mysql_fetch_array($res))
 		{
 			$Companies[] = $row['id'];
+		}
+	}
+
+	return array_filter(array_unique($Companies));
+}
+function GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId)
+{
+	global $db;
+	global $now;
+	$Products = array();
+	$Companies = array();
+	
+	
+
+	$query = "SELECT er.child AS CompId, e.`name` AS CompName, e.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
+						FROM entity_relations er 
+						JOIN entities e ON (er.child = e.id and e.class='Institution')
+						JOIN entity_trials et ON(er.parent = et.entity) 
+						JOIN entity_trials et2 ON(et.trial = et2.trial and et2.entity =" . $InvestigatorId . " ) 
+						JOIN data_trials dt on (et2.trial = dt.larvol_id )
+						group by CompId,ProdId
+						";	
+						
+			  
+	$res = mysql_query($query) or die('Bad SQL query getting companies '.$query);
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$Companies[] = $row['CompId'];
 		}
 	}
 

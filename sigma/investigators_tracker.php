@@ -202,7 +202,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					$data_matrix[$key]['ID'] = $key;//$result['ProdId'];
 					//$NewCompanyIds[] = $result['ProdId'];
 					//echo $data_matrix[$key]['RowHeader'].'<br>';
-					$data_matrix[$key]['HeaderLink'] = 'investigator.php?id=' . $data_matrix[$key]['ID'];
+					$data_matrix[$key]['HeaderLink'] = 'investigator.php?InvestigatorId=' . $data_matrix[$key]['ID'];
 					
 					if($GobalEntityType == "Institution"){
 						$data_matrix[$key]['ColumnsLink'] = 'company.php?InvestigatorId=' . $data_matrix[$key]['ID'] . '&CompanyId=' . $id . '&TrackerType=ICPT';
@@ -330,7 +330,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 						$link_part = '&list=1&itype=0';
 					}
 					
-					$data_matrix[$key]['HeaderLink'] = 'investigator.php?id=' . $data_matrix[$key]['ID'];
+					$data_matrix[$key]['HeaderLink'] = 'investigator.php?InvestigatorId=' . $data_matrix[$key]['ID'];
 					$data_matrix[$key]['ColumnsLink'] = 'ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
 					
 					///// Initialize data

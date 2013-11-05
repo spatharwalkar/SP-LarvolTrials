@@ -8203,6 +8203,10 @@ class TrialTracker
 		echo '<input type="hidden" name="DiseaseId" value="' . $globalOptions['DiseaseId'] . '" />'
 				. '<input type="hidden" name="tab" value="DiseaseOTT" />';
 				
+		if(isset($globalOptions['InvestigatorId']))		
+		echo '<input type="hidden" name="InvestigatorId" value="' . $globalOptions['InvestigatorId'] . '" />'
+				. '<input type="hidden" name="tab" value="InvestigatorOTT" />';
+				
 		if(isset($globalOptions['DiseaseCatId']))
 			echo '<input type="hidden" name="DiseaseCatId" value="' . $globalOptions['DiseaseCatId'] . '" />'
 					. '<input type="hidden" name="tab" value="DiseaseOTT" />';
@@ -8234,7 +8238,10 @@ class TrialTracker
 			$Arr = $this->processNonHmParams($resultIds, $globalOptions, 'webPage');
 		}
 		
-		if(!isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['DiseaseId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP'  && $globalOptions['sourcepg'] != 'TZC')
+		
+				
+				
+		if(!isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['DiseaseId']) && !isset($globalOptions['InvestigatorId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP'  && $globalOptions['sourcepg'] != 'TZC')
 		$this->displayHeader($Arr['tHeader']);
 		
 		$ottType = $Arr['ottType'];
@@ -10637,7 +10644,8 @@ class TrialTracker
 				. $this->downloadOptions($count, $Values['totalcount'], $ottType, $resultIds, $globalOptions)
 				. '</div><script type="text/javascript">cssdropdown.startchrome("chromemenu");</script>';
 		}
-		if(!isset($globalOptions['DiseaseId']) && !isset($globalOptions['DiseaseCatId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP'  && $globalOptions['sourcepg'] != 'TZC')
+		
+		if(!isset($globalOptions['DiseaseId']) && !isset($globalOptions['DiseaseCatId']) && !isset($globalOptions['InvestigatorId']) && $globalOptions['sourcepg'] != 'TZ' && $globalOptions['sourcepg'] != 'TZP'  && $globalOptions['sourcepg'] != 'TZC')
 		echo '<br/><br/><div style="height:50px;"></div>';
 		
 	}
@@ -11060,8 +11068,14 @@ class TrialTracker
 	{ 	
 		$url = $globalOptions['url'];
 		
+		
+			
+		
 		if(isset($globalOptions['DiseaseId']))
 		$url .= '&amp;DiseaseId=' . $globalOptions['DiseaseId'] . '&amp;tab=DiseaseOTT';
+		
+		if(isset($globalOptions['InvestigatorId']))
+		$url .= '&amp;InvestigatorId=' . $globalOptions['InvestigatorId'] . '&amp;tab=InvestigatorOTT';
 		
 		if(isset($globalOptions['DiseaseCatId']))
 			$url .= '&amp;DiseaseCatId=' . $globalOptions['DiseaseCatId'] . '&amp;tab=DiseaseOTT';

@@ -1,7 +1,7 @@
 <?php 
 //Below lines are lines should be kept on top of all like session start gives session error, sphinx also gives query related error
 // - so incase of TZ we place in these pages itself
-if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && $_REQUEST['sourcepg'] != 'TZC' && !isset($_REQUEST['CompanyId']) && (false === strpos($_SERVER["REQUEST_URI"], 'company.php')))
+if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && $_REQUEST['sourcepg'] != 'TZC' && !isset($_REQUEST['CompanyId']) && !isset($_REQUEST['InvestigatorId']) && (false === strpos($_SERVER["REQUEST_URI"], 'company.php')))
 {
 	header('P3P: CP="CAO PSA OUR"');
 	session_start();
@@ -41,7 +41,7 @@ if(isset($_POST['btnDownload']))
 	exit;
 }
 
-if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && !isset($_REQUEST['CompanyId']) && (false === strpos($_SERVER["REQUEST_URI"], 'company.php')))
+if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && !isset($_REQUEST['CompanyId']) && !isset($_REQUEST['InvestigatorId']) && (false === strpos($_SERVER["REQUEST_URI"], 'company.php')))
 	DisplayOTT();
 function DisplayOTT()
 {
@@ -87,6 +87,12 @@ function DisplayOTT()
 		$globalOptions['pageLocation'] = $dir."sigma/disease";
 		$_REQUEST['e1'] = $globalOptions['DiseaseId'];
 	}
+	if(isset($_REQUEST['InvestigatorId']))
+	{
+		$globalOptions['InvestigatorId'] = $_REQUEST['InvestigatorId'];
+		$globalOptions['pageLocation'] = $dir."sigma/investigator";
+		$_REQUEST['e1'] = $globalOptions['InvestigatorId'];
+	}
 	if(isset($_REQUEST['DiseaseCatId']))
 	{
 		$globalOptions['DiseaseCatId'] = $_REQUEST['DiseaseCatId'];
@@ -119,7 +125,7 @@ function DisplayOTT()
 		$globalOptions['pageLocation'] = $dir."sigma/company";
 	}
 	
-	if((isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ') || (isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZP') || (isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZC') || (isset($_REQUEST['DiseaseId'])) || (isset($_REQUEST['DiseaseCatId'])) )
+	if((isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZ') || (isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZP') || (isset($_REQUEST['sourcepg']) && $_REQUEST['sourcepg'] == 'TZC') || (isset($_REQUEST['DiseaseId'])) || (isset($_REQUEST['InvestigatorId'])) || (isset($_REQUEST['DiseaseCatId'])) )
 	{
 		if(!isset($_REQUEST['list']))	//set default view all trials in case of TZ related OTT.
 		{
