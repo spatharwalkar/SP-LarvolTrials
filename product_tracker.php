@@ -534,7 +534,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	$Return['matrix'] = $data_matrix;
 	$Return['report_name'] = $Report_DisplayName;
 	$Return['id'] = $id;
-	$Return['rows'] = $rows;
+	$Return['rows'] = $data_matrix;
 	$Return['columns'] = $columns;
 	$Return['ProductIds'] = $productIds;
 	$Return['inner_columns'] = $inner_columns;
