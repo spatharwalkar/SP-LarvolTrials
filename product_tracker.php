@@ -3709,18 +3709,23 @@ function GetProductsFromDiseaseCat($DiseaseCatID)
 	global $db;
 	global $now;
 	$Products = array();
-	$arrImplode = implode(",", $DiseaseCatID);
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent` in(" . mysql_real_escape_string($arrImplode) . ") AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
-
-	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT '.$query);
-
-	if($res)
+	
+	if(is_array($DiseaseCatID) && count($DiseaseCatID)) 
 	{
-		while($row = mysql_fetch_array($res))
+		$arrImplode = implode(",", $DiseaseCatID);
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent` in(" . mysql_real_escape_string($arrImplode) . ") AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+
+		$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT '.$query);
+
+		if($res)
 		{
-			$Products[] = $row['id'];
+			while($row = mysql_fetch_array($res))
+			{
+				$Products[] = $row['id'];
+			}
 		}
 	}
+	
 	return array_filter(array_unique($Products));
 }
 

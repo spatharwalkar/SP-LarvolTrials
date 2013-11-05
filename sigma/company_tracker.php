@@ -2401,20 +2401,24 @@ function GetCompaniesFromDiseaseCat_CompanyTracker($arrDiseaseIds)
 	global $now;
 	$Products = array();
 	$Companies = array();
-	$arrImplode = implode(",", $arrDiseaseIds);
 	
-	$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) JOIN `entities` e2 ON(e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'Institution' AND e.`category`='Industry' AND e2.`class` = 'Product' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND er2.`parent` in(" . mysql_real_escape_string($arrImplode) . ")";
-	
-	$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
+	if(is_array($arrDiseaseIds) && count($arrDiseaseIds)) 
+	{	
+		$arrImplode = implode(",", $arrDiseaseIds);
+		
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) JOIN `entities` e2 ON(e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'Institution' AND e.`category`='Industry' AND e2.`class` = 'Product' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND er2.`parent` in(" . mysql_real_escape_string($arrImplode) . ")";
+		
+		$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
 
-	if($res)
-	{
-		while($row = mysql_fetch_array($res))
+		if($res)
 		{
-			$Companies[] = $row['id'];
+			while($row = mysql_fetch_array($res))
+			{
+				$Companies[] = $row['id'];
+			}
 		}
 	}
-
+	
 	return array_filter(array_unique($Companies));
 }
 function GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId)

@@ -310,13 +310,18 @@
 		global $db;
 		global $now;
 		$ProductsCount = 0;
-		$query = "SELECT child FROM `entity_relations` WHERE parent =$dcid";
-		$res = mysql_query($query) or die('Bad SQL query for counting diseases by a disease category ID ');
-
-		if($res)
+		$arrDiseaseIds = array();
+		
+		if($dcid > 0) 
 		{
-			while($row = mysql_fetch_array($res))
-				$arrDiseaseIds[] = $row['child'];
+			$query = "SELECT child FROM `entity_relations` WHERE parent = '$dcid'";
+			$res = mysql_query($query) or die('Bad SQL query for counting diseases by a disease category ID ');
+
+			if($res)
+			{
+				while($row = mysql_fetch_array($res))
+					$arrDiseaseIds[] = $row['child'];
+			}
 		}
 		return $arrDiseaseIds;
 	}
@@ -327,16 +332,21 @@
 		global $db;
 		global $now;
 		$TrialsCount = 0;
-		$arrImplode = implode(",", $arrDiseaseIds);
-		$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity` in(" . mysql_real_escape_string($arrImplode) . ")";
 		
-		$res = mysql_query($query) or die('Bad SQL query getting trials count from Disease id in TZ');
-
-		if($res)
+		if(is_array($arrDiseaseIds) && count($arrDiseaseIds)) 
 		{
-			while($row = mysql_fetch_array($res))
-				$TrialsCount = $row['trialCount'];
+			$arrImplode = implode(",", $arrDiseaseIds);
+			$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity` in(" . mysql_real_escape_string($arrImplode) . ")";
+			
+			$res = mysql_query($query) or die('Bad SQL query getting trials count from Disease id in TZ');
+
+			if($res)
+			{
+				while($row = mysql_fetch_array($res))
+					$TrialsCount = $row['trialCount'];
+			}
 		}
+		
 		return $TrialsCount;
 	}
 
