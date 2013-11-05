@@ -208,7 +208,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 		("Area","Disease","Product","Biomarker","Disease_Category") and (searchdata is not null and searchdata<>\'\')) 
 		
 		order by `id` ';
-		else $query='select id from entities where class in  (("Product","Biomarker") and (searchdata is not null and searchdata<>\'\')) order by `id` ';
+		else $query='select id from entities where class in  ("Product","Biomarker") and (searchdata is not null and searchdata<>\'\') order by `id` ';
 		}
 	}	
 	$res = mysql_query($query);
