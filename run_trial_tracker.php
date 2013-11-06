@@ -7797,6 +7797,8 @@ class TrialTracker
 		
 		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 					. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
+					. " CASE dt.`start_date` WHEN 'NULL' or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
+					. "	CASE dt.`end_date` WHEN 'NULL' or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
 					. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
 					. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
 					. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
@@ -7884,12 +7886,12 @@ class TrialTracker
 		{
 			if($globalOptions['dOption'] == 'all')
 			{
-				$orderBy = ' ORDER BY dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC';
+				$orderBy = ' ORDER BY dt.`phase` DESC, `enddate` ASC, `startdate` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC';
 				$Query .= $orderBy;
 			}
 			else
 			{
-				$orderBy = ' ORDER BY dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC';
+				$orderBy = ' ORDER BY dt.`phase` DESC, `enddate` ASC, `startdate` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC';
 				$Query .= $filters . $orderBy;
 			}
 		}
@@ -8565,6 +8567,8 @@ class TrialTracker
 			
 			$select = " dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
+						. " CASE dt.`start_date` WHEN 'NULL' or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
+						. "	CASE dt.`end_date` WHEN 'NULL' or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
 						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
 						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
 						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
@@ -8609,7 +8613,7 @@ class TrialTracker
 			}
 			else
 			{
-				$orderBy .= "dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+				$orderBy .= "dt.`phase` DESC, `enddate` ASC, `startdate` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
 			}
 	
 			$Query .= $orderBy;
@@ -8997,11 +9001,11 @@ class TrialTracker
 		
 		if($ottType == 'rowstacked')
 		{
-			$orderBy = " ORDER BY FIELD(at.`entity`, " . implode(",", $aIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+			$orderBy = " ORDER BY FIELD(at.`entity`, " . implode(",", $aIds) . "), dt.`phase` DESC,`enddate` ASC,`startdate` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
 		}
 		else
 		{
-			$orderBy = " ORDER BY FIELD(pt.`entity`, " . implode(",", $pIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+			$orderBy = " ORDER BY FIELD(pt.`entity`, " . implode(",", $pIds) . "), dt.`phase` DESC,`enddate` ASC,`startdate` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
 		}
 		
 		$where = " WHERE 1 ";
@@ -9009,6 +9013,8 @@ class TrialTracker
 		
 		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
+						. " CASE dt.`start_date` WHEN 'NULL' or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
+						. "	CASE dt.`end_date` WHEN 'NULL' or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
 						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
 						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
 						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
@@ -9516,11 +9522,11 @@ class TrialTracker
 		
 		if($ottType == 'rowstacked')
 		{
-			$orderBy = " ORDER BY FIELD(at.`area`, " . implode(",", $aIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+			$orderBy = " ORDER BY FIELD(at.`area`, " . implode(",", $aIds) . "), dt.`phase` DESC, `enddate` ASC, `startdate` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
 		}
 		else
 		{
-			$orderBy = " ORDER BY FIELD(pt.`product`, " . implode(",", $pIds) . "), dt.`phase` DESC, dt.`end_date` ASC, dt.`start_date` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
+			$orderBy = " ORDER BY FIELD(pt.`product`, " . implode(",", $pIds) . "), dt.`phase` DESC, `enddate` ASC,`startdate` ASC, dt.`overall_status` ASC, dt.`enrollment` ASC ";
 		}
 		
 		$where = " WHERE 1 ";
@@ -9529,6 +9535,8 @@ class TrialTracker
 		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
 						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
+						. " CASE dt.`start_date` WHEN 'NULL' or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
+						. "	CASE dt.`end_date` WHEN 'NULL' or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
 						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
 						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
 						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region,"
