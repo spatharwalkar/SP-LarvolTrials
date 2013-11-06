@@ -540,9 +540,16 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 		//Get only those product Ids which we are planning to display on current page to avoid unnecessary queries
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		
-		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$rows = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		if(!empty($data_matrix))
+		{
+			$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$rows = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		}
+		else
+		{
+			$data_matrix=array();
+			$rows = array();
+		}
 	}
 	/////////PAGING DATA ENDS
 	
