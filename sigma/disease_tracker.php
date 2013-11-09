@@ -561,6 +561,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	}	
 	//print_r($data_matrix);
 	/// This function willl Sort multidimensional array according to Total count
+	
 	$data_matrix = sortTwoDimensionArrayByKeyDiseaseTracker($data_matrix,'TotalCount');
 //print_r($data_matrix);	
 	///////////PAGING DATA
@@ -576,7 +577,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewDiseaseIds = array_slice($NewDiseaseIds, $StartSlice, $RecordsPerPage);
+		$NewDiseaseIds = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
@@ -1221,7 +1222,7 @@ function DiseaseTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 
 function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $GobalEntityType, $CountType)
 {				
-	if(count($IdsArray) == 0) return 'No Disease Found';
+	if(count($data_matrix) == 0) return 'No Disease Found';
 	
 	require_once('../tcpdf/config/lang/eng.php');
 	require_once('../tcpdf/tcpdf.php');  
@@ -2682,13 +2683,19 @@ function sortTwoDimensionArrayByKeyDiseaseTracker($arr, $arrKey, $sortOrder=SORT
 {
 	if(is_array($arr) && count($arr) > 0)
 	{
+		$key_arr = array();
+		$res = array();
 		foreach ($arr as $key => $row)
 		{
-			$key_arr[$key] = $row[$arrKey];
+			if($row[$arrKey] > 0)
+			{
+				$key_arr[$key] = $row[$arrKey];
+				$res[$key] = $arr[$key];
+			}
 		}
-		array_multisort($key_arr, $sortOrder, $arr);
+		array_multisort($key_arr, $sortOrder, $res);
 	}
-	return $arr;
+	return $res;
 }
 
 //Get Diseases from Disease

@@ -376,7 +376,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewMOAOrMOACatIds = array_slice($NewMOAOrMOACatIds, $StartSlice, $RecordsPerPage);
+		$NewMOAOrMOACatIds = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
@@ -971,7 +971,7 @@ function MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 
 function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL)
 {				
-	if(count($IdsArray) == 0 && ($TrackerType == 'MTH' || $TrackerType == 'DMT' || $TrackerType == 'DISCATMT')) return 'No MOA Found';
+	if(count($data_matrix) == 0 && ($TrackerType == 'MTH' || $TrackerType == 'DMT' || $TrackerType == 'DISCATMT')) return 'No MOA Found';
 	
 	require_once('../tcpdf/config/lang/eng.php');
 	require_once('../tcpdf/tcpdf.php');  
@@ -2335,13 +2335,19 @@ function sortTwoDimensionArrayByKeyMOATracker($arr, $arrKey, $sortOrder=SORT_DES
 {
 	if(is_array($arr) && count($arr) > 0)
 	{
+		$key_arr = array();
+		$res = array();
 		foreach ($arr as $key => $row)
 		{
-			$key_arr[$key] = $row[$arrKey];
+			if($row[$arrKey] > 0)
+			{
+				$key_arr[$key] = $row[$arrKey];
+				$res[$key] = $arr[$key];
+			}
 		}
-		array_multisort($key_arr, $sortOrder, $arr);
+		array_multisort($key_arr, $sortOrder, $res);
 	}
-	return $arr;
+	return $res;
 }
 
 
