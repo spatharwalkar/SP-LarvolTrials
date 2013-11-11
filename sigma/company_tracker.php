@@ -419,7 +419,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewCompanyIds = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$NewCompanyIds = array_slice($NewCompanyIds, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
