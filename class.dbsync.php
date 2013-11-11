@@ -118,6 +118,8 @@
         function SyncDatabases(&$db_home, &$db_sync) {
         	$tables_home = $db_home->ListTables();
             $tables_sync = $db_sync->ListTables();
+			$fieldnames_sync = array();
+			$fields_home = array();
 
             for ($i = 0; $i < count($tables_home); $i++)
             {
@@ -259,7 +261,8 @@
 	                            
                         }
 
-		                unset($fieldnames_sync[array_shift(array_keys($fieldnames_sync, $fields_home[$j]['name']))]);
+		                $arrayKeysFieldsHome = array_keys($fieldnames_sync, $fields_home[$j]['name']);
+		                unset($fieldnames_sync[array_shift($arrayKeysFieldsHome)]);
                     }
                     
                     //set table field orders
@@ -294,7 +297,8 @@
 		            }
                 }
 
-                unset($tables_sync[array_shift(array_keys($tables_sync, $tables_home[$i]))]);
+                $arrayKeysTableHome = array_keys($tables_sync, $tables_home[$i]);
+				unset($tables_sync[array_shift($arrayKeysTableHome)]);
             }
 
             foreach ($tables_sync as $table) {

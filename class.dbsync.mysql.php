@@ -112,7 +112,12 @@ require_once('include.util.php');
 	            $indexFlag = false;
 	            $multiColumnKeyNameTmp = array();
 	            $keyDuplicateCount = null;
-				
+				$foreign_key = null;
+				$referenced_table_name = null;
+				$referenced_column_name = null;
+				$update_rule = null;
+				$delete_rule = null;
+				$constraint_name = null;
 				//Get collation type and characterset for each field as some time collation type of field is different from table
 				$FieldDetails = mysql_query("SELECT `CHARACTER_SET_NAME`, `COLLATION_NAME` FROM information_schema.columns WHERE table_schema='".$this->database."' AND table_name='".$table."' AND `COLUMN_NAME`= '{$row[0]}' LIMIT 1", $this->dbp);
 				
@@ -694,7 +699,8 @@ require_once('include.util.php');
          **/
         function getData($table)
         {
-        	switch($table)
+        	$out = array();
+			switch($table)
         	{
         		case 'data_fields':
         			$sql = "SELECT df . * , dc.name AS dcname FROM `$this->database`.data_fields df LEFT JOIN `$this->database`.data_categories dc ON df.category = dc.id";
@@ -922,7 +928,9 @@ require_once('include.util.php');
         **/
         function compareCommonTriggers($homeInterSync,$homeTriggerArr,$syncTriggerArr)
         {
-        	//pr($homeTriggerArr);pr($syncTriggerArr);die;
+        	$triggersForUpdate = array();
+			
+			//pr($homeTriggerArr);pr($syncTriggerArr);die;
         	foreach($homeInterSync as $triggerToAdd)
         	{
         		foreach($homeTriggerArr[0] as $ky=>$triggerDef)
