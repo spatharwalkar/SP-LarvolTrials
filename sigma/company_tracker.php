@@ -405,9 +405,6 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		
 	}
 	
-		
-		
-		
 	/// This function willl Sort multidimensional array according to Total count
 	$data_matrix = sortTwoDimensionArrayByKeyCompanyTracker($data_matrix,'TotalCount');
 	
@@ -2382,10 +2379,10 @@ function CountErr($data_matrix, $key, $ratio)
 
 function sortTwoDimensionArrayByKeyCompanyTracker($arr, $arrKey, $sortOrder=SORT_DESC)
 {
+	$key_arr = array();
+	$res = array();
 	if(is_array($arr) && count($arr) > 0)
-	{
-		$key_arr = array();
-		$res = array();
+	{		
 		foreach ($arr as $key => $row)
 		{
 			if($row[$arrKey] > 0)

@@ -2333,10 +2333,10 @@ function MOAsCountErr($data_matrix, $key, $ratio)
 
 function sortTwoDimensionArrayByKeyMOATracker($arr, $arrKey, $sortOrder=SORT_DESC)
 {
+	$key_arr = array();
+	$res = array();
 	if(is_array($arr) && count($arr) > 0)
-	{
-		$key_arr = array();
-		$res = array();
+	{		
 		foreach ($arr as $key => $row)
 		{
 			if($row[$arrKey] > 0)

@@ -558,12 +558,12 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 									
 			} //END OF IF - Disease ID NULL OR NOT			
 		}	//END OF While - Fetch data		
-	}	
-	//print_r($data_matrix);
-	/// This function willl Sort multidimensional array according to Total count
+	}
 	
+	//print_r($data_matrix);
+	/// This function willl Sort multidimensional array according to Total count	
 	$data_matrix = sortTwoDimensionArrayByKeyDiseaseTracker($data_matrix,'TotalCount');
-//print_r($data_matrix);	
+	
 	///////////PAGING DATA
 	global $TabDiseaseCount;
 	$TabDiseaseCount = count($data_matrix);	
@@ -2681,10 +2681,11 @@ function CountErr($data_matrix, $key, $ratio)
 
 function sortTwoDimensionArrayByKeyDiseaseTracker($arr, $arrKey, $sortOrder=SORT_DESC)
 {
+	
+	$key_arr = array();
+	$res = array();
 	if(is_array($arr) && count($arr) > 0)
 	{
-		$key_arr = array();
-		$res = array();
 		foreach ($arr as $key => $row)
 		{
 			if($row[$arrKey] > 0)
