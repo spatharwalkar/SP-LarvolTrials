@@ -42,6 +42,10 @@
 	
 	$CompanyIds      = GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId);
 	
+	$TabProductCount = array_filter(array_unique(getProductIdsFromInvestigator($InvestigatorId)));
+	$TabProductCount = count($TabProductCount);
+	
+	
 	$CompanyIds = array_filter(array_unique($CompanyIds));
 	
 	$TabTrialCount   = GetTrialsCountFromInvestigator($InvestigatorId);
@@ -166,18 +170,19 @@
 								<img id="CompaniesImg" src="../images/firstSelectTab.png" />
 							</td>
 							<td id="CompaniesTab" class="selectTab"><?php print $compLinkName; ?></td>
-							<!--
+							
 							<td>
 								<img id="ProductsImg" src="../images/selectTabConn.png" />
 							</td>
 							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
+							<!--
 							<td>
 								<img id="MOAsImg" src="../images/afterTab.png" />
 							</td>
 							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
 							-->
 							<td>
-								<img id="InvestigatorOTTImg" src="../images/selectTabConn.png" />
+								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
 							</td>
 							
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
@@ -194,13 +199,16 @@
 								<img id="ProductsImg" src="../images/middleTab.png" />
 							</td>
 							<td id="ProductsTab" class="selectTab"><?php print $prodLinkName; ?></td>
+							<!--
 							<td>
 								<img id="MOAsImg" src="../images/selectTabConn.png" />
 							</td>
-							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
+							<td id="MOAsTab" class="Tab"><?php /*print $moaLinkName;*/ ?></td>
+							-->
 							<td>
 								<img id="InvestigatorOTTImg" src="../images/selectTabConn.png" />
 							</td>
+							
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="InvestigatorOHMImg" src="../images/afterTab.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td> 
@@ -211,7 +219,7 @@
 							</td>
 							<td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td>
 							<td>
-								<img id="ProductsImg" src="../images/afterTab.png" />
+								<img id="ProductsImg" src="../images/middleTab.png" />
 							</td>
 							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
 							<td>
@@ -231,11 +239,12 @@
 								<img id="CompaniesImg" src="../images/firstTab.png" />
 							</td>
 							<td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td>
-							<!--
+							
 							<td>
 								<img id="ProductsImg" src="../images/afterTab.png" />
 							</td>
 							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
+							<!--
 							<td>
 								<img id="MOAsImg" src="../images/afterTab.png" />
 							</td>
@@ -284,11 +293,16 @@
 					if($tab == 'Products')
 					{
 						chdir ("..");
-						print '<div id="Products" align="center">'.showProductTracker($InvestigatorId, $dwcount, 'INVESTCT', $page).'</div>';
+						global $TabProductCount;
+						print '<div id="Products" align="center">'.showProductTracker($InvestigatorId, $dwcount, 'INVESTPT', $page).'</div>';
 						chdir ("$cwd");
 					}
 					if($tab == 'Companies')
-					print '<div id="Companies" align="center">'.showCompanyTracker($InvestigatorId, 'INVESTCT', $page).'</div>'; 
+					{
+						//global $TabCompanyCount;
+						print '<div id="Companies" align="center">'.showCompanyTracker($InvestigatorId, 'INVESTCT', $page).'</div>'; 
+					}
+					
 					if($tab == 'MOAs')
 					print '<div id="MOAs" align="center">'.showMOATracker($InvestigatorId, 'INVESTCT', $page).'</div>'; 
 					if($tab == 'InvestigatorOTT')
