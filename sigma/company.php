@@ -84,17 +84,23 @@
 	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'company.php?CompanyId='.$CompanyId;
 	$tabOTTUrl    = 'company.php?e1='.$CompanyId;
-	
+	$disease = array();
 	if($categoryFlag == 1){
-		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($CompanyId, 'Institution' ));
-	}else{
-		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
+		//$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($CompanyId, 'Institution' ));
+		$disease = DataGeneratorForDiseaseTracker($CompanyId, 'CDT', $page, $dwcount, $categoryFlag);
+		$TabDiseaseCount = $disease['TotalRecords'];
+	}
+	else{
+		//$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
+		$disease = DataGeneratorForDiseaseTracker($CompanyId, 'CDT', $page, $dwcount, $categoryFlag);
+		$TabDiseaseCount = $disease['TotalRecords'];
 	}	
 	
-	$productIds      = GetProductsFromCompany($CompanyId, 'CPT', array());
-	
+	//$productIds = GetProductsFromCompany($CompanyId, 'CPT', array());
+	$product = array();
+	$product = DataGenerator($CompanyId, 'CPT', $page, $OptionArray, $dwcount);
+	$TabProductCount = $product['TotalRecords'];
 	$TabTrialCount = GetTrialsCountForCompany($productIds);	
-	$TabProductCount = count($productIds);
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($CompanyId, 'Institution'));
 	
 	$meta_title = 'Larvol Sigma'; //default value
@@ -331,7 +337,7 @@
 						chdir ("$cwd");
 					}
 					else
-						print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 	
+						print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 
 					print '</div>';
 				}
 				else

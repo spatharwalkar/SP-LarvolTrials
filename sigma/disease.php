@@ -44,7 +44,10 @@
 	}
 	$tabCommonUrl = 'disease.php?DiseaseId='.$DiseaseId;
 	
-	$TabProductCount = count(GetProductsFromDisease($DiseaseId));
+	//$TabProductCount = count(GetProductsFromDisease($DiseaseId));
+	$product = array();
+	$product = DataGenerator($DiseaseId, 'DPT', $page, $OptionArray, $dwcount);
+	$TabProductCount = $product['TotalRecords'];
 	$TabCompanyCount = count(GetCompaniesFromDisease_CompanyTracker($DiseaseId));
 	$TabMOAData = GetMOAsOrMOACatFromDisease_MOATracker($DiseaseId);
 	$TabMOACount = count($TabMOAData['all']);

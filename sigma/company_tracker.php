@@ -411,7 +411,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	///////////PAGING DATA
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
-	$TotalRecords = count($NewCompanyIds);
+	$TotalRecords = count($data_matrix);
 	if(!isset($_POST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);

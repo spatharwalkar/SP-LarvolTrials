@@ -569,7 +569,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	$TabDiseaseCount = count($data_matrix);	
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
-	$TotalRecords = count($NewDiseaseIds);
+	$TotalRecords = count($data_matrix);
 	if(!isset($_REQUEST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
