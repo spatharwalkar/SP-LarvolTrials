@@ -7527,69 +7527,72 @@ class TrialTracker
 		$TrialsInfo = array();
 		$Ids = array();
 		
-		$Query = "SELECT `name`, `id`, `class`,`display_name`,`company`, `discontinuation_status`, `discontinuation_status_comment` "
-					. " FROM `entities` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') "
-					. " ORDER BY FIELD(`id`, " . implode(",", $productIds) . ") ";
-		$Res = m_query(__LINE__,$Query);
+		if(count($productIds)) {
 		
-		if($Res)
-		{	
-			if(mysql_num_rows($Res) > 0)
-			{	
-				while($row = mysql_fetch_assoc($Res))
-				{
-					$disContinuedTxt = "";
-					$sectionHeader = "";
-					
-					$productIds[] = $productId = $row['id'];
-					
-					if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
-					{
-						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
-					}
-					
-					if($row['class']=='Product')
-					{
-						$sectionHeader = formatBrandName($row['name'], 'product');
-						$productSelector[$productId] = $row['name'];	
-					}
-					elseif(!empty($row['display_name']))
-					{
-						$sectionHeader = formatBrandName($row['display_name'], 'area');
-						$productSelector[$productId] = $row['display_name'];
-					}
-					else
-					{
-						$sectionHeader = formatBrandName($row['class'].' ' . $areaId, 'area');
-						$productSelector[$productId] = $row['class'].' ' . $areaId;
-					}
-					
-					if($row['class']=='Product')	
-					$row['company'] = GetCompanyNames($productId);
-					
-					if($row['company'] !== NULL && $row['company'] != '')
-					{
-						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
-						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
-					}
+			$Query = "SELECT `name`, `id`, `class`,`display_name`,`company`, `discontinuation_status`, `discontinuation_status_comment` "
+						. " FROM `entities` WHERE id IN ('" . implode("','", $productIds) . "') OR LI_id IN ('" . implode("','", $productIds) . "') "
+						. " ORDER BY FIELD(`id`, " . implode(",", $productIds) . ") ";
+			$Res = m_query(__LINE__,$Query);
 			
-					
-					$sectionHeader .= $disContinuedTxt;
-					
-					$TrialsInfo[$productId]['Id'] = $productId;
-					$TrialsInfo[$productId]['sectionHeader'] = $sectionHeader;
-					
-					$Ids[$productId]['product'] = $productId;
-					
-					unset($disContinuedTxt);
+			if($Res)
+			{	
+				if(mysql_num_rows($Res) > 0)
+				{	
+					while($row = mysql_fetch_assoc($Res))
+					{
+						$disContinuedTxt = "";
+						$sectionHeader = "";
+						
+						$productIds[] = $productId = $row['id'];
+						
+						if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
+						{
+							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+						}
+						
+						if($row['class']=='Product')
+						{
+							$sectionHeader = formatBrandName($row['name'], 'product');
+							$productSelector[$productId] = $row['name'];	
+						}
+						elseif(!empty($row['display_name']))
+						{
+							$sectionHeader = formatBrandName($row['display_name'], 'area');
+							$productSelector[$productId] = $row['display_name'];
+						}
+						else
+						{
+							$sectionHeader = formatBrandName($row['class'].' ' . $areaId, 'area');
+							$productSelector[$productId] = $row['class'].' ' . $areaId;
+						}
+						
+						if($row['class']=='Product')	
+						$row['company'] = GetCompanyNames($productId);
+						
+						if($row['company'] !== NULL && $row['company'] != '')
+						{
+							$sectionHeader .= " / <i>" . $row['company'] . "</i>";
+							$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
+						}
+				
+						
+						$sectionHeader .= $disContinuedTxt;
+						
+						$TrialsInfo[$productId]['Id'] = $productId;
+						$TrialsInfo[$productId]['sectionHeader'] = $sectionHeader;
+						
+						$Ids[$productId]['product'] = $productId;
+						
+						unset($disContinuedTxt);
+					}
 				}
 			}
-		}
-		else
-		{
-			$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
-			$logger->error($log);
-			unset($log);
+			else
+			{
+				$log 	= 'ERROR: Bad SQL query. ' . $Query . mysql_error();
+				$logger->error($log);
+				unset($log);
+			}
 		}
 		
 		return array('Ids' => $Ids, 'TrialsInfo' => $TrialsInfo, 'productSelector' => $productSelector);
