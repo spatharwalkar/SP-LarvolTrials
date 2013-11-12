@@ -346,7 +346,7 @@
 					
 					//DIT=DISEASE INVESTIGATOR TRACKER
 					if($tab == 'Investigators')
-						print '<div id="Investigators" align="center">'.showInvestigatorTracker($DiseaseId, $dwcount, 'DIT', $page).'</div>'; 
+						print '<div id="Investigators" align="center">'.showInvestigatorTracker($DiseaseId, $dwIcount, 'DIT', $page).'</div>'; 
 					
 					//DCT=DISEASE COMPANY TRACKER
 					if($tab == 'Companies') 
