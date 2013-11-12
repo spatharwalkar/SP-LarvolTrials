@@ -96,11 +96,10 @@
 		$TabDiseaseCount = $disease['TotalRecords'];
 	}	
 	
-	//$productIds = GetProductsFromCompany($CompanyId, 'CPT', array());
 	$product = array();
 	$product = DataGenerator($CompanyId, 'CPT', $page, $OptionArray, $dwcount);
 	$TabProductCount = $product['TotalRecords'];
-	$TabTrialCount = GetTrialsCountForCompany($productIds);	
+	$TabTrialCount = GetTrialsCountForCompany($product['ProductIds']);	
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($CompanyId, 'Institution'));
 	
 	$meta_title = 'Larvol Sigma'; //default value
