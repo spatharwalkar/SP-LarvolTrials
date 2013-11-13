@@ -11109,7 +11109,10 @@ class TrialTracker
 		}
 		if(isset($globalOptions['endrange']))
 		{
-			$url .= '&amp;er=' . $globalOptions['endrange'];
+			if( substr($globalOptions['endrange'],0,1)=="1" and substr($globalOptions['endrange'],-5)=="month" )
+				$url .= '&amp;er=1+month';
+			else
+				$url .= '&amp;er=' . $globalOptions['endrange'];
 		}
 		
 		if(isset($globalOptions['type']) && $globalOptions['type'] != 'activeTrials')
