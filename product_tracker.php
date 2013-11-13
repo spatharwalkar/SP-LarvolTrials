@@ -78,6 +78,8 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 		$MainPageURL = 'moacategory.php';
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$MainPageURL = 'disease.php';
+	else if($TrackerType == 'INVESTPT')	
+		$MainPageURL = 'investigator.php';
 	
 	
 	$HTMLContent .= TrackerCommonCSS($uniqueId, $TrackerType);
