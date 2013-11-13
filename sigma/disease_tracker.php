@@ -892,7 +892,7 @@ function DiseaseTrackerCommonCSS($uniqueId, $TrackerType)
 						padding-top:0px; 
 						vertical-align:top;
 						font-weight:bold;
-						padding-bottom:25px;
+						/*padding-bottom:25px;*/
 						color:#4f2683;
 					}
 					
@@ -1233,13 +1233,13 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 	
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
-					.'<form action="disease_tracker.php" method="post" style="margin-bottom: 18px;">'
+					.'<form action="disease_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
 	if($TrackerType == 'DTH')				
 	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;'. (($TotalRecords == 1) ? 'Disease':'Diseases') .'</div></td>';
-	
+
 	if($TotalPages > 1)
 	{
 		$paginate = DiseaseTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
@@ -1274,9 +1274,9 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		$catHidden = '';
 	}
 	$htmlContent .= '<td class="bottom right">'
-					. '<input type="button" value="Category View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac&category=1\'"'. $catDisabled .'>'
-					. '&nbsp;&nbsp;'
-					. '<input type="button" value="Disease View"  onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac\'"' . $diseaseDisabled.'>'
+					. '<input type="radio" name="category_switch" value="Disease Category View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac&category=1\'"'. $catDisabled .'>Disease Category View'
+					. '&nbsp;&nbsp;'					
+					.'<input type="radio" name="category_switch" value="Disease View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac\'"' . $diseaseDisabled.'>Disease View'
 					. $catHidden
 					. '</td>'
 					. '</tr>'
