@@ -7798,10 +7798,11 @@ class TrialTracker
 		$join .= " LEFT OUTER JOIN `data_manual` dm ON dt.`larvol_id` = dm.`larvol_id` "
 					. " LEFT OUTER JOIN `data_history` dh ON dh.`larvol_id` = dt.`larvol_id` ";
 		
-		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
+		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, 
+					dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 					. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
-					. " CASE dt.`start_date` WHEN 'NULL' or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
-					. "	CASE dt.`end_date` WHEN 'NULL' or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
+					. " CASE WHEN dt.`start_date` is null or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
+					. "	CASE WHEN dt.`end_date` is null or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
 					. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
 					. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
 					. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
@@ -8570,8 +8571,8 @@ class TrialTracker
 			
 			$select = " dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
-						. " CASE dt.`start_date` WHEN 'NULL' or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
-						. "	CASE dt.`end_date` WHEN 'NULL' or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
+						. " CASE WHEN dt.`start_date` is null or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
+						. "	CASE WHEN dt.`end_date` is null or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
 						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
 						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
 						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
@@ -9017,8 +9018,8 @@ class TrialTracker
 		
 		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
-						. " CASE dt.`start_date` WHEN 'NULL' or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
-						. "	CASE dt.`end_date` WHEN 'NULL' or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
+						. " CASE WHEN dt.`start_date` is null or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
+						. "	CASE WHEN dt.`end_date` is null or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
 						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
 						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
 						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
@@ -9539,8 +9540,8 @@ class TrialTracker
 		$query = "SELECT SQL_CALC_FOUND_ROWS dt.`larvol_id`, dt.`source_id`, dt.`brief_title`, dt.`acronym`, dt.`lead_sponsor`, dt.`collaborator`, dt.`condition`,"
 						. " dt.`overall_status`, dt.`is_active`, dt.`start_date`, dt.`end_date`, dt.`enrollment`, dt.`intervention_name`,"
 						. " dt.`region`, dt.`phase`, dt.`firstreceived_date`, dt.`viewcount`, dt.`source`, "
-						. " CASE dt.`start_date` WHEN 'NULL' or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
-						. "	CASE dt.`end_date` WHEN 'NULL' or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
+						. " CASE WHEN dt.`start_date` is null or '0000-00-00' THEN dt.`end_date` ELSE dt.`start_date` END as startdate,"
+						. "	CASE WHEN dt.`end_date` is null or '0000-00-00' THEN dt.`start_date` ELSE  dt.`end_date` END as enddate,"
 						. " dm.`is_sourceless` AS manual_is_sourceless, dm.`brief_title` AS manual_brief_title, dm.`acronym` AS manual_acronym, "
 						. " dm.`lead_sponsor` AS manual_lead_sponsor, dm.`collaborator` AS manual_collaborator,"
 						. " dm.`condition` AS manual_condition, dm.`overall_status` AS manual_overall_status, dm.`region` AS manual_region,"
