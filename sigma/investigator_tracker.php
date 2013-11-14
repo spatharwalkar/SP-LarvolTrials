@@ -41,10 +41,9 @@ function showInvestigatorTracker($id, $dwIcount, $TrackerType, $page=1, $OptionA
 {
 	$HTMLContent = '';
 	
-	$Return = InvDataGenerator($id, $TrackerType, $page, $OptionArray);
+	$Return = InvDataGenerator($id, $TrackerType, $page, $OptionArray, $dwIcount);
 	$uniqueId = uniqid();
-	
-	
+		
 	$data_matrix = $Return['matrix'];
 	$Report_DisplayName = $Return['report_name'];
 	$id = $Return['id'];
@@ -82,7 +81,7 @@ function showInvestigatorTracker($id, $dwIcount, $TrackerType, $page=1, $OptionA
 	return $HTMLContent;
 
 }
-function InvDataGenerator($id, $TrackerType, $page=1, $OptionArray)
+function InvDataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwIcount='total')
 {
 	global $db;
 	global $now;
@@ -318,7 +317,7 @@ function InvDataGenerator($id, $TrackerType, $page=1, $OptionArray)
 	
 	
 	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
-		$data_matrix = IsortTwoDimensionArrayByKey($data_matrix,'total');	
+		$data_matrix = IsortTwoDimensionArrayByKey($data_matrix, $dwIcount);	
 	else
 		$data_matrix = IsortTwoDimensionArrayByKey($data_matrix,'indlead');
 	
@@ -2289,15 +2288,22 @@ function getInvColspanforExcelExportPT($cell, $inc)
 
 function IsortTwoDimensionArrayByKey($arr, $arrKey, $sortOrder=SORT_DESC)
 {
+	$key_arr = array();
+	$res = array();
+	
 	if(is_array($arr) && count($arr) > 0)
 	{
 		foreach ($arr as $key => $row)
 		{
-			$key_arr[$key] = $row[$arrKey];
+			if($row[$arrKey] > 0) 
+			{
+				$key_arr[$key] = $row[$arrKey];
+				$res[$key] = $arr[$key];
+			}
 		}
-		array_multisort($key_arr, $sortOrder, $arr);
+		array_multisort($key_arr, $sortOrder, $res);
 	}
-	return $arr;
+	return $res;
 }
 function IMax_ValueKey($valna, $val0, $val1, $val2, $val3, $val4)
 {
