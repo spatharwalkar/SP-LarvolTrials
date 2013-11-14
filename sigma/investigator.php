@@ -41,8 +41,11 @@
 	$tabCommonUrl    = 'investigator.php?InvestigatorId='.$InvestigatorId;
 	
 	$CompanyIds      = GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId);
-	
-	$TabProductCount = array_filter(array_unique(getProductIdsFromInvestigator($InvestigatorId)));
+	$TabProductCount = getProductIdsFromInvestigator($InvestigatorId);
+	if(empty($TabProductCount))
+		$TabProductCount = array();
+	else
+		$TabProductCount = array_filter(array_unique($TabProductCount));
 	$TabProductCount = count($TabProductCount);
 	
 	
