@@ -492,7 +492,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 						$data_matrix[$row]['active_phase_3']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
 						$data_matrix[$row]['indlead_phase_3']++;
-						if($phase_row['institution_type'] == 'owner_sponsored')
+						if($phase_row['relation_type'] == 'ownersponsored')
 						$data_matrix[$row]['owner_sponsored_phase_3']++;
 					}
 				}
@@ -504,7 +504,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 						$data_matrix[$row]['active_phase_4']++;
 						if($phase_row['institution_type'] == 'industry_lead_sponsor')
 						$data_matrix[$row]['indlead_phase_4']++;
-						if($phase_row['institution_type'] == 'owner_sponsored')
+						if($phase_row['relation_type'] == 'ownersponsored')
 						$data_matrix[$row]['owner_sponsored_phase_4']++;
 					}	
 				}
