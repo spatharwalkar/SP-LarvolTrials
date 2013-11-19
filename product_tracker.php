@@ -78,7 +78,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 		$MainPageURL = 'moacategory.php';
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$MainPageURL = 'disease.php';
-	else if($TrackerType == 'INVESTPT')	
+	else if($TrackerType == 'INVESTPT' or $TrackerType == 'INVESTMT')	
 		$MainPageURL = 'investigator.php';
 	
 	
@@ -109,7 +109,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 {
 	global $db;
 	global $now;
-
+	
 	$rows = array();
 	$productIds = array();
 	$rowsDisplayName = array();
@@ -211,6 +211,30 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'INVESTPT')	
 	{
 	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Investigator" and id=' . $id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$Report_DisplayName = $header['display_name'];	
+		if(isset($_REQUEST['InvestigatorId']))
+			{
+				$InvestigatorId = mysql_real_escape_string($_REQUEST['InvestigatorId']);
+				$OptionArray = array('InvestigatorId'=>$InvestigatorId, 'Phase'=> $_REQUEST['phase']);	
+			}
+		$productIds = GetProductsFromInvestigator($header['id'], $TrackerType, $OptionArray);
+		$id=$header['id'];
+		$ExtName = GetReportNameExtension($OptionArray);
+		
+		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];
+		$entity2Id = $OptionArray['InvestigatorId'];
+		$entity2Type = 'Investigator';
+		
+	}
+	else if($TrackerType == 'INVESTMT')	
+	{
+	global $productIds;
+	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
+	
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -410,7 +434,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				$impArr=implode("','", $arrDiseaseIds);
 				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity` IN ('" .  $impArr ."')";
 			}
-			else if($TrackerType=='IMPT' || $TrackerType=='IMCPT' || $TrackerType=='INVESTCT')			{
+			else if($TrackerType=='IMPT' || $TrackerType=='IMCPT' || $TrackerType=='INVESTCT' || $TrackerType=='INVESTPT' || $TrackerType=='INVESTMT' )			{
 				
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'  and dt.larvol_id in (select trial from entity_trials where entity=" .$OptionArray['InvestigatorId']  ." )";
 			}
@@ -1344,7 +1368,8 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		$htmlContent .= '<th width="8px" colspan="1" class="'. (($k == ($inner_columns-1)) ? 'graph_right':'' ) .'">&nbsp;</th>';
 	}
 	$htmlContent .= '<th width="8px"></th></tr>';
-
+	if(empty($OptionArray['InvestigatorId']))
+		$OptionArray['InvestigatorId']=$_REQUEST['InvestigatorId'];
 	for($incr=0; $incr < count($rows); $incr++)
 	{	
 		$row = $incr;
@@ -1353,7 +1378,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		{
 			if(isset($TrackerType) & $TrackerType == 'IMPT')
 				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
-			elseif(isset($TrackerType) & ($TrackerType == 'IMCPT' or $TrackerType == 'INVESTCT'))
+			elseif(isset($TrackerType) & ($TrackerType == 'IMCPT' or $TrackerType == 'INVESTCT' or $TrackerType == 'INVESTPT' or $TrackerType == 'INVESTMT'))
 				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
 			else
 				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
@@ -1928,7 +1953,7 @@ function Download_reports()
 			{
 				if($TrackerType != 'PTH')
 				{
-					if(isset($TrackerType) & ($TrackerType == 'IMPT' or $TrackerType == 'INVESTCT'))
+					if(isset($TrackerType) & ($TrackerType == 'IMPT' or $TrackerType == 'INVESTCT'  or $TrackerType == 'INVESTPT'  or $TrackerType == 'INVESTMT'))
 						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
 					else
 						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
@@ -2325,7 +2350,7 @@ function Download_reports()
 			
 			if($TrackerType != 'PTH')
 				{
-					if(isset($TrackerType) & ($TrackerType == 'IMPT' or $TrackerType == 'INVESTCT'))
+					if(isset($TrackerType) & ($TrackerType == 'IMPT' or $TrackerType == 'INVESTCT' or $TrackerType == 'INVESTPT'  or $TrackerType == 'INVESTMT'))
 						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
 					else
 						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
@@ -3218,9 +3243,9 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 					join entity_trials et2 ON et.trial=et2.trial and et2.entity = " . $InvestigatorId . " 
 					join data_trials dt on et2.trial=dt.larvol_id and dt.phase  IN ('". implode('\', \'',$PhaseArray) ."')
 					"	;
-		
+	
 
-		
+	
 	
 		$query = $query.$subQuery;
 		
@@ -3751,7 +3776,7 @@ function GetProductsFromDiseaseCat($DiseaseCatID)
 		$arrImplode = implode(",", $DiseaseCatID);
 		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent` in(" . mysql_real_escape_string($arrImplode) . ") AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 
-		$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT '.$query);
+		$res = mysql_query($query) or die('Bad SQL query getting products from DiseaseCat id in PT '.$query);
 
 		if($res)
 		{
@@ -3766,15 +3791,23 @@ function GetProductsFromDiseaseCat($DiseaseCatID)
 }
 
 
-function GetProductsFromInvestigator($InvestigatorId)
+function GetProductsFromInvestigator($EntityId, $TrackerType, $OptionArray)
 {
 	global $db;
 	global $now;
 	$Products = array();
 	$query = "	SELECT DISTINCT et2.entity from entity_trials et
-				JOIN entity_trials et2 ON (et.trial = et2.trial and et.entity = " . $InvestigatorId . ")
+				JOIN entity_trials et2 ON (et.trial = et2.trial and et.entity = " . $EntityId . ")
 				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))";
-	$res = mysql_query($query) or die('Bad SQL query getting products from Disease id in PT '.$query);
+	if($TrackerType=='INVESTMT' and !empty($OptionArray['InvestigatorId']))
+	{
+		$query = "	SELECT DISTINCT et2.entity from entity_trials et
+				JOIN entity_trials et2 ON (et.trial = et2.trial and et.entity = " . $OptionArray['InvestigatorId'] . ")
+				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
+				JOIN entity_relations er ON (e.id = er.parent and er.child = " . $EntityId . "  )
+				";
+	}
+	$res = mysql_query($query) or die('Bad SQL query getting products from Investigator id in PT '.$query);
 
 	if($res)
 	{

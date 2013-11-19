@@ -2527,7 +2527,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 		}
 		
 		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN ('". implode("','", $trials) ."') AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
-		$res = mysql_query($query) or die('Bad SQL query getting investigators');
+		$res = mysql_query($query) or die('Bad SQL query getting investigators.');
 		
 	}else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA' || $GobalEntityType == 'MOA_Category'){
 
@@ -2579,7 +2579,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 				JOIN entities e on (er.parent = e.id and e.class='Product' and (e.is_active<>0 or e.is_active IS NULL) )
 				JOIN entities e2 on (et.entity = e2.id and e2.class='Investigator')";
 		}
-		$res = mysql_query($query) or die('Bad SQL query getting investigators');
+		$res = mysql_query($query) or die('Bad SQL query getting investigators. '.$query);
 //		$res = mysql_query($query) or die('Bad SQL query getting investigators from Company id in Investigator Tracker');
 		
 	}

@@ -53,6 +53,9 @@ function showMOATracker($id, $TrackerType, $page=1)
 	
 	if($TrackerType == 'DISCATMT')	//DPT=DISEASE MOA TRACKER
 		$MainPageURL = 'disease_category.php';
+		
+	if($TrackerType == 'INVESTMT')	//INVESTIGATOR MOA TRACKER
+		$MainPageURL = 'investigator.php';
 	
 	$HTMLContent .= MOATrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -234,6 +237,116 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 			}//End of Types for loop
 		}	//End of Count > 0 Condition
 		/// This function willl Sort multidimensional array according to Total count
+		
+	}
+	
+	if($TrackerType == 'INVESTMT')	
+	{
+		global $MOAIds;
+		global $arrDiseaseIds;
+		$arrImplode = @implode(",", $arrDiseaseIds);
+		
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Investigator" AND `id`=' .$id;
+		$res = mysql_query($query) or die(mysql_error());
+		$header = mysql_fetch_array($res);
+		$Report_DisplayName = $header['name'];
+	
+		$MOAIds = array_filter(array_unique($MOAIds));
+		$id=$header['id'];
+
+		$MOAQuery = "SELECT er.child AS MOAId, e.`name` AS MOAName, e.`display_name` AS MOADispName,er.parent AS ProdId, dt.phase
+						FROM entity_relations er 
+						JOIN entities e ON (er.child = e.id and e.class='MOA')
+						JOIN entity_trials et ON(er.parent = et.entity) 
+						JOIN entity_trials et2 ON(et.trial = et2.trial and et2.entity =" . $id . " ) 
+						JOIN data_trials dt on (et2.trial = dt.larvol_id)
+						group by MOAId,ProdId
+						";	
+		
+		
+		//die();
+		if($MOAIds)
+			$MOAQueryResult = mysql_query($MOAQuery) or die(mysql_error());
+		else
+			$MOAQueryResult = null;
+		$key = 0;
+		while($result = @mysql_fetch_array($MOAQueryResult))
+		{
+			$key = $MOAId = $result['MOAId'];
+			
+			if(isset($MOAId) && $MOAId != NULL)
+			{
+		
+					/// Fill up all data in Data Matrix only, so we can sort all data at one place
+					if($result['MOADispName'] != NULL && trim($result['MOADispName']) != '')
+						$data_matrix[$key]['RowHeader'] = $result['MOADispName'];
+					else
+						$data_matrix[$key]['RowHeader'] = $result['MOAName'];
+						
+					$data_matrix[$key]['ID'] = $result['MOAId'];
+					$NewMOAIds[] = $result['MOAId'];
+						
+					$data_matrix[$key]['HeaderLink'] = 'moa.php?MOAId=' . $data_matrix[$key]['ID'];
+		
+					$data_matrix[$key]['ColumnsLink'] = 'moa.php?MOAId=' . $data_matrix[$key]['ID'] . '&InvestigatorId=' . $id . '&TrackerType=INVESTMT';
+		
+					///// Initialize data
+					if(empty($data_matrix[$key]))
+					{
+						$data_matrix[$key]['phase_na']=0;
+						$data_matrix[$key]['phase_0']=0;
+						$data_matrix[$key]['phase_1']=0;
+						$data_matrix[$key]['phase_2']=0;
+						$data_matrix[$key]['phase_3']=0;
+						$data_matrix[$key]['phase_4']=0;
+			
+						$data_matrix[$key]['TotalCount'] = 0;
+						$data_matrix[$key]['productIds'] = array();
+						$data_matrix[$key]['ProdExistance'] = array();
+					}
+					
+		
+					$data_matrix[$key]['ProdExistance'][] = $result['ProdId'];
+						
+					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+					{
+						$CurrentPhasePNTR = 0;
+					}
+					else if($result['phase'] == '0')
+					{
+						$CurrentPhasePNTR = 1;
+					}
+					else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
+							|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+					{
+						$CurrentPhasePNTR = 2;
+					}
+					else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
+							|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
+							|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+					{
+						$CurrentPhasePNTR = 3;
+					}
+					else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
+							|| $result['phase'] == '3a' || $result['phase'] == '3b')
+					{
+						$CurrentPhasePNTR = 4;
+					}
+					else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+					{
+						$CurrentPhasePNTR = 5;
+					}
+						
+					$MAXPhasePNTR = $CurrentPhasePNTR;
+					$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+						
+					$data_matrix[$key]['productIds'][] = $result['ProdId'];
+					
+					$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['productIds']);
+					if($max_count < $data_matrix[$key]['TotalCount'])
+						$max_count = $data_matrix[$key]['TotalCount'];
+			} 
+		}	
 		
 	}
 	
@@ -971,7 +1084,7 @@ function MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 
 function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL)
 {				
-	if(count($data_matrix) == 0 && ($TrackerType == 'MTH' || $TrackerType == 'DMT' || $TrackerType == 'DISCATMT')) return 'No MOA Found';
+	if(count($data_matrix) == 0 && ($TrackerType == 'MTH' || $TrackerType == 'DMT' || $TrackerType == 'DISCATMT' || $TrackerType == 'INVESTMT')) return 'No MOA Found';
 	
 	require_once('../tcpdf/config/lang/eng.php');
 	require_once('../tcpdf/tcpdf.php');  
@@ -986,8 +1099,8 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
 					
-	if($TrackerType != 'DMT' && $TrackerType != 'DISCATMT')				
-	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords['all'].'&nbsp;MOA'. (($TotalRecords['all'] == 1) ? '':'s') . '</div></td>';
+	if($TrackerType != 'DMT' && $TrackerType != 'DISCATMT' && $TrackerType != 'INVESTMT' && $TrackerType != 'INVESTPT' && $TrackerType != 'INVESTCT'    )				
+		$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords['all'].'&nbsp;MOA'. (($TotalRecords['all'] == 1) ? '':'s') . '</div></td>';
 					
 	if($TotalPages > 1)
 	{
@@ -1193,7 +1306,8 @@ function MOATrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $Mai
 		$url = 'DiseaseId=' . $id .'&amp;tab=MOAs';
 	if($TrackerType == 'DISCATMT')	//DPT=DISEASE MOA TRACKER
 		$url = 'DiseaseCatId=' . $id .'&amp;tab=MOAs';
-		
+	if($TrackerType == 'INVESTMT')	
+		$url = 'InvestigatorId=' . $id .'&amp;tab=MOAs';
 	
 	$rootUrl = $MainPageURL.'?';
 	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
@@ -2404,6 +2518,40 @@ function GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds)
 	}
 	
 	return $Return;
+}
+
+function GetMOAsFromInvestigator($InvestigatorId)
+{
+	global $db;
+	global $now;
+	$MOAs = array();
+	
+	
+
+	$query = "	SELECT er.child AS CompId, e.`name` AS CompName, e.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
+				FROM entity_relations er 
+				JOIN entities e ON (er.child = e.id and e.class='MOA')
+				JOIN entity_trials et ON(er.parent = et.entity) 
+				JOIN entity_trials et2 ON(et.trial = et2.trial and et2.entity =" . $InvestigatorId . " ) 
+				JOIN data_trials dt on (et2.trial = dt.larvol_id )
+				group by CompId,ProdId
+			";	
+						
+			  
+	$res = mysql_query($query) or die('Bad SQL query getting MOAs '.$query);
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$MOAs[] = $row['CompId'];
+		}
+	}
+
+	if(empty($MOAs))
+		return array();
+	else
+		return array_filter(array_unique($MOAs));
 }
 
 

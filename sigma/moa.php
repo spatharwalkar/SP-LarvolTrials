@@ -2,11 +2,13 @@
 	$cwd = getcwd();
 	chdir ("..");
 	require_once('db.php');
+	if(empty($_REQUEST['MoaId'])) $_REQUEST['MoaId']=$_REQUEST['MOAId'];
 	require_once('product_tracker.php');
 	chdir ($cwd);
 	require_once('disease_tracker.php');
 	require_once('investigators_tracker.php');	
 	$page = 1;
+	
 	if($_REQUEST['MoaId'] != NULL && $_REQUEST['MoaId'] != '' && isset($_REQUEST['MoaId']))
 	{
 		$MoaId = $_REQUEST['MoaId'];
@@ -284,6 +286,12 @@ else
 		print showProductTracker($MoaId, $dwcount, 'DISCATPT', $page, $OptionArray);	//DISCATPT :DISEASE CATEGORY PRODUCT TRACKER  //DCMPT= DISEASE CATEGORY MOA PRODUCT TRACKER
 	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'IMPT')
 		print showProductTracker($MoaId, $dwcount, 'IMPT', $page, $OptionArray);	//IMPT - INVESTIGATOR MOA PRODUCT TRACKER
+	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'INVESTMT')
+	{
+		print showProductTracker($MoaId, $dwcount, 'INVESTMT', $page, $OptionArray);	
+	}
+	elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'INVESTPT')
+		print showProductTracker($MoaId, $dwcount, 'INVESTPT', $page, $OptionArray);	
 	
 	else
 		print showProductTracker($MoaId, $dwcount, 'MPT', $page, $OptionArray);	//MPT= MOA PRODUCT TRACKER 	

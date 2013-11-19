@@ -1,7 +1,7 @@
 <?php 
 //Below lines are lines should be kept on top of all like session start gives session error, sphinx also gives query related error
 // - so incase of TZ we place in these pages itself
-if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && $_REQUEST['sourcepg'] != 'TZC' && !isset($_REQUEST['CompanyId']) && !isset($_REQUEST['InvestigatorId']) && (false === strpos($_SERVER["REQUEST_URI"], 'company.php')))
+if(!isset($_REQUEST['DiseaseId']) && !isset($_REQUEST['DiseaseCatId']) && $_REQUEST['sourcepg'] != 'TZ' && $_REQUEST['sourcepg'] != 'TZP' && $_REQUEST['sourcepg'] != 'TZC' && !isset($_REQUEST['CompanyId']) && !isset($_REQUEST['MOAId']) && !isset($_REQUEST['InvestigatorId']) && (false === strpos($_SERVER["REQUEST_URI"], 'company.php')))
 {
 	header('P3P: CP="CAO PSA OUR"');
 	session_start();

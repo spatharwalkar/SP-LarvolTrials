@@ -38,16 +38,22 @@
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
-	$tabCommonUrl    = 'investigator.php?InvestigatorId='.$InvestigatorId;
+	$tabCommonUrl		= 'investigator.php?InvestigatorId='.$InvestigatorId;
 	
-	$CompanyIds      = GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId);
-	$TabProductCount = getProductIdsFromInvestigator($InvestigatorId);
+	$CompanyIds			= GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId);
+	$TabProductCount	= getProductIdsFromInvestigator($InvestigatorId);
 	if(empty($TabProductCount))
 		$TabProductCount = array();
 	else
 		$TabProductCount = array_filter(array_unique($TabProductCount));
 	$TabProductCount = count($TabProductCount);
 	
+	$MOAIds				= GetMOAsFromInvestigator($InvestigatorId);
+	if(empty($MOAIds))
+		$MOAIds = array();
+	else
+		$MOAIds = array_filter(array_unique($MOAIds));
+	$TabMOACount = count($MOAIds);
 	
 	$CompanyIds = array_filter(array_unique($CompanyIds));
 	
@@ -178,12 +184,12 @@
 								<img id="ProductsImg" src="../images/selectTabConn.png" />
 							</td>
 							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
-							<!--
+							
 							<td>
 								<img id="MOAsImg" src="../images/afterTab.png" />
 							</td>
 							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
-							-->
+							
 							<td>
 								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
 							</td>
@@ -202,14 +208,12 @@
 								<img id="ProductsImg" src="../images/middleTab.png" />
 							</td>
 							<td id="ProductsTab" class="selectTab"><?php print $prodLinkName; ?></td>
-							<!--
 							<td>
 								<img id="MOAsImg" src="../images/selectTabConn.png" />
 							</td>
-							<td id="MOAsTab" class="Tab"><?php /*print $moaLinkName;*/ ?></td>
-							-->
+							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
 							<td>
-								<img id="InvestigatorOTTImg" src="../images/selectTabConn.png" />
+								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
 							</td>
 							
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
@@ -222,7 +226,7 @@
 							</td>
 							<td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td>
 							<td>
-								<img id="ProductsImg" src="../images/middleTab.png" />
+								<img id="ProductsImg" src="../images/afterTab.png" />
 							</td>
 							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
 							<td>
@@ -247,12 +251,12 @@
 								<img id="ProductsImg" src="../images/afterTab.png" />
 							</td>
 							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
-							<!--
+							
 							<td>
 								<img id="MOAsImg" src="../images/afterTab.png" />
 							</td>
 							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
-							-->
+							
 							<td>
 								<img id="InvestigatorOTTImg" src="../images/middleTab.png" />
 							</td>
@@ -307,7 +311,7 @@
 					}
 					
 					if($tab == 'MOAs')
-					print '<div id="MOAs" align="center">'.showMOATracker($InvestigatorId, 'INVESTCT', $page).'</div>'; 
+					print '<div id="MOAs" align="center">'.showMOATracker($InvestigatorId, 'INVESTMT', $page).'</div>'; 
 					if($tab == 'InvestigatorOTT')
 					{
 						chdir ("..");
