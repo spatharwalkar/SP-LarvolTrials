@@ -4346,11 +4346,11 @@ function Download_reports()
 					$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row].$rowsTagName[$row]);
 					$companyName->getFont()->setItalic(true);	
 				}else{
+					/*Those are non-Products Like (MOA,Disease,Institution,Area...), the row headers are bold for them.*/
 					$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row].$rowsTagName[$row]);
 					$companyName->getFont()->setBold(true);
 				}
-						
-				
+										
 				$objPHPExcel->getActiveSheet()->getCell($cell)->setValue($objProductFormatLI);			
 				
 				//$objPHPExcel->getActiveSheet()->setCellValue($cell, $rowsDisplayName[$row].$rowsCompanyName[$row].((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].']':''));
