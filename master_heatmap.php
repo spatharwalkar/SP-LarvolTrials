@@ -4346,7 +4346,7 @@ function Download_reports()
 					$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row].$rowsTagName[$row]);
 					$companyName->getFont()->setItalic(true);	
 				}else{
-					/*Those are non-Products Like (MOA,Disease,Institution,Area...), the row headers are bold for them.*/
+					/*Those are non-Products Like (MOA,Disease,Institution,Area...),the row headers are bold for them.*/
 					$companyName = $objProductFormatLI->createTextRun($rowsCompanyName[$row].$rowsTagName[$row]);
 					$companyName->getFont()->setBold(true);
 				}
