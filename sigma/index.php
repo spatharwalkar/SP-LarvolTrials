@@ -416,9 +416,15 @@ a:visited {color:#6600bc;}  /* visited link */
 	
 </style>
 <script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../comments/css/stylesheet.css"/>
 </head>
 <body>
-<?php include "searchbox.php";?>
+<?php include "searchbox.php";
+
+$cmtx_identifier = '1';
+define('IN_COMMENTICS', 'true'); //no need to edit this line
+
+?>
 <!-- Number of Results -->
 <br/>
 <table width="100%" border="0" class="FoundResultsTb">
@@ -458,6 +464,13 @@ a:visited {color:#6600bc;}  /* visited link */
 					
 					print $showResult;
 				}
+				if($db->loggedIn()) {
+					echo('<div style="padding-left:10px;float:right;">Welcome, <a href="profile.php">'
+						. htmlspecialchars($db->user->username) . '</a> :: <a href="login.php?logout=true">Logout</a> &nbsp; </div>');
+				} else {
+					echo ('<div style="padding-left:10px;float:right;"><a href="login.php">login</a></div>');
+				}
+				
 			?>
         </td>
     </tr>

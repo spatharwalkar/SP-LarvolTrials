@@ -240,10 +240,20 @@ a:visited {color:#6600bc;}  /* visited link */
 				<tr>
 					<td style="vertical-align:top;">
 						<a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="profile.php">Profile</a>
-					</td>         
+					</td>					
 				</tr>
 			</table>
-        </td>	
+        </td>
+		<td>
+		<?php
+		if($db->loggedIn()) {
+			echo('<div style="padding-left:10px;float:right;font-weight: bold;">Welcome, <a href="profile.php">'
+				. htmlspecialchars($db->user->username) . '</a> :: <a href="login.php?logout=true">Logout</a> &nbsp; </div>');
+		} else {
+			echo ('<div style="padding-left:10px;float:right;font-weight: bold;"><a href="login.php">login</a></div>');
+		}
+		?>
+		</td>
 	</tr>
 </table>
 <?php

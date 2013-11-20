@@ -11,15 +11,23 @@ if(isset($_GET['logout']))
 	exit;
 }
 
+
 if(!$db->loggedIn())
 {
 	$config = '../hybridauth/config.php';
 	require_once( "../hybridauth/Hybrid/Auth.php" );
-	 
+	
+	$reffererUrl = $_SERVER['HTTP_REFERER'];
+	
 	try
 	{
 		$hybridauth = new Hybrid_Auth( $config );
+		
+		if(!$hybridauth->storage()->get("reffererUrl")) {
+			$hybridauth->storage()->set("reffererUrl", $reffererUrl);
+		}		
 		$linkedin = $hybridauth->authenticate( "LinkedIn" );
+		
 		if(!$linkedin->isUserConnected())
 		{
 			echo("LinkedIn authorization failed.<br />");
@@ -60,13 +68,15 @@ if(!$db->loggedIn())
 					}
 				}
 			}else{
-				echo("Login successful.<br />");
+				if(!$hybridauth->storage()->get("reffererUrl") || $hybridauth->storage()->get("reffererUrl") == '')
+				header('Location: profile.php');
+				else 
+				header('Location:'.$hybridauth->storage()->get("reffererUrl"));
 			}
 		}
 	}catch( Exception $e ){
 		echo "Social auth error: " . $e->getMessage();
 	}
-	echo('Click <a href="' . $_SERVER['HTTP_REFERER'] . '">here</a> to return to where you were.');
 }else{
 	header('Location: profile.php');
 }
