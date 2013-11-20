@@ -927,6 +927,9 @@ function DiseaseTrackerCommonCSS($uniqueId, $TrackerType)
 						height: 16px;
 						padding: 2px;
 					}
+					.bottom .radio-input{
+						vertical-align: middle;
+					}
 					</style>';
 	return $htmlContent;				
 }
@@ -1265,18 +1268,18 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 					
 	global $tabCommonUrl;
 	if(isset($_REQUEST['category']) && $_REQUEST['category'] == 1){
-		$catDisabled = ' disabled="disabled"';
+		$catChecked = ' CHECKED';
 		$catHidden = '<input type="hidden" name="category" id="category" value="1" />';
-		$diseaseDisabled = '';
+		$diseaseChecked = '';
 	}else{
-		$catDisabled = '';
-		$diseaseDisabled =  ' disabled="disabled"';
+		$catChecked = '';
+		$diseaseChecked =  ' CHECKED';
 		$catHidden = '';
 	}
 	$htmlContent .= '<td class="bottom right">'
-					. '<input type="radio" name="category_switch" value="Disease Category View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac&category=1\'"'. $catDisabled .'>Disease Category View'
-					. '&nbsp;&nbsp;'					
-					.'<input type="radio" name="category_switch" value="Disease View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac\'"' . $diseaseDisabled.'>Disease View'
+					. '<input type="radio" name="category_switch" class="radio-input" value="Disease Category View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac&category=1\'"'. $catChecked .'><b>Disease Category View</b>'
+					. '&nbsp;&nbsp;&nbsp;'					
+					.'<input type="radio" name="category_switch" class="radio-input" value="Disease View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac\'"' . $diseaseChecked.'><b>Disease View</b>'
 					. $catHidden
 					. '</td>'
 					. '</tr>'
