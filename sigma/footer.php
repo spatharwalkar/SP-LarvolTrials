@@ -1,3 +1,6 @@
+<?php
+include("comments.php");
+?>
 <style type="text/css">
 #footer-spacer {
     height: 36px;
