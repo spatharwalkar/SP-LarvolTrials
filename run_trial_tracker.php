@@ -9154,7 +9154,8 @@ class TrialTracker
 		}
 		$Query   = $query . $where .$where1;
 		$groupBy = "";
-		if(stripos($_SERVER["REQUEST_URI"],'sigma')!==false)
+		global $cwd;
+         	if(isset($cwd) && stripos($cwd,'sigma')!==false)
 			$groupBy = " group by dt.`larvol_id` ";
 		
 		//limit clause for pagination in webpage display and unsetting section headers which are not required in each page
