@@ -49,7 +49,14 @@
 		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($e1, 'Product'));
 	}	
 	
-	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($e1, 'Product' ));//GetInvestigatorFromEntity_InvestigatorTracker
+	if(isset($_REQUEST['dwcount']))
+	$dwcount = $_REQUEST['dwcount'];
+	else
+	$dwcount = 'total';
+ 
+	$investigator = DataGeneratorForInvestigatorTracker($e1,'PIT', $page, $dwcount);
+	$TabInvestigatorCount = $investigator['TotalRecords'];
+	
 	$TabTrialsCount = GetTrialsCountFromProduct($e1);
 	
 	$meta_title = 'Larvol Sigma'; //default value

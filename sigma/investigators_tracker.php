@@ -12,9 +12,6 @@ ini_set('max_execution_time','36000');	//10 hours
 if(!isset($_REQUEST['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
 
-
-
-
 if(!is_numeric($id)) return;
 
 if($_REQUEST['download'])
@@ -419,7 +416,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewInvestigatorIds = @array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$NewInvestigatorIds = @array_slice($NewInvestigatorIds, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
