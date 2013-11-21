@@ -775,7 +775,7 @@ function cmtx_comments_folder() { //gets the URL to the /comments/ folder
 	if (!parse_url(cmtx_setting('url_to_comments_folder'), PHP_URL_PATH) || !filter_var($url, FILTER_VALIDATE_URL)) {
 		$url = cmtx_url_encode(cmtx_setting('url_to_comments_folder'));
 	}
-
+	$url = str_replace("sigma/comments/", "comments/", $url);
 	return $url;
 
 } //end of comments-folder function
