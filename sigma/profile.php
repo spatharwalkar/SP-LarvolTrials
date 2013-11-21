@@ -13,7 +13,7 @@ if(isset($_GET['user']))
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title><?php echo $meta_title; ?></title>
+<title>Profile - Larvol Sigma</title>
 <style type="text/css">
 body
 {
@@ -289,17 +289,18 @@ $res = $res['total'];
 </div>
 
 <?php
-$query = 'SELECT c.id, c.name, c.email, c.comment, c.page_id, c.dated, p.url FROM commentics_comments c, commentics_pages p WHERE c.userid=' . $user . ' AND c.name != "" AND c.is_approved =1 AND c.page_id = p.id AND p.is_form_enabled = 1 ORDER BY c.id DESC LIMIT 10';
+$query = 'SELECT c.id, c.name, c.email, c.comment, c.page_id, c.dated, p.url, p.reference FROM commentics_comments c, commentics_pages p WHERE c.userid=' . $user . ' AND c.name != "" AND c.is_approved =1 AND c.page_id = p.id AND p.is_form_enabled = 1 ORDER BY c.id DESC LIMIT 10';
 $res = mysql_query($query);
 if($res === false) die("Couldn't find comment.");
 while($row = mysql_fetch_array($res))
 {
 ?>
 	<div class="profile-comments">
-		<a href="<?php echo $row['url'].'?cmtx_perm='.$row['id'].'#cmtx_perm_'.$row['id']; ?>" class="profile-comment-nav">
-			<p><?php echo '<b>'.$row['name'].'</b>&nbsp;&nbsp;&nbsp;&nbsp;'.date('M d Y H.i', strtotime($row['dated'])); ?></p>
-			<p><?php echo $row['comment']; ?></p>
-		</a>
+			<p><?php echo '<a href="'.$_SERVER['PHP_SELF'].'" class="profile-comment-nav"><b>'.$row['name'].'</b></a>&nbsp;&nbsp;&nbsp;&nbsp;'.date('M d Y H.i', strtotime($row['dated'])).'&nbsp;&nbsp;&nbsp;&nbsp;';?>
+				<a href="<?php echo $row['url'].'?cmtx_perm='.$row['id'].'#cmtx_perm_'.$row['id']; ?>" class="profile-comment-nav">
+				<?php echo 'Commented Page:&nbsp;'.$row['reference']; ?></a>
+			</p>
+			<p><?php echo $row['comment']; ?></p>		
 	</div>
 <?php	
 }
