@@ -862,6 +862,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$entity1Ids = array();
 	while($header = mysql_fetch_array($res))
 	{
+		echo "<pre>";print_r($header);die();
 		if($header['type'] == 'column')
 		{
 			if($header['type_id'] != NULL)
@@ -1677,6 +1678,7 @@ function Download_reports()
 	
 	$rows = array();
 	$columns = array();
+	$column_types = array();
 	$entity2Ids = array();
 	$entity1Ids = array();
 	
@@ -1718,6 +1720,9 @@ function Download_reports()
 				{
 					$result =  mysql_fetch_assoc(mysql_query("SELECT `id`, `name`, `display_name`, `description`, `class`, `company` FROM `entities` WHERE id = '" . $header['type_id'] . "' "));
 					$columns[$header['num']] = $result['id'];
+					
+					$column_types[$header['num']] = $result['class'];
+					
 					$columnsEntityType[$header['num']] = $result['class'];
 					
 					$type = ''; $type = $result['class']; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
@@ -1984,7 +1989,6 @@ function Download_reports()
 			$new_columns[$col]=$cval;
 		}
 	}
-	
 	$columns=$new_columns;
 	/////Rearrange Completes //////////
 	if(isset($_REQUEST['sr']) && isset($_REQUEST['er']))
@@ -2012,15 +2016,14 @@ function Download_reports()
 	}
 
 	/*
-		echo '<pre>';
+		print_r($column_types);
 		print_r($rows);
+		print_r($columns);
 		print_r($columnsDisplayName);
 		print_r($columnsDescription);
 		print_r($rowsDisplayName);
 		print_r($rowsEntityType);
-		die(); 
-	*/	
-	
+	*/
 	$row_total=array();
 	$col_total=array();
 	$active_total=0;
@@ -4194,11 +4197,15 @@ function Download_reports()
 				//TODO
 				$val = $columnsDisplayName[$col].$columnsCompanyName[$col].((trim($columnsTagName[$col]) != '') ? ' ['.$columnsTagName[$col].']':'');
 				$cdesc = (isset($columnsDescription[$col]) && $columnsDescription[$col] != '')?$columnsDescription[$col]:null;
-				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;
-								
+				$caltTitle = (isset($cdesc) && $cdesc != '')?' alt="'.$cdesc.'" title="'.$cdesc.'" ':null;		
+				
 				$black_font['font']['color']['rgb'] = '000000';
 				$objPHPExcel->getActiveSheet()->getStyle($cell)->applyFromArray($black_font);
-					
+				
+				if($column_types[$col] !='Product'){
+					$objPHPExcel->getActiveSheet()->getStyle($cell)->getFont()->setBold(true);
+				}
+				
 				$objPHPExcel->getActiveSheet()->setCellValue($cell, $val);
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath() . 'intermediary.php?e2=' . $entity2Ids[$col].$link_part);
 				
