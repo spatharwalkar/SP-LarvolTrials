@@ -862,7 +862,6 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	$entity1Ids = array();
 	while($header = mysql_fetch_array($res))
 	{
-		echo "<pre>";print_r($header);die();
 		if($header['type'] == 'column')
 		{
 			if($header['type_id'] != NULL)
