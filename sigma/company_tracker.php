@@ -218,7 +218,6 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 						JOIN data_trials dt on (et2.trial = dt.larvol_id)
 						group by CompId,ProdId
 						";	
-						
 		
 		$CompanyQuery =
 				"SELECT DISTINCT er.child AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
@@ -228,8 +227,8 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
 				JOIN entity_relations er ON (e.id = er.parent )
 				JOIN entities e2 ON (er.child = e2.id and e2.class='Institution' )
+				group by CompId,ProdId
 				";					
-		
 		//die();
 		if($CompanyIds)
 			$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());

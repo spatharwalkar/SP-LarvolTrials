@@ -3801,8 +3801,23 @@ function GetProductsFromInvestigator($EntityId, $TrackerType, $OptionArray)
 				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))";
 	if($TrackerType=='INVESTMT' and !empty($OptionArray['InvestigatorId']))
 	{
+		$qstr='';
+		if($_REQUEST['phase']=='na')
+			$qstr=" and (dt.phase = 'N/A'  or  dt.phase = ''  or  dt.phase is null)";
+		elseif($_REQUEST['phase']=='0')
+			$qstr=" and (dt.phase = '0')";
+		elseif($_REQUEST['phase']=='1')
+			$qstr=" and dt.phase in ('1', '0/1'  ,'1a', '1b'  , '1a/1b', '1c')";
+		elseif($_REQUEST['phase']=='2')
+			$qstr=" and dt.phase in ( '2' ,  '1/2', '1b/2', '1b/2a'  ,  '2a', '2a/2b', '2a/b' , dt.phase = '2b')";
+		elseif($_REQUEST['phase']=='3')
+		$qstr=" and dt.phase in ( '3', '2/3','2b/3' ,'3a','3b') ";
+		elseif($_REQUEST['phase']=='4')
+			$qstr=" and dt.phase in ('4','3/4','3b/4')";
+	
 		$query = "	SELECT DISTINCT et2.entity from entity_trials et
-				JOIN entity_trials et2 ON (et.trial = et2.trial and et.entity = " . $OptionArray['InvestigatorId'] . ")
+				JOIN data_trials dt ON ( et.trial=dt.larvol_id " . $qstr ." and et.entity = " . $OptionArray['InvestigatorId'] . " )
+				JOIN entity_trials et2 ON (dt.larvol_id = et2.trial )
 				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
 				JOIN entity_relations er ON (e.id = er.parent and er.child = " . $EntityId . "  )
 				";
