@@ -2014,7 +2014,6 @@ function Download_reports()
 		$sr = 'now';
 		$er = '1 month';
 	}
-
 	/*
 		print_r($column_types);
 		print_r($rows);
