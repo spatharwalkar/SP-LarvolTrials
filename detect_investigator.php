@@ -292,8 +292,14 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			
 			if(!$exists)
 			{
+				$name_parts = parse_name($overall_official_name);
 				$query = 'INSERT IGNORE INTO entities 
-							set class="Investigator", name = "'.$overall_official_name.'", display_name = "'.$overall_official_name.'", affiliation = "'.$overall_official_affiliation.'" ';
+					set class="Investigator", name = "'.$overall_official_name.'", display_name = "'.$overall_official_name.'", affiliation = "'.$overall_official_affiliation.'" '
+					.', first_name = "'.$name_parts['first_name']
+					.'", middle_name = "'.$name_parts['middle_name']
+					.'", surname = "'.$name_parts['surname']
+					.'", degrees = "'.$name_parts['degrees'].'"';
+
 					
 				if(!$res = mysql_query($query))
 				{
@@ -358,6 +364,59 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 	}
 	return true;
 }
+function parse_name($name)
+{
+	$parts["first_name"]	= '';
+	$parts["middle_name"]	= '';
+	$parts["surname"] 	= '';
+	$parts["degrees"] 	= '';
+
+	# 1.
+	$name = preg_replace("/[.()]/", "", $name);
+
+	# 2.
+	$name_degree = explode(",", $name, 2);
+	if (count($name_degree) == 2) {
+		$name = $name_degree[0];
+		$parts["degrees"] = $name_degree[1];
+	}
+	else {
+		$parts["degrees"] = "";
+	}
+
+	# 3.
+	$name = trim($name);
+	if (preg_match('/^(.+)\s([^\s]+)\s*$/', $name, $matches)) {
+		$parts["surname"] = $matches[2];
+		$name = $matches[1];
+	}
+	else {
+		$parts["surname"] = $name;
+		$name = "";
+	}
+	
+	# 4.
+	$name = trim($name);
+	$name_middlename = explode(" ", $name, 2);
+	if (count($name_middlename) == 2) {
+		$parts["first_name"] = $name_middlename[0];
+		$parts["middle_name"] = $name_middlename[1];
+	}
+	else {
+		$parts["first_name"] = $name;
+	}
+
+	# 5.
+	foreach ($parts as &$val) {
+		$val = trim($val);
+		$val = preg_replace("/,/", " ", $val);
+		$val = preg_replace("/ +/", " ", $val);
+	}
+
+	return $parts;
+}
+
+
 
 
 
