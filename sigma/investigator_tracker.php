@@ -29,7 +29,7 @@ if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 {
 	$page = mysql_real_escape_string($_REQUEST['page']);
 }	
-
+echo "page-----------------: ".$page."<br/>";
 if($_POST['Idownload'])
 {
 	InvDownload_reports();
@@ -334,7 +334,7 @@ function InvDataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwIcount='t
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
 		$rows = array_slice($rows, $StartSlice, $RecordsPerPage);
 	}
-	
+	echo $StartSlice."==========================".$EndSlice;
 	$original_max_count = $max_count;
 	$max_count = ceil(($max_count / $columns)) * $columns;
 	$column_interval = $max_count / $columns;
