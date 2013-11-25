@@ -144,6 +144,17 @@
 			<td width="50%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:28px;" align="left">
 				<?php print $DiseaseName; ?>
 			</td>
+			<td width="50%" align="right" style="border:0; font-weight:bold; padding-right:5px;">			
+			<?php
+			if($db->loggedIn()) {
+				echo('<div style="padding-left:10px;float:right;">Welcome, <a  style="display:inline;"  href="profile.php">'
+					. htmlspecialchars($db->user->username) . '</a> :: <a  style="float:right;width:50px;"  href="login.php?logout=true">Logout</a> &nbsp; </div>');
+			} else {
+				echo ('<div style="padding-left:10px;float:right;font-size:18px;"><a href="login.php">login</a></div>');
+			}
+			?>
+			
+			</td>
 		</tr>
 	</table>
 

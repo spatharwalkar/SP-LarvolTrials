@@ -150,12 +150,22 @@
 	<br/>
 	<table width="100%" border="0" class="FoundResultsTb">
 		<tr>
-			<td width="100%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:middle;" align="left">
+			<td width="50%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:middle;" align="left">
 				<table><tr>
 				<?php 
 					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="product.php?e1='.$e1.'">'.productFormatLI($ProductName, $CompanyName, $tag='').'</a>&nbsp;</td>';
 				?>
 				</tr></table>
+			</td>
+			<td width="50%" align="right" style="border:0; font-weight:bold; padding-right:5px;">			
+			<?php
+			if($db->loggedIn()) {
+				echo('<div style="padding-left:10px;float:right;">Welcome, <a  style="display:inline;"  href="profile.php">'
+					. htmlspecialchars($db->user->username) . '</a> :: <a  style="float:right;width:50px;"  href="login.php?logout=true">Logout</a> &nbsp; </div>');
+			} else {
+				echo ('<div style="padding-left:10px;float:right;font-size:18px;"><a href="login.php">login</a></div>');
+			}
+			?>			
 			</td>
 		</tr>
 	</table>
@@ -233,7 +243,8 @@
 								<td></td>';
 						// print '<td><img id="CompanyImg" src="../images/firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
 						 }
-			print	'            
+			print	'      
+			
 					</tr>
 				</table>			
 			</td>

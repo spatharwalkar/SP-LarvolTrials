@@ -23,7 +23,7 @@ if(!$db->loggedIn())
 	{
 		$hybridauth = new Hybrid_Auth( $config );
 		
-		if(!$hybridauth->storage()->get("reffererUrl")) {
+		if(!$hybridauth->storage()->get("reffererUrl") || $hybridauth->storage()->get("reffererUrl") == '') {
 			$hybridauth->storage()->set("reffererUrl", $reffererUrl);
 		}		
 		$linkedin = $hybridauth->authenticate( "LinkedIn" );
@@ -67,11 +67,14 @@ if(!$db->loggedIn())
 						}
 					}
 				}
-			}else{
+			} else {
 				if(!$hybridauth->storage()->get("reffererUrl") || $hybridauth->storage()->get("reffererUrl") == '')
-				header('Location: profile.php');
-				else 
-				header('Location:'.$hybridauth->storage()->get("reffererUrl"));
+					header('Location: profile.php');
+				else {
+					$redirectUrl  = $hybridauth->storage()->get("reffererUrl");
+					$hybridauth->storage()->set("reffererUrl", '');
+					header('Location:'.$redirectUrl);
+				}
 			}
 		}
 	}catch( Exception $e ){
