@@ -413,7 +413,47 @@ a:visited {color:#6600bc;}  /* visited link */
 	font-weight:normal; 
 	color:#3399FF; 
 }
-	
+.ind_comment {
+    border-color: #AA8ECE;
+    border-style: solid;
+    border-width: 5px 1px 1px;
+    clear: both;
+    padding: 1px 5px;
+}
+.ind_comment a {
+    color: #1122CC;
+    font-weight: bold;
+}
+.ind_comment a:hover {
+	text-decoration:none;
+}
+p.com_name a {
+    color: #AA8ECE;
+    font-weight: bold;
+    text-transform: capitalize;
+	text-decoration:none;
+}
+p.com_desc {
+    font-size: 12px;
+}
+p.com_on {
+    font-size: 12px;
+}
+span.com_at,.com_at{
+    color: #888888;
+    float: right;
+    font-size: 12px;
+}	
+a{
+	text-decoration:none;
+}
+a:hover{
+	text-decoration:none;
+	color:#4F2683;
+}
+.com_name:hover{
+	color:#4F2683;
+}
 </style>
 <script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
 <link rel="stylesheet" type="text/css" href="../comments/css/stylesheet.css"/>
@@ -599,6 +639,107 @@ if((trim($globalOptions['TzSearch']) == '' || $globalOptions['TzSearch'] == NULL
 ?>
 <br/>
 <div align="center" style="padding-top:25px; color:#4f2683; font-weight:normal; font-size:16px">Welcome to <b>Larvol Sigma</b>. To find information please use the search field above or click on the links under it for a full list of covered items.</div>
+<?php
+	// Start of 'Recent Comments'
+$cmtx_mysql_table_prefix = "commentics_";
+
+echo "<h3>Recent Comments:</h3>";
+
+$comments = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' ORDER BY `dated` DESC LIMIT 5");
+while ($comment = mysql_fetch_array($comments)) {
+	if($comment["name"] == ""){
+		$comment["name"] = "NA";
+	}
+	$page_query = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "pages` WHERE `id` = '" . $comment["page_id"] . "'");
+	$page = mysql_fetch_assoc($page_query);
+	$comment["comment"] = (strlen($comment["comment"])>200) ? substr($comment["comment"],0,200).'...<a href='.$page["url"].'>' . $page["reference"] . '</a>' : $comment["comment"];
+	echo "<div class='ind_comment'>
+		<p class='com_name'><a class='com_name' href=profile.php?user=".$comment["userid"].">".$comment["name"]."</a></p>
+		<p class='com_desc'>".$comment["comment"]."</p>
+		<p class='com_on'>
+			<span style='color:#888888;'>Commented on</span> <a href='" . $page["url"] . "'>" . $page["reference"] . "</a>
+			<span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>
+			<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($comment["dated"]))."</span>
+		</p>
+	</div>";
+	echo "<br/>";
+}
+// End of 'Recent Comments'
+
+
+echo "<p></p>";
+
+
+// Start of 'Most Commented' 
+echo "<h3>Most Commented</h3>";
+
+$comments = mysql_query("SELECT `page_id`, COUNT(`page_id`) AS `total` FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' GROUP BY `page_id` ORDER BY `total` DESC LIMIT 5");
+
+while ($comment = mysql_fetch_assoc($comments)) {
+
+	$page_query = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "pages` WHERE `id` = '" . $comment["page_id"] . "'");
+	$page = mysql_fetch_assoc($page_query);
+	echo "<div class='ind_comment'>
+		<p class='com_on'>
+			<a href='" . $page["url"] . "'>" . $page["reference"] . "(" . $comment["total"] . ")</a> <span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>
+			<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($comment["dated"]))."</span>
+		</p>
+	</div>
+	";
+	echo "<br/>";
+
+}
+// End of 'Most Commented'
+
+
+echo "<p></p>";
+
+
+// Start of 'Top Posters'
+echo "<h3>Top Posters</h3>";
+
+$names = mysql_query("SELECT `userid`,`name`, COUNT(`name`) AS `total` FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' GROUP BY `name` ORDER BY `total` DESC LIMIT 5");
+
+while ($name = mysql_fetch_assoc($names)) {
+	if($name["name"] == ""){
+		$name["name"] = "NA";
+	}
+	echo "<div class='ind_comment'>
+		<p class='com_name'><a href=profile.php?user=".$name["userid"].">".$name["name"]."(" . $name["total"] . ")</a><span class='com_at'>at " . date("g:ia (jS-M)", strtotime($name["dated"]))."</span></p>
+	</div>";	
+	echo "<br/>";
+
+}
+// End of 'Top Posters'
+
+
+echo "<p></p>";
+
+
+// Start of 'Best Rated' 
+echo "<h3>Best Rated</h3>";
+
+//$comments = mysql_query("SELECT `page_id`, AVG(`rating`) AS `average` FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' AND `rating` != '0' GROUP BY `page_id` ORDER BY `average` DESC LIMIT 5");
+$comments = mysql_query("SELECT `page_id`, AVG(`rating`) AS `average` FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' GROUP BY `page_id` ORDER BY `average` DESC LIMIT 5");
+
+while ($comment = mysql_fetch_assoc($comments)) {
+
+	$average = round($comment["average"] / 0.5) * 0.5;
+
+	$page_query = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "pages` WHERE `id` = '" . $comment["page_id"] . "'");
+	$page = mysql_fetch_assoc($page_query);
+	echo "<div class='ind_comment'>
+		<p class='com_on'>
+			<a href='" . $page["url"] . "'>" . $page["reference"] . "(" . $average . "/5)</a> <span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>
+			<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($comment["dated"]))."</span>
+		</p>
+	</div>";
+	echo "<br/>";
+
+}
+// End of 'Best Rated'
+?>
+
 <?php
 }
 ?>
