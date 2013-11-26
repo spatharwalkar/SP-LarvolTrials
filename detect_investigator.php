@@ -277,7 +277,12 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			$overall_official_affiliation = $affiliations[$key];
 			$overall_official_name=mysql_real_escape_string($overall_official_name);
 			$overall_official_affiliation = mysql_real_escape_string($overall_official_affiliation);
-			$query = 'SELECT * FROM entities where class="Investigator" and name = "'.$overall_official_name.'" limit 1';
+			$failwords = preg_match_all('/(admin|medical|director|trial|monitor|clinical|science|strategy|study)/i', $overall_official_name);
+			if($failwords > 0) continue;
+			$name_parts = parse_name($overall_official_name);
+			$query = 'SELECT id FROM entities where class="Investigator"'
+					. ' and first_name = "'.$name_parts['first_name']
+					. '" and surname = "'.$name_parts['surname'].'" limit 1';
 				
 			if(!$res = mysql_query($query))
 			{
@@ -292,7 +297,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			
 			if(!$exists)
 			{
-				$name_parts = parse_name($overall_official_name);
+				
 				$query = 'INSERT IGNORE INTO entities 
 					set class="Investigator", name = "'.$overall_official_name.'", display_name = "'.$overall_official_name.'", affiliation = "'.$overall_official_affiliation.'" '
 					.', first_name = "'.$name_parts['first_name']
@@ -355,7 +360,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 					mysql_query('COMMIT');
 				}
 				
-			}			
+			}
 		}
 		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($totalncts >= $updateitems+$counter) ? ($updateitems+$counter) : $totalncts  ) . '" , status="2", current_nctid="'. $larvol_id .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="INVESTIGATOR"  ;' ;
 		

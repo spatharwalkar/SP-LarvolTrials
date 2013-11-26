@@ -424,6 +424,7 @@ CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )
   `affiliation` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name` ASC, `class` ASC),
+  UNIQUE KEY `investigatorname` (`first_name`,`surname`),
   UNIQUE KEY `LI_id` (`LI_id` ASC, `class` ASC) 
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT;
 
