@@ -1067,16 +1067,9 @@ function InvTrackerHTMLContent($data_matrix, $id, $rows, $columns, $investigator
 		$row = $incr;
 		
 		if($TrackerType != 'PTH')
-		$commonPart1 = 'ott.php?sourcepg=TZP&e1=' . $data_matrix[$row]['investigatorIds'];
+		$commonPart1 = $procommonPart1='investigator.php?InvestigatorId=' . $data_matrix[$row]['investigatorIds'].'&tab=Companies';
 		else
-		$commonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['investigatorIds'];
-		
-		
-		if($TrackerType != 'PTH')
-		$procommonPart1 = 'ott.php?sourcepg=TZP&e1=' . $data_matrix[$row]['investigatorIds'];
-		else
-		$procommonPart1 = 'intermediary.php?e1=' . $data_matrix[$row]['investigatorIds'];		
-		
+		$commonPart1 = $procommonPart1='intermediary.php?e1=' . $data_matrix[$row]['investigatorIds'];	
 		
 		$commonPart2 = '';
 		if($TrackerType == 'DIT') $commonPart2 = '&e2=' . $id;
