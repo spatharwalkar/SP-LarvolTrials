@@ -324,7 +324,7 @@ function InvDataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwIcount='t
 	
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
-	$TotalRecords = count($rows);
+	$TotalRecords = count($data_matrix);
 	if(!isset($_POST['Idownload']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
@@ -347,7 +347,7 @@ function InvDataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwIcount='t
 	$Return['matrix'] = $data_matrix;
 	$Return['report_name'] = $Report_DisplayName;
 	$Return['id'] = $id;
-	$Return['rows'] = $rows;
+	$Return['rows'] = $data_matrix;
 	$Return['columns'] = $columns;
 	$Return['InvestigatorIds'] = $investigatorIds;
 	$Return['inner_columns'] = $inner_columns;

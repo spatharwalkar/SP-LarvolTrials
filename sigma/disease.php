@@ -48,12 +48,13 @@
 	$product = array();
 	$product = DataGenerator($DiseaseId, 'DPT', $page, $OptionArray, $dwcount);
 	$TabProductCount = $product['TotalRecords'];
-	$TabCompanyCount = count(GetCompaniesFromDisease_CompanyTracker($DiseaseId));
-	$TabMOAData = GetMOAsOrMOACatFromDisease_MOATracker($DiseaseId);
-	$TabMOACount = count($TabMOAData['all']);
+	$company = DataGeneratorForCompanyTracker($DiseaseId, 'DCT', $page);
+	$TabCompanyCount = $company['TotalRecords'];
+	$TabMOAData = DataGeneratorForMOATracker($DiseaseId, 'DMT', $page);
+	 $TabMOACount = count($TabMOAData['matrix']);
 	$TabTrialCount = GetTrialsCountFromDisease($DiseaseId);
-	$TabInvCount = count(GetInvestigatorsFromDisease($DiseaseId));
-	
+	$investigator = InvDataGenerator($DiseaseId,'DIT', $page, $OptionArray, $dwIcount);
+	$TabInvCount = $investigator['TotalRecords'];
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($DiseaseName) ? $DiseaseName. ' - '.$meta_title : $meta_title;	
 ?>
