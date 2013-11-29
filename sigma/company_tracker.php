@@ -209,15 +209,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	
 		$CompanyIds = array_filter(array_unique($CompanyIds));
 		$id=$header['id'];
-		
-		$CompanyQuery = "SELECT er.child AS CompId, e.`name` AS CompName, e.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
-						FROM entity_relations er 
-						JOIN entities e ON (er.child = e.id and e.class='Institution')
-						JOIN entity_trials et ON(er.parent = et.entity) 
-						JOIN entity_trials et2 ON(et.trial = et2.trial and et2.entity =" . $id . " ) 
-						JOIN data_trials dt on (et2.trial = dt.larvol_id)
-						group by CompId,ProdId
-						";	
+
 		
 		$CompanyQuery =
 				"SELECT DISTINCT er.child AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase

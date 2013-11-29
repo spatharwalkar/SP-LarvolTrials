@@ -104,7 +104,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	//END DATA
 	$query = "SELECT `name`, `display_name`, `id`, `class` FROM `entities` WHERE id='" . $id ."'";
 	
-	$res = mysql_query($query) or die(mysql_error());
+	$res = mysql_query($query) or die( $query . ' '.mysql_error());
 	$header = mysql_fetch_array($res);
 	
 	if($header['display_name'] != NULL && trim($header['display_name']) != '')
@@ -153,7 +153,8 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 		
 			$results=array();
 			//die();
-			$InvestigatorQueryResult = mysql_query($InvestigatorQuery) or die(mysql_error());
+			$InvestigatorQueryResult = mysql_query($InvestigatorQuery) or die($InvestigatorQuery. ' '.mysql_error());
+			
 			$headerinvestigator=array();
 			while ($res = @mysql_fetch_array($InvestigatorQueryResult))
 			{
@@ -288,7 +289,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 		$Ids = array_filter(array_unique(GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType)));
 		$InvestigatorIds =  $Ids;
 		$InvestigatorQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname, e.`affiliation` FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Investigator') WHERE et.`entity` IN ('" . implode("','",$InvestigatorIds) . "') AND et2.`entity`='" . $id ."'";
-		$InvestigatorQueryResult = mysql_query($InvestigatorQuery) or die(mysql_error());
+		$InvestigatorQueryResult = mysql_query($InvestigatorQuery) or die($InvestigatorQuery.' ' .mysql_error());
 		
 		$key = 0;	
 		while($result = mysql_fetch_array($InvestigatorQueryResult))

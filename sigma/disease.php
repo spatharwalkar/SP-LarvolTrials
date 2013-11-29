@@ -2,22 +2,27 @@
 	header('P3P: CP="CAO PSA OUR"');
 	session_start();
 	//connect to Sphinx
+
 	if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 	$cwd = getcwd();
 	chdir ("..");
 	require_once('db.php');
 	require_once('intermediary.php');
+	
 	require_once('product_tracker.php');
 	chdir ($cwd);
 	require_once('investigator_tracker.php');
+	
 	require_once('company_tracker.php');
 	require_once('moa_tracker.php');
 	$page = 1;
+	
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
 	{
 		$DiseaseId = $_REQUEST['DiseaseId'];
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease" AND `id`=' . mysql_real_escape_string($DiseaseId);
-		$res = mysql_query($query) or die(mysql_error());
+		
+		$res = mysql_query($query) or die( $query . ' '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$DiseaseId = $header['id'];
 		$DiseaseName = $header['name'];
@@ -46,7 +51,9 @@
 	
 	//$TabProductCount = count(GetProductsFromDisease($DiseaseId));
 	$product = array();
+	
 	$product = DataGenerator($DiseaseId, 'DPT', $page, $OptionArray, $dwcount);
+	
 	$TabProductCount = $product['TotalRecords'];
 	$company = DataGeneratorForCompanyTracker($DiseaseId, 'DCT', $page);
 	$TabCompanyCount = $company['TotalRecords'];

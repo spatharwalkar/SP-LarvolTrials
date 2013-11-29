@@ -22,7 +22,7 @@
 	{
 		$e1 = $_REQUEST['e1'];
 		$query = 'SELECT `name`, `id`,company FROM `entities` WHERE `class` = "Product" AND `id`=' . mysql_real_escape_string($e1);
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$e1 = $header['id'];
 		$ProductName = $header['name'];

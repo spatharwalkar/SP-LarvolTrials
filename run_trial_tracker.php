@@ -8984,7 +8984,7 @@ class TrialTracker
 		
 		if(count($aIds) > 0){
 			$query = "SELECT er.child FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $aIds) . ") group by er.child";
-			$res = mysql_query($query) or die(mysql_error());
+			$res = mysql_query($query) or die($query.' '.mysql_error());
 			if(mysql_num_rows($res) > 0)
 			{
 				while($row = mysql_fetch_array($res)){

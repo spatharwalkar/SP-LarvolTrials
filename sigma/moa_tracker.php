@@ -2520,6 +2520,42 @@ function GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds)
 	return $Return;
 }
 
+
+
+function GetDiseasesFromInvestigator($InvestigatorId)
+{
+	global $db;
+	global $now;
+	$Diseases = array();
+	
+	
+
+	$query = "	SELECT er.child AS CompId, e.`name` AS CompName, e.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
+				FROM entity_relations er 
+				JOIN entities e ON (er.parent = e.id and e.class='Disease')
+				JOIN entity_trials et ON(er.child = et.entity) 
+				JOIN entity_trials et2 ON(et.trial = et2.trial and et2.entity =" . $InvestigatorId . " ) 
+				JOIN data_trials dt on (et2.trial = dt.larvol_id )
+				group by CompId,ProdId
+			";	
+						
+			  
+	$res = mysql_query($query) or die('Bad SQL query getting Diseases '.$query);
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$Diseases[] = $row['CompId'];
+		}
+	}
+
+	if(empty($Diseases))
+		return array();
+	else
+		return array_filter(array_unique($Diseases));
+}
+
 function GetMOAsFromInvestigator($InvestigatorId)
 {
 	global $db;

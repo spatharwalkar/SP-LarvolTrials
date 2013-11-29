@@ -13,7 +13,7 @@
 	{
 		$MoaId = $_REQUEST['MoaId'];
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "MOA" AND `id`=' . mysql_real_escape_string($MoaId);
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$MoaId = $header['id'];
 		$MoaName = $header['name'];

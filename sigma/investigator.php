@@ -11,13 +11,23 @@
 	chdir ($cwd);
 	require_once('company_tracker.php');
 	require_once('moa_tracker.php');
+	require_once('disease_tracker.php');
 	$page = 1;
+	if($_REQUEST['TrackerType'] == 'INVESTDT' && $_REQUEST['DiseaseId'] && $_REQUEST['InvestigatorId'] )
+	{
+		include "searchbox.php";
+		$dwcount=$_REQUEST['dwcount'];
+		$page=$_REQUEST['page'];
+		$OptionArray = array('InvestigatorId'=>$_REQUEST['InvestigtorId'], 'DiseaseId'=>$_REQUEST['DiseaseId'], 'Phase'=> $_REQUEST['phase']);
+		print showProductTracker($_REQUEST['DiseaseId'], $dwcount, 'INVESTDT', $page, $OptionArray);	
+		return;
+	}
 	
 	if($_REQUEST['InvestigatorId'] != NULL && $_REQUEST['InvestigatorId'] != '' && isset($_REQUEST['InvestigatorId']))
 	{
 		$InvestigatorId   = $_REQUEST['InvestigatorId'];
 		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Investigator" AND `id`=' . mysql_real_escape_string($InvestigatorId);
-		$res            = mysql_query($query) or die(mysql_error());
+		$res            = mysql_query($query) or die($query.' '.mysql_error());
 		$header         = mysql_fetch_array($res);
 		$InvestigatorId   = $header['id'];
 		$InvestigatorName = $header['name'];
@@ -54,6 +64,24 @@
 	else
 		$MOAIds = array_filter(array_unique($MOAIds));
 	$TabMOACount = count($MOAIds);
+	
+
+		$Ids = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($InvestigatorId, 'Investigator')));
+		$DiseaseIds =  $Ids;
+		if(count($DiseaseIds) > 0)
+		{
+			$ImplodeDiseaseIds = implode("','",$DiseaseIds);
+		}
+		else
+		{
+			$ImplodeDiseaseIds = '';
+		}
+	
+	if(empty($DiseaseIds))
+		$DiseaseIds = array();
+	else
+		$DiseaseIds = array_filter(array_unique($DiseaseIds));
+	$TabDiseaseCount = count($DiseaseIds);
 	
 	$CompanyIds = array_filter(array_unique($CompanyIds));
 	
@@ -177,6 +205,8 @@
 						
 						$CountExt = (($TabProductCount == 1) ? 'Product':'Products');
 						$prodLinkName = '<a href="'.$tabCommonUrl.'&tab=Products" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+						$CountExt = (($TabDiseaseCount == 1) ? 'Disease':'Diseases');
+						$diseaseLinkName = '<a href="'.$tabCommonUrl.'&tab=Diseases" title="'.$TabDiseaseCount.' '.$CountExt.'">&nbsp;'.$TabDiseaseCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						$CountExt = (($TabCompanyCount == 1) ? 'Company':'Companies');
 						$compLinkName = '<a href="'.$tabCommonUrl.'&tab=Companies" title="'.$TabCompanyCount.' '.$CountExt.'">&nbsp;'.$TabCompanyCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						$CountExt = (($TabMOACount == 1) ? 'Mechanisms of Action':'Mechanisms of Action');
@@ -202,6 +232,11 @@
 							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
 							
 							<td>
+								<img id="DiseasesImg" src="../images/afterTab.png" />
+							</td>
+							<td id="DiseasesTab" class="Tab"><?php print $diseaseLinkName; ?></td>
+							
+							<td>
 								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
 							</td>
 							
@@ -224,6 +259,10 @@
 							</td>
 							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
 							<td>
+								<img id="DiseasesImg" src="../images/afterTab.png" />
+							</td>
+							<td id="DiseasesTab" class="Tab"><?php print $diseaseLinkName; ?></td>
+							<td>
 								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
 							</td>
 							
@@ -245,12 +284,42 @@
 							</td>
 							<td id="MOAsTab" class="selectTab"><?php print $moaLinkName; ?></td>
 							<td>
+								<img id="DiseasesImg" src="../images/selectTabConn.png" />
+							</td>
+							<td id="DiseasesTab" class="Tab"><?php print $diseaseLinkName; ?></td>
+							<td>
+								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
+							</td>
+							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
+							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
+							<!-- <td><img id="InvestigatorOHMImg" src="../images/afterTab.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td> 
+							<td></td>
+							
+						<?php } else if($tab == 'Diseases') { ?>
+							<td>
+								<img id="CompaniesImg" src="../images/firstTab.png" />
+							</td>
+							<td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td>
+							<td>
+								<img id="ProductsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
+							<td>
+								<img id="MOAsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
+							<td>
+								<img id="DiseasesImg" src="../images/middleTab.png" />
+							</td>
+							<td id="DiseasesTab" class="selectTab"><?php print $diseaseLinkName; ?></td>
+							<td>
 								<img id="InvestigatorOTTImg" src="../images/selectTabConn.png" />
 							</td>
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="InvestigatorOHMImg" src="../images/afterTab.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td> 
 							<td></td>
+							
 						<?php } else if($tab == 'InvestigatorOTT') { ?>
 					
 							<td>
@@ -269,9 +338,21 @@
 							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
 							
 							<td>
+								<img id="DiseasesImg" src="../images/afterTab.png" />
+							</td>
+							<td id="DiseasesTab" class="Tab"><?php print $diseaseLinkName; ?></td>
+							
+							<td>
 								<img id="InvestigatorOTTImg" src="../images/middleTab.png" />
 							</td>
-							<td id="InvestigatorOTTTab" class="selectTab"><?php print $ottLinkName; ?></td>
+							
+							<td>
+								<img id="InvestigatorOTTImg" src="../images/selectLastTab.png" />
+							</td>
+							<td id="lastImg" class="selectTab"><?php print $ottLinkName; ?></td>
+							
+							
+							
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="InvestigatorOHMImg" src="../images/selectTabConn.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>
 						<?php } else if($tab == 'InvestigatorOHM') { ?>
@@ -322,7 +403,18 @@
 					}
 					
 					if($tab == 'MOAs')
-					print '<div id="MOAs" align="center">'.showMOATracker($InvestigatorId, 'INVESTMT', $page).'</div>'; 
+						print '<div id="MOAs" align="center">'.showMOATracker($InvestigatorId, 'INVESTMT', $page).'</div>'; 
+						
+					if($tab == 'Diseases')
+						print '<div id="Diseases" align="center">'.showDiseaseTracker($InvestigatorId, 'INVESTDT', $page).'</div>'; 
+						
+					if($tab == 'InvestigatorOTT')
+					{
+						chdir ("..");
+						print '<div id="InvestigatorOTT" align="center">'; DisplayOTT(); print '</div>'; 
+						chdir ("$cwd");
+					}
+						
 					if($tab == 'InvestigatorOTT')
 					{
 						chdir ("..");

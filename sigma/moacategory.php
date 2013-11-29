@@ -11,7 +11,7 @@
 	{
 		$MoaCatId = $_REQUEST['MoaCatId'];
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA_Category" AND `id`=' . mysql_real_escape_string($MoaCatId);
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query. ' '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$MoaCatId = $header['id'];
 		$MoaCatName = $header['name'];

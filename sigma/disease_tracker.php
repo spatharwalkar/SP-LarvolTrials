@@ -36,14 +36,12 @@ if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 function showDiseaseTracker($id, $TrackerType, $page=1, $categoryFlag = false)
 {
 	$HTMLContent = '';
-	
 	if(isset($_REQUEST['dwcount']))
 		$CountType = $_REQUEST['dwcount'];
 	else
 		$CountType = 'total';
 		
 	$Return = DataGeneratorForDiseaseTracker($id, $TrackerType, $page, $CountType, $categoryFlag);
-	
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -71,6 +69,8 @@ function showDiseaseTracker($id, $TrackerType, $page=1, $categoryFlag = false)
 		$MainPageURL = 'moa.php';
 	else if($TrackerType == 'MCDT')	//DPT=DISEASE Disease TRACKER
 		$MainPageURL = 'moacategory.php';			
+	else if($TrackerType == 'INVESTDT')	//DPT=DISEASE Disease TRACKER
+		$MainPageURL = 'investigator.php';			
 	
 	$HTMLContent .= DiseaseTrackerCommonCSS($uniqueId, $TrackerType);
 	
@@ -113,7 +113,8 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	//END DATA
 	
 	$query = "SELECT `name`, `display_name`, `id`, `class` FROM `entities` WHERE id='" . $id ."'";
-	$res = mysql_query($query) or die(mysql_error());
+	$res = mysql_query($query) or die( $query . ' '.mysql_error());
+	
 	$header = mysql_fetch_array($res);
 	
 	if($header['display_name'] != NULL && trim($header['display_name']) != '')
@@ -133,59 +134,83 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	
 	if($GobalEntityType != 'Product')	//FOR OTHER THAH
 	{
-		if($categoryFlag){
+		if($categoryFlag)
+		{
 			$Ids = array_filter(array_unique(GetDiseasesCatFromEntity_DiseaseTracker($id, $GobalEntityType)));
 			$DiseaseCategoryIds = $Ids;
 			
 			$DiseaseCategoryQuery = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $DiseaseCategoryIds) . ") group by id";
 			
-			$DiseaseQueryResult = mysql_query($DiseaseCategoryQuery) or die(mysql_error());
+			$DiseaseQueryResult = mysql_query($DiseaseCategoryQuery) or die($DiseaseCategoryQuery.' '.mysql_error());
 			
 			while ($results[] = mysql_fetch_array($DiseaseQueryResult));
-		}else{
+		}
+		else
+		{
 			$Ids = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($id, $GobalEntityType)));
 			$DiseaseIds =  $Ids;
-			if(count($DiseaseIds) > 0){
+			if(count($DiseaseIds) > 0)
+			{
 				$ImplodeDiseaseIds = implode("','",$DiseaseIds);
-			}else{
+			}
+			else
+			{
 				$ImplodeDiseaseIds = '';
 			}
 			
 				if($GobalEntityType == 'MOA' || $GobalEntityType == 'Institution')
 				{
 					$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
-					$DiseaseQuery2 = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity2`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+					$DiseaseQuery2= "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity2`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+				}
+				elseif ($GobalEntityType == 'Investigator')
+				{
+										
+					$DiseaseQuery = "	SELECT DISTINCT er.child, er.parent as id, 
+										e1.`name` AS name, e1.`display_name` AS dispname,er.child AS ProdId, dt.`phase` AS phase,  
+										er.parent as entity1, er.child as entity2
+										from entity_trials et
+										JOIN data_trials dt ON ( et.trial=dt.larvol_id  and et.entity = '". $id ."' )
+										JOIN entity_trials et2 ON (dt.larvol_id = et2.trial )
+										JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
+										JOIN entity_relations er ON (e.id = er.child and er.parent IN ('" . $ImplodeDiseaseIds . "')   )
+										JOIN entities e1 ON (er.parent=e1.id)
+										group by er.parent,er.child, dt.phase desc";
 				}
 				else if($GobalEntityType == 'MOA_Category')
 				{
 					$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 					$DiseaseQuery2 = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity2`=e2.`id` AND e2.`class`='Disease')) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 				}
-				$DiseaseQueryResult = mysql_query($DiseaseQuery) or die(mysql_error());
+				
+				$DiseaseQueryResult = mysql_query($DiseaseQuery) or die($DiseaseQuery.' '.mysql_error());
 				if($DiseaseQuery2)
-					$DiseaseQueryResult2 = mysql_query($DiseaseQuery2) or die(mysql_error());
+					$DiseaseQueryResult2 = mysql_query($DiseaseQuery2) or die($DiseaseQuery2.' '. mysql_error());
 				$results=array();
 				while ($results[] = mysql_fetch_array($DiseaseQueryResult));
 				if($DiseaseQuery2)
 					while($results[] = mysql_fetch_array($DiseaseQueryResult2));
-				
 		}
 		
 		
 		$key = 0;
 		foreach($results as $result)
 		{
-			if($categoryFlag){
+			if($categoryFlag)
+			{
 				$key = $DiseaseCategoryId = $result['id'];
 				$DiseaseIds = getDiseaseIdsFromDiseaseCat($DiseaseCategoryId);
 				//print_r($DiseaseIds);
-				if(count($DiseaseIds) > 0){
+				if(count($DiseaseIds) > 0)
+				{
 					$ImplodeDiseaseIds = implode("','",$DiseaseIds);
-				}else{
+				}
+				else
+				{
 					$ImplodeDiseaseIds = '';
 				}
 				
-				if($GobalEntityType == 'MOA' || $GobalEntityType == 'Institution')
+				if($GobalEntityType == 'MOA' || $GobalEntityType == 'Institution' ||  $GobalEntityType == 'Investigator')
 				{
 					/*$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, 
 					rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
@@ -202,9 +227,9 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 					$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 					$DiseaseQuery2 = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity2`=e2.`id` AND e2.`class`='Disease')) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 				}
-				$DiseaseQueryResult = mysql_query($DiseaseQuery) or die(mysql_error());
+				$DiseaseQueryResult = mysql_query($DiseaseQuery) or die($DiseseQuery.' '.mysql_error());
 				if($DiseaseQuery2)
-					$DiseaseQueryResult2 = mysql_query($DiseaseQuery2) or die(mysql_error());
+					$DiseaseQueryResult2 = mysql_query($DiseaseQuery2) or die($DiseseQuery2.' '.mysql_error());
 				$resultsCat=array();
 				while ($resultsCat[] = mysql_fetch_array($DiseaseQueryResult));
 				if($DiseaseQuery2)
@@ -233,11 +258,21 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 						$identifierKey = 'DiseaseCatId=';
 						//$trackerType = array('Institution' => 'DCCPT', 'MOA' => 'DCMPT', 'MOA_Category' => 'DCMCPT');
 						$trackerType = array('Institution' => 'DISCATCPT', 'MOA' => 'DISCATMPT', 'MOA_Category' => 'DISCATMCPT');
-					}else{
+					}
+					elseif($GobalEntityType == 'Investigator')
+					{
+						$data_matrix[$key]['HeaderLink'] = 'disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
+						$identifierKey = 'DiseaseId=';
+						$trackerType = array('Investigator' => 'INVESTDT');
+					}
+					else
+					{
 						$data_matrix[$key]['HeaderLink'] = 'disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
 						$identifierKey = 'DiseaseId=';
 						$trackerType = array('Institution' => 'DCPT', 'MOA' => 'DMPT', 'MOA_Category' => 'DMCPT');
 					}
+					
+					
 					
 					
 					if($GobalEntityType == 'Institution')
@@ -252,7 +287,10 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 					{
 						$data_matrix[$key]['ColumnsLink'] = 'moacategory.php?MoaCatId=' . $id . '&'. $identifierKey . $data_matrix[$key]['ID'] . '&TrackerType='.$trackerType['MOA_Category'];
 					}				
-					
+					else if($GobalEntityType == 'Investigator')
+					{
+						$data_matrix[$key]['ColumnsLink'] = 'investigator.php?InvestigatorId=' . $id . '&'. $identifierKey . $data_matrix[$key]['ID'] . '&TrackerType='.$trackerType['Investigator'];
+					}				
 					///// Initialize data
 					$data_matrix[$key]['phase_na']=0;
 					$data_matrix[$key]['phase_0']=0;
@@ -322,7 +360,10 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 						}	//End of if Product Existsnace
 					}	
 						
-				}else{
+				}
+				else
+				{
+				
 					if((($result['entity1'] == $key && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $key && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
 					{
 						if($result['entity1'] == $key)
@@ -380,12 +421,12 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 			$Ids = array_filter(array_unique(GetDiseasesCatFromEntity_DiseaseTracker($id, $GobalEntityType)));
 			$DiseaseCategoryIds = $Ids;
 			$DiseaseCategoryQuery = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $DiseaseCategoryIds) . ") group by id";
-			$DiseaseQueryResult = mysql_query($DiseaseCategoryQuery) or die(mysql_error());
+			$DiseaseQueryResult = mysql_query($DiseaseCategoryQuery) or die($DiseseCategoryQuery.' '.mysql_error());
 		}else{
 			$Ids = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($id, $GobalEntityType)));
 			$DiseaseIds =  $Ids;
 			$DiseaseQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";
-			$DiseaseQueryResult = mysql_query($DiseaseQuery) or die(mysql_error());
+			$DiseaseQueryResult = mysql_query($DiseaseQuery) or die($DiseaseQuery.'- '.mysql_error());
 		}
 		
 		
@@ -396,7 +437,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 				$key = $DiseaseCategoryId = $result['id'];
 				$DiseaseIds = getDiseaseIdsFromDiseaseCat($DiseaseCategoryId);
 				$DiseaseQuery2 = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";
-				$resultCat = mysql_query($DiseaseQuery2) or die(mysql_error());
+				$resultCat = mysql_query($DiseaseQuery2) or die($DiseaseQuery2.' - '.mysql_error());
 				
 				
 
@@ -947,6 +988,9 @@ function DiseaseTrackerCommonJScript($uniqueId, $id, $MainPageURL, $GobalEntityT
 		$url = 'MoaId='.$id.'&page='.$page.'&tab=diseasetrac';
 	else if($TrackerType == 'MCDT')	//MCDT = MOA CATEGORY DISEASE TRACKER
 		$url = 'MoaCatId='.$id.'&page='.$page.'&tab=diseasetrac';
+	else if($TrackerType == 'INVESTDT')	
+		$url = 'InvestigatorId='.$id.'&page='.$page.'&tab=Diseases';
+		
 		
 	//Script for view change
 	if($GobalEntityType == 'Product')
@@ -1276,7 +1320,14 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		$diseaseChecked =  ' CHECKED';
 		$catHidden = '';
 	}
-	$htmlContent .= '<td class="bottom right">'
+	if($GobalEntityType == 'Investigator')
+	{
+		$htmlContent .= '</tr>'. '</table>';
+	
+	}
+		
+	else
+		$htmlContent .= '<td class="bottom right">'
 					. '<input type="radio" name="category_switch" class="radio-input" value="Disease Category View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac&category=1\'"'. $catChecked .'><b>Disease Category View</b>'
 					. '&nbsp;&nbsp;&nbsp;'					
 					.'<input type="radio" name="category_switch" class="radio-input" value="Disease View" onclick="location.href=\''.$tabCommonUrl.'&tab=diseasetrac\'"' . $diseaseChecked.'><b>Disease View</b>'
@@ -1371,7 +1422,7 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 		}
 		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
 		
-		$Err = CountErr($data_matrix, $key, $ratio);
+		$Err = CountErrs($data_matrix, $key, $ratio);
 			
 		$Max_ValueKey = Max_ValueKeyDiseaseTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 			
@@ -1484,7 +1535,8 @@ function DiseaseTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, 
 		$url = 'MoaId='.$id.'&amp;tab=diseasetrac';
 	else if($TrackerType == 'MCDT')	//MCDT = MOA CATEGORY DISEASE TRACKER
 		$url = 'MoaCatId='.$id.'&amp;tab=diseasetrac';
-	
+	else if($TrackerType == 'INVESTDT')	
+		$url = 'InvestigatorId='.$id.'&tab=Diseases';
 	if($GobalEntityType == 'Product')
 		$url .= '&amp;dwcount=' . $dwcount;	
 	
@@ -1745,7 +1797,7 @@ function DownloadDiseaseTrackerReports($categoryFlag)
 			$from++;
 				
 			//// Graph starts
-			$Err = CountErr($data_matrix, $key, $ratio);
+			$Err = CountErrs($data_matrix, $key, $ratio);
 			
 			$Max_ValueKey = Max_ValueKeyDiseaseTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 			
@@ -2071,7 +2123,7 @@ function DownloadDiseaseTrackerReports($categoryFlag)
 			$Place_X = $Middle_Place;
 			
 			//// Graph starts
-			$Err = CountErr($data_matrix, $key, $ratio);
+			$Err = CountErrs($data_matrix, $key, $ratio);
 			$Max_ValueKey = Max_ValueKeyDiseaseTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
 				
 			$total_cols = $inner_columns * $columns;
@@ -2673,7 +2725,7 @@ $max = $valna;
 	return $key;
 }
 
-function CountErr($data_matrix, $key, $ratio)
+function CountErrs($data_matrix, $key, $ratio)
 {
 	$Rounded = (($data_matrix[$key]['phase_4'] > 0 && round($ratio * $data_matrix[$key]['phase_4']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_4'])) + (($data_matrix[$key]['phase_3'] > 0 && round($ratio * $data_matrix[$key]['phase_3']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_3'])) + (($data_matrix[$key]['phase_2'] > 0 && round($ratio * $data_matrix[$key]['phase_2']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_2'])) + (($data_matrix[$key]['phase_1'] > 0 && round($ratio * $data_matrix[$key]['phase_1']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_1'])) + (($data_matrix[$key]['phase_0'] > 0 && round($ratio * $data_matrix[$key]['phase_0']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_0'])) + (($data_matrix[$key]['phase_na'] > 0 && round($ratio * $data_matrix[$key]['phase_na']) < 1) ? 1:round($ratio * $data_matrix[$key]['phase_na']));
 	$Actual = ($ratio * $data_matrix[$key]['phase_4']) + ($ratio * $data_matrix[$key]['phase_3']) + ($ratio * $data_matrix[$key]['phase_2']) + ($ratio * $data_matrix[$key]['phase_1']) + ($ratio * $data_matrix[$key]['phase_0'])+ ($ratio * $data_matrix[$key]['phase_na']);
@@ -2721,8 +2773,19 @@ function GetDiseasesFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 	{
 		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) JOIN `entities` e2 ON (er.`child`=e2.`id`) JOIN `entity_relations` er2 ON(er2.`parent` = e2.`id`) JOIN `entities` e3 ON (er2.`child`=e3.`id`) JOIN `entity_relations` er3 ON(er3.`child` = e3.`id`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product' AND e3.`class` = 'MOA' AND er3.`parent`='" . mysql_real_escape_string($EntityID) . "' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL)";
 	}
+	else if($GobalEntityType == 'Investigator' )
+	{
+				
+		$query = "	
+					SELECT DISTINCT e.`id` FROM `entity_trials` et 
+					JOIN `entity_trials` et2 ON(et.`trial`=et2.trial and et.entity=".  mysql_real_escape_string($EntityID) .") 
+					JOIN entities e on (et2.entity = e.id and e.class='Disease')
+					JOIN `entity_relations` er ON(e.id=er.parent) 
+					JOIN entities e2 on (er.child = e2.id and e2.class='Product')
+					";
+	}
 	
-	$res = mysql_query($query) or die('Bad SQL query getting Diseases from products ids in DT');
+	$res = mysql_query($query) or die('Bad SQL query getting Diseases from Investigator id');
 	
 	if($res)
 	{
@@ -2805,7 +2868,7 @@ function CalculateMiniBarWidthDiseaseTracker($Ratio, $countValue, $Key, $Max_Val
 
 function getDiseaseIdsFromDiseaseCat($DiseaseCatId){
 	$query = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) WHERE e.`class` = 'Disease' AND er.`parent` ='" . $DiseaseCatId . "'";
-	$res = mysql_query($query) or die(mysql_error());
+	$res = mysql_query($query) or die($query.' '.mysql_error());
 	if($res){
 		while($row = mysql_fetch_array($res))
 		{

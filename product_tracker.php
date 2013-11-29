@@ -51,6 +51,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	
 	///Required Data restored
 	$data_matrix = $Return['matrix'];
+	
 	$Report_DisplayName = $Return['report_name'];
 	$id = $Return['id'];
 	$rows = $Return['rows'];
@@ -80,6 +81,8 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 		$MainPageURL = 'disease.php';
 	else if($TrackerType == 'INVESTPT' or $TrackerType == 'INVESTMT')	
 		$MainPageURL = 'investigator.php';
+	else if($TrackerType == 'INVESTDT')	
+		$MainPageURL = 'disease.php';
 	
 	
 	$HTMLContent .= TrackerCommonCSS($uniqueId, $TrackerType);
@@ -109,7 +112,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 {
 	global $db;
 	global $now;
-	
+	if($_REQUEST['TrackerType']=='INVESTDT') $TrackerType=$_REQUEST['TrackerType'];
 	$rows = array();
 	$productIds = array();
 	$rowsDisplayName = array();
@@ -153,12 +156,12 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 		
 		// SELECT MAX NUM of Entity2
 		$query = 'SELECT MAX(`num`) AS `num` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' AND type = \'column\'';
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 
 		// Max Entity2 Id
 		$query = 'SELECT rpt.`type_id` AS type_id, et.`class` AS class FROM `rpt_masterhm_headers` rpt JOIN `entities` et ON (et.`id` = rpt.`type_id`) WHERE report=' . $id . ' AND type = \'column\' AND `num`='.$header['num'];
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$entity2Id = $header['type_id'];
 		$entity2Type = $header['class'];
@@ -172,7 +175,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'DISCATCPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER 
 	{
 	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -189,7 +192,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'INVESTCT')	
 	{
 	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -211,7 +214,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'INVESTPT')	
 	{
 	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Investigator" and id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -235,7 +238,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	global $productIds;
 	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
 	
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -254,11 +257,39 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 		$entity2Type = 'Investigator';
 		
 	}
+	else if($TrackerType == 'INVESTDT')	
+	{
+	global $productIds;
+	if(isset($_REQUEST['DiseaseId'])) $id=$_REQUEST['DiseaseId'];
+	
+	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Disease" and id=' . $id;
+	
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
+		$header = mysql_fetch_array($res);
+		
+		$Report_DisplayName = $header['name'];
+		if($header['display_name'] != NULL && $header['display_name'] != '')
+				$Report_DisplayName = $header['display_name'];	
+		if(isset($_REQUEST['InvestigatorId']))
+			{
+				$InvestigatorId = mysql_real_escape_string($_REQUEST['InvestigatorId']);
+				$OptionArray = array('InvestigatorId'=>$InvestigatorId, 'Phase'=> $_REQUEST['phase']);	
+			}
+		$productIds = GetProductsFromInvestigator($id, $TrackerType, $OptionArray);
+		
+		$id=$header['id'];
+		$ExtName = GetReportNameExtension($OptionArray);
+		
+		$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];
+		$entity2Id = $OptionArray['InvestigatorId'];
+		$entity2Type = 'Investigator';
+		
+	}
 	else if($TrackerType == 'DISCATPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
 	{
 		global $productIds;
 		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -272,7 +303,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'CPT' || $TrackerType=='DCPT')	//CPT=COMPANY PRODUCT TRACKER	//DCPT=DISEASE COMPANY PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -290,7 +321,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT' || $TrackerType == 'IMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DCMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -313,7 +344,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DISCATMCPT' || $TrackerType == 'IMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER || DISCATMCPT==DISEASE CATEGORY MOA CATEGORY PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA_Category" and id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -336,8 +367,10 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 	{
+	if(isset($_REQUEST['DiseaseId'])) $id=$_REQUEST['DiseaseId'];
+	
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Disease" and id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -348,7 +381,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'ICPT')	//ICPT=COMPANY INVESTIGATOR PRODUCT TRACKER
 	{
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
-		$res = mysql_query($query) or die(mysql_error());
+		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 		if($header['display_name'] != NULL && $header['display_name'] != '')
@@ -361,8 +394,10 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	
 	$rowsCompanyName=array();
 	$rowsDescription=array();
+	
 	foreach($productIds as $key=> $product)
 	{
+		
 		$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `entities` WHERE `class`='Product' and id = '" . $product . "' "));
 		$rows[$key] = $result['name'];
 		$result['company'] = GetCompanyNames($result['id']);
@@ -371,12 +406,14 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 			$rowsCompanyName[$key] = ' / '.$result['company'];
 		} 
 		$rowsDescription[$key] = $result['description'];
+		
 	}
 	
 	
 	foreach($rows as $row => $rval)
 	{
 		/// Fill up all data in Data Matrix only, so we can sort all data at one place
+		
 		$data_matrix[$row]['productName'] = $rval;
 		$data_matrix[$row]['product_CompanyName'] = $rowsCompanyName[$row];
 		$data_matrix[$row]['productIds'] = $productIds[$row];
@@ -434,7 +471,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				$impArr=implode("','", $arrDiseaseIds);
 				$phase_query = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) WHERE et.`entity`='" . $productIds[$row] ."' AND et2.`entity` IN ('" .  $impArr ."')";
 			}
-			else if($TrackerType=='IMPT' || $TrackerType=='IMCPT' || $TrackerType=='INVESTCT' || $TrackerType=='INVESTPT' || $TrackerType=='INVESTMT' )			{
+			else if($TrackerType=='IMPT' || $TrackerType=='IMCPT' || $TrackerType=='INVESTCT' || $TrackerType=='INVESTPT' || $TrackerType=='INVESTMT' || $TrackerType=='INVESTDT' )			
+			{
 				
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'  and dt.larvol_id in (select trial from entity_trials where entity=" .$OptionArray['InvestigatorId']  ." )";
 			}
@@ -443,9 +481,10 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				$phase_query = "SELECT dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type  FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) WHERE et.`entity`='" . $productIds[$row] ."'";
 			}
 			
-			$phase_res = mysql_query($phase_query) or die(mysql_error());
+			$phase_res = mysql_query($phase_query) or die($phase_query.' - '.mysql_error());
 			while($phase_row=mysql_fetch_array($phase_res))
 			{
+
 				$data_matrix[$row]['total']++;
 				if($phase_row['is_active'])
 				{
@@ -458,6 +497,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 					
 				if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
 				{
+					
 					$data_matrix[$row]['total_phase_na']++;
 					if($phase_row['is_active'])
 					{
@@ -470,6 +510,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				}
 				else if($phase_row['phase'] == '0')
 				{
+					
 					$data_matrix[$row]['total_phase_0']++;
 					if($phase_row['is_active'])
 					{
@@ -483,6 +524,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
 				|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
 				{
+					
 					$data_matrix[$row]['total_phase_1']++;
 					if($phase_row['is_active'])
 					{
@@ -495,9 +537,12 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				}
 				else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
 				|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
-				|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b')
+				|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b' || $phase_row['phase'] == 2)
 				{
+					
+					
 					$data_matrix[$row]['total_phase_2']++;
+					
 					if($phase_row['is_active'])
 					{
 						$data_matrix[$row]['active_phase_2']++;
@@ -510,6 +555,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
 				|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
 				{
+					
 					$data_matrix[$row]['total_phase_3']++;
 					if($phase_row['is_active'])
 					{
@@ -522,6 +568,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				}
 				else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
 				{
+					
 					$data_matrix[$row]['total_phase_4']++;
 					if($phase_row['is_active'])
 					{
@@ -576,10 +623,12 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	
 	/// This function willl Sort multidimensional array according to industry lead column
 	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
+	{
+		if($TrackerType='INVESTDT') $dwcount='total';
 		$data_matrix = sortTwoDimensionArrayByKey($data_matrix, $dwcount);	//Sort according to default view as other than LI default view is total
+	}
 	else
 		$data_matrix = sortTwoDimensionArrayByKey($data_matrix, 'indlead');
-	
 	///////////PAGING DATA
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
@@ -1378,7 +1427,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		{
 			if(isset($TrackerType) & $TrackerType == 'IMPT')
 				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
-			elseif(isset($TrackerType) & ($TrackerType == 'IMCPT' or $TrackerType == 'INVESTCT' or $TrackerType == 'INVESTPT' or $TrackerType == 'INVESTMT'))
+			elseif(isset($TrackerType) & ($TrackerType == 'IMCPT' or $TrackerType == 'INVESTCT' or $TrackerType == 'INVESTPT' or $TrackerType == 'INVESTMT' or $TrackerType=='INVESTDT' ))
 				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
 			else
 				$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
@@ -1414,6 +1463,8 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		////// Color Graph - Bar Starts
 		
 		//// Code for Indlead
+		
+		if($TrackerType == 'INVESTDT')	$dwcount='total';
 		if($dwcount == 'indlead')
 		{
 			$Err = IndleadCountErr($data_matrix, $row, $ratio);
@@ -1953,7 +2004,7 @@ function Download_reports()
 			{
 				if($TrackerType != 'PTH')
 				{
-					if(isset($TrackerType) & ($TrackerType == 'IMPT' or $TrackerType == 'INVESTCT'  or $TrackerType == 'INVESTPT'  or $TrackerType == 'INVESTMT'))
+					if(isset($TrackerType) & ($TrackerType == 'IMPT' or $TrackerType == 'INVESTCT'  or $TrackerType == 'INVESTPT'  or $TrackerType == 'INVESTMT' or $TrackerType=='INVESTDT' ))
 						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
 					else
 						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
@@ -2350,7 +2401,7 @@ function Download_reports()
 			
 			if($TrackerType != 'PTH')
 				{
-					if(isset($TrackerType) & ($TrackerType == 'IMPT' or $TrackerType == 'INVESTCT' or $TrackerType == 'INVESTPT'  or $TrackerType == 'INVESTMT'))
+					if(isset($TrackerType) & ($TrackerType == 'IMPT' or $TrackerType == 'INVESTCT' or $TrackerType == 'INVESTPT'  or $TrackerType == 'INVESTMT' or $TrackerType=='INVESTDT' ))
 						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'] . '&e2='.$OptionArray['InvestigatorId'];
 					else
 						$commonPart1 = 'ott.php?e1=' . $data_matrix[$row]['productIds'];
@@ -3796,7 +3847,7 @@ function GetProductsFromInvestigator($EntityId, $TrackerType, $OptionArray)
 	global $db;
 	global $now;
 	$Products = array();
-	$query = "	SELECT DISTINCT et2.entity from entity_trials et
+	$query = "	SELECT  DISTINCT et2.entity from entity_trials et
 				JOIN entity_trials et2 ON (et.trial = et2.trial and et.entity = " . $EntityId . ")
 				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))";
 	if($TrackerType=='INVESTMT' and !empty($OptionArray['InvestigatorId']))
@@ -3822,7 +3873,31 @@ function GetProductsFromInvestigator($EntityId, $TrackerType, $OptionArray)
 				JOIN entity_relations er ON (e.id = er.parent and er.child = " . $EntityId . "  )
 				";
 	}
-	$res = mysql_query($query) or die('Bad SQL query getting products from Investigator id in PT '.$query);
+	if($TrackerType=='INVESTDT' and !empty($OptionArray['InvestigatorId']))
+	{
+		$qstr='';
+		if($_REQUEST['phase']=='na')
+			$qstr=" and (dt.phase = 'N/A'  or  dt.phase = ''  or  dt.phase is null)";
+		elseif($_REQUEST['phase']=='0')
+			$qstr=" and (dt.phase = '0')";
+		elseif($_REQUEST['phase']=='1')
+			$qstr=" and dt.phase in ('1', '0/1'  ,'1a', '1b'  , '1a/1b', '1c')";
+		elseif($_REQUEST['phase']=='2')
+			$qstr=" and dt.phase in ( '2' ,  '1/2', '1b/2', '1b/2a'  ,  '2a', '2a/2b', '2a/b' , dt.phase = '2b')";
+		elseif($_REQUEST['phase']=='3')
+		$qstr=" and dt.phase in ( '3', '2/3','2b/3' ,'3a','3b') ";
+		elseif($_REQUEST['phase']=='4')
+			$qstr=" and dt.phase in ('4','3/4','3b/4')";
+	
+		$query = "	SELECT DISTINCT et2.entity from entity_trials et
+				JOIN data_trials dt ON ( et.trial=dt.larvol_id " . $qstr ." and et.entity = " . $OptionArray['InvestigatorId'] . " )
+				JOIN entity_trials et2 ON (dt.larvol_id = et2.trial )
+				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
+				JOIN entity_relations er ON (e.id = er.child and er.parent = " . $EntityId . "  )
+				";
+	}
+	
+	$res = mysql_query($query) or die(' - Bad SQL query getting products from Investigator id in PT  '.$query);
 
 	if($res)
 	{
@@ -3831,6 +3906,7 @@ function GetProductsFromInvestigator($EntityId, $TrackerType, $OptionArray)
 			$Products[] = $row['entity'];
 		}
 	}
+	
 	return array_filter(array_unique($Products));
 }
 
