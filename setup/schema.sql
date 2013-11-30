@@ -1181,6 +1181,9 @@ CREATE TABLE IF NOT EXISTS `redtags` (
    `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(63) COLLATE utf8_unicode_ci NOT NULL,
   `type` enum('Clinical','Clinical data','Clinical New Trial','New Trial','Clinical Trial status','Trial status','Clinical Enrollment status','Enrollment status','Clinical Other','Other','Regulatory','Regulatory FDA event','FDA event','Regulatory Non-US regulatory','Non-US regulatory','Regulatory Other','Reimbursement','Reimbursement US reimbursement','US reimbursement','Reimbursement NICE','Commercial','Commercial Sales','Sales','Commercial Licensing / partnership','Licensing / partnership','Commercial Patent','Patent','Commercial Launch','Launch','Commercial Launch Non-US','Launch Non-US','Commercial Other','Other Preclinical') COLLATE utf8_unicode_ci NOT NULL,
+ `rUIS` tinyint(1) NOT NULL DEFAULT '0',
+  `formula`  	varchar(150) NULL,
+  `statement`	varchar(250) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1396,6 +1399,32 @@ CREATE TABLE `commentics_voters` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `news`  ( 
+	`larvol_id`  	int(10) UNSIGNED NOT NULL,
+	`redtag_id`  	int(10) UNSIGNED NOT NULL,
+	`brief_title`	text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
+	`phase`      	enum('N/A','0','0/1','1','1a','1b','1a/1b','1c','1/2','1b/2','1b/2a','2','2a','2a/2b','2b','2/3','2b/3','3','3a','3b','3/4','3b/4','4') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N/A',
+	`enrollment` 	int(10) UNSIGNED NULL,
+	`sponsor`    	varchar(150) NULL,
+	`summary`    	varchar(150) NULL,
+	`added`      	date NOT NULL,
+	`period`     	smallint(6) NOT NULL
+	)
+ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `news`  ( 
+	`larvol_id`  	int(10) UNSIGNED NOT NULL,
+	`redtag_id`  	int(10) UNSIGNED NOT NULL,
+	`brief_title`	text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
+	`phase`      	enum('N/A','0','0/1','1','1a','1b','1a/1b','1c','1/2','1b/2','1b/2a','2','2a','2a/2b','2b','2/3','2b/3','3','3a','3b','3/4','3b/4','4') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N/A',
+	`enrollment` 	int(10) UNSIGNED NULL,
+	`sponsor`    	varchar(150) NULL,
+	`summary`    	varchar(150) NULL,
+	`added`      	date NOT NULL,
+	`period`     	smallint(6) NOT NULL
+	)
+ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 ALTER TABLE `products_moas`
   ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1477,3 +1506,152 @@ ALTER TABLE `upm_areas`
   ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_areas_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+ALTER TABLE `news`
+  ADD CONSTRAINT `news_ibfk_1` FOREIGN KEY (`redtag_id`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `news`
+	ADD CONSTRAINT `redtag_trial`
+	UNIQUE (redtag_id, larvol_id);
+
+DELIMITER$$
+CREATE PROCEDURE `generateTrialNews`( IN days int)
+BEGIN
+	
+	DECLARE rtag_id INT;
+	DECLARE frml VARCHAR(150);
+	DECLARE score INT;
+	DECLARE stmt VARCHAR(250);
+	DECLARE done INT DEFAULT FALSE;
+
+	DECLARE dynamicCursor CURSOR FOR SELECT id,rUIS,formula,statement from redtags;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+	#cleanup temporary table (if left over from a previous failure)
+	SET @drop_tmp_tbl = 'DROP TEMPORARY TABLE IF EXISTS lttmp.t'; 
+	PREPARE tmp_stmt1 FROM @drop_tmp_tbl;
+	EXECUTE tmp_stmt1;
+
+	OPEN dynamicCursor;
+	dynamicCursorLoop: LOOP
+
+		FETCH dynamicCursor INTO rtag_id,score,frml,stmt;
+		IF (done) THEN LEAVE dynamicCursorLoop;
+		END IF;
+
+		
+		IF (stmt LIKE 'select %') THEN
+			IF (frml IS NULL) THEN
+				SET @frml_quoted := '"NA"';
+			ELSE
+				SET @frml_quoted := CONCAT('"',frml,'"');
+			END IF;
+
+			/*replace '[column]' with 'column'
+			to fill up the data slots (enclosed in []) in the redtag formula*/
+			IF(frml REGEXP '\\[') THEN
+				SET @first_slot_t = SUBSTRING_INDEX(frml, ']', 1);
+				SET @first_slot   = SUBSTRING_INDEX(@first_slot_t, '[', -1);
+				SET @last_slot_t  = SUBSTRING_INDEX(frml, '[', -1);
+				SET @last_slot    = SUBSTRING_INDEX(@last_slot_t, ']', 1);
+				SET @comp_formula = CONCAT('REPLACE(REPLACE(',@frml_quoted,',"[',@first_slot,']",',@first_slot,'),"[',@last_slot,']",',@last_slot,')');
+			ELSE
+				SET @first_slot   := '"NA"';
+				SET @last_slot    := '"NA"';
+				SET @comp_formula := '"NA"';
+			END IF;
+			
+			#run the redtag select statement
+			SET @tmp_tbl = CONCAT('create temporary table lttmp.t as ',REPLACE(stmt,"%d",days));
+			PREPARE tmp_stmt2 FROM @tmp_tbl;
+			EXECUTE tmp_stmt2;
+
+			#populate the news table
+			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,lead_sponsor,',@comp_formula,' as summary, current_date as added, ',days,' as period from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) ON DUPLICATE KEY UPDATE added=current_date,period=',days);
+			PREPARE news_stmt FROM @insert_news;
+			EXECUTE news_stmt;						
+
+			#cleanup temporary table
+			PREPARE tmp_stmt FROM @drop_tmp_tbl;
+			EXECUTE tmp_stmt;			
+		END IF;
+	END LOOP;
+	
+	CLOSE dynamicCursor;
+	
+END$$;
+DELIMITER ;	ALTER TABLE `news`
+  ADD CONSTRAINT `news_ibfk_1` FOREIGN KEY (`redtag_id`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `news`
+	ADD CONSTRAINT `redtag_trial`
+	UNIQUE (redtag_id, larvol_id);
+
+DELIMITER$$
+CREATE PROCEDURE `generateTrialNews`( IN days int)
+BEGIN
+	
+	DECLARE rtag_id INT;
+	DECLARE frml VARCHAR(150);
+	DECLARE score INT;
+	DECLARE stmt VARCHAR(250);
+	DECLARE done INT DEFAULT FALSE;
+
+	DECLARE dynamicCursor CURSOR FOR SELECT id,rUIS,formula,statement from redtags;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+	#cleanup temporary table (if left over from a previous failure)
+	SET @drop_tmp_tbl = 'DROP TEMPORARY TABLE IF EXISTS lttmp.t'; 
+	PREPARE tmp_stmt1 FROM @drop_tmp_tbl;
+	EXECUTE tmp_stmt1;
+
+	OPEN dynamicCursor;
+	dynamicCursorLoop: LOOP
+
+		FETCH dynamicCursor INTO rtag_id,score,frml,stmt;
+		IF (done) THEN LEAVE dynamicCursorLoop;
+		END IF;
+
+		
+		IF (stmt LIKE 'select %') THEN
+			IF (frml IS NULL) THEN
+				SET @frml_quoted := '"NA"';
+			ELSE
+				SET @frml_quoted := CONCAT('"',frml,'"');
+			END IF;
+
+			/*replace '[column]' with 'column'
+			to fill up the data slots (enclosed in []) in the redtag formula*/
+			IF(frml REGEXP '\\[') THEN
+				SET @first_slot_t = SUBSTRING_INDEX(frml, ']', 1);
+				SET @first_slot   = SUBSTRING_INDEX(@first_slot_t, '[', -1);
+				SET @last_slot_t  = SUBSTRING_INDEX(frml, '[', -1);
+				SET @last_slot    = SUBSTRING_INDEX(@last_slot_t, ']', 1);
+				SET @comp_formula = CONCAT('REPLACE(REPLACE(',@frml_quoted,',"[',@first_slot,']",',@first_slot,'),"[',@last_slot,']",',@last_slot,')');
+			ELSE
+				SET @first_slot   := '"NA"';
+				SET @last_slot    := '"NA"';
+				SET @comp_formula := '"NA"';
+			END IF;
+			
+			#run the redtag select statement
+			SET @tmp_tbl = CONCAT('create temporary table lttmp.t as ',REPLACE(stmt,"%d",days));
+			PREPARE tmp_stmt2 FROM @tmp_tbl;
+			EXECUTE tmp_stmt2;
+
+			#populate the news table
+			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,lead_sponsor,',@comp_formula,' as summary, current_date as added, ',days,' as period from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) ON DUPLICATE KEY UPDATE added=current_date,period=',days);
+			PREPARE news_stmt FROM @insert_news;
+			EXECUTE news_stmt;						
+
+			#cleanup temporary table
+			PREPARE tmp_stmt FROM @drop_tmp_tbl;
+			EXECUTE tmp_stmt;			
+		END IF;
+	END LOOP;
+	
+	CLOSE dynamicCursor;
+	
+END$$;
+DELIMITER ;	

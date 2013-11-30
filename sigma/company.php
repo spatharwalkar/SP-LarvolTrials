@@ -7,6 +7,7 @@
 	chdir ($cwd);
 	require_once('disease_tracker.php');
 	require_once('investigators_tracker.php');
+	require_once('news_tracker.php');
 	$page = 1;
 	if($_REQUEST['CompanyId'] != NULL && $_REQUEST['CompanyId'] != '' && isset($_REQUEST['CompanyId']))
 	{
@@ -102,6 +103,7 @@
 	$productIds = $product['ProductIds'];
 	$TabTrialCount = GetTrialsCountForCompany($productIds);	
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($CompanyId, 'Institution'));
+	$TabNewsCount = GetNewsCountForCompany($productIds);
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($CompanyName) ? $CompanyName. ' - '.$meta_title : $meta_title;	
@@ -280,6 +282,8 @@
 						$ottLinkName = '<a href="'.$tabOTTUrl.'&tab=OTTtrac&sourcepg=TZC" title="'.$TabTrialCount.' '.$CountExt.'">&nbsp;'.$TabTrialCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
 						$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+						$CountExt = (($TabNewsCount == 1) ? 'News':'News');
+						$newsLinkName = '<a href="'.$tabCommonUrl.'&tab=newstrac" title="'.$TabNewsCount.' '.$CountExt.'">&nbsp;'.$TabNewsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 
 						if($tab == 'diseasetrac') {
 							print '<td><img id="CompanyImg" src="../images/firstTab.png" /></td>
@@ -290,6 +294,8 @@
 							<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
 							<td><img id="InvestigatorsImg" src="../images/afterTab.png" /></td>
 							<td id="CompanyOTTTab" class="Tab">'.$ottLinkName.'</td>
+							<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+							<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
 							<td><img id="lastImg" src="../images/lastTab.png" /></td>
 							<td></td>';
 						 } else if($tab == 'company') { 
@@ -301,6 +307,8 @@
 							<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>							
 							<td><img id="InvestigatorsImg" src="../images/afterTab.png" /></td>							
 							<td id="CompanyOTTTab" class="Tab">'.$ottLinkName.'</td>
+							<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+							<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
 							<td><img id="lastImg" src="../images/lastTab.png" /></td>
 							<td></td>';
 							// print '<td><img id="CompanyImg" src="../images//firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images//selectLastTab.png" /></td><td></td>';
@@ -313,7 +321,9 @@
 									<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
 									<td><img id="InvestigatorsImg" src="../images/middleTab.png" /></td>
 									<td id="CompanyOTTTab" class="selectTab">'.$ottLinkName.'</td>
-									<td><img id="lastImg" src="../images/selectLastTab.png" /></td>
+									<td><img id="lastImg" src="../images/selectTabConn.png" /></td>
+									<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
+									<td><img id="lastImg" src="../images/lastTab.png" /></td>
 									<td></td>';
 						 } else if($tab == 'investigatortrac') {
 							print '<td><img id="DiseaseImg" src="../images/firstTab.png" /></td>
@@ -323,10 +333,25 @@
 									<td><img id="lastImg" src="../images/middleTab.png" /></td>
 									<td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
 									<td><img id="InvestigatorsImg" src="../images/selectTabConn.png" /></td>
-									<td id="CompanyOTTTab" class="Tab">'.$ottLinkName.'</td>									
+									<td id="CompanyOTTTab" class="Tab">'.$ottLinkName.'</td>
+									<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+									<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
 									<td><img id="lastImg" src="../images/lastTab.png" /></td>
 									<td></td>';
-						 }
+						 } else if($tab == 'newstrac') {
+											print '<td><img id="CompanyImg" src="../images/firstTab.png" /></td>
+									<td id="CompanyTab" class="Tab">'. $companyLinkName .'</td>
+									<td><img id="DiseaseImg" src="../images/afterTab.png" /></td>
+									<td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td>
+									<td><img id="lastImg" src="../images/afterTab.png" /></td>
+									<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+									<td><img id="InvestigatorsImg" src="../images/afterTab.png" /></td>
+									<td id="CompanyOTTTab" class="Tab">'.$ottLinkName.'</td>
+									<td><img id="CompanyImg" src="../images/middleTab.png" /></td>															
+									<td id="CompanyTab" class="selectTab">'. $newsLinkName .'</td></td>
+									<td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+						 	// print '<td><img id="CompanyImg" src="../images/firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+				 }
 						print	'            
 					</tr>
 				</table>		
@@ -344,6 +369,8 @@
 						print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag);//CDT= COMPANY DISEASE TRACKER
 					else if($tab == 'investigatortrac')
 						print showInvestigatorTracker($CompanyId, 'CIT', $page);		//CIT= COMPANY INVESTIGATOR TRACKER
+					else if($tab == 'newstrac')
+						print showNewsTracker($CompanyId, 'CNT', $page);		//CNT = COMPANY NEWS TRACKER  showNewsTracker
 					else if($tab == 'OTTtrac'){
 						chdir ("..");
 						DisplayOTT(); //SHOW OTT
@@ -404,6 +431,23 @@ function GetTrialsCountForCompany($productIds)
 	{
 		while($row = mysql_fetch_array($res))
 			$TrialsCount = $row['trialCount'];
+	}
+	return $TrialsCount;
+}
+/* Function to get Trials count from Products id */
+function GetNewsCountForCompany($productIds)
+{
+	global $db;
+	global $now;
+	$impArr = implode("','", $productIds);
+	$NewsCount = 0;
+	$query = "SELECT count(Distinct(dt.`larvol_id`)) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity` in('" . $impArr . "')";
+	$res = mysql_query($query) or die('Bad SQL query getting trials count for Products ids in Sigma Companys Page');
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+			$TrialsCount = $row['newsCount'];
 	}
 	return $TrialsCount;
 }

@@ -645,6 +645,16 @@ if (isset($_POST['li_therapeuticarea']) and $_POST['li_therapeuticarea']=="3" an
 	return;
 }
 
+//Generate News
+if (isset($_POST['news_days']))
+{
+	require_once('generateNews.php');
+	echo '<br><b>Generating news...<br></b>';
+	generateNews($_POST['news_days']);
+	echo '<br>Done. <br>';
+	return;
+}
+
 /****************************/
 echo(editor());
 echo('</body></html>');
@@ -1085,7 +1095,7 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	. '<input type="hidden" name="recalc_investigators" value="YES">'
 	. '<br><input type="submit" value="Recalculate" />'
 	. '</form></formset></fieldset></div>';
-	
+
 	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	// Diseases Category from clinicaltrials.gov
 	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> Import Disease Category </b></legend>'
@@ -1093,10 +1103,24 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			. '<input type="hidden" name="import_disease_category" value="YES">'
 			. '<br><input type="submit" value="Import" />'
 			. '</form></formset></fieldset></div>';
-	
-			
+				
 	$out .= '</fieldset></div><br /><br /><br />';
-		
+
+	
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+	// generate news
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> GENERATE NEWS</b></legend>'
+			. '<form action="database.php" method="post">'
+			. 'Enter no. of days (look back period) : <input type="text" name="news_days" value=""/>&nbsp;&nbsp;&nbsp;'	
+			. ''
+			. '<input type="submit" value="Generate News" />'
+					. '</form>'
+							. '</fieldset></div>';
+	
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+	
 	return $out;
 
 }

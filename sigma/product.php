@@ -13,6 +13,7 @@
 	chdir ($cwd);
 	require_once('disease_tracker.php');
 	require_once('investigators_tracker.php');
+	require_once('news_tracker.php');
 	
 	$e1 = NULL;
 	if( ($_REQUEST['er']=='1%20month') or ($_REQUEST['er']=='1 month') )
@@ -58,6 +59,7 @@
 	$TabInvestigatorCount = $investigator['TotalRecords'];
 	
 	$TabTrialsCount = GetTrialsCountFromProduct($e1);
+	$TabNewsCount = GetNewsCountFromProduct($e1);
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($ProductName) ? $ProductName. ' - '.$meta_title : $meta_title;
@@ -189,6 +191,8 @@
 						$trialsLinkName = '<a href="'.$tabCommonUrl.'&tab=ott&sourcepg=TZP" title="'.$TabTrialsCount.' '.$CountExt.'">&nbsp;'.$TabTrialsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
 						$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+						$CountExt = (($TabNewsCount == 1) ? 'News':'News');
+						$newsLinkName = '<a href="'.$tabCommonUrl.'&tab=newstrac" title="'.$TabNewsCount.' '.$CountExt.'">&nbsp;'.$TabNewsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						
 						if($tab == 'diseasetrac') {  
 						print '<td>
@@ -203,6 +207,10 @@
 									<img id="CompanyImg" src="../images/afterTab.png" />
 								</td>
 								<td id="DiseaseTab" class="Tab">'. $trialsLinkName .'</td>
+								<td>
+									<img id="CompanyImg" src="../images/afterTab.png" />
+								</td>
+								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
 								<td>
 									<img id="lastImg" src="../images/lastTab.png" />
 								</td>
@@ -221,6 +229,10 @@
 								</td>
 								<td id="DiseaseTab" class="Tab">'. $trialsLinkName .'</td>
 								<td>
+									<img id="CompanyImg" src="../images/afterTab.png" />
+								</td>
+								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
+								<td>
 									<img id="lastImg" src="../images/lastTab.png" />
 								</td>
 								<td></td>';
@@ -238,12 +250,27 @@
 								</td>
 								<td id="DiseaseTab" class="selectTab">'. $trialsLinkName .'</td>
 								<td>
-									<img id="lastImg" src="../images/selectLastTab.png" />
+									<img id="lastImg" src="../images/selectTabConn.png" />
+								</td>
+								<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
+								<td>
+									<img id="lastImg" src="../images/lastTab.png" />
 								</td>
 								<td></td>';
 						// print '<td><img id="CompanyImg" src="../images/firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
-						 }
-			print	'      
+						 } else if($tab == 'newstrac') {
+				 		print '<td><img id="investigatorImg" src="../images/firstTab.png" /></td>
+							<td id="InvestigatortracTab" class="Tab">' . $investigatorLinkName .'</td>
+							<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+							<td id="DiseaseTab" class="Tab">'. $diseaseLinkName .'</td>
+							<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+							<td id="CompanyTab" class="Tab">'. $trialsLinkName .'</td></td>
+							<td><img id="CompanyImg" src="../images/middleTab.png" /></td>
+							<td id="CompanyTab" class="selectTab">'. $newsLinkName .'</td></td>
+							<td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+				 		// print '<td><img id="CompanyImg" src="../images/firstSelectTab.png" /></td><td id="CompanyTab" class="selectTab">'. $companyLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+				 		}
+			print	'            
 			
 					</tr>
 				</table>			
@@ -259,6 +286,9 @@
 				}
 				else if($tab == 'investigatortrac'){
 					print showInvestigatorTracker($e1, 'PIT', $page);		//PDT = PRODUCT INVESTIGATOR TRACKER  showInvestigatorTracker
+				}
+				else if($tab == 'newstrac'){
+					print showNewsTracker($e1, 'PNT', $page);		//PDT = PRODUCT NEWS TRACKER  showNewsTracker
 				}	
 				else
 				{
