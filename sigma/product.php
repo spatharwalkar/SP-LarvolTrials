@@ -212,6 +212,10 @@
 								</td>
 								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
 								<td>
+									<img id="CompanyImg" src="../images/afterTab.png" />
+								</td>
+								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
+								<td>
 									<img id="lastImg" src="../images/lastTab.png" />
 								</td>
 								<td></td>';
@@ -228,6 +232,10 @@
 									<img id="CompanyImg" src="../images/selectTabConn.png" />
 								</td>
 								<td id="DiseaseTab" class="Tab">'. $trialsLinkName .'</td>
+								<td>
+									<img id="CompanyImg" src="../images/afterTab.png" />
+								</td>
+								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
 								<td>
 									<img id="CompanyImg" src="../images/afterTab.png" />
 								</td>
@@ -290,6 +298,9 @@
 				else if($tab == 'newstrac'){
 					print showNewsTracker($e1, 'PNT', $page);		//PDT = PRODUCT NEWS TRACKER  showNewsTracker
 				}	
+				else if($tab == 'newstrac'){
+					print showNewsTracker($e1, 'PNT', $page);		//PDT = PRODUCT NEWS TRACKER  showNewsTracker
+				}	
 				else
 				{
 					chdir ("..");
@@ -305,7 +316,22 @@
 	<br/><br/>
 	
 	<?php include "footer.php" ;
-
+/* Function to get News count from Product id */
+	function GetNewsCountFromProduct($ProductID)
+	{
+		global $db;
+		global $now;
+		$NewsCount = 0;
+		$query = "SELECT count(Distinct(dt.`larvol_id`)) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity`='" . mysql_real_escape_string($ProductID) . "'";
+		$res = mysql_query($query) or die('Bad SQL query getting trials count from Product id ');
+	
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+				$NewsCount = $row['newsCount'];
+		}
+		return $NewsCount;
+	}
 	/* Function to get Trials count from Disease id */
 	function GetTrialsCountFromProduct($ProductID)
 	{
