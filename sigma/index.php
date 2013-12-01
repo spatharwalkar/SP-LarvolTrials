@@ -147,7 +147,6 @@
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category` FROM `entities` WHERE `class` = '".$globalOptions['class']."'  AND (`is_active` <> '0' OR `is_active` IS NULL)";
 		else
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
-
 		$QueryResult = mysql_query($ResultArrQuery);
 		
 		$i=0;
@@ -443,13 +442,6 @@ span.com_at,.com_at{
     color: #888888;
     float: right;
     font-size: 12px;
-}	
-a{
-	text-decoration:none;
-}
-a:hover{
-	text-decoration:none;
-	color:#4F2683;
 }
 .com_name:hover{
 	color:#4F2683;
