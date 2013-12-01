@@ -362,9 +362,11 @@ require_once('include.util.php');
 				$skipModify = null;	        		
 	        	//special case detected for mul keys
 	        	$special_mul_key = null;
+	        	$special_uni_key = null;
 	        	$indexKey = null;
 				$Collation = null;
 				$AlreadyIndex = null;
+				$no_primary_def_needed = null;
 	        	//pr($new_field);
 	        	//pr($old_field);
 	        	//die;
@@ -487,7 +489,7 @@ require_once('include.util.php');
 	        		$after = $fieldNamesOrderHome[$newFieldHomeKey-1];
 	        	}
 	        	
-				$sql = $this->ChangeTableFieldQuery($table, $change, $field, $new_field, $no_primary_def_needed, $special_mul_key, $indexKey, $special_uni_key,$after,$Collation);
+				$sql = $this->ChangeTableFieldQuery($table, $change, $field, $new_field, $no_primary_def_needed, $special_mul_key, $indexKey, $special_uni_key, $after, $Collation);
 				echo($sql.';<br />');
 /* 				if($table=='rpt_ott_upm' && ($new_field['name'] == 'intervention_name_negate' || $new_field['name'] == 'intervention_name'))
 				{
@@ -715,10 +717,12 @@ require_once('include.util.php');
         			
         	}
         	$result = mysql_query($sql,$this->dbp);
-        	while($row = mysql_fetch_assoc($result))
-        	{
-        		$out[] = $row;
-        	}
+			if($result) {
+				while($row = mysql_fetch_assoc($result))
+				{
+					$out[] = $row;
+				}
+			}
         	return $out;
         }  
         
