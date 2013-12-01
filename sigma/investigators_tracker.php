@@ -26,6 +26,11 @@ if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 	$page = mysql_real_escape_string($_REQUEST['page']);
 }
 
+if(isset($_REQUEST['dwcount']))
+  $CountType = $_REQUEST['dwcount'];
+ else
+  $CountType = 'total';
+
 ////Process Report Tracker
 function showInvestigatorTracker($id, $TrackerType, $page=1)
 {
@@ -1295,7 +1300,7 @@ function InvestigatorTrackerpagination($TrackerType, $totalPages, $id, $CurrentP
 		$url = 'MoaCatId='.$id.'&amp;tab=investigatortrac';
 	
 	if($GobalEntityType == 'Product')
-		$url .= '&amp;dwcount=' . $dwcount;	
+		$url .= '&amp;dwcount=' . $CountType;	
 	
 	$rootUrl = $MainPageURL.'?';
 	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';

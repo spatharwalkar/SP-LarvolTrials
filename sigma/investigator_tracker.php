@@ -2178,8 +2178,8 @@ function Ipagination($TrackerType, $totalPages, $id, $dwIcount, $CurrentPage, $M
 		$url = 'MoaCatId=' . $id . '&amp;DiseaseId=' . $OptionArray['DiseaseId'] .'&amp;dwIcount=' . $dwIcount .'&amp;TrackerType='.$TrackerType.((isset($phase) && $phase != NULL && $phase != '') ? '&amp;phase=' . $phase:'' );
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$url = 'DiseaseId=' . $id .'&amp;dwIcount=' . $dwIcount .'&amp;tab=Products';
-	else if($TrackerType == 'DIT')	//DIT=DISEASE INVESTIGATOR TRACKER
-		$url = 'DiseaseId=' . $id .'&page=' . $page .'&tab=Investigators';	
+	else if($TrackerType == 'DIT') //DIT=DISEASE INVESTIGATOR TRACKER
+		$url = 'DiseaseId=' . $id .'&amp;dwIcount=' . $dwIcount.'&page=' . $page .'&tab=Investigators';
 	
 	$rootUrl = $MainPageURL.'?';
 	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
