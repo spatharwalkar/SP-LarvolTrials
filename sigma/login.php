@@ -4,19 +4,21 @@ chdir ("..");
 require_once('db.php');
 chdir ($cwd);
 
+$config = '../hybridauth/config.php';
+require_once( "../hybridauth/Hybrid/Auth.php" );
+
 if(isset($_GET['logout']))
 {
 	$db->logout();
+	$hybridauth = new Hybrid_Auth( $config );
+	$hybridauth->storage()->clear();
 	header('Location: index.php');
 	exit;
 }
 
 
 if(!$db->loggedIn())
-{
-	$config = '../hybridauth/config.php';
-	require_once( "../hybridauth/Hybrid/Auth.php" );
-	
+{	
 	$reffererUrl = $_SERVER['HTTP_REFERER'];
 	
 	try
@@ -59,8 +61,11 @@ if(!$db->loggedIn())
 						$res = mysql_query($query);
 						if($res)
 						{
-							$db->linkedInLogin($user_profile->email);
-							echo("Larvol Sigma access granted.<br />");
+							$db->linkedInLogin($user_profile->email);							
+							$redirectUrl  = $hybridauth->storage()->get("reffererUrl");
+							$hybridauth->storage()->set("reffererUrl", '');
+							header('Location:'.$redirectUrl);
+							
 						}else{
 							echo("Sorry, there was a problem granting access based on LinkedIn authentication. Please try again at another time.<br />"
 									. mysql_error() . '<br />');
