@@ -297,7 +297,7 @@ while($row = mysql_fetch_array($res))
 ?>
 	<div class="profile-comments">
 			<p><?php echo '<a href="'.$_SERVER['PHP_SELF'].'" class="profile-comment-nav"><b>'.$row['name'].'</b></a>&nbsp;&nbsp;&nbsp;&nbsp;'.date('M d Y H.i', strtotime($row['dated'])).'&nbsp;&nbsp;&nbsp;&nbsp;';?>
-				<a href="<?php echo $row['url'].'?cmtx_perm='.$row['id'].'#cmtx_perm_'.$row['id']; ?>" class="profile-comment-nav">
+				<a href="<?php echo $row['url'].'&cmtx_perm='.$row['id'].'#cmtx_perm_'.$row['id']; ?>" class="profile-comment-nav">
 				<?php echo 'Commented Page:&nbsp;'.$row['reference']; ?></a>
 			</p>
 			<p><?php echo $row['comment']; ?></p>		
