@@ -1514,7 +1514,7 @@ ALTER TABLE `news`
 	ADD CONSTRAINT `redtag_trial`
 	UNIQUE (redtag_id, larvol_id);
 
-DELIMITER$$
+DELIMITER $$
 CREATE PROCEDURE `generateTrialNews`( IN days int)
 BEGIN
 	
@@ -1588,7 +1588,7 @@ ALTER TABLE `news`
 	ADD CONSTRAINT `redtag_trial`
 	UNIQUE (redtag_id, larvol_id);
 
-DELIMITER$$
+DELIMITER $$
 CREATE PROCEDURE `generateTrialNews`( IN days int)
 BEGIN
 	
