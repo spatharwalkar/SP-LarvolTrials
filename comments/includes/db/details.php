@@ -22,7 +22,9 @@ along with Commentics. If not, see <http://www.gnu.org/licenses/>.
 Text to help preserve UTF-8 file encoding: 汉语漢語.
 */
 
-if (!defined('IN_COMMENTICS')) { die('Access Denied.'); }
+if (!defined('IN_COMMENTICS')) { die('Access Denied.'); } 
+
+if(strpos(getcwd(), 'comments') !== false){chdir ("..");}
 require_once('settings.php');
 
 //larvol: replaced separate db connection details with ones pulled from main config
