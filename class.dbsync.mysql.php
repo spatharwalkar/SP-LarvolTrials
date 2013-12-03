@@ -272,12 +272,15 @@ require_once('include.util.php');
          * @return 	boolean	Success
          **/
         function CreateTable($name, $fields) {
+		
             mysql_select_db($this->database, $this->dbp);
+			
         	$primary_keys = array();
         	$index_keys = array();
         	$unique_keys = array();
-        	$special_mul_keys = null;
-            $sql_f = array();
+			$sql_f = array();
+        	$special_mul_key = null;            
+			
             for ($i = 0; $i < count($fields); $i++) {
             	if ($fields[$i]['key_primary'] == 'PRIMARY') {
                 	$primary_keys[] = $fields[$i]['name'];
@@ -625,7 +628,7 @@ require_once('include.util.php');
         * @return 	mysql result
         * @author Jithu Thomas
         **/
-        function ChangeTableRowFormatEngine($table,$new_field,$old_field)
+        function ChangeTableRowFormatEngine($table, $new_field, $old_field)
         {
             //check row_format
 	        if($old_field['row_format'] != $new_field['row_format'] || $old_field['Engine'] != $new_field['Engine'] || $old_field['tableCollation'] != $new_field['tableCollation'])
