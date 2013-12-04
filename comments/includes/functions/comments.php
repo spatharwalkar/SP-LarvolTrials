@@ -253,10 +253,10 @@ function cmtx_generate_comment ($is_preview, $alternate, $id, $name, $email, $we
 		$cmtx_website_attribute = ""; //initialize variable
 		if (cmtx_setting('website_new_window')) { $cmtx_website_attribute = " target='_blank'"; } //if website should open in new window
 		if (cmtx_setting('website_nofollow')) { $cmtx_website_attribute .= " rel='nofollow'";	} //if website should contain nofollow tag
-		
+
 		if($name == "")
 		{
-			$name = "Anonymous " . substr(hash(HASH_ALGO,$userid.$SERVER['PHP_SELF']),0,5);
+			$name = "Anonymous " . substr(hash(HASH_ALGO,$userid.$_SERVER['REQUEST_URI']),-5);
 			$website="";
 		}else{
 			$cmtx_box .= ($islarvol?'<img src="images/larvoltag.png" style="vertical-align:middle;"/> ':'');
