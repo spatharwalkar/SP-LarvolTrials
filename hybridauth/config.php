@@ -9,7 +9,7 @@
 //	HybridAuth Config file: http://hybridauth.sourceforge.net/userguide/Configuration.html
 // ----------------------------------------------------------------------------------------
 
-$baseurl = oldurlPath();
+$baseurl = urlPath();
 $sigmapos = strpos($baseurl,"sigma");
 if($sigmapos !== false)	$baseurl = substr($baseurl,0,$sigmapos);
 $baseurl .= 'hybridauth/';

@@ -33,8 +33,9 @@ function urlPath()  // return current domain/path
 	$out = substr($beforeq,0,strrpos($beforeq,'/')+1);
 	$urlpath = $out;
 	
-	if($current_path<>$out)
-		file_put_contents('cache/urlpath.txt', $out);
+	if($current_path<>$out && file_exists('cache/urlpath.txt'))
+	file_put_contents('cache/urlpath.txt', $out);
+		
 	return $out;
 }
 
