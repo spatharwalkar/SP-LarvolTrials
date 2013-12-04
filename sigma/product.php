@@ -212,10 +212,6 @@
 								</td>
 								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
 								<td>
-									<img id="CompanyImg" src="../images/afterTab.png" />
-								</td>
-								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
-								<td>
 									<img id="lastImg" src="../images/lastTab.png" />
 								</td>
 								<td></td>';
@@ -232,10 +228,6 @@
 									<img id="CompanyImg" src="../images/selectTabConn.png" />
 								</td>
 								<td id="DiseaseTab" class="Tab">'. $trialsLinkName .'</td>
-								<td>
-									<img id="CompanyImg" src="../images/afterTab.png" />
-								</td>
-								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
 								<td>
 									<img id="CompanyImg" src="../images/afterTab.png" />
 								</td>
