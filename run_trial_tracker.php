@@ -8220,6 +8220,10 @@ class TrialTracker
 		if($globalOptions['sourcepg'] == 'TZ')		
 		echo '<input type="hidden" name="sourcepg" value="TZ" />';
 		
+		if($globalOptions['sourcepg'] == 'TZI' or $_REQUEST['tab']=='InvestigatorOTT')
+			echo '<input type="hidden" name="sourcepg" value="TZI" />'
+					. '<input type="hidden" name="tab" value="InvestigatorOTT" />';
+		
 		if($globalOptions['sourcepg'] == 'TZP')		
 		echo '<input type="hidden" name="sourcepg" value="TZP" />'
 				. '<input type="hidden" name="tab" value="ott" />';

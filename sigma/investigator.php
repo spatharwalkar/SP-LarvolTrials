@@ -341,15 +341,12 @@
 								<img id="DiseasesImg" src="../images/afterTab.png" />
 							</td>
 							<td id="DiseasesTab" class="Tab"><?php print $diseaseLinkName; ?></td>
+				
 							
-							<td>
-								<img id="InvestigatorOTTImg" src="../images/middleTab.png" />
-							</td>
+							<td><img id="InvestigatorOTTImg" src="../images/middleTab.png" /></td>															
+							<td id="InvestigatorTab" class="selectTab"><?php print $ottLinkName; ?></td>
+							';
 							
-							<td>
-								<img id="InvestigatorOTTImg" src="../images/selectLastTab.png" />
-							</td>
-							<td id="lastImg" class="selectTab"><?php print $ottLinkName; ?></td>
 							
 							
 							
@@ -415,12 +412,6 @@
 						chdir ("$cwd");
 					}
 						
-					if($tab == 'InvestigatorOTT')
-					{
-						chdir ("..");
-						print '<div id="InvestigatorOTT" align="center">'; DisplayOTT(); print '</div>'; 
-						chdir ("$cwd");
-					}
 					if($tab == 'InvestigatorOHM') 
 					{
 						
