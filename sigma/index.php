@@ -418,6 +418,7 @@ a:visited {color:#6600bc;}  /* visited link */
     border-width: 5px 1px 1px;
     clear: both;
     padding: 1px 5px;
+	width:400px;
 }
 .ind_comment a {
     color: #1122CC;
@@ -426,7 +427,7 @@ a:visited {color:#6600bc;}  /* visited link */
 .ind_comment a:hover {
 	text-decoration:none;
 }
-p.com_name a {
+p.com_name a,p.com_on a{
     color: #AA8ECE;
     font-weight: bold;
     text-transform: capitalize;
@@ -438,12 +439,14 @@ p.com_desc {
 p.com_on {
     font-size: 12px;
 }
-span.com_at,.com_at{
+span.com_at,.com_at,.page_url{
     color: #888888;
-    float: right;
     font-size: 12px;
 }
 .com_name:hover{
+	color:#4F2683;
+}
+.page_url:hover{
 	color:#4F2683;
 }
 </style>
@@ -640,7 +643,7 @@ echo "<h3>Recent Comments:</h3>";
 $comments = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' ORDER BY `dated` DESC LIMIT 5");
 while ($comment = mysql_fetch_array($comments)) {
 	if($comment["name"] == ""){
-		$comment["name"] = "NA";
+		$comment["name"] = "Anonymous";
 	}
 	$page_query = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "pages` WHERE `id` = '" . $comment["page_id"] . "'");
 	$page = mysql_fetch_assoc($page_query);
@@ -649,19 +652,15 @@ while ($comment = mysql_fetch_array($comments)) {
 		<p class='com_name'><a class='com_name' href=profile.php?user=".$comment["userid"].">".$comment["name"]."</a></p>
 		<p class='com_desc'>".$comment["comment"]."</p>
 		<p class='com_on'>
-			<span style='color:#888888;'>Commented on</span> <a href='" . $page["url"] . "'>" . $page["reference"] . "</a>
-			<span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>
+			<span>Commented on</span> <a class='page_url' href='" . $page["url"] . "'>" . $page["reference"] . "</a>
+			<!--<span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>-->
 			<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($comment["dated"]))."</span>
 		</p>
 	</div>";
 	echo "<br/>";
 }
 // End of 'Recent Comments'
-
-
 echo "<p></p>";
-
-
 // Start of 'Most Commented' 
 echo "<h3>Most Commented</h3>";
 
@@ -673,8 +672,9 @@ while ($comment = mysql_fetch_assoc($comments)) {
 	$page = mysql_fetch_assoc($page_query);
 	echo "<div class='ind_comment'>
 		<p class='com_on'>
-			<a href='" . $page["url"] . "'>" . $page["reference"] . "(" . $comment["total"] . ")</a> <span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>
-			<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($comment["dated"]))."</span>
+			<a class='page_url' href='" . $page["url"] . "'>" . $page["reference"] . "(" . $comment["total"] . ")</a> 
+			<!--<span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>
+			<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($comment["dated"]))."</span>-->
 		</p>
 	</div>
 	";
@@ -682,11 +682,7 @@ while ($comment = mysql_fetch_assoc($comments)) {
 
 }
 // End of 'Most Commented'
-
-
 echo "<p></p>";
-
-
 // Start of 'Top Posters'
 echo "<h3>Top Posters</h3>";
 
@@ -694,45 +690,15 @@ $names = mysql_query("SELECT `userid`,`name`, COUNT(`name`) AS `total` FROM `" .
 
 while ($name = mysql_fetch_assoc($names)) {
 	if($name["name"] == ""){
-		$name["name"] = "NA";
+		$name["name"] = "Anonymous";
 	}
 	echo "<div class='ind_comment'>
-		<p class='com_name'><a href=profile.php?user=".$name["userid"].">".$name["name"]."(" . $name["total"] . ")</a><span class='com_at'>at " . date("g:ia (jS-M)", strtotime($name["dated"]))."</span></p>
+		<p class='com_name'><a class='com_name' href=profile.php?user=".$name["userid"].">".$name["name"]."(" . $name["total"] . ")</a>
+		<!--<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($name["dated"]))."</span>--></p>
 	</div>";	
 	echo "<br/>";
-
 }
 // End of 'Top Posters'
-
-
-echo "<p></p>";
-
-
-// Start of 'Best Rated' 
-echo "<h3>Best Rated</h3>";
-
-//$comments = mysql_query("SELECT `page_id`, AVG(`rating`) AS `average` FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' AND `rating` != '0' GROUP BY `page_id` ORDER BY `average` DESC LIMIT 5");
-$comments = mysql_query("SELECT `page_id`, AVG(`rating`) AS `average` FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' GROUP BY `page_id` ORDER BY `average` DESC LIMIT 5");
-
-while ($comment = mysql_fetch_assoc($comments)) {
-
-	$average = round($comment["average"] / 0.5) * 0.5;
-
-	$page_query = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "pages` WHERE `id` = '" . $comment["page_id"] . "'");
-	$page = mysql_fetch_assoc($page_query);
-	echo "<div class='ind_comment'>
-		<p class='com_on'>
-			<a href='" . $page["url"] . "'>" . $page["reference"] . "(" . $average . "/5)</a> <span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>
-			<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($comment["dated"]))."</span>
-		</p>
-	</div>";
-	echo "<br/>";
-
-}
-// End of 'Best Rated'
-?>
-
-<?php
 }
 ?>
 <!-- Displaying Records -->
