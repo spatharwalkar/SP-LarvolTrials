@@ -449,6 +449,11 @@ span.com_at,.com_at,.page_url{
 .page_url:hover{
 	color:#4F2683;
 }
+.anonymous_com{
+	color: #AA8ECE;
+    font-weight: bold;
+    text-decoration: none;
+}
 </style>
 <script type="text/javascript" src="scripts/jquery-1.7.2.min.js"></script>
 <link rel="stylesheet" type="text/css" href="../comments/css/stylesheet.css"/>
@@ -637,20 +642,19 @@ if((trim($globalOptions['TzSearch']) == '' || $globalOptions['TzSearch'] == NULL
 <?php
 	// Start of 'Recent Comments'
 $cmtx_mysql_table_prefix = "commentics_";
-
 echo "<h3>Recent Comments:</h3>";
-
 $comments = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' ORDER BY `dated` DESC LIMIT 5");
-while ($comment = mysql_fetch_array($comments)) {
-	if($comment["name"] == ""){
-		$comment["name"] = "Anonymous";
-	}
+while ($comment = mysql_fetch_array($comments)) {	
 	$page_query = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "pages` WHERE `id` = '" . $comment["page_id"] . "'");
 	$page = mysql_fetch_assoc($page_query);
 	$comment["comment"] = (strlen($comment["comment"])>200) ? substr($comment["comment"],0,200).'...<a href='.$page["url"].'>' . $page["reference"] . '</a>' : $comment["comment"];
-	echo "<div class='ind_comment'>
-		<p class='com_name'><a class='com_name' href=profile.php?user=".$comment["userid"].">".$comment["name"]."</a></p>
-		<p class='com_desc'>".$comment["comment"]."</p>
+	echo "<div class='ind_comment'>";
+	if($comment["name"] == ""){
+		echo "<p class='anonymous_com'>Anonymous</p>";
+	}else{
+		echo "<p class='com_name'><a class='com_name' href=profile.php?user=".$comment["userid"].">".$comment["name"]."</a></p>";
+	}
+	echo "<p class='com_desc'>".$comment["comment"]."</p>
 		<p class='com_on'>
 			<span>Commented on</span> <a class='page_url' href='" . $page["url"] . "'>" . $page["reference"] . "</a>
 			<!--<span style='color:#888888;text-transform:uppercase;'> (" . $page["identifier"] . ")</span>-->
@@ -679,14 +683,12 @@ while ($comment = mysql_fetch_assoc($comments)) {
 	</div>
 	";
 	echo "<br/>";
-
 }
 // End of 'Most Commented'
 echo "<p></p>";
 // Start of 'Top Posters'
 echo "<h3>Top Posters</h3>";
-
-$names = mysql_query("SELECT `userid`,`name`, COUNT(`name`) AS `total` FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' GROUP BY `name` ORDER BY `total` DESC LIMIT 5");
+$names = mysql_query("SELECT `userid`,`name`, COUNT(`name`) AS `total` FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' AND `name`!= '' GROUP BY `name` ORDER BY `total` DESC LIMIT 5");
 
 while ($name = mysql_fetch_assoc($names)) {
 	if($name["name"] == ""){
