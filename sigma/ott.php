@@ -162,6 +162,8 @@ function GetLinkNClass($id)
 		$LinkNClass['link'] = 'moa.php?MoaId='. $header['id'];
 	else if($header['class'] == 'MOA_Category')
 		$LinkNClass['link'] = 'moacategory.php?MoaCatId='. $header['id'];
+	else if($header['class'] == 'Investigator')
+		$LinkNClass['link'] = 'investigator.php?InvestigatorId='. $header['id'];
 	else
 		$LinkNClass['link'] = 'product.php?e1='. $header['id'].'&sourcepg=TZ';
 						
