@@ -635,7 +635,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	$ratio = ($columns * $inner_columns) / $max_count;
 	
 	///All Data send
-	
+	/*
 	foreach($data_matrix as $key=>$val)
 	{
 		if( $val['phase_na']+$val['phase_0']+$val['phase_1']+$val['phase_2']+$val['phase_3']+$val['phase_4']==0 )
@@ -644,7 +644,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 			unset($NewDiseaseIds[$key]);
 		}
 	}
-	
+	*/
 	//$TotalRecords = count($data_matrix);
 	$Return['matrix'] = $data_matrix;
 	$Return['report_name'] = $Report_DisplayName;

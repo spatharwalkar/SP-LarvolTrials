@@ -51,7 +51,10 @@
 	$tabCommonUrl		= 'investigator.php?InvestigatorId='.$InvestigatorId;
 	
 	$CompanyIds			= GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId);
-	$TabProductCount	= getProductIdsFromInvestigator($InvestigatorId);
+	$product = array();
+	$product = DataGenerator($InvestigatorId, 'INVESTPT', $page, $OptionArray, $dwcount);
+	$TabProductCount = $product['TotalRecords'];
+	
 	if(empty($TabProductCount))
 		$TabProductCount = array();
 	else
@@ -66,22 +69,9 @@
 	$TabMOACount = count($MOAIds);
 	
 
-		$Ids = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($InvestigatorId, 'Investigator')));
-		$DiseaseIds =  $Ids;
-		if(count($DiseaseIds) > 0)
-		{
-			$ImplodeDiseaseIds = implode("','",$DiseaseIds);
-		}
-		else
-		{
-			$ImplodeDiseaseIds = '';
-		}
-	
-	if(empty($DiseaseIds))
-		$DiseaseIds = array();
-	else
-		$DiseaseIds = array_filter(array_unique($DiseaseIds));
-	$TabDiseaseCount = count($DiseaseIds);
+	$disease = array();
+	$disease = DataGeneratorForDiseaseTracker($InvestigatorId, 'INVESTDT', $page, $dwcount);
+	$TabDiseaseCount = $disease['TotalRecords'];
 	
 	$CompanyIds = array_filter(array_unique($CompanyIds));
 	
