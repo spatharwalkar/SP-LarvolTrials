@@ -611,15 +611,19 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
 	$TotalRecords = count($data_matrix);
+	
 	if(!isset($_REQUEST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
 		
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
 		$NewDiseaseIds = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+
+		
 	}
+	
 	/////////PAGING DATA ENDS
 	
 	$original_max_count = $max_count;
@@ -1625,7 +1629,6 @@ function DiseaseTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, 
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
 	}
 	$paginateStr .= '</span></td></tr></table>';
-	
 	return array($url, $paginateStr);
 }
 
@@ -2781,7 +2784,9 @@ function GetDiseasesFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 					JOIN `entity_trials` et2 ON(et.`trial`=et2.trial and et.entity=".  mysql_real_escape_string($EntityID) .") 
 					JOIN entities e on (et2.entity = e.id and e.class='Disease')
 					JOIN `entity_relations` er ON(e.id=er.parent) 
-					JOIN entities e2 on (er.child = e2.id and e2.class='Product')
+					JOIN `entity_trials` et1 ON(er.child = et1.entity and et.trial=et1.trial ) 
+					JOIN entities e1 on (et1.entity = e1.id and e1.class='Product')
+					
 					";
 	}
 	
