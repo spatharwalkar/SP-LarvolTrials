@@ -9,10 +9,14 @@
 //	HybridAuth Config file: http://hybridauth.sourceforge.net/userguide/Configuration.html
 // ----------------------------------------------------------------------------------------
 
-$baseurl = urlPath();
+$baseurl = urlBase();
 $sigmapos = strpos($baseurl,"sigma");
-if($sigmapos !== false)	$baseurl = substr($baseurl,0,$sigmapos);
-$baseurl .= 'hybridauth/';
+if($sigmapos == false) { // other the Production environment where sigma is not there in the domain
+	$baseurl = urlPath();
+	$sigmapos = strpos($baseurl,"sigma");
+	if($sigmapos !== false) $baseurl = substr($baseurl,0,$sigmapos);
+}
+$baseurl .= '/hybridauth/';
 
 return 
 	array(
