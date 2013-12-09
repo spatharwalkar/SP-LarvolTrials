@@ -510,7 +510,6 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 				}
 				else if($phase_row['phase'] == '0')
 				{
-					
 					$data_matrix[$row]['total_phase_0']++;
 					if($phase_row['is_active'])
 					{
@@ -624,7 +623,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	/// This function willl Sort multidimensional array according to industry lead column
 	if( ( (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'larvolinsight') == FALSE&&strpos($_SERVER['HTTP_REFERER'], 'delta') == FALSE) || !isset($_SERVER['HTTP_REFERER']) ) && ( !isset($_REQUEST['LI']) || $_REQUEST['LI'] != 1) )
 	{
-		if($TrackerType='INVESTDT') $dwcount='total';
+		if($TrackerType == 'INVESTDT') $dwcount='total';
 		$data_matrix = sortTwoDimensionArrayByKey($data_matrix, $dwcount);	//Sort according to default view as other than LI default view is total
 	}
 	else
