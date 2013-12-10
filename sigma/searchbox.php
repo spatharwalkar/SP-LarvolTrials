@@ -86,7 +86,7 @@
 }
 </style>
 <script type="text/javascript" src="scripts/autosuggest/jquery.autocomplete-min.js"></script>
-<script type="text/javascript">
+<!--<script type="text/javascript">
 	$(function() 
 	{
 		$('body').keydown(function(e)
@@ -98,7 +98,7 @@
 		});
 	}); 
 	
-</script>
+</script>-->
 <script type="text/javascript">
 function autoComplete(fieldID)
 {	
