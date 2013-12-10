@@ -134,16 +134,6 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 		else
 		{
 
-			$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
-				if(!$res = mysql_query($query))
-				{
-					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-					$logger->error($log);
-					echo $log;
-					return false;
-				}
-			$res = mysql_fetch_array($res) ;
-			$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
 			$fid = getFieldId('NCT','nct_id');
 			
 			$cid = 0; 
@@ -152,8 +142,8 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			$totalncts=count($larvol_ids);
 			
 			
-			$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
-					  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
+			$query = 'INSERT into update_status_fullhistory (process_id,status,update_items_total,start_time,max_nctid,trial_type) 
+					  VALUES ("'. $pid .'","'. 2 .'",
 					  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "INVESTIGATOR"  ) ;';
 				if(!$res = mysql_query($query))
 				{
@@ -162,6 +152,8 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 					echo $log;
 					return false;
 				}
+				else
+				$up_id=mysql_insert_id();
 			
 			
 			

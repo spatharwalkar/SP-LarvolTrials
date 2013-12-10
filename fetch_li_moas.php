@@ -30,24 +30,13 @@ function fetch_li_moas($lastrun)
 	}
 
 	//** STATUS DISPLAY
-	$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
-	if(!$res = mysql_query($query))
-	{
-		global $logger;
-		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-		$logger->error($log);
-		mysql_query('ROLLBACK');
-		echo $log;
-		return false;
-	}
-	$res = mysql_fetch_array($res) ;
-	$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
 	$prid = getmypid();
 
-	$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,trial_type,item_id) 
-	  VALUES ("'.$up_id.'","'. $prid .'","'. 2 .'",
+	$query = 'INSERT into update_status_fullhistory (process_id,status,update_items_total,start_time,trial_type,item_id) 
+	  VALUES ("'. $prid .'","'. 2 .'",
 	  "' . $total_moas . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "' . "LI_IMPORT" . '" , "' . 0 . '" ) ;';
 	 if( $total_moas>1 ) mysql_query($query);
+	 $up_id=mysql_insert_id();
 
 	// STATUS DISPLAY **/
 	$i=1;

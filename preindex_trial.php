@@ -338,21 +338,11 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				}
 				elseif(!$scraper_run)  // insert new status row
 				{
-					$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
-					if(!$res = mysql_query($query))
-					{
-						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-						$logger->error($log);
-						mysql_query('ROLLBACK');
-						echo $log;
-						return false;
-					}
-					$res = mysql_fetch_array($res) ;
-					$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
+			
 					$prid = getmypid();
 				
-					$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,trial_type,item_id) 
-						  VALUES ("'.$up_id.'","'. $prid .'","'. 2 .'",
+					$query = 'INSERT into update_status_fullhistory (process_id,status,update_items_total,start_time,trial_type,item_id) 
+						  VALUES ( "'. $prid .'","'. 2 .'",
 						  "' . $total . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "' . $ttype . '" , "' . $pid . '" ) ;';
 				
 				}
@@ -368,6 +358,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						mysql_query('ROLLBACK');
 						return false;
 					}
+					$up_id=mysql_insert_id();
 				$query="select er.child from entity_relations er,entities e 
 									where er.parent = " . $cid . "
 									and er.child=e.id and e.class = 'Institution'";
@@ -448,7 +439,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						{
 							$reltype = 'default';
 						}
-
+						echo '<br> current time:'. date("Y-m-d H:i:s", strtotime('now')) . '<br>';
 						if(trial_indexed($larvol_id,$cat,$cid)) // check if the trial+product/trial+area index already exists
 						{
 							$query="update entity_trials set relation_type = '". $reltype . "'

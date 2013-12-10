@@ -75,10 +75,6 @@ if ( isset($res['process_id']) )
 
 else
 {
-	$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
-	$res = mysql_query($query) or die('Bad SQL query finding highest update id');
-	$res = mysql_fetch_array($res) ;
-	$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
 	$fid = getFieldId('NCT','nct_id');
 	if(!isset($nct_ids))
 	{
@@ -121,10 +117,11 @@ else
 
 	if ($totalncts > 0)
 	{
-	$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
-			  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
+	$query = 'INSERT into update_status_fullhistory (process_id,status,update_items_total,start_time,max_nctid,trial_type) 
+			  VALUES ( "'. $pid .'","'. 2 .'",
 			  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "NCT"  ) ;';
 	$res = mysql_query($query) or die('Bad SQL query updating update_status_fullhistory. Query:' . $query);
+	$up_id=mysql_insert_id();
 	}
 	else die("No valid nctids found.");
 

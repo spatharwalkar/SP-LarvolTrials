@@ -371,7 +371,8 @@ CREATE TABLE IF NOT EXISTS `rpt_ott_searchdata` (
   KEY `result_set` (`result_set`(300))
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  `update_id` int( 10  )  unsigned NOT  NULL ,
+CREATE TABLE IF NOT EXISTS `update_status_fullhistory` (  
+ `update_id` int( 10  )  unsigned NOT  NULL AUTO_INCREMENT,
  `process_id` int( 11  )  NOT  NULL DEFAULT  '0',
  `start_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',
  `end_time` timestamp NOT  NULL DEFAULT  '0000-00-00 00:00:00',

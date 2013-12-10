@@ -54,18 +54,6 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 	{
 	
 		$display_status='YES';
-		$query = '	select max(update_id) as maxid from  update_status_fullhistory ';
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-		$row = mysql_fetch_assoc($res);
-		$update_id=$row['maxid']+1;
-		
 		
 		$query = '	select update_id,trial_type,status from update_status_fullhistory where 
 					trial_type="RECALC=' . $id . '" and status="2" ' ;
@@ -90,17 +78,18 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			
 			$query = '	INSERT into update_status_fullhistory SET 
 						start_time="' . date("Y-m-d H:i:s", strtotime('now')) . '", 
-						updated_days="0", status="2", trial_type="RECALC=' . $id . '", update_id="' . $update_id . '"';
-		}
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			global $logger;
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
+						updated_days="0", status="2", trial_type="RECALC=' . $id . '"';
 		
+			if(!$res = mysql_query($query))
+			{
+				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+				global $logger;
+				$logger->error($log);
+				echo $log;
+				return false;
+			}
+			$update_id=mysql_insert_id();
+		}
 		 
 	}
 

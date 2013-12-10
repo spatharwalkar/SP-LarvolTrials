@@ -367,7 +367,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 	
 	$query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 						`update_items_total`,`update_items_progress`,`er_message`,TIMEDIFF(updated_time, start_time) AS timediff,
-						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA1" and update_id="'.$last_id.'" ';
+						`update_items_complete_time` FROM update_status_fullhistory where trial_type="AREA1" and ( update_id="'.$last_id.'" or status = "2") ';
 	if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -1095,17 +1095,6 @@ function runnewscraper($requeued,$current_nctid)
 
 	else
 	{
-
-		$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
-		if(!$res = mysql_query($query))
-		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-			$logger->error($log);
-			echo $log;
-			return false;
-		}
-		$res = mysql_fetch_array($res) ;
-		$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
 		$fid = getFieldId('NCT','nct_id');
 		if(!isset($nct_ids))
 		{
@@ -1157,8 +1146,8 @@ function runnewscraper($requeued,$current_nctid)
 		if ($totalncts > 0)
 		{
 		
-			$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 
-					  VALUES ("'.$up_id.'","'. $pid .'","'. 2 .'",
+			$query = 'INSERT into update_status_fullhistory (process_id,status,update_items_total,start_time,max_nctid,trial_type) 
+					  VALUES ("'. $pid .'","'. 2 .'",
 					  "' . $totalncts . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "'. $maxid .'", "NCT"  ) ;';
 			if(!$res = mysql_query($query))
 			{
@@ -1167,6 +1156,7 @@ function runnewscraper($requeued,$current_nctid)
 				echo $log;
 				return false;
 			}
+			$up_id=mysql_insert_id();
 		}
 		else die("No valid nctids found.");
 	}
