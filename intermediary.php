@@ -793,13 +793,13 @@ print           '$("ul #productbox li").click(function () {
                     event.stopPropagation();
                 });
                 
-                $("body").keydown(function(e)
+                /* $("body").keydown(function(e)
                 {	
                     if (e.keyCode == 13) 
                     {
                       $("#frmOtt").submit();
                     } 
-                });
+                }); */
                 
                 $(window).load(function(){
                     $("#outercontainer").mCustomScrollbar({
