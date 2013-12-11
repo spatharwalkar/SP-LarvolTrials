@@ -135,6 +135,22 @@
                 {
 					$fields_home = $db_home->ListTableFields($tables_home[$i]);
 					$fields_home_tmp = $fields_home;
+					$sync_keys = $db_sync->ListCompositeKeys($tables_home[$i]);
+			  		$home_ckeys = $db_home->ListCompositeKeys($tables_home[$i]);
+
+				foreach($home_ckeys as $key=>$val){
+					if(true === array_key_exists($key,$sync_keys)){
+						if($val !== $sync_keys[$key])
+						    $db_sync->changeCompositeKey($key,$val,$tables_home[$i]);
+
+					} elseif(false === array_key_exists($key,$sync_keys)){
+					    $db_sync->addCompositeKey($key,$val,$tables_home[$i]);
+					} else{
+					die("Please Check Key Constraint");
+					}
+
+				}
+			
                     $fields_sync = $db_sync->ListTableFields($tables_home[$i]);
                     $fieldnames_sync = $this->GetFieldNames($fields_sync);
                     $fieldnames_home = $this->GetFieldNames($fields_home);

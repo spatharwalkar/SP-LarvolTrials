@@ -307,6 +307,94 @@ require_once('include.util.php');
 			echo($sql.';<br />');
             return true;
         }
+        
+        /**
+         * DBSync_mysql::changeCompositeKeys()
+         * Maintaining latest update on composite keys fields from a table on current database
+         *
+         * @param	string	$table	Table Name
+         *
+         * @access	public
+         * @return 	array	Keys List
+         **/
+        function changeCompositeKey($key,$val,$table){
+		  $expArr = explode("-",$val);
+	  		if("PRIMARY" !== $key){
+	  			$dropStr="ALTER TABLE {$table} DROP KEY `{$key}`";
+			    $str="ALTER TABLE {$table} ADD ";
+			    if($expArr[0] == 0) $str.="UNIQUE KEY ";
+			    elseif($expArr[0] == 1) $str.="KEY ";
+			    else die("UNIQUE KEY || KEY Constarint Fails");
+
+				$str .= "`{$key}` ({$expArr[1]})";
+		 		echo $dropStr.';<br />';
+		  		echo $str.';<br />';
+		   } else {
+			  $dropStr="ALTER TABLE {$table} DROP {$key} KEY ";
+			  $str="ALTER TABLE {$table} ADD {$key} KEY ({$expArr[1]})";
+			  
+			  echo $dropStr.';<br />';
+			  echo $str.';<br />';
+		   }
+		}
+		
+		/**
+		 * DBSync_mysql::addCompositeKeys()
+		 * Adding composite keys fields from a table on current database
+		 *
+		 * @param	string	$table	Table Name
+		 *
+		 * @access	public
+		 * @return 	array	Keys List
+		 **/
+		function addCompositeKey($key,$val,$table){
+			$expArr = explode("-",$val);
+			$str="ALTER TABLE {$table} ADD ";
+			if($expArr[0] == 0) $str.="UNIQUE KEY ";
+			elseif($expArr[0] == 1) $str.="KEY ";
+			else die("UNIQUE KEY || KEY Constarint Fails");
+
+			$str .= "`{$key}` ({$expArr[1]})";
+			echo $str.';<br />';
+		}
+
+        /**
+         * DBSync_mysql::ListCompositeKeys()
+		 * List table fields from a table on current database
+         *
+         * @param	string	$table	Table Name
+         *
+         * @access	public
+         * @return 	array	Keys List
+         **/
+        function ListCompositeKeys($table) {
+            mysql_select_db($this->database, $this->dbp);
+
+        	$ckeys = array();
+        	$result_index = mysql_query("SHOW INDEX FROM {$table}",$this->dbp);
+        	$arr = array();
+        	while($row = mysql_fetch_assoc($result_index))
+        	{
+        		$arr[] = $row;
+        	}
+        	
+        	$i=0;
+        	
+        	foreach($arr as $k=> $v){
+        		foreach($v as $k2=>$v2){
+        			if($k2 == 'Key_name'){
+        				if(!isset($ckeys[$v2])){
+        					$ckeys[$v2]=$arr[$i]["Non_unique"]."-`".$arr[$i]["Column_name"]."`";
+        					if(!empty($arr[$i]["Sub_part"])) { $ckeys[$v2] .= "(".$arr[$i]["Sub_part"].")"; }
+        				}else{
+        						$ckeys[$v2] .=",`".$arr[$i]["Column_name"]."`";
+        						if(!empty($arr[$i]["Sub_part"])) { $ckeys[$v2] .= "(".$arr[$i]["Sub_part"].")"; }
+        				}
+        			}
+        		} $i++; 
+        	}
+        	return $ckeys;
+        } 
 
         /**
          * DBSync_mysql::RemoveTable()
@@ -976,4 +1064,6 @@ require_once('include.util.php');
         }
     //end class    
     }
+
+
 ?>
