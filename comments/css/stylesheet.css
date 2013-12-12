@@ -662,3 +662,9 @@ font-size: 0.7em;
 iframe[src="about:blank"] {
 display: none;
 }
+
+/*************************** Custom CSS *************************/
+a{
+height:0px !important;
+display:inline !important;
+}
