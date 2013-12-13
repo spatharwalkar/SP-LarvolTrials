@@ -664,7 +664,7 @@ display: none;
 }
 
 /*************************** Custom CSS *************************/
-a{
-height:0px !important;
+.commentics-login{
+height:0px;
 display:inline !important;
 }

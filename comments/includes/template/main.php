@@ -87,7 +87,7 @@ function includeform()
 	
 	
 	if(!$db->loggedIn())
-		echo('Please <a href="' . $sigmalogin . '">login</a> to post a comment.');
+		echo('Please <a href="' . $sigmalogin . '" class="commentics-login">login</a> to post a comment.');
 	else
 		require_once $cmtx_path . 'includes/template/form.php'; //load form
 }
