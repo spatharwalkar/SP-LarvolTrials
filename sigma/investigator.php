@@ -53,13 +53,9 @@
 	$CompanyIds			= GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId);
 	$product = array();
 	$product = DataGenerator($InvestigatorId, 'INVESTPT', $page, $OptionArray, $dwcount);
+	$product = array();
+	$product = DataGenerator($InvestigatorId, 'INVESTPT', $page, $OptionArray, $dwcount);
 	$TabProductCount = $product['TotalRecords'];
-	
-	if(empty($TabProductCount))
-		$TabProductCount = array();
-	else
-		$TabProductCount = array_filter(array_unique($TabProductCount));
-	$TabProductCount = count($TabProductCount);
 	
 	$MOAIds				= GetMOAsFromInvestigator($InvestigatorId);
 	if(empty($MOAIds))

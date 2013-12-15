@@ -64,13 +64,18 @@
 	$tabCommonUrl = 'moacategory.php?MoaCatId='.$MoaCatId;
 	
 	
-	if($categoryFlag == 1){	
-		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
+	$disease = array();
+	if($categoryFlag == 1){
+		$disease = DataGeneratorForDiseaseTracker($MoaCatId, 'MCDT', $page, $dwcount, $categoryFlag);
+		$TabDiseaseCount = $disease['TotalRecords'];
 	}else{
-		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
-	}
+		$disease = DataGeneratorForDiseaseTracker($MoaCatId, 'MCDT', $page, $dwcount, $categoryFlag);
+		$TabDiseaseCount = $disease['TotalRecords'];
+	}	
 	
-	$TabProductCount = count(GetProductsFromMOACategory($MoaCatId, 'MCPT', array()));
+	$product = array();
+	$product = DataGenerator($MoaCatId, 'MCPT', $page, $OptionArray, $dwcount);
+	$TabProductCount = $product['TotalRecords'];
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($MoaCatId, 'MOA_Category'));
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaCatName) ? $MoaCatName. ' - '.$meta_title : $meta_title;		
