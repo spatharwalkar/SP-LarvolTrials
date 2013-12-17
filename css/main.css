@@ -44,6 +44,7 @@ body{
 	position:relative;
 	z-index:99;
 	border:#000 thin solid;
+	cursor:default;
 }
 
 .drop:hover, .drop.hover{
