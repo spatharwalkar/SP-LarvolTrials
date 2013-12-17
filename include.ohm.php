@@ -36,15 +36,15 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Online Heatmap</title>
 <base target="_blank"/>
-<script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="scripts/jquery-ui-1.8.17.custom.min.js"></script>
+<script type="text/javascript" src="scripts/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
 <script type="text/javascript" src="date/init.js"></script>
 <script type="text/javascript" src="css/getcssrule.js"></script>
 <link href="date/date_input.css" rel="stylesheet" type="text/css" media="all" />
 <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" />
-<link href="css/themes/cupertino/jquery-ui-1.8.17.custom.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="css/themes/cupertino/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="css/ohm/ohm.css" rel="stylesheet" type="text/css" />
 
 <!--[if lte IE 9]><link href="css/ohm/ie9.css" rel="stylesheet" type="text/css" /><![endif]-->

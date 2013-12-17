@@ -9,7 +9,7 @@
 <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" /> 
 <link href="krumo/skin.css" rel="stylesheet" type="text/css" media="all" />
 <link href="css/colorbox.css" rel="stylesheet" type="text/css" media="all" />
-<script type="text/javascript" src="date/jquery.js"></script>
+<script type="text/javascript" src="scripts/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
 <script type="text/javascript" src="date/init.js"></script>
@@ -109,8 +109,9 @@ if($db->loggedIn())
 			. '<a href="admin_settings.php">Settings</a><br />'			
 			. '</div>');
 	}
-	echo('::<div class="drop">'
-		. '<a href="master_heatmap.php">Heatmap</a><br />'
+	echo('::<div class="drop">Heatmap<br />'
+		. '<a href="master_heatmap.php">Old HM Editor</a><br />'
+		. '<a href="heatmap_edit.php">New HM Editor</a><br />'
 		. '</div>');
 	echo('</div>Welcome, <a href="profile.php">'
 		. htmlspecialchars($db->user->username) . '</a> :: <a href="index.php?logout">Logout</a> &nbsp; </div>');

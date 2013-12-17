@@ -59,17 +59,6 @@ while($row = mysql_fetch_assoc($res))
 		$heatmaps[$row['report']][$row['type'].'s'] = $row['cnt'];
 }
 
-$id = NULL;
-if(isset($_GET['id']))
-{
-	$id = (int)$_GET['id'];
-	if(!is_numeric($id))
-	{
-		die('Invalid HM id.');
-	}
-}
-
-
 echo('
 <div class="heatmap">
 <div class="hmcontrol">
@@ -82,7 +71,7 @@ echo('
   </div>
 </div>
 <div class="hmcbutton view" title="View Report">
-  <div class="hmcmenu" id="viewmenu" style="width:400px;height:400px;">
+  <div class="hmcmenu" id="viewmenu" style="width:550px;height:550px;">
     <div class="hmchead">Report</div>
     <div style="overflow-y:scroll;height:98%;"><table><tr><th>Name</th><th>Owner</th><th>Rows</th><th>Columns</th></tr>');
 
@@ -111,6 +100,16 @@ echo('</table>
     </div>
   </div>
 </div>');
+
+$id = NULL;
+if(isset($_REQUEST['id']))
+{
+	$id = (int)$_REQUEST['id'];
+	if(!is_numeric($id))
+	{
+		$id = NULL;
+	}
+}
 
 if($id !== NULL) echo('
 <div class="hmcbutton export" title="Export">
@@ -143,8 +142,26 @@ if($id !== NULL)
 		{
 			echo('Specified HM not found.');				
 		}else{
-			if($db->user->userlevel == 'root' || $row['user'] == NULL || $row['user'] == $db->user)
+			if($db->user->userlevel == 'root' || $row['user'] == NULL || $row['user'] == $db->user->id)
 			{
+				if(isset($_POST['hmsubmit']))
+				{
+					$errors = process_edits($id);
+					echo('<fieldset id="results" style="width:200px;float:right;"><legend>Results</legend>At '.date('Y-m-d H:i:s',$now) . ':<br />');
+					if(empty($errors))
+						echo('Edits saved successfully.');
+					else
+						var_dump($errors);
+					echo('</fieldset>');
+				}elseif(isset($_POST['setsubmit'])){
+					$errors = process_settings($id);
+					echo('<fieldset id="results" style="width:200px;float:right;"><legend>Results</legend>At '.date('Y-m-d H:i:s',$now) . ':<br />');
+					if(empty($errors))
+						echo('Settings saved successfully.');
+					else
+						var_dump($errors);
+					echo('</fieldset>');
+				}
 				show_editor($id, true);
 			}else{
 				if($row['shared'] || $db->user->userlevel == 'admin')
@@ -161,10 +178,353 @@ if($id !== NULL)
 }
 ?>
 </div></div>
-
 </body></html>
 
 <?php
+function process_settings($id)
+{
+	global $db;
+	$errors = array();
+	$name = mysql_real_escape_string($_POST['hmname']);
+	$displayname = mysql_real_escape_string($_POST['hmdisplayname']);
+	$category = mysql_real_escape_string($_POST['hmcat']);
+	$ownership = $_POST['hmowner']; //g, ms, mp
+	$dtt = $_POST['hmdtt'] ? 1 : 0;
+	$total = $_POST['hmtotal'] ? 1 : 0;
+	$query = 'UPDATE rpt_masterhm SET name="' . $name . '",user=' . ($ownership[0]=='g'?'NULL':'COALESCE(user,'.$db->user->id.')') . ',category="' . $category
+				. '",shared=' . (strpos($ownership,'s')?1:0) . ',total=' . $total . ',dtt=' . $dtt . ',display_name="' . $displayname
+				. '" WHERE id=' . $id . ' LIMIT 1';
+	$res = mysql_query($query);
+	if($res === false) $errors[] = 'Bad SQL query saving report settings';
+	return $errors;
+}
+
+function process_edits($id)
+{
+	global $now;
+	$edits = json_decode($_POST['edits']);
+	$errors = array();
+	//the logic here that parses the codes should mirror what is given in the javascript function addEdits()
+	foreach($edits as $edit)
+	{
+		if($edit[0] == "%") //header management
+		{
+			$source = explode(',', substr($edit,1));
+			$srcHeader = $source[0];
+			$destHeader = (int)$source[1];
+			if($srcHeader[0] == 'R') //add row
+			{
+				$query = 'INSERT INTO rpt_masterhm_headers SET report=' . $id
+					. ', num=(SELECT * FROM(SELECT MAX(num) FROM rpt_masterhm_headers WHERE report=' . $id . ' AND type="row") AS t)+1, type="row"';
+				$res = mysql_query($query);
+				if($res === false) $errors[] = "Couldn't add a row: " . mysql_error();
+			}
+			else if($srcHeader[0] == 'D') //delete header
+			{
+				$query = 'DELETE FROM rpt_masterhm_headers WHERE id=' . $destHeader . ' LIMIT 1';
+				$res = mysql_query($query);
+				if($res === false) $errors[] = "Couldn't delete header." . mysql_error();
+			}
+			else if($srcHeader[0] == 'C') //add column
+			{
+				$query = 'INSERT INTO rpt_masterhm_headers SET report=' . $id
+					. ', num=(SELECT * FROM(SELECT MAX(num) FROM rpt_masterhm_headers WHERE report=' . $id . ' AND type="column") AS t)+1, type="column"';
+				$res = mysql_query($query);
+				if($res === false) $errors[] = "Couldn't add a column." . mysql_error();
+			}else{ //header move
+				$srcHeader = (int)$srcHeader;
+				$query = 'SELECT type,num FROM rpt_masterhm_headers WHERE id=' . $srcHeader;
+				$res = mysql_query($query);
+				if($res === false){ $errors[] = "Bad SQL query getting source header info." . mysql_error();	continue;}
+				$res = mysql_fetch_assoc($res);
+				if($res === false){ $errors[] = "Tried to move unknown source header id.";						continue;}
+				$srcType = $res['type'];
+				$srcNum = $res['num'];
+				$query = 'SELECT type,num FROM rpt_masterhm_headers WHERE id=' . $destHeader;
+				$res = mysql_query($query);
+				if($res === false){ $errors[] = "Bad SQL query getting dest header info." . mysql_error();		continue;}
+				$res = mysql_fetch_assoc($res);
+				if($res === false){ $errors[] = "Tried to move header to unknown dest id.";						continue;}
+				$destType = $res['type'];
+				$destNum = $res['num'];
+				
+				$finalNum = $srcType!=$destType ? $destNum+1 : $destNum;
+				if($destType == $srcType)
+				{
+					if($srcNum > $finalNum)
+					{
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_headers SET num=(SELECT * FROM(SELECT MAX(num) FROM rpt_masterhm_headers WHERE report='
+								. $id . ' AND type="' . $destType . '") AS t) WHERE id=' . $srcHeader;
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query moving header." . mysql_error();				mysql_query('ROLLBACK');	continue;}
+						$query = 'UPDATE rpt_masterhm_headers SET num=num+1 WHERE type="' . $destType
+								. '" AND report=' . $id . ' AND num<' . $srcNum . ' AND num>=' . $finalNum;
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query shifting jumped headers." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						$query = 'UPDATE rpt_masterhm_headers SET num=' . $finalNum . ' WHERE id=' . $srcHeader;
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query finalizing header move." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						mysql_query('COMMIT');
+					}else{
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_headers SET num=(SELECT * FROM(SELECT MAX(num) FROM rpt_masterhm_headers WHERE report='
+								. $id . ' AND type="' . $destType . '") AS t) WHERE id=' . $srcHeader;
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query moving header." . mysql_error();				mysql_query('ROLLBACK');	continue;}
+						$query = 'UPDATE rpt_masterhm_headers SET num=num-1 WHERE type="' . $destType
+								. '" AND report=' . $id . ' AND num>' . $srcNum . ' AND num<=' . $finalNum;
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query shifting jumped headers." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						$query = 'UPDATE rpt_masterhm_headers SET num=' . $finalNum . ' WHERE id=' . $srcHeader;
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query finalizing header move." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						mysql_query('COMMIT');
+					}
+				}else{
+					mysql_query('BEGIN');
+					$query = 'UPDATE rpt_masterhm_headers SET num=num+1 WHERE type="' . $destType
+							. '" AND report=' . $id . ' AND num>=' . $finalNum;
+					$res = mysql_query($query);
+					if($res === false){ $errors[] = "Bad SQL query shifting latter headers." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+					$query = 'UPDATE rpt_masterhm_headers SET num=' . $finalNum . ',type="' . $destType . '" WHERE id=' . $srcHeader;
+					$res = mysql_query($query);
+					if($res === false){ $errors[] = "Bad SQL query finalizing header move." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+					$query = 'UPDATE rpt_masterhm_headers SET num=num-1 WHERE report=' . $id . ' AND type="' . $srcType . '" AND num>' . $srcNum;
+					$res = mysql_query($query);
+					if($res === false){ $errors[] = "Bad SQL query retracting latter headers." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+					mysql_query('COMMIT');
+				}
+			}
+		}
+		else if($edit[0] == "#") //header change
+		{
+			$source = explode('`',edit);
+			$input = explode('_',substr($source[0],1));
+			$fieldName = $input[0];
+			$hid = $input[3];
+			$value = $source[1];
+			
+			switch(fieldName)
+			{
+				case 'e':
+				$fieldName = 'type_id';
+				$value = (int)$value;
+				break;
+				
+				case 'd':
+				$fieldName = 'display_name';
+				$value = '"' . mysql_real_escape_string($value) . '"';
+				break;
+				
+				case 'c':
+				$fieldName = 'category';
+				$value = '"' . mysql_real_escape_string($value) . '"';
+				break;
+				
+				case 't':
+				$fieldName = 'tag';
+				$value = '"' . mysql_real_escape_string($value) . '"';
+				break;
+				
+				default:
+				$errors[] = "Unrecognized field anme to change in header.";
+				continue;
+			}
+			$query = 'UPDATE rpt_masterhm_headers SET ' . $fieldName . '=' . $value . ' WHERE id=' . $hid . ' LIMIT 1';
+			$res = mysql_query($query);
+			if($res === false){ $errors[] = "Bad SQL query updating fields of header." . mysql_error();	continue;}
+			
+		}else{ //cell change
+			$source = explode('`',$edit);
+			$rowEntity = (int)$source[0];
+			$colEntity = (int)$source[1];
+			$type = $source[2];
+			$value = mysql_real_escape_string($source[3]);
+			mysql_query('INSERT INTO rpt_masterhm_cells SET entity1=' . $rowEntity . ',entity2=' . $colEntity);
+			if(substr($value,0,2) == "##") //changed which icons are in the cell
+			{
+				$command = $value[2];
+				switch($command)
+				{
+					case '+':
+					switch($type)
+					{
+						case 'bomb':
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_cells SET bomb="large" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query adding item to cell." . $query . mysql_error(); mysql_query('ROLLBACK'); continue;}
+						$query = 'UPDATE rpt_masterhm_cells SET bomb_lastchanged="' . date('Y-m-d', $now)
+									. '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity . ' IN(entity1,entity2) LIMIT 1';
+						if($res === false){ $errors[] = "Bad SQL query recording change date." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						mysql_query('COMMIT');
+						break;
+						
+						case 'filing':
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_cells SET filing="" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query adding item to cell." . $query . mysql_error(); mysql_query('ROLLBACK'); continue;}
+						$query = 'UPDATE rpt_masterhm_cells SET filing_lastchanged="' . date('Y-m-d', $now)
+									. '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity . ' IN(entity1,entity2) LIMIT 1';
+						if($res === false){ $errors[] = "Bad SQL query recording change date." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						mysql_query('COMMIT');
+						break;
+
+						case 'info':
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_cells SET phase_explain="" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query adding item to cell." . $query . mysql_error(); mysql_query('ROLLBACK'); continue;}
+						$query = 'UPDATE rpt_masterhm_cells SET phase_explain_lastchanged="' . date('Y-m-d', $now)
+									. '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity . ' IN(entity1,entity2) LIMIT 1';
+						if($res === false){ $errors[] = "Bad SQL query recording change date." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						mysql_query('COMMIT');
+						break;
+
+						case 'phase4':
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_cells SET phase4_override=1 WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query adding item to cell." . $query . mysql_error(); mysql_query('ROLLBACK'); continue;}
+						$query = 'UPDATE rpt_masterhm_cells SET phase4_override_lastchanged="' . date('Y-m-d', $now)
+									. '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity . ' IN(entity1,entity2) LIMIT 1';
+						if($res === false){ $errors[] = "Bad SQL query recording change date." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						mysql_query('COMMIT');
+						break;
+
+						case 'preclinical':
+						$query = 'UPDATE rpt_masterhm_cells SET preclinical=1 WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query adding item to cell." . mysql_error();	continue;}
+						break;
+
+						default:
+						if($res === false){ $errors[] = "Unrecognized item to add.";	continue;}
+					}
+					break;
+					
+					case '-':
+					switch($type)
+					{
+						case 'bomb':
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_cells SET bomb="none" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query removing item from cell." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						$query = 'UPDATE rpt_masterhm_cells SET bomb_lastchanged="' . date('Y-m-d', $now)
+									. '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity . ' IN(entity1,entity2) LIMIT 1';
+						if($res === false){ $errors[] = "Bad SQL query recording change date." . mysql_error();	mysql_query('ROLLBACK');		continue;}
+						mysql_query('COMMIT');
+						break;
+						
+						case 'filing':
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_cells SET filing=NULL WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query removing item from cell." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						$query = 'UPDATE rpt_masterhm_cells SET filing_lastchanged="' . date('Y-m-d', $now)
+									. '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity . ' IN(entity1,entity2) LIMIT 1';
+						if($res === false){ $errors[] = "Bad SQL query recording change date." . mysql_error();	mysql_query('ROLLBACK');		continue;}
+						mysql_query('COMMIT');
+						break;
+
+						case 'info':
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_cells SET phase_explain=NULL WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query removing item from cell." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						$query = 'UPDATE rpt_masterhm_cells SET phase_explain_lastchanged="' . date('Y-m-d', $now)
+									. '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity . ' IN(entity1,entity2) LIMIT 1';
+						if($res === false){ $errors[] = "Bad SQL query recording change date." . mysql_error();	mysql_query('ROLLBACK');		continue;}
+						mysql_query('COMMIT');
+						break;
+
+						case 'phase4':
+						mysql_query('BEGIN');
+						$query = 'UPDATE rpt_masterhm_cells SET phase4_override=0 WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query removing item from cell." . mysql_error();	mysql_query('ROLLBACK');	continue;}
+						$query = 'UPDATE rpt_masterhm_cells SET phase4_override_lastchanged="' . date('Y-m-d', $now)
+									. '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity . ' IN(entity1,entity2) LIMIT 1';
+						if($res === false){ $errors[] = "Bad SQL query recording change date." . mysql_error();	mysql_query('ROLLBACK');		continue;}
+						mysql_query('COMMIT');
+						break;
+
+						case 'preclinical':
+						$query = 'UPDATE rpt_masterhm_cells SET preclinical=0 WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+									. ' IN(entity1,entity2) LIMIT 1';
+						$res = mysql_query($query);
+						if($res === false){ $errors[] = "Bad SQL query removing item from cell." . mysql_error();	continue;}
+						break;
+
+						default:
+						if($res === false){ $errors[] = "Unrecognized item to remove.";	continue;}
+					}
+					break;
+					
+					case 'l':
+					$query = 'UPDATE rpt_masterhm_cells SET bomb="large" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+								. ' IN(entity1,entity2) LIMIT 1';
+					$res = mysql_query($query);
+					if($res === false){ $errors[] = "Bad SQL query changing bomb size." . mysql_error();	continue;}
+					break;
+					
+					case 's':
+					$query = 'UPDATE rpt_masterhm_cells SET bomb="small" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+								. ' IN(entity1,entity2) LIMIT 1';
+					$res = mysql_query($query);
+					if($res === false){ $errors[] = "Bad SQL query changing bomb size." . mysql_error();	continue;}
+					break;
+					
+					default:
+					$errors[] = "Unrecognized cell level command.";
+				}
+			}else{ //change the text of a single icon in the cell
+				switch($type)
+				{
+					case 'bomb_explain':
+					$query = 'UPDATE rpt_masterhm_cells SET bomb_explain="' . $value . '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+								. ' IN(entity1,entity2) LIMIT 1';
+					$res = mysql_query($query);
+					if($res === false){ $errors[] = "Bad SQL query setting item text." . mysql_error();	continue;}
+					break;
+					
+					case 'filing':
+					$query = 'UPDATE rpt_masterhm_cells SET filing="' . $value . '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+								. ' IN(entity1,entity2) LIMIT 1';
+					$res = mysql_query($query);
+					if($res === false){ $errors[] = "Bad SQL query setting item text." . mysql_error();	continue;}
+					break;
+					
+					case 'info':
+					$query = 'UPDATE rpt_masterhm_cells SET phase_explain="' . $value . '" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
+								. ' IN(entity1,entity2) LIMIT 1';
+					$res = mysql_query($query);
+					if($res === false){ $errors[] = "Bad SQL query setting item text." . mysql_error();	continue;}
+					break;
+					
+					default:
+					$errors[] = "Unrecognized item for text attachment: " . htmlspecialchars($type);
+				}
+			}
+		}
+	}
+	return $errors;
+}
+
+
+
 function show_editor($id, $editable=true)
 {
 	global $db;
@@ -174,9 +534,11 @@ function show_editor($id, $editable=true)
 	$sel = ' selected="selected"';
 	$chk = ' checked="checked"';
 	echo('<fieldset style="float:left;"><legend>Report Settings</legend>');
+	echo('<form id="hmsettings" name="hmsettings" action="heatmap_edit.php" method="post">');
+	echo('<input type="hidden" name="id" id="id" value="' . $id . '"/>');
 	echo('<label>Name: <input type="text" name="hmname" id="hmname" value="' . $row['name'] . '"/></label> 
-<label>Display Name:<input type="text" name="hmdisplayname" id="hmdisplayname" ' . $row['display_name'] . '/></label>
-<label>Category:<input type="text" name="hmcat" id="hmcat" ' . $row['category'] . '/></label>');
+<label>Display Name:<input type="text" name="hmdisplayname" id="hmdisplayname" value="' . $row['display_name'] . '"/></label>
+<label>Category:<input type="text" name="hmcat" id="hmcat" value="' . $row['category'] . '"/></label>');
 	echo('<br /><label>Ownership: <select name="hmowner" id="hmowner">
     <option value="g"' . ($row['user']===NULL ? $sel : '') . '>Global</option>
     <option value="ms"' . ($row['user']==$db->user->id && $row['shared'] ? $sel : '') . '>Mine (shared)</option>
@@ -195,12 +557,14 @@ function show_editor($id, $editable=true)
 	echo('</select></label> ');
 	echo('<label><input type="checkbox" name="hmdtt" id="hmdtt"' . ($row['dtt']?$chk:'') . '/>Last column is DTT</label> ');
 	echo('<label><input type="checkbox" name="hmtotal" id="hmtotal"' . ($row['total']?$chk:'') . '/>Add auto-total column</label>');
+	echo('<input type="submit" name="setsubmit" id="setsubmit" value="Save Settings" /></form>');
 	echo('</fieldset><fieldset style="float:left;"><legend>Actions</legend>');
 	echo('<form id="hmactions" name="hmactions" method="post" action="heatmap_edit.php" style="margin:3px;">');
 	echo('<input type="submit" name="hmclone" id="hmclone" value="Clone" /><br />');
 	echo('<input type="submit" name="hmcalc" id="hmcalc" value="Recalculate cells" /></form></fieldset>');
 	echo('<fieldset style="float:left;"><legend>Pending Changes</legend>');
-	echo('<form name="hmedit" method="post" action="heatmap_edit.php"><input type="hidden" name="edits" id="edits"/><ol id="editlist">');
+	echo('<form name="hmedit" method="post" action="heatmap_edit.php"><input type="hidden" name="edits" id="edits"/>');
+	echo('<input type="hidden" name="id" id="id" value="' . $id . '"/><ol id="editlist">');
 	//<li> tags with a non-editable form control for each edit will be added here by javascript
 	echo('</ol><input type="submit" name="hmsubmit" id="hmsubmit" value="Submit" /></form></fieldset><br clear="all"/>');
 	echo('<fieldset><legend>Heatmap ' . $id . '</legend>');
@@ -232,7 +596,8 @@ function show_editor($id, $editable=true)
 	}
 	
 	//show table
-	echo('<table><tr><th>&nbsp;</th>');
+	echo('<table id="heatmap"><tr><th id="corner"><a href="#" id="addColumn">Add Column</a><br />');
+	echo('<br /><a href="#" id="addRow">Add Row</a></th>');
 	//get columns
 	$headerfields =  'rpt_masterhm_headers.type_id      AS type_id,'
 					.'rpt_masterhm_headers.id           AS id,'
@@ -249,7 +614,7 @@ function show_editor($id, $editable=true)
 	$json_headers = array();
 	while($row = mysql_fetch_assoc($res))
 	{
-		echo('<th>Column ' . $row['num'] . ' - (#' . $row['id'] . ')');
+		echo('<th id="' . $row['id'] . '">Column ' . $row['num'] . ' - (#' . $row['id'] . ')');
 		echo('<br /><img title="Entity" src="images/file_square.png"/>');
 		$hid = '_col_' . $row['num'] . '_' . $row['id'];
 		echo('<input type="text" id="e' . $hid . '" value="' . $row[/*'type_id'*/'name'] . '"' . ' class="entity" />');
@@ -260,8 +625,8 @@ function show_editor($id, $editable=true)
 		echo('<input type="text" id="c' . $hid . '" value="' . $row['category'] . '"/>');
 		echo('<br /><img title="Tag" src="images/tag.gif"/>');
 		echo('<input type="text" id="t' . $hid . '" value="' . $row['tag'] . '"/><br />');
-		echo('<img title="Drag to reorder" draggable="true" src="images/drag_horizontal.png" style="margin-left:30px;"/> - ');
-		echo('<img title="Delete" src="images/delicon.gif" style="margin-left:50px;"/>');
+		echo('<img title="Drag to reorder" draggable="true" src="images/drag_horizontal.png" class="drag"/> - ');
+		echo('<img title="Delete" src="images/delicon.gif" draggable="false" style="margin-left:50px;" class="delete" />');
 		echo('</th>');
 		$columnorder[] = $row['type_id'];
 		$json_headers[$row['id']] = array('e' => $row['name'], 'd' => $row['display_name'], 'c' => $row['category'], 't' => $row['tag']);
@@ -276,7 +641,7 @@ function show_editor($id, $editable=true)
 	{
 		//show row header
 		$hid = '_row_' . $row['num'] . '_' . $row['id'];
-		echo('<tr><th>Row ' . $row['num'] . ' - (#' . $row['id'] . ')');
+		echo('<tr><th id="' . $row['id'] . '">Row ' . $row['num'] . ' - (#' . $row['id'] . ')');
 		echo('<br /><img title="Entity" src="images/file_square.png"/>');
 		echo('<input type="text" id="e' . $hid . '" value="' . $row[/*'type_id'*/'name'] . '"' . ' class="entity" />');
 			//. ' onkeyup="javascript:autoComplete(\'e' . $hid . '\')" />');
@@ -286,8 +651,8 @@ function show_editor($id, $editable=true)
 		echo('<input type="text" id="c' . $hid . '" value="' . $row['category'] . '"/>');
 		echo('<br /><img title="Tag" src="images/tag.gif"/>');
 		echo('<input type="text" id="t' . $hid . '" value="' . $row['tag'] . '"/>');
-		echo('<br /><img title="Drag to reorder" draggable="true" src="images/drag_horizontal.png" style="margin-left:30px;"/> - ');
-		echo('<img title="Delete" src="images/delicon.gif" style="margin-left:50px;"/>');
+		echo('<br /><img title="Drag to reorder" draggable="true" src="images/drag_horizontal.png" class="drag"/> - ');
+		echo('<img title="Delete" src="images/delicon.gif" draggable="false" style="margin-left:50px;" class="delete"/>');
 		echo('</th>');
 		$json[$row['type_id']] = array();
 		$json_headers[$row['id']] = array('e' => $row['name'], 'd' => $row['display_name'], 'c' => $row['category'], 't' => $row['tag']);
@@ -577,8 +942,29 @@ Row: <span id="iconrow"></span><br />Column: <span id="iconcol"></span><br />Typ
 	var edits = new Array();
 	function addEdit(edit)
 	{
+		$("#results").remove();
 		var list = document.getElementById("editlist");
-		if(edit.charAt(0) == "#") //header change
+		if(edit.charAt(0) == "%") //header management
+		{
+			var source = edit.substring(1).split(',');
+			var srcHeader = source[0];
+			var destHeader = source[1];
+			if(srcHeader.charAt(0) == 'R') //add row
+			{
+				list.innerHTML += "<li>Added a row.</li>";
+			}
+			else if(srcHeader.charAt(0) == 'D') //delete header
+			{
+				list.innerHTML += "<li>Deleted header " + destHeader + ".</li>";
+			}
+			else if(srcHeader.charAt(0) == 'C') //add column
+			{
+				list.innerHTML += "<li>Added a column.</li>";
+			}else{ //header move
+				list.innerHTML += "<li>Moved header " + srcHeader + " past header " + destHeader + "</li>";
+			}
+		}
+		else if(edit.charAt(0) == "#") //header change
 		{
 			var source = edit.split('`');
 			var input = source[0].substring(1).split('_');
@@ -652,7 +1038,10 @@ Row: <span id="iconrow"></span><br />Column: <span id="iconcol"></span><br />Typ
 			}
 		});
 	}
-	$(".entity").keyup(	function(event){ autoComplete($(this).attr("id")); });
+	//var userTyped = null;
+	$(".entity").keyup(	function(event){
+			autoComplete($(this).attr("id"));
+		});
 	$("th input").focusout(
 		function(event)
 		{
@@ -669,6 +1058,98 @@ Row: <span id="iconrow"></span><br />Column: <span id="iconcol"></span><br />Typ
 			}
 		}
 	);
+	
+	//dragndrop
+	var handles = document.querySelectorAll('.drag');
+	var tableHeaders = document.querySelectorAll('th');
+	var dragSrcEl = null;
+	
+	function handleDragStart(e)
+	{
+		this.style.opacity = '0.4';  // this / e.target is the source node.
+		dragSrcEl = this.parentNode;
+		e.dataTransfer.effectAllowed = 'move';
+		e.dataTransfer.setData('text/html', dragSrcEl.id);
+		$('th *').css({"pointer-events":"none"});	
+	}
+	
+	function handleDragOver(e)
+	{
+		if(e.preventDefault)
+			e.preventDefault(); // Necessary. Allows us to drop.
+		e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+		return false;
+	}
+
+	function handleDragEnter(e)
+	{
+		this.classList.add('over'); // this / e.target is the current hover target.
+	}
+
+	function handleDragLeave(e)
+	{
+		this.classList.remove('over');  // this / e.target is previous target element.
+	}
+	
+	function handleDrop(e)
+	{
+		// this / e.target is current target element.
+		if(e.stopPropagation)
+		{
+			e.stopPropagation(); // stops the browser from redirecting.
+		}
+		e.preventDefault();
+		var draggedHeaderId = e.dataTransfer.getData('text/html');
+		// Don't do anything if dropping the same column we're dragging. Or if dest is the corner.
+		if (dragSrcEl != this && draggedHeaderId != "corner")
+		{
+			addEdit('%' + draggedHeaderId + ',' + this.id);
+		}
+		$('th *').css({"pointer-events":"auto"});
+		return false;
+	}
+
+	function handleDragEnd(e)
+	{
+		// this/e.target is the source node.
+		[].forEach.call(tableHeaders, function (header){ header.classList.remove('over'); });
+		$('th *').css({"pointer-events":"auto"});
+	}
+	
+	[].forEach.call(handles, function(handle){
+			handle.addEventListener('dragstart', handleDragStart, false);
+		});
+	
+	[].forEach.call(tableHeaders, function(header){
+			header.addEventListener('dragenter', handleDragEnter, false);
+			header.addEventListener('dragover', handleDragOver, false);
+			header.addEventListener('dragleave', handleDragLeave, false);
+			header.addEventListener('drop', handleDrop, false);
+			header.addEventListener('dragend', handleDragEnd, false);
+		});
+	
+	
+	function addRow()
+	{
+		addEdit('%R');
+		return false;
+	}
+	
+	function addColumn()
+	{
+		addEdit('%C');
+		return false;
+	}
+	
+	function deleteHeader()
+	{
+		addEdit('%D,'+this.parentNode.id);
+		return false;
+	}
+	
+	$('#addRow').click(addRow);
+	$('#addColumn').click(addColumn);
+	$('.delete').click(deleteHeader);
 	
 	//]]>
 	</script>
