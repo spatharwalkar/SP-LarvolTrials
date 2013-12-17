@@ -6,7 +6,8 @@
 	require_once('product_tracker.php');
 	chdir ($cwd);
 	require_once('disease_tracker.php');
-	require_once('investigators_tracker.php');	
+	require_once('investigators_tracker.php');
+	require_once('news_tracker.php');
 	$page = 1;
 	
 	if($_REQUEST['MoaId'] != NULL && $_REQUEST['MoaId'] != '' && isset($_REQUEST['MoaId']))
@@ -239,6 +240,8 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				$moaLinkName = '<a href="'.$tabCommonUrl.'&tab=moa" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
 				$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+				$CountExt = (($TabNewsCount == 1) ? 'News':'News');
+				$newsLinkName = '<a href="'.$tabCommonUrl.'&tab=newstrac" title="'.$TabNewsCount.' '.$CountExt.'">&nbsp;'.$TabNewsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 				
 				if($tab == 'diseasetrac') {  
 				print '<td><img id="MoaImg" src="../images/firstTab.png" /></td>
@@ -247,6 +250,8 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				<td id="DiseaseTab" class="selectTab">' . $diseaseLinkName .'</td>
 				<td><img id="lastImg" src="../images/selectTabConn.png" /></td> 
 				<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+				<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>				
 				<td><img id="lastImg" src="../images/lastTab.png" /></td>';
 				 } else if($tab == 'moa') { 
 				print '<td><img id="MoaImg" src="../images/firstSelectTab.png" /></td>
@@ -255,6 +260,8 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				<td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td>
 				<td><img id="lastImg" src="../images/afterTab.png" /></td> 
 				<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+				<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
 				<td><img id="lastImg" src="../images/lastTab.png" /></td>';
 				// print '<td><img id="MoaImg" src="images/firstSelectTab.png" /></td><td id="moaTab" class="selectTab">'. $moaLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
 				 }  else if($tab == 'investigatortrac') { 
@@ -264,9 +271,22 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NU
 				<td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td>
 				<td><img id="lastImg" src="../images/middleTab.png" /></td> 
 				<td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
+				<td><img id="CompanyImg" src="../images/selectTabConn.png" /></td>
+				<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
+				<td><img id="lastImg" src="../images/lastTab.png" /></td>';
+				// print '<td><img id="MoaImg" src="images/firstSelectTab.png" /></td><td id="moaTab" class="selectTab">'. $moaLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
+				 } else if($tab == 'newstrac') { 
+				print '<td><img id="MoaImg" src="../images/firstTab.png" /></td>
+				<td id="moaTab" class="Tab">'. $moaLinkName .'</td>
+				<td><img id="DiseaseImg" src="../images/afterTab.png" /></td>
+				<td id="DiseaseTab" class="Tab">' . $diseaseLinkName .'</td>
+				<td><img id="lastImg" src="../images/afterTab.png" /></td> 
+				<td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				<td><img id="CompanyImg" src="../images/middleTab.png" /></td>
+				<td id="InvestigatorTab" class="selectTab">'. $newsLinkName .'</td>
 				<td><img id="lastImg" src="../images/selectLastTab.png" /></td>';
 				// print '<td><img id="MoaImg" src="images/firstSelectTab.png" /></td><td id="moaTab" class="selectTab">'. $moaLinkName .'</td></td><td><img id="lastImg" src="images/selectLastTab.png" /></td><td></td>';
-				 } 
+				 }  
 	print	'            
 			</tr>
 		</table>
@@ -283,6 +303,8 @@ if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $In
 		print showDiseaseTracker($MoaId, 'MDT', $page, $categoryFlag);		//MDT= MOA DISEASE TRACKER
 	else if($tab == 'investigatortrac')
 		print showInvestigatorTracker($MoaId, 'MIT', $page);		//MIT= COMPANY INVESTIGATOR TRACKER
+	else if($tab == 'newstrac')
+		print showNewsTracker($MoaId, 'MNT', $page);		//MIT= MOA NEWS TRACKER
 	else
 		print showProductTracker($MoaId, $dwcount, 'MPT', $page, $OptionArray);	//MPT= MOA PRODUCT TRACKER 	
 	print '</div>';

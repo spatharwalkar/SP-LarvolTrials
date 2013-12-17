@@ -55,8 +55,8 @@ function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 
 	if($TrackerType == 'PNT')
 		$query .= "WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
-	else if($TrackerType == 'CNT') {
-		$productIds      = GetProductsFromCompany($id, 'CPT', array());
+	else if($TrackerType == 'CNT' || $TrackerType == 'DNT') {
+		$productIds      = ($TrackerType == 'CNT' ? GetProductsFromCompany($id, 'CPT', array()) : GetProductsFromDisease($id, 'DPT', array()));
 		$impArr = implode("','", $productIds);
 		$query .= "WHERE et.`entity` in('" . $impArr . "')";
 	}

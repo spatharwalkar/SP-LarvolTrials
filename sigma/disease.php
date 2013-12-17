@@ -15,6 +15,7 @@
 	
 	require_once('company_tracker.php');
 	require_once('moa_tracker.php');
+	require_once('news_tracker.php');
 	$page = 1;
 	
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
@@ -186,6 +187,8 @@
 						$CountExt = (($TabInvCount == 1) ? 'Investigator':'Investigators');
 						$InvLinkName = '<a href="'.$tabCommonUrl.'&tab=Investigators" title="'.$TabInvCount.' '.$CountExt.'">&nbsp;'.$TabInvCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						$ohmLinkName = '<a href="'.$tabCommonUrl.'&tab=DiseaseOHM" title="Heatmap">&nbsp;Heatmap&nbsp;</a>';
+						$CountExt = (($TabNewsCount == 1) ? 'News':'News');
+						$newsLinkName = '<a href="'.$tabCommonUrl.'&tab=News" title="'.$TabNewsCount.' '.$CountExt.'">&nbsp;'.$TabNewsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						
 						if($tab == 'Companies') {  ?>
 							<td>
@@ -209,7 +212,11 @@
 							</td>
 							<td id="DiseaseOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
-							<!-- <td><img id="DiseaseOHMImg" src="../images/afterTab.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> 
+							<!-- <td><img id="DiseaseOHMImg" src="../images/afterTab.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> -->
+							<td>
+								<img id="NewsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td> 
 							<td>
 								<img id="lastImg" src="../images/lastTab.png" />
 							</td>		
@@ -236,7 +243,11 @@
 							</td>
 							<td id="DiseaseOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
-							<!-- <td><img id="DiseaseOHMImg" src="../images/afterTab.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> 
+							<!-- <td><img id="DiseaseOHMImg" src="../images/afterTab.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> -->
+							<td>
+								<img id="NewsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="NewsTab" class="Tab"> <?php print $newsLinkName; ?></td> 
 							<td>
 								<img id="lastImg" src="../images/lastTab.png" />
 							</td> 
@@ -264,6 +275,10 @@
 								<td id="DiseaseOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
 								<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 								<!-- <td><img id="DiseaseOHMImg" src="../images/afterTab.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> -->
+								<td>
+								<img id="NewsImg" src="../images/afterTab.png" />
+								</td>
+								<td id="NewsTab" class="Tab"> <?php print $newsLinkName; ?> </td>
 								<td>
 									<img id="lastImg" src="../images/lastTab.png" />
 								</td> 
@@ -319,7 +334,11 @@
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="DiseaseOHMImg" src="../images/selectTabConn.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> -->
 							<td>
-								<img id="lastImg" src="../images/selectLastTab.png" />
+								<img id="lastImg" src="../images/selectTabConn.png" />
+							</td>
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td>
+							<td>
+								<img id="lastImg" src="../images/lastTab.png" />
 							</td>
 							<td></td>
 						<?php } else if($tab == 'DiseaseOHM') {  ?>
@@ -343,6 +362,41 @@
 								<img id="DiseaseOHMImg" src="../images/middleTab.png" />
 							</td>
 							<td id="DiseaseOHMTab" class="selectTab"><?php print $ohmLinkName; ?></td>
+							<td>
+								<img id="lastImg" src="../images/selectTabConn.png" />
+							</td>
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td>
+							<td>
+								<img id="lastImg" src="../images/lastTab.png" />
+							</td>
+							<td></td>
+						<?php } else if($tab == 'News') {  ?>
+							<td>
+								<img id="CompaniesImg" src="../images/firstTab.png" />
+							</td>
+							<td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td>
+							<td>
+								<img id="ProductsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
+							<td>
+								<img id="MOAsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
+							<td>
+								<img id="InvestigatorsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="InvestigatorsTab" class="Tab"><?php print $InvLinkName; ?></td>
+							<td>
+								<img id="DiseaseOTTImg" src="../images/afterTab.png" />
+							</td>
+							<td id="DiseaseOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
+							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
+							<!-- <td><img id="DiseaseOHMImg" src="../images/selectTabConn.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> -->
+							<td>
+								<img id="lastImg" src="../images/middleTab.png" />
+							</td>
+							<td id="NewsTab" class="selectTab"><?php print $newsLinkName; ?></td>
 							<td>
 								<img id="lastImg" src="../images/selectLastTab.png" />
 							</td>
@@ -383,7 +437,9 @@
 						print '<div id="DiseaseOTT" align="center">'; DisplayOTT(); print '</div>'; 
 						chdir ("$cwd");
 					}
-					
+					//DCT=DISEASE NEWS TRACKER
+					if($tab == 'News')
+						print '<div id="News" align="center">'.showNewsTracker($DiseaseId, 'DNT', $page).'</div>';
 					//DOHM=DISEASE ONLINE HEATMAP 
 					if($tab == 'DiseaseOHM')
 						//print '<div id="DiseaseOHM" align="center">'; DisplayOHM($DiseaseId, 'DOHM').'</div>';

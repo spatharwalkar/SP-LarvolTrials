@@ -212,6 +212,10 @@
 								</td>
 								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
 								<td>
+									<img id="CompanyImg" src="../images/afterTab.png" />
+								</td>
+								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
+								<td>
 									<img id="lastImg" src="../images/lastTab.png" />
 								</td>
 								<td></td>';
@@ -228,6 +232,10 @@
 									<img id="CompanyImg" src="../images/selectTabConn.png" />
 								</td>
 								<td id="DiseaseTab" class="Tab">'. $trialsLinkName .'</td>
+								<td>
+									<img id="CompanyImg" src="../images/afterTab.png" />
+								</td>
+								<td id="DiseaseTab" class="Tab">'. $newsLinkName .'</td>
 								<td>
 									<img id="CompanyImg" src="../images/afterTab.png" />
 								</td>
@@ -287,6 +295,9 @@
 				else if($tab == 'investigatortrac'){
 					print showInvestigatorTracker($e1, 'PIT', $page);		//PDT = PRODUCT INVESTIGATOR TRACKER  showInvestigatorTracker
 				}
+				else if($tab == 'newstrac'){
+					print showNewsTracker($e1, 'PNT', $page);		//PDT = PRODUCT NEWS TRACKER  showNewsTracker
+				}	
 				else if($tab == 'newstrac'){
 					print showNewsTracker($e1, 'PNT', $page);		//PDT = PRODUCT NEWS TRACKER  showNewsTracker
 				}	
