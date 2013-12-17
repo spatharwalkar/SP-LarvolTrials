@@ -8221,8 +8221,8 @@ class TrialTracker
 		echo '<input type="hidden" name="sourcepg" value="TZ" />';
 		
 		if($globalOptions['sourcepg'] == 'TZI' or $_REQUEST['tab']=='InvestigatorOTT')
-			echo '<input type="hidden" name="sourcepg" value="TZI" />'
-					. '<input type="hidden" name="tab" value="InvestigatorOTT" />';
+		echo '<input type="hidden" name="sourcepg" value="TZI" />'
+				. '<input type="hidden" name="tab" value="InvestigatorOTT" />';
 		
 		if($globalOptions['sourcepg'] == 'TZP')		
 		echo '<input type="hidden" name="sourcepg" value="TZP" />'
@@ -11414,7 +11414,9 @@ class TrialTracker
 			
 			$rowspan = 1;
 			$titleLinkColor = '#000000;';
-		
+			if(isset($tvalue['manual_is_sourceless']) && ($tvalue['manual_is_sourceless'] == 1))
+				$titleLinkColor = '#FF0000';
+			
 			if(isset($tvalue['upms']))  
 				$rowspan = count($tvalue['upms'])+1; 
 				
@@ -11582,7 +11584,7 @@ class TrialTracker
 				}
 			}
 			
-			$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'
+			$outputStr .= '<td nowrap="nowrap" rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse" style="color:' . $titleLinkColor .'">'
 						. $tvalue["enrollment"] . '</div></td>';	
 			
 			
@@ -11625,7 +11627,7 @@ class TrialTracker
 				}
 			}
 			
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' 
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse" style="color:' . $titleLinkColor .'">' 
 						. (($tvalue['region'] != '' && $tvalue['region'] !== NULL) ? $tvalue['region'] : '&nbsp;') . '</div></td>';	
 						
 			
@@ -11677,7 +11679,7 @@ class TrialTracker
 			}
 			
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-						. '<div class="rowcollapse">' . $tvalue['intervention_name'] . '</div></td>';	
+						. '<div class="rowcollapse" style="color:' . $titleLinkColor .'">' . $tvalue['intervention_name'] . '</div></td>';	
 						
 			
 			//collaborator and sponsor column
@@ -11785,7 +11787,7 @@ class TrialTracker
 				}
 			
 			}
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' . $tvalue['lead_sponsor'];
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse" style="color:' . $titleLinkColor .'">' . $tvalue['lead_sponsor'];
 			if($tvalue['lead_sponsor'] != '' && $tvalue['collaborator'] != ''
 			&& $tvalue['lead_sponsor'] != NULL && $tvalue['collaborator'] != NULL)
 			{
@@ -11840,7 +11842,7 @@ class TrialTracker
 					$attr = '" title="New record' ;
 				} 
 			}
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">' 
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse" style="color:' . $titleLinkColor .'">' 
 						. (($tvalue['overall_status'] != '' && $tvalue['overall_status'] !== NULL) ? $tvalue['overall_status'] : '&nbsp;')
 						. '</div></td>';
 						
@@ -11892,7 +11894,7 @@ class TrialTracker
 				}
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">'
-						. '<div class="rowcollapse">' . $tvalue['condition'] . '</div></td>';
+						. '<div class="rowcollapse" style="color:' . $titleLinkColor .'">' . $tvalue['condition'] . '</div></td>';
 						
 			
 			$borderLeft = '';	
@@ -11951,7 +11953,7 @@ class TrialTracker
 					$attr = '" title="New record';
 				}	
 			}
-			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse">'; 
+			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '"><div class="rowcollapse" style="color:' . $titleLinkColor .'">'; 
 			if($tvalue["end_date"] != '' && $tvalue["end_date"] != NULL && $tvalue["end_date"] != '0000-00-00') 
 			{
 				$outputStr .= date('m/y',strtotime($tvalue["end_date"]));
@@ -12021,7 +12023,7 @@ class TrialTracker
 				$phaseColor = $this->phaseValues[$phase];
 			}
 			$outputStr .= '<td rowspan="' . $rowspan . '" class="' . $rowOneType . $attr . '">' 
-						. '<div class="rowcollapse">' . $phase . '</div></td>';				
+						. '<div class="rowcollapse" style="color:' . $titleLinkColor .'">' . $phase . '</div></td>';				
 			
 			$startMonth = date('m',strtotime($tvalue['start_date']));
 			$startYear = date('Y',strtotime($tvalue['start_date']));
