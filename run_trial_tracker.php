@@ -6872,7 +6872,8 @@ class TrialTracker
 					
 					if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 					{
-						$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+						//commented on 18-Dec-13
+						//$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 					}
 					
 					$productSelector[$productId] = $row['name'];
@@ -7547,7 +7548,8 @@ class TrialTracker
 						
 						if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 						{
-							$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
+							//commented on 18-Dec-13
+							//$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 						}
 						
 						if($row['class']=='Product')
@@ -7721,7 +7723,8 @@ class TrialTracker
 					}
 					if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 					{
-						$sectionHeader .= " <span style='color:gray'>Discontinued</span>";
+						//commented on 18-Dec-13
+						//$sectionHeader .= " <span style='color:gray'>Discontinued</span>";
 					}
 					
 					$TrialsInfo[$id]['Id'] = $id;
