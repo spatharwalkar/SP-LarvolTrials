@@ -155,6 +155,24 @@ foreach($tasks as $row)
 			if(!calc_cells(NULL,4)) echo '<br><b>Could complete calculating cells, there was an error.<br></b>';
 			else continue;
 		}
+		
+		//generate news if scheduled
+		if( !is_null($row['generate_news']) and $row['generate_news']==1 )
+		{			
+			echo '<br>Generating News...<br>';
+			$query = 'UPDATE schedule SET lastrun="' . date("Y-m-d H:i:s",strtotime('now')) . '" WHERE id=' . $row['id'] . ' LIMIT 1';
+		
+			global $logger;
+			if(!mysql_query($query))
+			{
+				$log='Error saving changes to schedule: ' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+				$logger->fatal($log);
+				die($log);
+			}
+			require_once('generateNews.php');
+			generateNews(30);
+			continue;
+		}
 
 		//Import diseases
 		if( !is_null($row['get_diseases']) and $row['get_diseases']==1 )

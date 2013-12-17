@@ -44,6 +44,10 @@ function editor()
 		$chkd4=" checked='checked' ";
 	else
 		$chkd4="";
+	if($rpt['generate_news']==1)
+		$chkd5=" checked='checked' ";
+	else
+		$chkd5="";
 	$out = '<form action="schedule.php" method="post"><fieldset class="schedule"><legend>Edit schedule item ' . $id . '</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />'
 			. '<input type="submit" name="reportsave" value="Save edits" /><br clear="all"/>'
@@ -55,7 +59,9 @@ function editor()
 			. '<label>Update database (fetch)?: '
 			//. '<input type="checkbox" name="fetch"'	. ($rpt['fetch'] ? 'checked="checked"' : '') . '/>'
 			. makeDropdown('fetch',getEnumValues('schedule','fetch'),false,$rpt['fetch'])
-			. '</label><br clear="all"/>';
+			. '</label><br />'  // checkbox for updating status of UPMs.
+			. '<label>Generate News?: <input type="checkbox" name="gen_news" value="news" ' . $chkd5 . ' /></label>'  // update deseases
+			. '<br clear="all"/>';
 
 	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
 	//Adding or modifying any sycn here should also modify in cron.php as well to kept all correct
@@ -231,6 +237,15 @@ function postEd()
 		{
 			$query = 'UPDATE `schedule` SET `upm_status`= NULL where `id`="'.$id . '" limit 1';		
 		}
+		if( isset($_POST['gen_news']) and $_POST['gen_news']=='news' )
+		{
+			$query = 'UPDATE `schedule` SET `generate_news`="1" where `id`="'.$id . '" limit 1';
+		}
+		else
+		{
+			$query = 'UPDATE `schedule` SET `generate_news`= NULL where `id`="'.$id . '" limit 1';
+		}
+		mysql_query($query);
 		if(!mysql_query($query))
 		{
 			$log='Error saving changes to schedule: ' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
