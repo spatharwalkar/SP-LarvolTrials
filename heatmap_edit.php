@@ -615,15 +615,15 @@ function show_editor($id, $editable=true)
 	while($row = mysql_fetch_assoc($res))
 	{
 		echo('<th id="' . $row['id'] . '">Column ' . $row['num'] . ' - (#' . $row['id'] . ')');
-		echo('<br /><img title="Entity" src="images/file_square.png"/>');
+		echo('<br /><img title="Entity" src="images/file_square.png" draggable="false"/>');
 		$hid = '_col_' . $row['num'] . '_' . $row['id'];
 		echo('<input type="text" id="e' . $hid . '" value="' . $row[/*'type_id'*/'name'] . '"' . ' class="entity" />');
 			//. ' onkeyup="javascript:autoComplete(\'e' . $hid . '\')" />');
-		echo('<br /><img title="Display Name" src="images/display.gif"/>');
+		echo('<br /><img title="Display Name" src="images/display.gif" draggable="false"/>');
 		echo('<input type="text" id="d' . $hid . '" value="' . $row['display_name'] . '"/>');
-		echo('<br /><img title="Category" src="images/expanded.png"/>');
+		echo('<br /><img title="Category" src="images/expanded.png" draggable="false"/>');
 		echo('<input type="text" id="c' . $hid . '" value="' . $row['category'] . '"/>');
-		echo('<br /><img title="Tag" src="images/tag.gif"/>');
+		echo('<br /><img title="Tag" src="images/tag.gif" draggable="false"/>');
 		echo('<input type="text" id="t' . $hid . '" value="' . $row['tag'] . '"/><br />');
 		echo('<img title="Drag to reorder" draggable="true" src="images/drag_horizontal.png" class="drag"/> - ');
 		echo('<img title="Delete" src="images/delicon.gif" draggable="false" style="margin-left:50px;" class="delete" />');
@@ -642,14 +642,14 @@ function show_editor($id, $editable=true)
 		//show row header
 		$hid = '_row_' . $row['num'] . '_' . $row['id'];
 		echo('<tr><th id="' . $row['id'] . '">Row ' . $row['num'] . ' - (#' . $row['id'] . ')');
-		echo('<br /><img title="Entity" src="images/file_square.png"/>');
+		echo('<br /><img title="Entity" src="images/file_square.png" draggable="false"/>');
 		echo('<input type="text" id="e' . $hid . '" value="' . $row[/*'type_id'*/'name'] . '"' . ' class="entity" />');
 			//. ' onkeyup="javascript:autoComplete(\'e' . $hid . '\')" />');
-		echo('<br /><img title="Display Name" src="images/display.gif"/>');
+		echo('<br /><img title="Display Name" src="images/display.gif" draggable="false"/>');
 		echo('<input type="text" id="d' . $hid . '" value="' . $row['display_name'] . '"/>');
-		echo('<br /><img title="Category" src="images/expanded.png"/>');
+		echo('<br /><img title="Category" src="images/expanded.png" draggable="false"/>');
 		echo('<input type="text" id="c' . $hid . '" value="' . $row['category'] . '"/>');
-		echo('<br /><img title="Tag" src="images/tag.gif"/>');
+		echo('<br /><img title="Tag" src="images/tag.gif" draggable="false"/>');
 		echo('<input type="text" id="t' . $hid . '" value="' . $row['tag'] . '"/>');
 		echo('<br /><img title="Drag to reorder" draggable="true" src="images/drag_horizontal.png" class="drag"/> - ');
 		echo('<img title="Delete" src="images/delicon.gif" draggable="false" style="margin-left:50px;" class="delete"/>');
