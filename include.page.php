@@ -1,4 +1,7 @@
 <?php
+$USE_OLD_JQUERY = true;
+
+
 /**
  * @name tableColumns
  * @tutorial outputs the table field Names

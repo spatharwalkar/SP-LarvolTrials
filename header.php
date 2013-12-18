@@ -9,7 +9,11 @@
 <link href="scripts/date/jdpicker.css" rel="stylesheet" type="text/css" media="screen" /> 
 <link href="krumo/skin.css" rel="stylesheet" type="text/css" media="all" />
 <link href="css/colorbox.css" rel="stylesheet" type="text/css" media="all" />
+<?php if($USE_OLD_JQUERY){?>
+  <script type="text/javascript" src="date/jquery.js"></script>
+<?php }else{ ?>  
 <script type="text/javascript" src="scripts/jquery-1.9.1.js"></script>
+<?php } ?>  
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
 <script type="text/javascript" src="date/init.js"></script>
