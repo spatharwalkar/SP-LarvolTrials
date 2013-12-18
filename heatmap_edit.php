@@ -299,13 +299,13 @@ function process_edits($id)
 		}
 		else if($edit[0] == "#") //header change
 		{
-			$source = explode('`',edit);
+			$source = explode('`',$edit);
 			$input = explode('_',substr($source[0],1));
 			$fieldName = $input[0];
 			$hid = $input[3];
 			$value = $source[1];
 			
-			switch(fieldName)
+			switch($fieldName)
 			{
 				case 'e':
 				$fieldName = 'type_id';
@@ -328,7 +328,7 @@ function process_edits($id)
 				break;
 				
 				default:
-				$errors[] = "Unrecognized field anme to change in header.";
+				$errors[] = "Unrecognized field name to change in header.";
 				continue;
 			}
 			$query = 'UPDATE rpt_masterhm_headers SET ' . $fieldName . '=' . $value . ' WHERE id=' . $hid . ' LIMIT 1';
