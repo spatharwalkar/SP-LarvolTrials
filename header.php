@@ -22,6 +22,10 @@
 <script type="text/javascript" src="scripts/colorbox/jquery.colorbox-min.js"></script>
 <script type="text/javascript" src="scripts/jquery.sqlbuilder-0.06.js"></script>
 
+<?php echo($HEADER_INCLUDES);
+if($db->user->userlevel == 'public') die();
+?>
+
 <link rel="stylesheet" type="text/css" href="css/jquery.sqlbuilder.css" />
 <style type="text/css">
 #sqlreport
