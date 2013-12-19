@@ -245,7 +245,7 @@ tr.hrow{
 	width:52px;
 	height:14px;
 }
-.hmdata td.sect,.sect div,.sect div:hover,.sect a{
+.hmdata td.sect,.hmdata .sect div,.sect div:hover,.hmdata .sect a{
 	text-align:left;
 	color:black;
 	background-color:rgb(162,255,151);
@@ -254,6 +254,9 @@ tr.hrow{
 	font-weight:bold;
 	line-height:normal;
 	border:0;margin:0;padding:0;
+	width:100%;
+}
+.hmdata td.sect a{
 	width:100%;
 }
 td.pn{background-color:rgb(204,204,204)}
@@ -267,8 +270,8 @@ a.ch,span.ch{border-left:3px #F00 solid;}
 .hmdata td div{
 	position:absolute;
 	border-radius:5px;
-	/*background-color:rgb(255,255,170);*/
-	background-color:rgb(162,255,151);
+	background-color:rgb(255,255,170);
+	/*background-color:rgb(162,255,151);*/
 	border:rgb(255,173,51) 1px solid;
 	width:280px;
 	text-align:left;
@@ -284,7 +287,7 @@ a.ch,span.ch{border-left:3px #F00 solid;}
 .hmdata td div.be{ /* mouseover near bottom edge */
 	bottom:0;
 }
-td div a,td div span{
+.hmdata td div a,.hmdata td div span{
 	width:90%;
 	display:block;
 	line-height:normal;
@@ -311,7 +314,7 @@ div .ex{background:url(../../images/phaseexp_small.png);}
 td div .ex,td div .bex,td div .fex,.bom a,.fil a{background-repeat:no-repeat;}
 .bom a{background-position:right center;}
 .fil a{background-position:left center;}
-div .ex,div .bex,div .fex{background-position:1px 50%;padding-left:16px;}
+.hmdata div .ex,.hmdata div .bex,.hmdata div .fex{background-position:1px 50%;padding-left:16px;}
 .fil a{background-position:2px 50%;}
 .fil.ch a{background-position:1px 50%;}
 .cat,.cat div{
