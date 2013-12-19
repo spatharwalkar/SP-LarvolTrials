@@ -10,6 +10,7 @@ if(!$db->loggedIn())
 	require('index.php');
 	exit;
 }
+$USE_OLD_JQUERY = true;
 require('header.php');
 $show_sort_res_bool = true;
 require('querybuilder.php');
