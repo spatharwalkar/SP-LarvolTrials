@@ -690,6 +690,6 @@ function productFormatLI($name, $companies, $tag='')
 		$name = '<b>' . substr($name,0,$paren) . '</b>' . substr($name,$paren);
 	}
 	if(strlen($tag)) $tag = ' <span class="gray">[' . $tag . ']</span>';
-	return $name . ' / <i>' . implode(', ', $companies) . '</i>' . $tag;
+	return $name . ' / <i>' . htmlspecialchars(implode(', ', $companies)) . '</i>' . htmlspecialchars($tag);
 }
 ?>
