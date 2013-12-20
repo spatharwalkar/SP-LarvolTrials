@@ -10310,7 +10310,9 @@ class TrialTracker
 	
 	function displayWebPage($ottType, $resultIds, $Values, $productSelector = array(), $globalOptions)
 	{
-	
+		if(isset($globalOptions['tid'])){
+			$Values = getNonProductTrialDataList($globalOptions['tid'],"Product Name");
+		}
 		if(count($resultIds) && array_key_exists('e1', $resultIds) && ($resultIds['e1'][0] > 0)) {
 			$entityIds[] = $resultIds['e1'][0];
 		}
@@ -10620,10 +10622,8 @@ class TrialTracker
 					 . '<th colspan="3" style="width:12px;">+</th></tr>';
 		
 		if($count > 0)
-		{
-			
-			echo $this->displayTrials($globalOptions, $loggedIn, $Values, $ottType, $totalPages);
-			
+		{			
+			echo $this->displayTrials($globalOptions, $loggedIn, $Values, $ottType, $totalPages);			
 		}
 		else
 		{
@@ -11355,7 +11355,11 @@ class TrialTracker
 				}
 			}
 		}
-		
+		/* Added to add the Non Product Trial Header*/
+		if(isset($globalOptions['tid'])){
+			$sectionHeader = $globalOptions['nptname'];
+			$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms, 'n');
+		}
 		foreach($Trials as $tkey => $tvalue)
 		{
 			if($tvalue['sectionid'] != $sectionId)
@@ -11408,8 +11412,7 @@ class TrialTracker
 				
 				//Rendering Upms
 				$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms, 'n');
-			}
-			
+			}			
 			if($counter%2 == 1) 
 				$rowOneType = 'alttitle';
 			else
@@ -13873,6 +13876,61 @@ function GetProductFromProducts($ss,$productSelector){
 
 	}
 	return $resArr;	
+}
+function getNonProductTrialDataList($tid,$productName=''){
+	$dataList = "SELECT * FROM data_trials WHERE larvol_id IN (".$tid.")";
+	$dataListRes = mysql_query($dataList);
+	$dataArr = array();
+	$trialsArr = array();
+	$totalCount = 0;
+	$totalActiveCount = 0;
+	$totalInActiveCount = 0;
+	while($dlr = mysql_fetch_array($dataListRes)){
+		
+		if($dlr['is_active']==1){
+			$totalActiveCount++;
+		}else{
+			$totalInActiveCount++;
+		}
+		$totalCount++;
+		$trialsArr[$dlr['larvol_id']]['larvol_id'] = $dlr['larvol_id'];
+		$trialsArr[$dlr['larvol_id']]['nct_id'] = $dlr['source_id'];
+		$trialsArr[$dlr['larvol_id']]['full_id'] = $dlr['source_id'];
+		$trialsArr[$dlr['larvol_id']]['id_for_upm'] = $dlr['source_id'];
+		$trialsArr[$dlr['larvol_id']]['brief_title'] = $dlr['brief_title'];
+		$trialsArr[$dlr['larvol_id']]['acronym'] = $dlr['acronym'];
+		$trialsArr[$dlr['larvol_id']]['region'] = $dlr['region'];
+		$trialsArr[$dlr['larvol_id']]['lead_sponsor'] = $dlr['lead_sponsor'];
+		$trialsArr[$dlr['larvol_id']]['start_date'] = $dlr['start_date'];
+		$trialsArr[$dlr['larvol_id']]['end_date'] = $dlr['end_date'];
+		$trialsArr[$dlr['larvol_id']]['phase'] = $dlr['phase'];
+		$trialsArr[$dlr['larvol_id']]['enrollment'] = $dlr['enrollment'];
+		$trialsArr[$dlr['larvol_id']]['collaborator'] = $dlr['collaborator'];
+		
+		$condition = $dlr['condition'];
+		$condition = str_replace("`",",",$condition);
+		$trialsArr[$dlr['larvol_id']]['condition'] = $condition;
+		
+		$interventionName = $dlr['intervention_name'];
+		$interventionName = str_replace("`",",",$interventionName);
+		$trialsArr[$dlr['larvol_id']]['intervention_name'] = $interventionName;
+		
+		$trialsArr[$dlr['larvol_id']]['overall_status'] = $dlr['overall_status'];
+		$trialsArr[$dlr['larvol_id']]['is_active'] = $dlr['is_active'];
+		$trialsArr[$dlr['larvol_id']]['new'] = $dlr['is_active'];
+		$trialsArr[$dlr['larvol_id']]['source'] = $dlr['source'];
+		$trialsArr[$dlr['larvol_id']]['source_id'] = $dlr['source_id'];
+		$trialsArr[$dlr['larvol_id']]['intervention_name_prev'] = $dlr['intervention_name'];
+		$trialsArr[$dlr['larvol_id']]['phase_prev'] = 'N/A';
+	}	
+	$dataArr['Data']['product_id']['Id'] = 'product_id';
+	$dataArr['Data']['product_id']['sectionHeader'] = 'Abdomen, Acute';
+	$dataArr['Data']['product_id']['Trials'] = $trialsArr;
+	$dataArr['activecount'] = $totalActiveCount;
+	$dataArr['inactivecount'] = $totalInActiveCount;
+	$dataArr['totalcount'] = $totalCount;
+	$dataArr['count'] = $totalCount;
+	return $dataArr;
 }
 
 ?>

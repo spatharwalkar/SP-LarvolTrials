@@ -47,7 +47,6 @@ function DisplayOTT()
 {
 	global $db;
 	$maxEnrollLimit = 5000;
-
 	/*******************************/
 	if(isset($_REQUEST['p']) && !isset($_REQUEST['e1']))	$_REQUEST['e1']= $_REQUEST['p'];
 	if(isset($_REQUEST['a']) && !isset($_REQUEST['e2']))	$_REQUEST['e2']= $_REQUEST['a'];
@@ -601,7 +600,7 @@ if(isset($_REQUEST['pr']) && $_REQUEST['pr'] != '')
 	$globalOptions['product'] = array_filter($globalOptions['product'], 'iszero');
 }
 
-if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']) || isset($globalOptions['DiseaseId']) || isset($globalOptions['DiseaseCatId']))
+if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']) || isset($globalOptions['DiseaseId']) || isset($globalOptions['DiseaseCatId']) || isset($_REQUEST['tid']) )
 { 
 	$globalOptions['url'] = 'e1=' . $_REQUEST['e1'] . '&e2=' . $_REQUEST['e2'];	
 	if(isset($_REQUEST['JSON_search']))
@@ -622,6 +621,12 @@ if(isset($_REQUEST['e1']) || isset($_REQUEST['e2'])|| isset($_REQUEST['hm']) || 
 	if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
 	{
 		$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
+	}
+	if(isset($_REQUEST['tid'])){
+		$globalOptions['tid'] = $_REQUEST['tid'];
+	}
+	if(isset($_REQUEST['nptname'])){
+		$globalOptions['nptname'] = $_REQUEST['nptname'];
 	}
 	$tt->generateTrialTracker('entities', array('e1' => $_REQUEST['e1'], 'e2' => $_REQUEST['e2']), $globalOptions);
 }
@@ -656,9 +661,7 @@ else if(isset($_REQUEST['p']) || isset($_REQUEST['a']) || isset($_REQUEST['hm'])
 	if(isset($_REQUEST['ss']) && $_REQUEST['ss'] != '')
 	{
 		$globalOptions['sphinxSearch'] = $_REQUEST['ss'];
-	}
-	
-	
+	}	
 	$tt->generateTrialTracker('indexed', array('product' => $_REQUEST['p'], 'area' => $_REQUEST['a']), $globalOptions);
 }
 else
