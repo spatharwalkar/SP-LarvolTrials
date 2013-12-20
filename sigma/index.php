@@ -147,8 +147,7 @@
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category` FROM `entities` WHERE `class` = '".$globalOptions['class']."'  AND (`is_active` <> '0' OR `is_active` IS NULL)";
 		else
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
-		$QueryResult = mysql_query($ResultArrQuery);
-		
+		$QueryResult = mysql_query($ResultArrQuery);		
 		$i=0;
 		while($result = mysql_fetch_assoc($QueryResult))
 		{
@@ -163,14 +162,23 @@
 				if($result['display_name'] != NULL && $result['display_name'] != '' && $DataArray[$index]['type'] != 'Product')
 					$DataArray[$i]['name'] = $result['display_name'];
 				
-				//DETECT FIRST CHAR AND ACTIVATE FALG FOR THAT CHAR AND SEPARATE OUT DATA OF FOR EACH CHAR
+				//DETECT FIRST CHAR AND ACTIVATE FALG FOR THAT CHAR AND SEPARATE OUT DATA OF FOR EACH CHARe
 				$ch1 = strtoupper(substr(trim($DataArray[$i]['name']),0,1));
 				if(array_key_exists($ch1,$AlphaData))	{ $AlphaData[$ch1]['Active'] = true; $AlphaData[$ch1]['Data'][] = $DataArray[$i]; }
 				else { $AlphaData['Other']['Active'] = true; $AlphaData['Other']['Data'][] = $DataArray[$i]; }
 				//END OF PART
 			}		
 		}
-		
+		if($globalOptions['class'] == 'NPT'){
+			$DataArray = getNonProductTrials();
+			//DETECT FIRST CHAR AND ACTIVATE FALG FOR THAT CHAR AND SEPARATE OUT DATA OF FOR EACH CHARe
+			foreach($DataArray as $DataArray){
+				$ch1 = strtoupper(substr(trim($DataArray['name']),0,1));
+				if(array_key_exists($ch1,$AlphaData))	{ $AlphaData[$ch1]['Active'] = true; $AlphaData[$ch1]['Data'][] = $DataArray; }
+				else { $AlphaData['Other']['Active'] = true; $AlphaData['Other']['Data'][] = $DataArray; }
+				//END OF PART
+			}
+		}
 		/**
 		 * Holds the information of entity URLs and entity names.
 		 * @var $arrTZBarLink 
@@ -181,9 +189,9 @@
 							 "Disease"	  	  => array("url"=>"index.php?class=Disease","name"=>"Diseases"),
 							 "Product"	  	  => array("url"=>"index.php?class=Product", "name"=>"Products"),				
 							 "Investigator"	  => array("url"=>"index.php?class=Investigator", "name"=>"Investigators"),
+							 "NPT"	  => array("url"=>"index.php?class=NPT", "name"=>"Non Product Trials"),
 "Disease_Category"	  => array("url"=>"index.php?class=Disease_Category", "name"=>"Disease Categories")
 							);
-		
 		if($globalOptions['class'] == 'MOA')	//IN CASE OF MOA  - GET MOA ID AS WELL WHO DOES NOT HAVE CATEGORY OR has Other Category
 		{
 			$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e LEFT OUTER JOIN `entity_relations` er ON(e.`id`=er.`child`) LEFT OUTER JOIN `entities` e2 ON(e2.`id`=er.`parent`) WHERE e.`class`='MOA' AND ((e2.`name` = 'Other' AND e2.`class` = 'MOA_Category') OR er.`parent` IS NULL)";
@@ -207,7 +215,9 @@
 				//END OF PART	
 			}
 		}
-		
+		if($globalOptions['class'] == 'NPT'){
+			$DataArray = getNonProductTrials();
+		}
 		if(isset($_REQUEST['Alpha']))
 		{
 			//MAKE CURRENT DATASET EQUAL TO THAT CHAR DATA
@@ -219,16 +229,15 @@
 		$totalPages = ceil($FoundRecords / $RecordsPerPage);
 		$StartSlice = ($globalOptions['page'] - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		
 		$DataArray = sortTwoDimensionArrayByKey($DataArray, 'name');	//SORT ARRAY USING PHP AS SOME RECORDS MAY NOT HAVE DISPLAY NAME
-			
 		$CurrentPageResultArr = array_slice($DataArray, $StartSlice, $RecordsPerPage);
-		$DataArray = $CurrentPageResultArr;
-		
+		$DataArray = $CurrentPageResultArr;		
 		if($globalOptions['class'] == 'Institution')
 			$globalOptions['classType'] = 'Companies';
 		elseif($globalOptions['class'] == 'Disease_Category')
 			$globalOptions['classType'] = 'Disease Categories';
+		elseif($globalOptions['class'] == 'NPT')
+			$globalOptions['classType'] = 'Non Product Trials';
 		else
 			$globalOptions['classType'] = $globalOptions['class'].'s';
 	}
@@ -237,7 +246,7 @@
 $meta_title = "Larvol Sigma";
 if(isset($_GET['class'])) {
 	$class=strtolower($_GET['class']);
-	$meta_titles_arr = array('institution' => 'List of Companies', 'product' => 'Products', 'moa' => 'Mechanisms of Action', 'disease' => 'Disease List', 'investigator' => 'List of Investigators','disease_category'=>'Disease Category List');
+	$meta_titles_arr = array('institution' => 'List of Companies', 'product' => 'Products', 'moa' => 'Mechanisms of Action', 'disease' => 'Disease List', 'investigator' => 'List of Investigators','disease_category'=>'Disease Category List','NPT'=>'Non Product Trials');
 	$meta_title = (isset($meta_titles_arr[$class]) ? $meta_titles_arr[$class].' : ' : '').$meta_title;
 } else if(isset($_REQUEST['TzSearch']) && $_REQUEST['TzSearch'] != '') {
 	$meta_title = $_REQUEST['TzSearch'].' : '.$meta_title;
@@ -510,7 +519,6 @@ define('IN_COMMENTICS', 'true'); //no need to edit this line
 				} else {
 					echo ('<div style="padding-left:10px;float:right;"><a href="login.php">login</a></div>');
 				}
-				
 			?>
         </td>
     </tr>
@@ -547,22 +555,19 @@ if($ClassFlg)
 			</table><br/>';
 }
 ?>
-
 <!-- Displaying Records -->
 <br/>
 <?php
-
 	foreach($CurrentPageResultArr as $index=> $data)
 	{
 		if($DataArray[$index]['id'] != '' && $DataArray[$index]['id'] != '' && $FoundRecords > 0)
 		{
-
-			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category' || $DataArray[$index]['type'] == 'Investigator' || $DataArray[$index]['type'] == 'Disease_Category')	// avoid displying row for other types
+			if($DataArray[$index]['type'] == 'Institution' || $DataArray[$index]['type'] == 'MOA' || $DataArray[$index]['type'] == 'Product' || $DataArray[$index]['type'] == 'Disease' || $DataArray[$index]['type'] == 'MOA_Category' || $DataArray[$index]['type'] == 'Investigator' || $DataArray[$index]['type'] == 'Disease_Category' || $DataArray[$index]['type'] == 'NPT')	// avoid displying row for other types
 			{
 				print'<table width="100%" border="0" cellspacing="0" cellpadding="0">
 						<tr>
 						<td align="left"  width="100px" style="vertical-align:top;">
-								<img src="../images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
+							<img src="../images/'.$DataArray[$index]['type'].'arrow.gif" style="padding-bottom:5px;" width="100px" height="17px" />
 						</td>
 						<td style="padding-left:5px;" align="left">';
 						
@@ -576,6 +581,9 @@ if($ClassFlg)
 				{
 					$ProdRelateCompany = GetCompanyNames($DataArray[$index]['id']);
 					print ' 		<a href="product.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" ><b>'.$DataArray[$index]['name'] . '</b>' . ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'') .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
+				}
+				else if($DataArray[$index]['type'] == 'NPT'){
+					print ' <a href="npt_tracker.php?tid='. trim($DataArray[$index]['id']) .'&nptname='.$DataArray[$index]['name'].'" title="Product" ><b>'.$DataArray[$index]['name'] . '</b></a>&nbsp;&nbsp;('.$DataArray[$index]['noOfTrials'].' Trials)';
 				}
 				else if($DataArray[$index]['type'] == 'Disease_Category')
 						print ' 		<a href="disease_category.php?DiseaseCatId='. trim($DataArray[$index]['id']) .'" title="Disease Category" >'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDiseaseCat(trim($DataArray[$index]['id'])).' Products)';
@@ -1010,4 +1018,34 @@ function pagination($globalOptions = array(), $totalPages)
 	
 	return array($url, $paginateStr);
 }
+	/* get all the product name those dont have an entry in the entity trials table*/
+	function getNonProductTrials(){
+		$dataList = "SELECT intervention_name,larvol_id FROM data_trials WHERE larvol_id NOT IN (SELECT trial FROM entity_trials) LIMIT 0,100";
+		$dataListRes = mysql_query($dataList);
+		$interventionNameArr = array();
+		while($dlr = mysql_fetch_array($dataListRes)){
+			if($dlr['intervention_name'] !=''){
+				$interventionNames = explode("`",$dlr['intervention_name']);
+				foreach($interventionNames as $in){
+					$interventionNameArr[$in][] = $dlr['larvol_id'];
+				}
+			}
+		}	
+		$productListArr = array();
+		$i = 0;
+		foreach ($interventionNameArr as $interventionName=>$larvolIds) {
+			if (is_array($larvolIds)){	
+				$i++;		
+				$larvolIdCount = count($larvolIds);
+				$larvolIdList = implode(",",$larvolIds);
+				$productListArr[$i]['name'] = $interventionName;
+				$productListArr[$i]['id'] = $larvolIdList;
+				$productListArr[$i]['type'] = "NPT";
+				$productListArr[$i]['affiliation'] = "";
+				$productListArr[$i]['index'] = $i;
+				$productListArr[$i]['noOfTrials'] = $larvolIdCount;
+			}
+		}
+		return $productListArr;
+	}
 ?>
