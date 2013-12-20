@@ -128,7 +128,7 @@ function DisplayOTT()
 	{
 		if(!isset($_REQUEST['list']))	//set default view all trials in case of TZ related OTT.
 		{
-			$_REQUEST['list']=2;
+			$_REQUEST['list'] = 2;
 		}
 	}	
 	//sphinx search option.

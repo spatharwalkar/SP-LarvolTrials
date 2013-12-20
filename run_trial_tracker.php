@@ -10,7 +10,7 @@ require_once('include.excel.php');
 require_once 'PHPExcel/IOFactory.php';
 require_once('special_chars.php');
 require_once('include.util.php');
-$li_user=null;
+$li_user = null;
 
 class TrialTracker
 {
