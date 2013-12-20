@@ -129,7 +129,7 @@
 			<td width="50%" style="border:0; font-weight:bold; padding-left:5px; color:#FFFFFF; font-size:23px; vertical-align:middle;" align="left">
 				<table><tr>
 				<?php 
-					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="npt_tracke.php?tid='.$tid.'&nptname='.$ProductName.'">'.$ProductName.'</a>'.'&nbsp; </td>';
+					print '<td style="vertical-align:top;"><a style="color:#FFFFFF; display:inline; text-decoration:underline;" href="npt_tracke.php?tid='.$tid.'&nptname='.$ProductName.'">'.$ProductName.'</a>'.'&nbsp;</td>';
 				?>
 				</tr></table>
 			</td>

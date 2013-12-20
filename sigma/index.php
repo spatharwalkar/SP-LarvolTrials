@@ -584,7 +584,7 @@ if($ClassFlg)
 				}
 				else if($DataArray[$index]['type'] == 'NPT'){
 					print ' <a href="npt_tracker.php?tid='. trim($DataArray[$index]['id']) .'&nptname='.$DataArray[$index]['name'].'" title="Product" ><b>'.$DataArray[$index]['name'] . '</b></a>&nbsp;&nbsp;('.$DataArray[$index]['noOfTrials'].' Trials)';
-				}
+				} 
 				else if($DataArray[$index]['type'] == 'Disease_Category')
 						print ' 		<a href="disease_category.php?DiseaseCatId='. trim($DataArray[$index]['id']) .'" title="Disease Category" >'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDiseaseCat(trim($DataArray[$index]['id'])).' Products)';
 				else if($DataArray[$index]['type'] == 'Disease')
