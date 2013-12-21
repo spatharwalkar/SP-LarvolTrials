@@ -2264,12 +2264,27 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 		if($table<>'upm') $postnew = $post;
 
 		// Fix for the issue Duplicate entry '' for key 'investigatorname'
-		if($_REQUEST['entity'] and $_REQUEST['entity']<>'investigator')
+		if($_REQUEST['entity'] and $_REQUEST['entity']=='investigator')
 		{
-			if($postnew['first_name'])
-				unset $postnew['first_name'];
-			if($postnew['surname'])
-				unset $postnew['surname'];
+		}
+		else
+		{
+		
+			foreach($postnew as $k1 => $v1)
+			{
+				if(stristr($v1, 'first_name'))
+				{
+					$fn = $k1;
+				}
+				elseif(stristr($v1, 'surname'))
+				{
+					$sn = $k1;
+				}
+			} 
+			if($fn)
+				unset ($postnew[$fn]);
+			if($sn)
+				unset ($postnew[$sn]);
 		}
 		//
 		
