@@ -2262,6 +2262,17 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			//pr($post);//die;
 		}
 		if($table<>'upm') $postnew = $post;
+
+		// Fix for the issue Duplicate entry '' for key 'investigatorname'
+		if($_REQUEST['entity'] and $_REQUEST['entity']<>'investigator')
+		{
+			if($postnew['first_name'])
+				unset $postnew['first_name'];
+			if($postnew['surname'])
+				unset $postnew['surname'];
+		}
+		//
+		
 		$query = "update $actual_table set ".implode(',',$postnew)." where id=".$id;
 		if(mysql_query($query))
 		{
