@@ -41,6 +41,7 @@ function NewsTrackerHTMLContent($res) {
 		//set summary in the database during news generation
 		if($result['summary'] == 'NA')
 			$result['summary'] = $result['name'];
+		
 		$formattedNews=formatNews($result);
 		$htmlContent .= '<tr><td>' . $formattedNews .'</td></tr>';
 	}
@@ -51,16 +52,29 @@ function NewsTrackerHTMLContent($res) {
 function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 	
 	global $db;
-	$query = "SELECT n.*,p.name as product ,r.*,dt.phase,dt.enrollment,dt.source FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN products p ON(et.entity = p.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `redtags` r ON(r.id=n.redtag_id)";
+	$query = "SELECT n.*,p.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN products p ON(et.entity = p.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `redtags` r ON(r.id=n.redtag_id)";
 
 	if($TrackerType == 'PNT')
 		$query .= "WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
-	else if($TrackerType == 'CNT' || $TrackerType == 'DNT') {
-		$productIds      = ($TrackerType == 'CNT' ? GetProductsFromCompany($id, 'CPT', array()) : GetProductsFromDisease($id, 'DPT', array()));
+	else {
+		switch($TrackerType) {
+			case 'CNT':
+				$productIds = GetProductsFromCompany($id, 'CPT', array());
+				break;
+			case 'DNT':
+				$productIds = GetProductsFromDisease($id, 'DPT', array());
+				break;
+			case 'MNT':
+				$productIds = GetProductsFromMOA($id, 'MPT', array());
+				break;
+			case 'MCNT':
+				$productIds = GetProductsFromMOACategory($id, 'MCPT', array());
+				break;
+		}
 		$impArr = implode("','", $productIds);
 		$query .= "WHERE et.`entity` in('" . $impArr . "')";
 	}
-	
+	$query .= " order by added desc limit 50";
 	if(!$res = mysql_query($query))
 	{
 		global $logger;
@@ -74,10 +88,28 @@ function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 
 /*format based on LastZilla_Story_8*/
 function formatNews($result) {
+	
+	$nctid = $result['source_id'];
+	if(isset($nctid) && strpos($nctid, 'NCT') === FALSE)
+	{
+		$ctLink = 'https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $nctid;
+	}
+	else if(isset($nctid) && strpos($nctid, 'NCT') !== FALSE)
+	{
+		$ctLink = 'http://clinicaltrials.gov/ct2/show/' . $nctid;
+	}
+	else
+	{
+		$ctLink = 'javascript:void(0)';
+	}
+	$phase = $result['phase'];
+	if($phase != 'NA') { 
+		$phase = 'P'. $phase;
+	}
 	$returnStr = '';
 	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['rUIS']).'</span>'.str_repeat('|',10-$result['rUIS']).'&nbsp;&nbsp;</span><span class="product_name">'.$result['product'].'</span><br>';
-	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span><span class="phase_enroll">P'.$result['phase'].', &nbsp;N='.$result['enrollment'].',</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
-	$returnStr .= '<span class="title">'.$result['brief_title'].'</span>&nbsp;-&nbsp;&nbsp;'.date('M d Y', strtotime('now')) .'<br>';
+	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span><span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
+	$returnStr .= '<a class="title" href="'.$ctLink.'" target="_blank">'.$result['brief_title'].'</a>&nbsp;-&nbsp;&nbsp;'.date('M jS, Y', strtotime($result['added'])) .'<br>';
 	$returnStr .= '<span class="summary">'.$result['summary'].'</span>';
 	return $returnStr;
 }
@@ -126,7 +158,7 @@ function NewsTrackerCommonCSS($uniqueId, $TrackerType)
 		.sponsor {
 			color:blue;
 		}		
-		.title {
+		a.title, a.title:visited, a.title:hover, a.title:active {
 			color:#000080;
 		}		
 		.summary {

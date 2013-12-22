@@ -6,12 +6,13 @@
 	chdir ($cwd);
 	require_once('disease_tracker.php');
 	require_once('investigators_tracker.php');
+	require_once('news_tracker.php');
 	$page = 1;
 	if($_REQUEST['MoaCatId'] != NULL && $_REQUEST['MoaCatId'] != '' && isset($_REQUEST['MoaCatId']))
 	{
 		$MoaCatId = $_REQUEST['MoaCatId'];
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA_Category" AND `id`=' . mysql_real_escape_string($MoaCatId);
-		$res = mysql_query($query) or die($query. ' '.mysql_error());
+		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$MoaCatId = $header['id'];
 		$MoaCatName = $header['name'];
@@ -64,19 +65,16 @@
 	$tabCommonUrl = 'moacategory.php?MoaCatId='.$MoaCatId;
 	
 	
-	$disease = array();
-	if($categoryFlag == 1){
-		$disease = DataGeneratorForDiseaseTracker($MoaCatId, 'MCDT', $page, $dwcount, $categoryFlag);
-		$TabDiseaseCount = $disease['TotalRecords'];
+	if($categoryFlag == 1){	
+		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
 	}else{
-		$disease = DataGeneratorForDiseaseTracker($MoaCatId, 'MCDT', $page, $dwcount, $categoryFlag);
-		$TabDiseaseCount = $disease['TotalRecords'];
-	}	
+		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
+	}
 	
-	$product = array();
-	$product = DataGenerator($MoaCatId, 'MCPT', $page, $OptionArray, $dwcount);
-	$TabProductCount = $product['TotalRecords'];
+	$productIds      = GetProductsFromMOACategory($MoaCatId, 'MCPT', array());
+	$TabProductCount = count($productIds);
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($MoaCatId, 'MOA_Category'));
+	$TabNewsCount = GetNewsCountFromMOA($productIds);
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaCatName) ? $MoaCatName. ' - '.$meta_title : $meta_title;		
 ?>
@@ -211,6 +209,9 @@
 						$moacatLinkName = '<a href="'.$tabCommonUrl.'&tab=moacat" title="'.$TabProductCount.' '.$CountExt.'">&nbsp;'.$TabProductCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						$CountExt = (($TabInvestigatorCount == 1) ? 'Investigator':'Investigators');
 						$investigatorLinkName = '<a href="'.$tabCommonUrl.'&tab=investigatortrac" title="'.$TabInvestigatorCount.' '.$CountExt.'">&nbsp;'.$TabInvestigatorCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+						$CountExt = (($TabNewsCount == 1) ? 'News':'News');
+						$newsLinkName = '<a href="'.$tabCommonUrl.'&tab=newstrac" title="'.$TabNewsCount.' '.$CountExt.'">&nbsp;'.$TabNewsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
+						
 						if($tab == 'diseasetrac') {  
 						print '
 							<td>
@@ -223,6 +224,8 @@
 								<td id="moacatTab" class="selectTab">'. $diseaseLinkName .'</td>
 								<td><img id="lastImg" src="../images/selectTabConn.png" /></td> 
 				                <td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+								<td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+								<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
 				                <td><img id="lastImg" src="../images/lastTab.png" /></td>
 							<td></td>';
 						  //print '<td><img id="MoaCatImg" src="../images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
@@ -238,6 +241,8 @@
 								<td id="moacatTab" class="Tab">'. $diseaseLinkName .'</td>
 								<td><img id="lastImg" src="../images/afterTab.png" /></td> 
 				                <td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				                <td><img id="CompanyImg" src="../images/afterTab.png" /></td>
+								<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
 				                <td><img id="lastImg" src="../images/lastTab.png" /></td> 
 								<td></td>';								
 							//  print '<td><img id="MoaCatImg" src="../images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
@@ -253,10 +258,30 @@
 								<td id="moacatTab" class="Tab">'. $diseaseLinkName .'</td>
 								<td><img id="lastImg" src="../images/middleTab.png" /></td> 
 				                <td id="CompanyTab" class="selectTab">'. $investigatorLinkName .'</td>
-				                <td><img id="lastImg" src="../images/selectLastTab.png" /></td> 
+				                <td><img id="lastImg" src="../images/selectTabConn.png" /></td>
+								<td id="InvestigatorTab" class="Tab">'. $newsLinkName .'</td>
+								<td><img id="lastImg" src="../images/lastTab.png" /></td> 
 								<td></td>';								
 							//  print '<td><img id="MoaCatImg" src="../images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
-						 } 
+						 }
+			 			else if($tab == 'newstrac') { 
+							print '
+								<td>
+									<img id="DiseaseImg" src="../images/firstTab.png" />
+								</td>
+								<td id="DiseaseTab" class="Tab">' . $moacatLinkName .'</td>
+								<td>
+									<img id="MoaCatImg" src="../images/afterTab.png" />
+								</td>
+								<td id="moacatTab" class="Tab">'. $diseaseLinkName .'</td>
+								<td><img id="lastImg" src="../images/afterTab.png" /></td> 
+				                <td id="CompanyTab" class="Tab">'. $investigatorLinkName .'</td>
+				                <td><img id="lastImg" src="../images/middleTab.png" /></td>
+								<td id="InvestigatorTab" class="selectTab">'. $newsLinkName .'</td>
+								<td><img id="lastImg" src="../images/selectLastTab.png" /></td> 
+								<td></td>';								
+							//  print '<td><img id="MoaCatImg" src="../images/firstSelectTab.png" /></td><td id="moacatTab" class="selectTab">'. $moacatLinkName .'</td></td><td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>';
+						 }  
 			print	'            
 					</tr>
 				</table>			
@@ -275,6 +300,8 @@
 					//print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER
 				else if($tab == 'investigatortrac')
 					print showInvestigatorTracker($MoaCatId, 'MCIT', $page);
+				else if($tab == 'newstrac')
+					print showNewsTracker($MoaCatId, 'MCNT', $page);		//MCNT= MOA CATEGORY NEWS TRACKER
 				else
 					print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
 				print '</div>';
@@ -312,5 +339,22 @@ function m_query($n,$q)
 	$logger->debug($log);
 	unset($log);
 	return $res;
+}
+/* Function to get News count from Products id */
+function GetNewsCountFromMOA($productIds)
+{
+	global $db;
+	global $now;
+	$impArr = implode("','", $productIds);
+	$NewsCount = 0;
+	$query = "SELECT count(Distinct(dt.`larvol_id`)) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity` in('" . $impArr . "')";
+	$res = mysql_query($query) or die('Bad SQL query getting trials count for Products ids in Sigma Companys Page');
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+			$NewsCount = $row['newsCount'];
+	}
+	return $NewsCount;
 }
 ?>

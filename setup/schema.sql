@@ -1184,7 +1184,7 @@ CREATE TABLE IF NOT EXISTS `redtags` (
   `type` enum('Clinical','Clinical data','Clinical New Trial','New Trial','Clinical Trial status','Trial status','Clinical Enrollment status','Enrollment status','Clinical Other','Other','Regulatory','Regulatory FDA event','FDA event','Regulatory Non-US regulatory','Non-US regulatory','Regulatory Other','Reimbursement','Reimbursement US reimbursement','US reimbursement','Reimbursement NICE','Commercial','Commercial Sales','Sales','Commercial Licensing / partnership','Licensing / partnership','Commercial Patent','Patent','Commercial Launch','Launch','Commercial Launch Non-US','Launch Non-US','Commercial Other','Other Preclinical') COLLATE utf8_unicode_ci NOT NULL,
  `rUIS` tinyint(1) NOT NULL DEFAULT '0',
   `formula`  	varchar(150) NULL,
-  `statement`	varchar(250) NOT NULL,
+  `statement`	varchar(500) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1522,7 +1522,7 @@ BEGIN
 	DECLARE rtag_id INT;
 	DECLARE frml VARCHAR(150);
 	DECLARE score INT;
-	DECLARE stmt VARCHAR(250);
+	DECLARE stmt VARCHAR(500);
 	DECLARE done INT DEFAULT FALSE;
 
 	DECLARE dynamicCursor CURSOR FOR SELECT id,rUIS,formula,statement from redtags;
@@ -1568,7 +1568,7 @@ BEGIN
 			EXECUTE tmp_stmt2;
 
 			#populate the news table
-			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,lead_sponsor,',@comp_formula,' as summary, current_date as added, ',days,' as period from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) ON DUPLICATE KEY UPDATE added=current_date,period=',days);
+			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,lead_sponsor,',@comp_formula,' as summary, t.added, ',days,' as period from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			PREPARE news_stmt FROM @insert_news;
 			EXECUTE news_stmt;						
 
