@@ -355,6 +355,7 @@ function GetNewsCountFromMOA($productIds)
 		while($row = mysql_fetch_array($res))
 			$NewsCount = $row['newsCount'];
 	}
+	if ($NewsCount > 50) $NewsCount = 50;
 	return $NewsCount;
 }
 ?>

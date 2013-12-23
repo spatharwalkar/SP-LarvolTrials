@@ -103,7 +103,7 @@ function formatNews($result) {
 		$ctLink = 'javascript:void(0)';
 	}
 	$phase = $result['phase'];
-	if($phase != 'NA') { 
+	if($phase != 'N/A') { 
 		$phase = 'P'. $phase;
 	}
 	$returnStr = '';

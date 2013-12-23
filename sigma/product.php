@@ -325,6 +325,7 @@
 			while($row = mysql_fetch_array($res))
 				$NewsCount = $row['newsCount'];
 		}
+		if ($NewsCount > 50) $NewsCount = 50;
 		return $NewsCount;
 	}
 	/* Function to get Trials count from Disease id */

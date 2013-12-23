@@ -81,6 +81,7 @@
 	$product = DataGenerator($MoaId, 'MPT', $page, $OptionArray, $dwcount);
 	$TabProductCount = $product['TotalRecords'];
 	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($MoaId, 'MOA'));
+	$TabNewsCount = GetNewsCountFromMOA($product['ProductIds']);
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaName) ? $MoaName. ' - '.$meta_title : $meta_title;		

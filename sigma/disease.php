@@ -63,6 +63,7 @@
 	$TabTrialCount = GetTrialsCountFromDisease($DiseaseId);
 	$investigator = InvDataGenerator($DiseaseId,'DIT', $page, $OptionArray, $dwIcount);
 	$TabInvCount = $investigator['TotalRecords'];
+	$TabNewsCount = GetNewsCountFromDisease($DiseaseId);
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($DiseaseName) ? $DiseaseName. ' - '.$meta_title : $meta_title;	
 ?>

@@ -447,8 +447,9 @@ function GetNewsCountForCompany($productIds)
 	if($res)
 	{
 		while($row = mysql_fetch_array($res))
-			$TrialsCount = $row['newsCount'];
+			$NewsCount = $row['newsCount'];
 	}
-	return $TrialsCount;
+	if ($NewsCount > 50) $NewsCount = 50;
+	return $NewsCount;
 }
 ?>
