@@ -11419,7 +11419,7 @@ class TrialTracker
 				$rowOneType = 'title';
 			
 			$rowspan = 1;
-			$titleLinkColor = '#000000;';
+			$titleLinkColor = '';
 			if(isset($tvalue['manual_is_sourceless']) && ($tvalue['manual_is_sourceless'] == 1))
 				$titleLinkColor = '#FF0000';
 			
