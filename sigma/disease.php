@@ -471,6 +471,24 @@ function GetTrialsCountFromDisease($DiseaseID)
 	}
 	return $TrialsCount;
 }
+/* Function to get News count from Disease id */
+function GetNewsCountFromDisease($DiseaseID)
+{
+	global $db;
+	global $now;
+	$NewsCount = 0;
+	$query = "SELECT count(dt.`larvol_id`) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity`='" . mysql_real_escape_string($DiseaseID) . "'";
+	$res = mysql_query($query) or die('Bad SQL query getting trials count from Disease id in TZ');
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+			$NewsCount = $row['newsCount'];
+	}
+	if ($NewsCount > 50) $NewsCount = 50;
+	return $NewsCount;
+}
+
 ?>
 </body>
 </html>

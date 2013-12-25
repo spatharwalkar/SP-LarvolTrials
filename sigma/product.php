@@ -317,7 +317,7 @@
 		global $db;
 		global $now;
 		$NewsCount = 0;
-		$query = "SELECT count(Distinct(dt.`larvol_id`)) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity`='" . mysql_real_escape_string($ProductID) . "'";
+		$query = "SELECT count(dt.`larvol_id`) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity`='" . mysql_real_escape_string($ProductID) . "'";
 		$res = mysql_query($query) or die('Bad SQL query getting trials count from Product id ');
 	
 		if($res)

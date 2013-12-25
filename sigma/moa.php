@@ -352,4 +352,22 @@ function m_query($n,$q)
 	unset($log);
 	return $res;
 }
+/* Function to get News count from Products id */
+function GetNewsCountFromMOA($productIds)
+{
+	global $db;
+	global $now;
+	$impArr = implode("','", $productIds);
+	$NewsCount = 0;
+	$query = "SELECT count(dt.`larvol_id`) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` =et.`trial`) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity` in('" . $impArr . "')";
+	$res = mysql_query($query) or die($query . ' Bad SQL query getting news count for Products ids in Sigma Companys Page');
+
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+			$NewsCount = $row['newsCount'];
+	}
+	if ($NewsCount > 50) $NewsCount = 50;
+	return $NewsCount;
+}
 ?>
