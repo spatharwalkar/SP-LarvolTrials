@@ -73,7 +73,9 @@
 	
 	$productIds      = GetProductsFromMOACategory($MoaCatId, 'MCPT', array());
 	$TabProductCount = count($productIds);
-	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($MoaCatId, 'MOA_Category'));
+	$MoaCatChildRecords = implode("','",getAllMoaChild($MoaCatId));
+	$Inv_data = GetInvestigatorFromEntity_InvestigatorTracker($MoaCatId, 'MOA_Category',true);
+	$TabInvestigatorCount = count($Inv_data["Ids"]);
 	$TabNewsCount = GetNewsCountFromMOA($productIds);
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaCatName) ? $MoaCatName. ' - '.$meta_title : $meta_title;		
@@ -339,6 +341,17 @@ function m_query($n,$q)
 	$logger->debug($log);
 	unset($log);
 	return $res;
+}
+function getAllMoaChild($MoaCatId){
+	
+	$query = "select child from entity_relations where parent= " . mysql_real_escape_string($MoaCatId);
+	$res = mysql_query($query) or die('Bad SQL query getting child records from Moa_Category');
+	$child=array();
+	while($row = mysql_fetch_array($res))
+	{
+		$child[] = $row['child'];
+	}
+    return $child;
 }
 /* Function to get News count from Products id */
 function GetNewsCountFromMOA($productIds)

@@ -130,8 +130,11 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	if($GobalEntityType != 'Product')	//FOR OTHER THAH
 	{
 		//$Ids = array_filter(array_unique(GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType)));
-		$Inv_data = GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType,true);
-	
+		global $Inv_data,$MoaCatChildRecords;
+		if(empty($Inv_data))
+			$Inv_data = GetInvestigatorFromEntity_InvestigatorTracker($id, $GobalEntityType,true);
+			
+
 		$Idquery = $Inv_data['query'];
 		$InvestigatorIds = $Inv_data['Ids'];
 	if(!empty($Idquery))
@@ -143,7 +146,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 				SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type, et2.`entity` AS ProdId,  et.`entity` AS id, et.entity as investigator,e.`name` AS name, e.`display_name` AS dispname, e.class,e.`affiliation`
 				FROM data_trials dt
 				JOIN entity_trials et ON (dt.`larvol_id` = et.`trial` and et.entity in ('" . implode("','",$InvestigatorIds) . "') )
-				JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial` and et2.`entity` in (select parent from entity_relations where child in(select child from entity_relations where parent=" . $id .")))
+				JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial` and et2.`entity` in (select parent from entity_relations where child in('" .$MoaCatChildRecords."')))
 				JOIN entities e ON (et.`entity` = e.id AND e.`class` = 'Investigator') ";
 		} else {
 			$InvestigatorQuery = "
@@ -166,6 +169,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 				$results[]=$res;
 				$headerinvestigator[$res['id']]=$res;
 				$NewInvestigatorIds[] = $res['id'];
+				$invData[$res['investigator']][]  = $res;//@performence::created new array
 			}
 			
 			/*
@@ -173,13 +177,13 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 			
 			$resinvestigator = mysql_query($queryinvestigator) or die(mysql_error());
 			pr( __LINE__ .'  ' .date("D M d, Y G:i:s a"));
-			*/
+			
 			while ($headinv = @mysql_fetch_array($InvestigatorQueryResult))
 			{
 				
 			}
 			$cnt=count($results);
-			$cnt1=count($NewInvestigatorIds);
+			$cnt1=count($NewInvestigatorIds);*/
 			//pr($results);
 			//die();
 	}
@@ -231,11 +235,11 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					
 			}
 			//pr($results);
-			foreach($results as $key2=>$result)
-			{
+			if(isset($invData[$InvestigatorId])) {  //@performence::Added this and below 
+			  foreach($invData[$InvestigatorId] as $key2=>$result)  {
 				/// Fill up all data in Data Matrix only, so we can sort all data at one place
 				
-				if($result['investigator']<>$InvestigatorId) continue;
+				//if($result['investigator']<>$InvestigatorId) continue; //@performence::commented
 								
 					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
 					{
@@ -282,6 +286,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 					if($max_count < $data_matrix[$key]['TotalCount'])
 						$max_count = $data_matrix[$key]['TotalCount'];
 
+				}
 			}
 		
 		}
@@ -2534,10 +2539,9 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 		
 	}else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA' || $GobalEntityType == 'MOA_Category'){
 
-		$query = "SELECT DISTINCT parent from entity_relations where child = " . mysql_real_escape_string($EntityID) . " and parent in (select id from entities where class='Product'  and (is_active <> '0' OR is_active IS NULL)) ";
+/*$query = "SELECT DISTINCT parent from entity_relations where child = " . mysql_real_escape_string($EntityID) . " and parent in (select id from entities where class='Product'  and (is_active <> '0' OR is_active IS NULL)) ";
 //		$query = "SELECT DISTINCT e.id FROM entities e JOIN entity_relations er  ON(er.parent = e.id) WHERE e.class='Product' AND er.child = '" . mysql_real_escape_string($EntityID) . "' and (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 		
-		/*
 		$res = mysql_query($query) or die('Bad SQL query getting products from entity company in IT');
 		if($res)
 		{
@@ -2552,7 +2556,7 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 		JOIN entities e on (e.id=et1.entity)
 		JOIN entity_trials et2 on et1.trial=et2.trial and et2.entity IN ( ". $query . ") and e.class='Investigator' ";
 		*/
-		$query = "SELECT DISTINCT trial from entity_trials where  entity in (". $query . ")  ";
+//		$query = "SELECT DISTINCT trial from entity_trials where  entity in (". $query . ")  ";
 		
 		/*
 		$res = mysql_query($query) or die('Bad SQL query getting trials from entity trials in IT '.$query );
@@ -2564,13 +2568,15 @@ function GetInvestigatorFromEntity_InvestigatorTracker($EntityID, $GobalEntityTy
 				$trials[] = $row['trial'];
 			}
 		}
-		*/
-		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN (". $query . ") AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";
+		$query = "SELECT DISTINCT entity FROM entity_trials WHERE trial IN (". $query . ") AND entity IN (SELECT id FROM entities WHERE class='Investigator') ";	*/
 		if($GobalEntityType == 'MOA_Category'){
+
+			global $MoaCatChildRecords;
+
 			$query = "
 				SELECT DISTINCT et.entity from entity_trials et
 				JOIN entity_trials et2 on (et.trial = et2.trial)
-				JOIN entity_relations er on (et2.entity=er.parent and er.child in ( select child from entity_relations where parent= " . mysql_real_escape_string($EntityID) . "))
+				JOIN entity_relations er on (et2.entity=er.parent and er.child in ( ' " . $MoaCatChildRecords . "'))
 				JOIN entities e on (er.parent = e.id and e.class='Product' and (e.is_active<>0 or e.is_active IS NULL) )
 				JOIN entities e2 on (et.entity = e2.id and e2.class='Investigator')";
 		
