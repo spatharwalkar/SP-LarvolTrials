@@ -113,6 +113,7 @@ if($db->loggedIn())
 			. '<a href="status.php">Status</a><br />'
 			. $dbpage
 			. '<a href="admin_settings.php">Settings</a><br />'			
+			. '<a href="npt.php">Unknown Product Trials</a><br />'			
 			. '</div>');
 	}
 	echo('::<div class="drop">Heatmap<br />'
