@@ -10602,32 +10602,34 @@ class TrialTracker
 		{
 			echo '<input type="hidden" name="sphinx_s" value="' . $globalOptions['sphinx_s'] . '" />';
 		}
-		
-		echo '<table cellpadding="0" cellspacing="0" class="manage">'
-					 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
-					 . '<th style="width:270px;">Title</th>'
-					 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
-					 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
-					 . '<th style="width:100px;">Interventions</th>'
-					 . '<th style="width:90px;">Sponsor</th>'
-					 . '<th style="width:105px;">Status</th>'
-					 . '<th style="width:100px;">Conditions</th>'
-					 . '<th title="MM/YY" style="width:33px;">End</th>'
-					 . '<th style="width:25px;">Ph</th>'
-					 . '<th style="width:25px;">Data</th>'
-					 . '<th colspan="3" style="width:12px;">-</th>'
-					 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
-					 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
-					 . '<th colspan="12" style="width:32px;">' . (date('Y')+2) . '</th>'
-					 . '<th colspan="3" style="width:12px;">+</th></tr>';
-		
+
 		if($count > 0)
-		{			
-			echo $this->displayTrials($globalOptions, $loggedIn, $Values, $ottType, $totalPages);			
+		{		
+			echo '<table cellpadding="0" cellspacing="0" class="manage">'
+						 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
+						 . '<th style="width:270px;">Title</th>'
+						 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
+						 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
+						 . '<th style="width:100px;">Interventions</th>'
+						 . '<th style="width:90px;">Sponsor</th>'
+						 . '<th style="width:105px;">Status</th>'
+						 . '<th style="width:100px;">Conditions</th>'
+						 . '<th title="MM/YY" style="width:33px;">End</th>'
+						 . '<th style="width:25px;">Ph</th>'
+						 . '<th style="width:25px;">Data</th>'
+						 . '<th colspan="3" style="width:12px;">-</th>'
+						 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
+						 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
+						 . '<th colspan="12" style="width:32px;">' . (date('Y')+2) . '</th>'
+						 . '<th colspan="3" style="width:12px;">+</th></tr>';
+					
+			echo $this->displayTrials($globalOptions, $loggedIn, $Values, $ottType, $totalPages);	
+			echo '</table>';			
 		}
 		else
 		{
-			$outputStr = 'No results found';
+			echo '<script>$("#outercontainer").css("width", "55%");</script>';
+			$outputStr = '<div align="center" style="clear:both;">No Trial Found</div>';
 			foreach($Values['Data'] as $dkey => $dvalue)
 			{
 				$sectionHeader = $dvalue['sectionHeader'];
@@ -10646,8 +10648,6 @@ class TrialTracker
 			
 			echo $outputStr;
 		}
-		
-		echo '</table>';
 		
 		echo '<input type="hidden" name="enroll" value="' . $globalOptions['enroll'] . '" />';	
 		
