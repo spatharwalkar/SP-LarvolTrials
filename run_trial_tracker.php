@@ -10629,7 +10629,7 @@ class TrialTracker
 		else
 		{
 			echo '<script>$("#outercontainer").css("width", "55%");</script>';
-			$outputStr = '<div align="center" style="clear:both;">No Trial Found</div>';
+			$outputStr = '<div align="center" style="clear:both;">No trial found</div>';
 			foreach($Values['Data'] as $dkey => $dvalue)
 			{
 				$sectionHeader = $dvalue['sectionHeader'];
