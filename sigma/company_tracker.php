@@ -2434,24 +2434,15 @@ function GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId)
 	global $now;
 	$Products = array();
 	$Companies = array();
-	
-	$query = "SELECT er.child AS CompId, e.`name` AS CompName, e.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
-						FROM entity_relations er 
-						JOIN entities e ON (er.child = e.id and e.class='Institution')
-						JOIN entity_trials et ON(er.parent = et.entity) 
-						JOIN entity_trials et2 ON(et.trial = et2.trial and et2.entity =" . $InvestigatorId . " ) 
-						JOIN data_trials dt on (et2.trial = dt.larvol_id )
-						group by CompId,ProdId
-						";	
-	$query = "	
-				SELECT DISTINCT er.child as CompId from entity_trials et
+
+	$query = "SELECT DISTINCT er.child as CompId from entity_trials et
 				JOIN entity_trials et2 ON (et.trial = et2.trial and et.entity = " . $InvestigatorId . ")
 				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
 				JOIN entity_relations er ON (e.id = er.parent )
 				JOIN entities e2 ON (er.child = e2.id and e2.class='Institution' )
 				";					
 			  
-	$res = mysql_query($query) or die('Bad SQL query getting companies '.$query);
+	$res = mysql_query($query) or die('Bad SQL query getting companies');
 
 	if($res)
 	{
