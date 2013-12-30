@@ -2442,7 +2442,7 @@ function GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId)
 				JOIN entities e2 ON (er.child = e2.id and e2.class='Institution' )
 				";					
 			  
-	$res = mysql_query($query) or die('Bad SQL query getting companies');
+	$res = mysql_query($query) or die('Bad SQL query getting companies from Investigator id');
 
 	if($res)
 	{
