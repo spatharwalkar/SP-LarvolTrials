@@ -93,7 +93,7 @@ function update_diseases()
 	global $NCTdiseasenames, $urllist;
 
 	//get list of diseases from the database
-    $query = 'SELECT id, name, mesh_name from entities where class="Disease"';
+    $query = 'SELECT id, name, mesh_name,searchdata from entities where class="Disease"';
    if(!$res = mysql_query($query))
 	{
 		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -109,6 +109,7 @@ function update_diseases()
 		$LTdiseases[$cnt]['id']=$row['id'];
 		$LTdiseases[$cnt]['name']=$row['name'];
 		$LTdiseases[$cnt]['mesh_name']=$row['mesh_name'];
+		$LTdiseases[$cnt]['searchdata']=$row['searchdata'];
 		$cnt++;
 	}
 	
@@ -126,13 +127,18 @@ function update_diseases()
 			pr($dkey);
 			*/
 			$diseaseid=$LTdiseases[$dkey][id];
-//			if($diseaseid<15789) continue;
+			//if($diseaseid<15460 or $diseaseid>15499) continue;
 			pr('<b>Indexing Disease:'.$NCTdiseasename.'</b>'.str_repeat(" ",1025));
 			//exit;
 			//pr($urllist[$key]);
 			$nctids=fetchNCTIDs($urllist[$key]) ;
 			
-			update_mesh_preindex($nctids,$diseaseid);
+			if(!empty($LTdiseases[$dkey]['searchdata']))
+				$indexing_required=true;
+			else
+				$indexing_required=false;
+			
+			update_mesh_preindex($nctids,$diseaseid,$indexing_required);
 			if($NCTdiseasename<>$LTdiseases[$dkey]['mesh_name'])  //update mesh name if different
 			{
 				$query='UPDATE entities SET mesh_name="'.$NCTdiseasename.'" where id='.$LTdiseases[$dkey]['id'].' limit 1';
@@ -175,7 +181,7 @@ function recursive_array_search($needle,$haystack)
     return false;
 }
 
-function update_mesh_preindex($nctids,$diseaseid)
+function update_mesh_preindex($nctids,$diseaseid,$indexing_required=false)
 {
 	if(empty($nctids) or !is_array($nctids) or empty($diseaseid))
 	{
@@ -186,7 +192,7 @@ function update_mesh_preindex($nctids,$diseaseid)
 	$res=mysql_query("delete from entity_trials where entity=".$diseaseid." ;") or die("Error deleting records from entity_trials ". mysql_error());
 	foreach ($nctids as $nctid=>$ts)
 	{
-		$larvol_id=get_larvolID($nctid);
+		$larvol_id=getlarvolID($nctid);
 		if(empty($larvol_id))
 		{
 //			pr('NCTID '.$nctid.' does not exist in database !');
@@ -204,6 +210,18 @@ function update_mesh_preindex($nctids,$diseaseid)
 		}
 		//$res=mysql_query("select * from entity_trials where entity=".$diseaseid." and trial=".$nctid." limit 1;") or die("Error in geting data from entity_trials ". mysql_errror());
 	}
+	
+	/*** RE-INDEX MESH DISEASES WHICH HAS SEARCH DATA ****/
+	if($indexing_required)
+	{
+		require_once('preindex_trial.php');
+		pr('Re-Indexing this MeSH disease as it has search data.');
+		tindex(NULL,'areas',NULL,NULL,NULL,$diseaseid);
+	}
+
+	/**************/
+	
+	
 //	mysql_query("COMMIT;");
 }
 
@@ -292,7 +310,7 @@ function fetchNCTIDs($cond)
     return $NCTids;
 }
 
-function get_larvolID($nctid)
+function getlarvolID($nctid)
 {
 	$nctid=trim($nctid);
 	$query = "	SELECT `larvol_id`
