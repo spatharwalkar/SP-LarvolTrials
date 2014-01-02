@@ -2840,7 +2840,7 @@ function GetDiseasesCatFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 			$UniqueDiseasesIds = '';
 		}
 			
-		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`child` IN (" . $UniqueDiseasesIds . ")";
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`child` IN (" . $UniqueDiseasesIds . ")  AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 		$res = mysql_query($query) or die('Bad SQL query getting Diseases from products ids in DT');
 		if($res)
 		{
