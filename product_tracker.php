@@ -1462,7 +1462,6 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		////// Color Graph - Bar Starts
 		
 		//// Code for Indlead
-		
 		if($TrackerType == 'INVESTDT')	$dwcount='total';
 		if($dwcount == 'indlead')
 		{
@@ -1743,9 +1742,26 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage-1) . '\'>&laquo;</a>';
 	}
-	
-	if($totalPages < 7 + ($stages * 2))
-	{	
+	if($totalPages > 10)
+	{
+		if($CurrentPage >= 7){
+			$counter = $CurrentPage - 5;
+		}else{
+			$counter = 1;
+		}
+		$top_count = $counter + 9;
+		for($counter; $counter <= $top_count; $counter++)
+		{
+			if ($counter == $CurrentPage)
+			{
+				$paginateStr .= '<span>' . $counter . '</span>';
+			}
+			else
+			{
+				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+			}
+		}	
+	}else{
 		for($counter = 1; $counter <= $totalPages; $counter++)
 		{
 			if ($counter == $CurrentPage)
@@ -1756,64 +1772,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 			{
 				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
 			}
-		}
-	}
-	elseif($totalPages > 5 + ($stages * 2))
-	{
-		if($CurrentPage <= 1 + ($stages * 2))
-		{
-			for($counter = 1; $counter < 4 + ($stages * 2); $counter++)
-			{
-				if ($counter == $CurrentPage)
-				{
-					$paginateStr .= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr .='<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
-			}
-			$paginateStr.= '<span>...</span>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' .  ($totalPages-1) . '</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
-		}
-		elseif($totalPages - ($stages * 2) > $CurrentPage && $CurrentPage > ($stages * 2))
-		{
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
-			$paginateStr.= '<span>...</span>';
-			for($counter = $CurrentPage - $stages; $counter <= $CurrentPage + $stages; $counter++)
-			{
-				if ($counter == $CurrentPage)
-				{
-					$paginateStr.= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
-			}
-			$paginateStr.= '<span>...</span>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
-		}
-		else
-		{
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
-			$paginateStr .= "<span>...</span>";
-			for($counter = $totalPages - (2 + ($stages * 2)); $counter <= $totalPages; $counter++)
-			{
-				if ($counter == $CurrentPage)
-				{
-					$paginateStr .= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
-			}
-		}
+		}		
 	}
 	
 	if($CurrentPage != $totalPages)
