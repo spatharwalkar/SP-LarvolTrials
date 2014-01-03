@@ -138,12 +138,16 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 		{
 			$Ids = array_filter(array_unique(GetDiseasesCatFromEntity_DiseaseTracker($id, $GobalEntityType)));
 			$DiseaseCategoryIds = $Ids;
-			
-			$DiseaseCategoryQuery = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $DiseaseCategoryIds) . ") group by id";
-			
-			$DiseaseQueryResult = mysql_query($DiseaseCategoryQuery) or die($DiseaseCategoryQuery.' '.mysql_error());
-			
-			while ($results[] = mysql_fetch_array($DiseaseQueryResult));
+
+			if(count($Ids)==0){
+				$results[] = array(); 
+			}else{			
+				$DiseaseCategoryQuery = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $DiseaseCategoryIds) . ") group by id";
+				
+				$DiseaseQueryResult = mysql_query($DiseaseCategoryQuery) or die($DiseaseCategoryQuery.' '.mysql_error());
+				
+				while ($results[] = mysql_fetch_array($DiseaseQueryResult));
+			}
 		}
 		else
 		{
@@ -420,8 +424,10 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 		if($categoryFlag){
 			$Ids = array_filter(array_unique(GetDiseasesCatFromEntity_DiseaseTracker($id, $GobalEntityType)));
 			$DiseaseCategoryIds = $Ids;
-			$DiseaseCategoryQuery = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $DiseaseCategoryIds) . ") group by id";
-			$DiseaseQueryResult = mysql_query($DiseaseCategoryQuery) or die($DiseseCategoryQuery.' '.mysql_error());
+			if(count($Ids)){
+				$DiseaseCategoryQuery = "SELECT * FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`parent` IN (" . implode(",", $DiseaseCategoryIds) . ") group by id";
+				$DiseaseQueryResult = mysql_query($DiseaseCategoryQuery) or die($DiseseCategoryQuery.' '.mysql_error());
+			}
 		}else{
 			$Ids = array_filter(array_unique(GetDiseasesFromEntity_DiseaseTracker($id, $GobalEntityType)));
 			$DiseaseIds =  $Ids;
@@ -429,176 +435,177 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 			$DiseaseQueryResult = mysql_query($DiseaseQuery) or die($DiseaseQuery.'- '.mysql_error());
 		}
 		
-		
-		$key = 0;	
-		while($result = mysql_fetch_array($DiseaseQueryResult))
-		{
-			if($categoryFlag){
-				$key = $DiseaseCategoryId = $result['id'];
-				$DiseaseIds = getDiseaseIdsFromDiseaseCat($DiseaseCategoryId);
-				$DiseaseQuery2 = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";
-				$resultCat = mysql_query($DiseaseQuery2) or die($DiseaseQuery2.' - '.mysql_error());
-				
-				
-
-				while($row = mysql_fetch_array($resultCat)){
-					$rowDiseases[] = $row;
-				}
-			}else{
-				$key = $DiseaseId = $result['id'];
-			}
-			if((isset($DiseaseId) && $DiseaseId != NULL) || (isset($DiseaseCategoryId) && $DiseaseCategoryId != NULL))
+		if(count($Ids)){
+			$key = 0;	
+			while($result = mysql_fetch_array($DiseaseQueryResult))
 			{
-				if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
-				{
-
-					/// Fill up all data in Data Matrix only, so we can sort all data at one place
-					if($result['dispname'] != NULL && trim($result['dispname']) != '')
-						$data_matrix[$key]['RowHeader'] = $result['dispname'];
-					else
-						$data_matrix[$key]['RowHeader'] = $result['name'];
+				if($categoryFlag){
+					$key = $DiseaseCategoryId = $result['id'];
+					$DiseaseIds = getDiseaseIdsFromDiseaseCat($DiseaseCategoryId);
+					$DiseaseQuery2 = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";
+					$resultCat = mysql_query($DiseaseQuery2) or die($DiseaseQuery2.' - '.mysql_error());
 					
-					$data_matrix[$key]['ID'] = $result['id'];
-					$NewDiseaseIds[] = $result['id'];
-					if($CountType=='active')
-					{
-						$link_part = '&list=1';
+					
+
+					while($row = mysql_fetch_array($resultCat)){
+						$rowDiseases[] = $row;
 					}
-					elseif($CountType=='total')
+				}else{
+					$key = $DiseaseId = $result['id']; 
+				}
+				if(((isset($DiseaseId) && $DiseaseId != NULL) || (isset($DiseaseCategoryId) && $DiseaseCategoryId != NULL)) && isset($rowDiseases))
+				{
+					if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
 					{
-						$link_part = '&list=2';
+
+						/// Fill up all data in Data Matrix only, so we can sort all data at one place
+						if($result['dispname'] != NULL && trim($result['dispname']) != '')
+							$data_matrix[$key]['RowHeader'] = $result['dispname'];
+						else
+							$data_matrix[$key]['RowHeader'] = $result['name'];
+						
+						$data_matrix[$key]['ID'] = $result['id'];
+						$NewDiseaseIds[] = $result['id'];
+						if($CountType=='active')
+						{
+							$link_part = '&list=1';
+						}
+						elseif($CountType=='total')
+						{
+							$link_part = '&list=2';
+						}
+						elseif($CountType=='owner_sponsored')
+						{
+							$link_part = '&list=1&osflt=on';
+						}
+						else
+						{
+							$link_part = '&list=1&itype=0';
+						}
+						
+						if($DiseaseCategoryId){
+							$data_matrix[$key]['HeaderLink'] = 'disease_category.php?DiseaseCatId=' . $data_matrix[$key]['ID'];
+						}else{
+							$data_matrix[$key]['HeaderLink'] = 'disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
+						}	
+						$data_matrix[$key]['ColumnsLink'] = 'ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
+						
+						///// Initialize data
+						$data_matrix[$key]['phase_na']=0;
+						$data_matrix[$key]['phase_0']=0;
+						$data_matrix[$key]['phase_1']=0;
+						$data_matrix[$key]['phase_2']=0;
+						$data_matrix[$key]['phase_3']=0;
+						$data_matrix[$key]['phase_4']=0;
+					
+						$data_matrix[$key]['TotalCount'] = 0;
+						$data_matrix[$key]['larvolIds'] = array();	
+						$data_matrix[$key]['TrialExistance'] = array();		
 					}
-					elseif($CountType=='owner_sponsored')
+					
+					if($CountType == 'indlead' || $CountType == 'owner_sponsored' || $CountType == 'active')
 					{
-						$link_part = '&list=1&osflt=on';
-					}
-					else
-					{
-						$link_part = '&list=1&itype=0';
+						if(!$result['is_active']) continue;
+						if($CountType == 'indlead' && $result['institution_type'] != 'industry_lead_sponsor') continue;
+						if($CountType == 'owner_sponsored' &&  $result['relation_type'] != 'ownersponsored') continue;
 					}
 					
 					if($DiseaseCategoryId){
-						$data_matrix[$key]['HeaderLink'] = 'disease_category.php?DiseaseCatId=' . $data_matrix[$key]['ID'];
-					}else{
-						$data_matrix[$key]['HeaderLink'] = 'disease.php?DiseaseId=' . $data_matrix[$key]['ID'];
-					}	
-					$data_matrix[$key]['ColumnsLink'] = 'ott.php?e1=' . $id . '&e2=' . $data_matrix[$key]['ID'].$link_part.'&sourcepg=TZ';
-					
-					///// Initialize data
-					$data_matrix[$key]['phase_na']=0;
-					$data_matrix[$key]['phase_0']=0;
-					$data_matrix[$key]['phase_1']=0;
-					$data_matrix[$key]['phase_2']=0;
-					$data_matrix[$key]['phase_3']=0;
-					$data_matrix[$key]['phase_4']=0;
-				
-					$data_matrix[$key]['TotalCount'] = 0;
-					$data_matrix[$key]['larvolIds'] = array();	
-					$data_matrix[$key]['TrialExistance'] = array();		
-				}
-				
-				if($CountType == 'indlead' || $CountType == 'owner_sponsored' || $CountType == 'active')
-				{
-					if(!$result['is_active']) continue;
-					if($CountType == 'indlead' && $result['institution_type'] != 'industry_lead_sponsor') continue;
-					if($CountType == 'owner_sponsored' &&  $result['relation_type'] != 'ownersponsored') continue;
-				}
-				
-				if($DiseaseCategoryId){
-						foreach($rowDiseases as $rowDisease)
-						{
-							//print_r($rowDisease); die;
-							//$rowDisease['id'] == $key && 
-							if(!in_array($rowDisease['larvol_id'],$data_matrix[$key]['TrialExistance']))	//Avoid duplicates like (1,2) and (2,1) type
+							foreach($rowDiseases as $rowDisease)
 							{
-								$data_matrix[$key]['TrialExistance'][] = $rowDisease['larvol_id'];
-									
-								if($rowDisease['phase'] == 'N/A' || $rowDisease['phase'] == '' || $rowDisease['phase'] === NULL)
+								//print_r($rowDisease); die;
+								//$rowDisease['id'] == $key && 
+								if(!in_array($rowDisease['larvol_id'],$data_matrix[$key]['TrialExistance']))	//Avoid duplicates like (1,2) and (2,1) type
 								{
-									$CurrentPhasePNTR = 0;
-								}
-								else if($rowDisease['phase'] == '0')
-								{
-									$CurrentPhasePNTR = 1;
-								}
-								else if($rowDisease['phase'] == '1' || $rowDisease['phase'] == '0/1' || $rowDisease['phase'] == '1a'
-										|| $rowDisease['phase'] == '1b' || $rowDisease['phase'] == '1a/1b' || $$rowDisease['phase'] == '1c')
-								{
-									$CurrentPhasePNTR = 2;
-								}
-								else if($rowDisease['phase'] == '2' || $rowDisease['phase'] == '1/2' || $rowDisease['phase'] == '1b/2'
-										|| $rowDisease['phase'] == '1b/2a' || $rowDisease['phase'] == '2a' || $rowDisease['phase'] == '2a/2b'
-										|| $rowDisease['phase'] == '2a/b' || $rowDisease['phase'] == '2b')
-								{
-									$CurrentPhasePNTR = 3;
-								}
-								else if($rowDisease['phase'] == '3' || $rowDisease['phase'] == '2/3' || $rowDisease['phase'] == '2b/3'
-										|| $rowDisease['phase'] == '3a' || $rowDisease['phase'] == '3b')
-								{
-									$CurrentPhasePNTR = 4;
-								}	
-								else if($rowDisease['phase'] == '4' || $rowDisease['phase'] == '3/4' || $rowDisease['phase'] == '3b/4')
-								{
-									$CurrentPhasePNTR = 5;
-								}
-									
-								$MAXPhasePNTR = $CurrentPhasePNTR;
-								$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
-		
-								$data_matrix[$key]['larvolIds'][] = $row['larvol_id'];
-									
-								$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['larvolIds']);
-								if($max_count < $data_matrix[$key]['TotalCount'])
-									$max_count = $data_matrix[$key]['TotalCount'];
-							}	//End of if larvol Existsnace
-						}
-				}else{
-					if($result['id'] == $key && !in_array($result['larvol_id'],$data_matrix[$key]['TrialExistance']))	//Avoid duplicates like (1,2) and (2,1) type
-					{
-						$data_matrix[$key]['TrialExistance'][] = $result['larvol_id'];
-							
-						if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+									$data_matrix[$key]['TrialExistance'][] = $rowDisease['larvol_id'];
+										
+									if($rowDisease['phase'] == 'N/A' || $rowDisease['phase'] == '' || $rowDisease['phase'] === NULL)
+									{
+										$CurrentPhasePNTR = 0;
+									}
+									else if($rowDisease['phase'] == '0')
+									{
+										$CurrentPhasePNTR = 1;
+									}
+									else if($rowDisease['phase'] == '1' || $rowDisease['phase'] == '0/1' || $rowDisease['phase'] == '1a'
+											|| $rowDisease['phase'] == '1b' || $rowDisease['phase'] == '1a/1b' || $$rowDisease['phase'] == '1c')
+									{
+										$CurrentPhasePNTR = 2;
+									}
+									else if($rowDisease['phase'] == '2' || $rowDisease['phase'] == '1/2' || $rowDisease['phase'] == '1b/2'
+											|| $rowDisease['phase'] == '1b/2a' || $rowDisease['phase'] == '2a' || $rowDisease['phase'] == '2a/2b'
+											|| $rowDisease['phase'] == '2a/b' || $rowDisease['phase'] == '2b')
+									{
+										$CurrentPhasePNTR = 3;
+									}
+									else if($rowDisease['phase'] == '3' || $rowDisease['phase'] == '2/3' || $rowDisease['phase'] == '2b/3'
+											|| $rowDisease['phase'] == '3a' || $rowDisease['phase'] == '3b')
+									{
+										$CurrentPhasePNTR = 4;
+									}	
+									else if($rowDisease['phase'] == '4' || $rowDisease['phase'] == '3/4' || $rowDisease['phase'] == '3b/4')
+									{
+										$CurrentPhasePNTR = 5;
+									}
+										
+									$MAXPhasePNTR = $CurrentPhasePNTR;
+									$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+			
+									$data_matrix[$key]['larvolIds'][] = $row['larvol_id'];
+										
+									$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['larvolIds']);
+									if($max_count < $data_matrix[$key]['TotalCount'])
+										$max_count = $data_matrix[$key]['TotalCount'];
+								}	//End of if larvol Existsnace
+							}
+					}else{
+						if($result['id'] == $key && !in_array($result['larvol_id'],$data_matrix[$key]['TrialExistance']))	//Avoid duplicates like (1,2) and (2,1) type
 						{
-							$CurrentPhasePNTR = 0;
-						}
-						else if($result['phase'] == '0')
-						{
-							$CurrentPhasePNTR = 1;
-						}
-						else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
-								|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
-						{
-							$CurrentPhasePNTR = 2;
-						}
-						else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
-								|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
-								|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
-						{
-							$CurrentPhasePNTR = 3;
-						}
-						else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
-								|| $result['phase'] == '3a' || $result['phase'] == '3b')
-						{
-							$CurrentPhasePNTR = 4;
-						}
-						else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
-						{
-							$CurrentPhasePNTR = 5;
-						}
-							
-						$MAXPhasePNTR = $CurrentPhasePNTR;
-						$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
+							$data_matrix[$key]['TrialExistance'][] = $result['larvol_id'];
+								
+							if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
+							{
+								$CurrentPhasePNTR = 0;
+							}
+							else if($result['phase'] == '0')
+							{
+								$CurrentPhasePNTR = 1;
+							}
+							else if($result['phase'] == '1' || $result['phase'] == '0/1' || $result['phase'] == '1a'
+									|| $result['phase'] == '1b' || $result['phase'] == '1a/1b' || $result['phase'] == '1c')
+							{
+								$CurrentPhasePNTR = 2;
+							}
+							else if($result['phase'] == '2' || $result['phase'] == '1/2' || $result['phase'] == '1b/2'
+									|| $result['phase'] == '1b/2a' || $result['phase'] == '2a' || $result['phase'] == '2a/2b'
+									|| $result['phase'] == '2a/b' || $result['phase'] == '2b')
+							{
+								$CurrentPhasePNTR = 3;
+							}
+							else if($result['phase'] == '3' || $result['phase'] == '2/3' || $result['phase'] == '2b/3'
+									|| $result['phase'] == '3a' || $result['phase'] == '3b')
+							{
+								$CurrentPhasePNTR = 4;
+							}
+							else if($result['phase'] == '4' || $result['phase'] == '3/4' || $result['phase'] == '3b/4')
+							{
+								$CurrentPhasePNTR = 5;
+							}
+								
+							$MAXPhasePNTR = $CurrentPhasePNTR;
+							$data_matrix[$key]['phase_'.$PhaseArray[$MAXPhasePNTR]]++; //INCREASE COUNTER
 
-						$data_matrix[$key]['larvolIds'][] = $result['larvol_id'];
-							
-						$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['larvolIds']);
-						if($max_count < $data_matrix[$key]['TotalCount'])
-							$max_count = $data_matrix[$key]['TotalCount'];
-					}	//End of if larvol Existsnace					
-				}				
-									
-			} //END OF IF - Disease ID NULL OR NOT			
-		}	//END OF While - Fetch data		
+							$data_matrix[$key]['larvolIds'][] = $result['larvol_id'];
+								
+							$data_matrix[$key]['TotalCount'] = count($data_matrix[$key]['larvolIds']);
+							if($max_count < $data_matrix[$key]['TotalCount'])
+								$max_count = $data_matrix[$key]['TotalCount'];
+						}	//End of if larvol Existsnace					
+					}				
+										
+				} //END OF IF - Disease ID NULL OR NOT			
+			}	//END OF While - Fetch data		
+		}
 	}
 	
 	//print_r($data_matrix);
@@ -1273,47 +1280,47 @@ function DiseaseTrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 
 function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $GobalEntityType, $CountType)
 {				
-	if(count($data_matrix) == 0) return 'No Disease Found';
+	if(count($data_matrix) != 0){
+		require_once('../tcpdf/config/lang/eng.php');
+		require_once('../tcpdf/tcpdf.php');  
+		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 	
-	require_once('../tcpdf/config/lang/eng.php');
-	require_once('../tcpdf/tcpdf.php');  
-	$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-	
-	$Line_Width = 20;
-	$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
-	
+		$Line_Width = 20;
+		$phase_legend_nums = array('4', '3', '2', '1', '0', 'na');
+	}
 	$htmlContent = '';
 	$htmlContent .= '<br style="line-height:11px;"/>'
 					.'<form action="disease_tracker.php" method="post">'
 					. '<table border="0" cellspacing="0" cellpadding="0" class="controls" align="center">'
 					. '<tr>';
-					
-	if($TrackerType == 'DTH')				
-	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;'. (($TotalRecords == 1) ? 'Disease':'Diseases') .'</div></td>';
-
-	if($TotalPages > 1)
-	{
-		$paginate = DiseaseTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
-		$htmlContent .= '<td style="padding-left:0px; vertical-align:top; border:0px;">'.$paginate[1].'</td>';
-	}
-	
-	if($GobalEntityType == 'Product')
-	{
-			$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
-					. '<option value="total" '. (($CountType == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
-					. '<option value="indlead" '. (($CountType == 'indlead') ?  'selected="selected"' : '' ).'>Active industry trials</option>'
-					. '<option value="owner_sponsored" '. (($CountType == 'owner_sponsored') ?  'selected="selected"' : '' ).'>Active owner-sponsored trials</option>'
-					. '<option value="active" '. (($CountType == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
-					. '</select></td>';
-	}							
-	$htmlContent .= '<td class="bottom right">'
-					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu">
-						<a rel="'.$uniqueId.'_dropmenu">
-						<span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'../images/save.png\'); cursor:pointer; ">
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a>
-						</div>'
-					. '</td>';
-					
+	if(count($data_matrix) != 0){				
+		if($TrackerType == 'DTH')				
+		$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;'. (($TotalRecords == 1) ? 'Disease':'Diseases') .'</div></td>';
+		
+		if($TotalPages > 1)
+		{
+			$paginate = DiseaseTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
+			$htmlContent .= '<td style="padding-left:0px; vertical-align:top; border:0px;">'.$paginate[1].'</td>';
+		}
+		
+		if($GobalEntityType == 'Product')
+		{
+				$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwcount" name="dwcount" onchange="change_view_'.$uniqueId.'_();">'
+						. '<option value="total" '. (($CountType == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
+						. '<option value="indlead" '. (($CountType == 'indlead') ?  'selected="selected"' : '' ).'>Active industry trials</option>'
+						. '<option value="owner_sponsored" '. (($CountType == 'owner_sponsored') ?  'selected="selected"' : '' ).'>Active owner-sponsored trials</option>'
+						. '<option value="active" '. (($CountType == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
+						. '</select></td>';
+		}	
+			
+		$htmlContent .= '<td class="bottom right">'
+						. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu">
+							<a rel="'.$uniqueId.'_dropmenu">
+							<span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\'../images/save.png\'); cursor:pointer; ">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a>
+							</div>'
+						. '</td>';
+	}				
 	global $tabCommonUrl;
 	if(isset($_REQUEST['category']) && $_REQUEST['category'] == 1){
 		$catChecked = ' CHECKED';
@@ -1339,167 +1346,170 @@ function DiseaseTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inne
 					. '</td>'
 					. '</tr>'
 					. '</table>';
-				
-	$htmlContent  .= '<div id="'.$uniqueId.'_dropmenu" class="dropmenudiv" style="width: 310px;">'
-					.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
-					. '<input type="hidden" name="id" id="'.$uniqueId.'_id" value="' . $id . '" />'
-					. '<input type="hidden" name="TrackerType" id="'.$uniqueId.'_TrackerType" value="'. $TrackerType .'" />'
-					. '<ul><li><label>Which format: </label></li>'
-					. '<li><select id="'.$uniqueId.'_dwformat" name="dwformat" size="3" style="height:50px">'
-					//. '<option value="exceldown" selected="selected">Excel</option>'
-					. '<option value="pdfdown" selected="selected">PDF</option>'
-					. '<option value="excelchartdown">Excel Chart</option>'
-					. '<option value="tsvdown">TSV</option>'
-					. '</select></li>'
-					. '</ul>'
-					. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
-					. '</div></div>'
-					. '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>'
-					. '</form>';
-				
-						
-	$htmlContent .= '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+10).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="'.$uniqueId.'_ProdTrackerTable">'
-				    . '<thead>';
-	//scale
-	//Row to keep alignement perfect at time of floating headers
-	$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col" width="420px">&nbsp;</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
-	for($j=0; $j < $columns; $j++)
-	{
-		for($k=0; $k < $inner_columns; $k++)
-		$htmlContent .= '<th width="8px" colspan="1" '. (($k == ($inner_columns-1)) ? 'class="graph_rightWhite" ':'' ) .'>&nbsp;</th>';
+	if(count($data_matrix) != 0){				
+		$htmlContent  .= '<div id="'.$uniqueId.'_dropmenu" class="dropmenudiv" style="width: 310px;">'
+						.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
+						. '<input type="hidden" name="id" id="'.$uniqueId.'_id" value="' . $id . '" />'
+						. '<input type="hidden" name="TrackerType" id="'.$uniqueId.'_TrackerType" value="'. $TrackerType .'" />'
+						. '<ul><li><label>Which format: </label></li>'
+						. '<li><select id="'.$uniqueId.'_dwformat" name="dwformat" size="3" style="height:50px">'
+						//. '<option value="exceldown" selected="selected">Excel</option>'
+						. '<option value="pdfdown" selected="selected">PDF</option>'
+						. '<option value="excelchartdown">Excel Chart</option>'
+						. '<option value="tsvdown">TSV</option>'
+						. '</select></li>'
+						. '</ul>'
+						. '<input type="submit" name="download" title="Download" value="Download file" style="margin-left:8px;"  />'
+						. '</div></div>'
+						. '</div><script type="text/javascript">cssdropdown.startchrome("'.$uniqueId.'_chromemenu");</script>';
 	}
-	$htmlContent .= '<th width="8px"></th></tr>';
-
-	/* Modified by By PK to add a gray stripe behind the x axis label and numbering*/
-	$htmlContent .= '<tr style="background-color:#CCCCCC;"><th class="RowHeader_col" align="right">'.(($GobalEntityType == 'Product') ? 'Trials' : 'Products') .'</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
-	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
-	for($j=0; $j < $columns; $j++)
-	{
-		if($column_interval == 0){
-			$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.($j+1 == $columns ? ($j+1) * $column_interval : "").'</th>';
-		}else{
-			$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.(($j+1) * $column_interval).'</th>';
-		}
-	}		
-	$htmlContent .= '</tr>';
-	
-	$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height RowHeader_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-	for($j=0; $j < $columns; $j++)
-	$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right graph_bottom"><font style="line-height:4px;">&nbsp;</font></th>';
-	$htmlContent .= '<th></th></tr>';
-	
-	
-	$htmlContent .='</thead>';
-	//scale ends
-
-	$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col" width="420px">&nbsp;</th><th width="8px" class="graph_right">&nbsp;</th>';
-	for($j=0; $j < $columns; $j++)
-	{
-		for($k=0; $k < $inner_columns; $k++)
-		$htmlContent .= '<th width="8px" colspan="1" class="'. (($k == ($inner_columns-1)) ? 'graph_right':'' ) .'">&nbsp;</th>';
-	}
-	$htmlContent .= '<th width="8px"></th></tr>';
-
-	foreach($IdsArray as $key => $Ids)
-	{	
-		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
+	$htmlContent  .= '</form>';
+	if(count($data_matrix) != 0){								
+		$htmlContent .= '<table border="0" align="center" width="'.(420+8+($inner_columns*$columns*8)+8+10).'px" style="vertical-align:middle;" cellpadding="0" cellspacing="0" id="'.$uniqueId.'_ProdTrackerTable">'
+						. '<thead>';
+		//scale
+		//Row to keep alignement perfect at time of floating headers
+		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col" width="420px">&nbsp;</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 		for($j=0; $j < $columns; $j++)
 		{
-			$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+			for($k=0; $k < $inner_columns; $k++)
+			$htmlContent .= '<th width="8px" colspan="1" '. (($k == ($inner_columns-1)) ? 'class="graph_rightWhite" ':'' ) .'>&nbsp;</th>';
 		}
-		$htmlContent .= '<th></th></tr>';
-		
-		////// Color Graph - Bar Starts
-		
-		//// Code for Indlead
-		
-		$htmlContent .= '<tr id="'.$uniqueId.'_Graph_Row_A_'.$key.'"><th align="right" class="RowHeader_col" id="'.$uniqueId.'_RowHeaderCol_'.$key.'" rowspan="3"><a href="'.  $data_matrix[$key]['HeaderLink'] . '" style="text-decoration:underline;">'.$data_matrix[$key]['RowHeader'].'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
-	
-		///Below function will derive number of lines required to display disease name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
-		///for disease column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
-		///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
-		$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$key]['RowHeader'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
-		
+		$htmlContent .= '<th width="8px"></th></tr>';
+
+		/* Modified by By PK to add a gray stripe behind the x axis label and numbering*/
+		$htmlContent .= '<tr style="background-color:#CCCCCC;"><th class="RowHeader_col" align="right">'.(($GobalEntityType == 'Product') ? 'Trials' : 'Products') .'</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
+		$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
 		for($j=0; $j < $columns; $j++)
 		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
-		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
-		
-		$Err = CountErrs($data_matrix, $key, $ratio);
-			
-		$Max_ValueKey = Max_ValueKeyDiseaseTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
-			
-		$total_cols = $inner_columns * $columns;
-		$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
-		$phase_space = 0;
-	
-		foreach($phase_legend_nums as $phase_nums)
-		{
-			if($data_matrix[$key]['phase_'.$phase_nums] > 0)
-			{
-				$Color = getClassNColorforPhaseDiseaseTracker($phase_nums);
-				$Mini_Bar_Width = CalculateMiniBarWidthDiseaseTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-				$phase_space =  $phase_space + $Mini_Bar_Width;					
-				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="' . $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" class="Link" >&nbsp;</a></th>';
+			if($column_interval == 0){
+				$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.($j+1 == $columns ? ($j+1) * $column_interval : "").'</th>';
+			}else{
+				$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.(($j+1) * $column_interval).'</th>';
 			}
-		}
+		}		
+		$htmlContent .= '</tr>';
 		
-		$remain_span = $total_cols - $phase_space;
-		
-		if($remain_span > 0)
-		$htmlContent .= DrawExtraHTMLCellsDiseaseTracker($phase_space, $inner_columns, $remain_span);
-		
-		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_C_'.$key.'">';
+		$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height RowHeader_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
 		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
+		$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right graph_bottom"><font style="line-height:4px;">&nbsp;</font></th>';
 		$htmlContent .= '<th></th></tr>';
 		
-		////// End Of - Color Graph - Bar Starts
 		
-		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="'. (($key == (count($IdsArray)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
+		$htmlContent .='</thead>';
+		//scale ends
+
+		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col" width="420px">&nbsp;</th><th width="8px" class="graph_right">&nbsp;</th>';
 		for($j=0; $j < $columns; $j++)
 		{
-			$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+			for($k=0; $k < $inner_columns; $k++)
+			$htmlContent .= '<th width="8px" colspan="1" class="'. (($k == ($inner_columns-1)) ? 'graph_right':'' ) .'">&nbsp;</th>';
 		}
+		$htmlContent .= '<th width="8px"></th></tr>';
+
+		foreach($IdsArray as $key => $Ids)
+		{	
+			$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+			}
+			$htmlContent .= '<th></th></tr>';
+			
+			////// Color Graph - Bar Starts
+			
+			//// Code for Indlead
+			
+			$htmlContent .= '<tr id="'.$uniqueId.'_Graph_Row_A_'.$key.'"><th align="right" class="RowHeader_col" id="'.$uniqueId.'_RowHeaderCol_'.$key.'" rowspan="3"><a href="'.  $data_matrix[$key]['HeaderLink'] . '" style="text-decoration:underline;">'.$data_matrix[$key]['RowHeader'].'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
+		
+			///Below function will derive number of lines required to display disease name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
+			///for disease column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
+			///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
+			$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$key]['RowHeader'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
+			
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			}
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
+			
+			$Err = CountErrs($data_matrix, $key, $ratio);
+				
+			$Max_ValueKey = Max_ValueKeyDiseaseTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+				
+			$total_cols = $inner_columns * $columns;
+			$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
+			$phase_space = 0;
+		
+			foreach($phase_legend_nums as $phase_nums)
+			{
+				if($data_matrix[$key]['phase_'.$phase_nums] > 0)
+				{
+					$Color = getClassNColorforPhaseDiseaseTracker($phase_nums);
+					$Mini_Bar_Width = CalculateMiniBarWidthDiseaseTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$phase_space =  $phase_space + $Mini_Bar_Width;					
+					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="' . $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" class="Link" >&nbsp;</a></th>';
+				}
+			}
+			
+			$remain_span = $total_cols - $phase_space;
+			
+			if($remain_span > 0)
+			$htmlContent .= DrawExtraHTMLCellsDiseaseTracker($phase_space, $inner_columns, $remain_span);
+			
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_C_'.$key.'">';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			}
+			$htmlContent .= '<th></th></tr>';
+			
+			////// End Of - Color Graph - Bar Starts
+			
+			$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="'. (($key == (count($IdsArray)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+			}
+			$htmlContent .= '<th></th></tr>';
+		}			   
+
+		//Draw scale			   
+		$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height RowHeader_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
+		for($j=0; $j < $columns; $j++)
+		$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
 		$htmlContent .= '<th></th></tr>';
-	}			   
+		/* Current no need of lower scale
+		$htmlContent .= '<tr><th class="RowHeader_col"></th><th class="graph_rightWhite"></th>';
+		for($j=0; $j < $columns; $j++)
+		$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'">'.(($j+1) * $column_interval).'</th>';
+		$htmlContent .= '</tr>';
+		//End of draw scale
+		*/
 
-	//Draw scale			   
-	$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height RowHeader_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-	for($j=0; $j < $columns; $j++)
-	$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-	$htmlContent .= '<th></th></tr>';
-	/* Current no need of lower scale
-	$htmlContent .= '<tr><th class="RowHeader_col"></th><th class="graph_rightWhite"></th>';
-	for($j=0; $j < $columns; $j++)
-	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.(($j==0)? $inner_columns+1 : $inner_columns).'">'.(($j+1) * $column_interval).'</th>';
-	$htmlContent .= '</tr>';
-	//End of draw scale
-	*/						
-	$htmlContent .= '</table>';
-
-	///Add HELP Tab here only
-	$htmlContent .= '<div id="slideout_'.$uniqueId.'">
-    					<img src="../images/help.png" alt="Help" />
-    					<div class="slideout_inner">
-        					<table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
-       							<tr><td colspan="2" style="padding-right: 1px;">
-        			 					<div style="float:left;padding-top:3px;">Phase&nbsp;</div>
-        								<div class="gray">N/A</div>
-         								<div class="blue">0</div>
-         								<div class="green">1</div>
-         								<div class="yellow">2</div>
-         								<div class="orange">3</div>
-         								<div class="red">4</div>
-         						</td></tr>
-        					</table>
-    					</div>
-					</div>';
-
-
+		$htmlContent .= '</table>';
+	}
+	if(count($data_matrix) == 0) 
+		return $htmlContent .= (isset($_REQUEST['category']) && $_REQUEST['category'] == 1)?'<br /><div>No Disease Category Found</div>':'<br /><div>No Disease Found</div>';
+	else{	
+		///Add HELP Tab here only
+		$htmlContent .= '<div id="slideout_'.$uniqueId.'">
+							<img src="../images/help.png" alt="Help" />
+							<div class="slideout_inner">
+								<table bgcolor="#FFFFFF" cellpadding="0" cellspacing="0" class="table-slide">
+									<tr><td colspan="2" style="padding-right: 1px;">
+											<div style="float:left;padding-top:3px;">Phase&nbsp;</div>
+											<div class="gray">N/A</div>
+											<div class="blue">0</div>
+											<div class="green">1</div>
+											<div class="yellow">2</div>
+											<div class="orange">3</div>
+											<div class="red">4</div>
+									</td></tr>
+								</table>
+							</div>
+						</div>';
+	}
 	return $htmlContent;
 }
 
@@ -2849,7 +2859,7 @@ function GetDiseasesCatFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 				$DiseasesCatgories[] = $row['id'];
 			}
 		}
-		
+		if(count($DiseasesCatgories) < 1) return array();
 		return array_filter(array_unique($DiseasesCatgories));
 }
 
