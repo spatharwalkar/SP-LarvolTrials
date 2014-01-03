@@ -281,7 +281,9 @@
 						chdir ("$cwd");
 					}
 					if($tab == 'Companies')
+					{
 					print '<div id="Companies" align="center">'.showCompanyTracker($DiseaseCatId, 'DISCATCT', $page).'</div>'; //DISCATCT=DISEASE Category COMPANY TRACKER 
+					}
 					if($tab == 'MOAs')
 					print '<div id="MOAs" align="center">'.showMOATracker($DiseaseCatId, 'DISCATMT', $page).'</div>'; //DISCATMT=DISEASE Category MOA TRACKER 
 					if($tab == 'DiseaseOTT')
@@ -336,8 +338,12 @@
 		if(is_array($arrDiseaseIds) && count($arrDiseaseIds)) 
 		{
 			$arrImplode = implode(",", $arrDiseaseIds);
-			$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity` in(" . mysql_real_escape_string($arrImplode) . ")";
 			
+			//$query = 	"SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity` in(" . mysql_real_escape_string($arrImplode) . ")";
+			$query =	"SELECT count(Distinct(dt.`larvol_id`)) as trialCount 
+						FROM `entity_trials` et 
+						JOIN `data_trials` dt 
+						ON(dt.`larvol_id` = et.`trial` and et.`entity` in(" . mysql_real_escape_string($arrImplode) . "))";
 			$res = mysql_query($query) or die('Bad SQL query getting trials count from Disease id in TZ');
 
 			if($res)

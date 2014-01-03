@@ -854,11 +854,21 @@ function GetProductsCountFromMOACat($moaCatID)
 	return $ProductsCount;
 }
 /* Function to get Product count from Disease category id */
-function GetProductsCountFromDiseaseCat($DiseaseCatID){
+function GetProductsCountFromDiseaseCat($DiseaseCatID)
+{
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(Distinct(e.`id`)) as productCount FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent` in(SELECT child FROM `entity_relations` WHERE parent =".mysql_real_escape_string($DiseaseCatID).") AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+	// $query = "SELECT count(Distinct(e.`id`)) as productCount FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent` in(SELECT child FROM `entity_relations` WHERE parent =".mysql_real_escape_string($DiseaseCatID).") AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+
+	$query = 
+			"	SELECT count(Distinct(e.`id`)) as productCount 
+				FROM `entities` e 
+				JOIN `entity_relations` er 
+				ON(e.`id` = er.`child` and e.`class`='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)) 
+				JOIN entity_relations er2 on (er.parent=er2.child and er2.parent=".mysql_real_escape_string($DiseaseCatID)." )
+			";
+
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)

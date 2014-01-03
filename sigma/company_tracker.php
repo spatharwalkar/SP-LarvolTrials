@@ -107,7 +107,26 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	
 		$CompanyIds = array_filter(array_unique($CompanyIds));
 		$id=$header['id'];
-		$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND ( ".$id. " in (rpt.`entity1`, rpt.`entity2` )) AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+		/*
+		$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, 
+						rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) 
+						WHERE (rpt.`count_total` > 0) AND ( ".$id. " in (rpt.`entity1`, rpt.`entity2` )) AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+		*/
+		//changed query for performance improvement
+		$CompanyQuery=	"
+						SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, 
+						rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` 
+						FROM `entities` e 
+						JOIN `rpt_masterhm_cells` rpt ON
+						(
+							(
+								(rpt.`entity1`=e.`id` AND rpt.`count_total` > 0 AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')
+							)
+							AND (rpt.`entity1`=".$id. " OR  rpt.`entity2` =".$id. ")
+						) 
+						JOIN `entity_relations` er ON	(e.`id` = er.`parent` AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)) 
+						JOIN `entities` e2 ON	(e2.`id` = er.`child` AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution') 
+						";
 		if($CompanyIds)
 			$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
 		else
@@ -2414,7 +2433,6 @@ function GetCompaniesFromDiseaseCat_CompanyTracker($arrDiseaseIds)
 		$arrImplode = implode(",", $arrDiseaseIds);
 		
 		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`child` = e.`id`) JOIN `entities` e2 ON(e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'Institution' AND e.`category`='Industry' AND e2.`class` = 'Product' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND er2.`parent` in(" . mysql_real_escape_string($arrImplode) . ")";
-		
 		$res = mysql_query($query) or die('Bad SQL query getting companies from products ids in CT');
 
 		if($res)

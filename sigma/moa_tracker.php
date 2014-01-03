@@ -2483,9 +2483,8 @@ function GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds)
 
 		//Get MOA Categoryids from Product id
 		$query = "SELECT e1.`id` as id, e2.`id` AS moaid FROM `entities` e1 JOIN `entity_relations` er1 ON(er1.`parent` = e1.`id`) JOIN `entities` e2 ON (er1.`child` = e2.`id`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) JOIN `entities` e3 ON(e3.`id` = er2.`parent`) JOIN `entity_relations` er3 ON(er3.`child` = e3.`id`) WHERE e1.`class` = 'MOA_Category' AND e1.`name` <> 'Other' AND e2.`class` = 'MOA' AND e3.`class` = 'Product' AND er3.`parent` in(" . mysql_real_escape_string($arrImplode) . ") AND (e3.`is_active` <> '0' OR e3.`is_active` IS NULL)";
-
+		
 		$res = mysql_query($query) or die('Bad SQL query getting MOA Categories from products ids in MT');
-
 		if($res)
 		{
 			while($row = mysql_fetch_array($res))
@@ -2499,10 +2498,17 @@ function GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds)
 		$OnlyMOACatIds = $MOAOrMOACats;
 
 		//Get MOA which dont have related category from product id
-		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON (er.`child` = e.`id`) JOIN `entities` e2 ON (e2.`id` = er.`parent`) JOIN `entity_relations` er2 ON(er2.`child` = e2.`id`) WHERE e.`class` = 'MOA' AND e2.`class` = 'Product' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND er2.`parent` in(" . mysql_real_escape_string($arrImplode) . ") ".((count($onlymoas) > 0) ? "AND e.`id` NOT IN (" . implode(',',$onlymoas) . ")" : "");
 		
+		if(count($onlymoas) > 0) 
+			$qstr=" AND e.`id` NOT IN (" . implode(',',$onlymoas) . ")" ;
+		else
+			$qstr='';
+		$query = "	SELECT DISTINCT e.`id` 
+					FROM `entities` e JOIN `entity_relations` er ON (er.`child` = e.`id` and e.`class` = 'MOA' " . $qstr ." ) 
+					JOIN `entities` e2 ON (e2.`id` = er.`parent` and e2.`class` = 'Product' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) ) 
+					JOIN `entity_relations` er2 ON(er2.`child` = e2.`id` and er2.`parent` in(" . mysql_real_escape_string($arrImplode) . ")) 
+				" ;
 		$res = mysql_query($query) or die('Bad SQL query getting MOAs from products ids in MT');
-
 		if($res)
 		{
 			while($row = mysql_fetch_array($res))
