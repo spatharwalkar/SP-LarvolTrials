@@ -914,7 +914,7 @@ function sortTwoDimensionArrayByKey($arr, $arrKey)
 function pagination($globalOptions = array(), $totalPages)
 {	
 	$url = '';
-	$stages = 1;
+	$stages = 5;
 			
 	if(isset($_REQUEST['TzSearch']))
 	{
@@ -949,79 +949,33 @@ function pagination($globalOptions = array(), $totalPages)
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($globalOptions['page']-1) . '\'>&laquo;</a>';
 	}
-	
-	if($totalPages < 7 + ($stages * 2))
-	{	
-		for($counter = 1; $counter <= $totalPages; $counter++)
-		{
-			if ($counter == $globalOptions['page'])
-			{
-				$paginateStr .= '<span>' . $counter . '</span>';
-			}
-			else
-			{
-				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-			}
-		}
-	}
-	elseif($totalPages > 5 + ($stages * 2))
+
+	$prelink = 	'<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>'
+				.'<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>'
+				.'<span>...</span>';
+	$postlink = '<span>...</span>'
+				.'<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>'
+				.'<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+			
+	if($totalPages > (($stages * 2) + 3))
 	{
-		if($globalOptions['page'] <= 1 + ($stages * 2))
-		{
-			for($counter = 1; $counter < 4 + ($stages * 2); $counter++)
+		if($globalOptions['page'] >= ($stages+3)){
+			$paginateStr .= $prelink;
+			if($totalPages >= $globalOptions['page'] + $stages + 2)
 			{
-				if ($counter == $globalOptions['page'])
-				{
-					$paginateStr .= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr .='<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
+				$paginateStr .= generateLink($globalOptions['page'] - $stages,$globalOptions['page'] + $stages,$globalOptions['page'],$rootUrl,$url);
+				$paginateStr .= $postlink;			
+			}else{
+					$paginateStr .= generateLink($totalPages - (($stages*2) + 2),$totalPages,$globalOptions['page'],$rootUrl,$url);
 			}
-			$paginateStr.= '<span>...</span>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' .  ($totalPages-1) . '</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
-		}
-		elseif($totalPages - ($stages * 2) > $globalOptions['page'] && $globalOptions['page'] > ($stages * 2))
-		{
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
-			$paginateStr.= '<span>...</span>';
-			for($counter = $globalOptions['page'] - $stages; $counter <= $globalOptions['page'] + $stages; $counter++)
-			{
-				if ($counter == $globalOptions['page'])
-				{
-					$paginateStr.= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
-			}
-			$paginateStr.= '<span>...</span>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
-		}
-		else
-		{
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
-			$paginateStr .= "<span>...</span>";
-			for($counter = $totalPages - (2 + ($stages * 2)); $counter <= $totalPages; $counter++)
-			{
-				if ($counter == $globalOptions['page'])
-				{
-					$paginateStr .= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
-			}
-		}
-	}
-	
+		}else{
+			$paginateStr .= generateLink(1,($stages*2) + 3,$globalOptions['page'],$rootUrl,$url);	
+			$paginateStr .= $postlink;
+		}		
+	}else{
+		$paginateStr .= generateLink(1,$totalPages,$globalOptions['page'],$rootUrl,$url);	
+	}	
+
 	if($globalOptions['page'] != $totalPages)
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($globalOptions['page']+1) . '\'>&raquo;</a>';
@@ -1030,6 +984,22 @@ function pagination($globalOptions = array(), $totalPages)
 	
 	return array($url, $paginateStr);
 }
+
+function generateLink($counter,$totalPages,$CurrentPage,$rootUrl,$url){
+	for($counter; $counter <= $totalPages; $counter++)
+	{
+		if ($counter == $CurrentPage)
+		{
+			$paginateStr .= '<span>' . $counter . '</span>';
+		}
+		else
+		{
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+		}
+	}
+	return $paginateStr;
+}
+
 	/* get all the product name those dont have an entry in the entity trials table*/
 	function getNonProductTrials(){
 		$dataList = "SELECT intervention_name,larvol_id FROM data_trials WHERE larvol_id NOT IN (SELECT trial FROM entity_trials) LIMIT 0,100";
