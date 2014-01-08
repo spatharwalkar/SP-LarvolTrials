@@ -632,7 +632,7 @@ if($FoundRecords == 0 && (($globalOptions['TzSearch'] != '' && $globalOptions['T
 						print "<p>Your search - 
                 				<strong>
 									".$globalOptions['TzSearch']."
-                			    </strong> - did not match any products or companies or MOAs or diseases.</p>";
+                			    </strong> - did not match any products, companies, MOAs, or investigators.</p>";
 				?>
                <p>Suggestions:</p>
 			    <ul>
