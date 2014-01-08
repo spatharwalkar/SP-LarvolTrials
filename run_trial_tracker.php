@@ -11421,7 +11421,7 @@ class TrialTracker
 			$rowspan = 1;
 			$titleLinkColor = '';
 			if(isset($tvalue['manual_is_sourceless']) && ($tvalue['manual_is_sourceless'] == 1))
-				$titleLinkColor = '#FF0000';
+				$titleLinkColor = '#FF7700';
 			
 			if(isset($tvalue['upms']))  
 				$rowspan = count($tvalue['upms'])+1; 
