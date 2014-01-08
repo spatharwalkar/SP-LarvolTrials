@@ -167,7 +167,7 @@ if($_REQUEST['save']=='Save')
 		unset($_POST[$Rfield]);
 	}
 	$searchDataOld = $_REQUEST['id']?getSearchData('entities', 'searchdata', $_REQUEST['id']):null;	
-	$_REQUEST = array_merge($_GET, $_POST); 
+	$_REQUEST = array_merge($_GET, $_POST);
 	$saveStatus = saveData($_REQUEST,$table);
 }
 
@@ -214,8 +214,10 @@ if($table=='products')
 }
 elseif($table=='diseases')
 {
-	$ignoreFields = array('administration_mode','approvals','brand_names','client_name','code_names','comments','company','created','discontinuation_status_comment','discontinuation_status','generic_names','is_active','is_key','licensing_mode','modified','old_id','product_type','search_name','xml','searchdata','affiliation','class','first_name','surname','degrees','middle_name');
-	$skipArr = array('xml','old_id','is_active','client_name','comments','product_type','licensing_mode','administrative_mode','created','modified','company','brand_names','generic_names','code_names','approvals','search_name','administration_mode','discontinuation_status','is_key','discontinuation_status_comment','affiliation','class','first_name','surname','degrees','middle_name');
+ $ignoreFields = array('administration_mode','approvals','brand_names','client_name','code_names','comments','company','created','discontinuation_status_comment','discontinuation_status','generic_names','is_key','licensing_mode','modified','old_id','product_type','search_name','xml','searchdata','affiliation','class','first_name','surname','degrees','middle_name');
+ $skipArr = array('xml','old_id','client_name','comments','product_type','licensing_mode','administrative_mode','created','modified','company','brand_names','generic_names','code_names','approvals','search_name','administration_mode','discontinuation_status','is_key','discontinuation_status_comment','affiliation','class','first_name','surname','degrees','middle_name');
+ if($table=='diseases' && ($_GET['mesh_display'] == 'NO' || $_GET['mesh_display'] == ''))
+  $skipArr[] = 'is_active';
 }
 elseif($table=='investigator')
 {

@@ -232,6 +232,11 @@ if($table !='upm')
 		$where .= " and class='Disease' and mesh_name!='' ";
 	else if($table =='diseases')
 	    $where .= " and class='Disease' and (mesh_name='' OR mesh_name IS NULL)";
+	if($table =='diseasecategory' && $mesh=="YES")
+		$where .= " and class='Disease_Category' and mesh_name!='' ";
+	else if($table =='diseasecategory')
+	    $where .= " and class='Disease_Category' and (mesh_name='' OR mesh_name IS NULL)";
+ 	if($_GET['no_sort']!=1)
 	if($_GET['no_sort']!=1)
 		$query = "select * from $actual_table $where $currentOrderBy $currentSortOrder limit $start , $limit";
 	else
@@ -270,6 +275,10 @@ while ($row = mysql_fetch_assoc($res))
 		$defaultTdStyle = 'background-color:#7FBEFF';
 	}
 	elseif($table == 'diseases' && $row['class'] == 'Disease' && !empty($row['LI_id']) )
+	{
+		$defaultTdStyle = 'background-color:#7FBEFF';
+	}
+	elseif($table == 'diseasecategory' && $row['class'] == 'Disease_Category' && !empty($row['LI_id']) )
 	{
 		$defaultTdStyle = 'background-color:#7FBEFF';
 	}
@@ -339,7 +348,7 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-                                $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
+					$edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
                                 
 				echo '<td style="'.$defaultTdStyle.'">';
 				echo $edit_url;
@@ -359,7 +368,7 @@ while ($row = mysql_fetch_assoc($res))
 				echo '</td>';				
 			}	
 			else
-			if($columnName == 'searchdata' && ($table=='areas' || $table=='diseases'))
+			if($columnName == 'searchdata' && ($table=='areas' || $table=='diseases' || $table=='diseasecategory'))
 			{
 				echo '<td style="'.$defaultTdStyle.'">';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$actual_table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
@@ -392,7 +401,14 @@ while ($row = mysql_fetch_assoc($res))
 					echo '<td>';
 					echo (($v==='0')?'False':'True');
 					echo '</td>';
-			}						
+			}
+			// else
+			// if($columnName == 'is_active' && $table == 'diseases')
+			// {
+					// echo '<td>';
+					// echo (($v==='0')?'False':'True');
+					// echo '</td>';
+			// }				
 			else 
 			{
 				echo '<td style="'.$defaultTdStyle.'">';
@@ -434,7 +450,7 @@ while ($row = mysql_fetch_assoc($res))
 				echo '</td>';				
 			}	
 			else
-			if($columnName == 'searchdata' && ($table=='areas' || $table=='diseases'))
+			if($columnName == 'searchdata' && ($table=='areas' || $table=='diseases' || $table=='diseasecategory'))
 			{
 				echo '<td style="'.$defaultTdStyle.'">';
 				echo input_tag(array('Field'=>'searchdata'),$v,array('table'=>$actual_table,'id'=>$upmId,'callFrom'=>'contentListingAreas'));
@@ -1044,7 +1060,6 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						$updateFailCnt++;
 						softDieSession('updating redtags failed.<br/>'.$query,0,1,'error');
 					}
-					
 				}
 				else
 				{
@@ -1053,8 +1068,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			}
 			else
 			{
-				//insert
-				
+				//insert	
 				switch($table)
 				{
 					case 'products': $class = "Product"; break;
@@ -2841,7 +2855,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		
 		if($row['Field'] == 'searchdata')
 		{
-			if($searchType ===false && ($table=='areas' || $table=='products' || $table=='diseases'))
+			if($searchType ===false && ($table=='areas' || $table=='products' || $table=='diseases' || $table=='diseasecategory'))
 			{
 				$searchType = calculateSearchType($db->sources,unserialize(base64_decode($dbVal)));
 			}			
@@ -2860,7 +2874,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			$i++;	
 			continue;
 		}
-		if($table == 'areas')
+		if($table == 'areas' || $table == 'diseases' || $table == 'diseasecategory')
 		{
 			$defaultOptions['look_for_bool'] = true;
 		}
@@ -2871,6 +2885,11 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			$ProductReadOnlyArr = array('name','search_name','LI_id','client_name','is_active','class','description','display_name','category','searchdata','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','class');
 		elseif($table=='products')
 			$ProductReadOnlyArr = array('comments','is_active','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','display_name');
+		elseif($table=='diseases' && $_GET['mesh_display'] == 'YES')
+			$ProductReadOnlyArr = array('client_name','class','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','class');
+		elseif($table=='diseasecategory')
+			$ProductReadOnlyArr = array('name','LI_id','client_name','mesh_name','class','description','display_name','category','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','created','modified','company','brand_names','generic_names','code_names','approvals','class');
+
 		else
 			$ProductReadOnlyArr = array('is_active');
 
@@ -2946,7 +2965,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '</tr>';
 	}
 	
-	if(in_array($table, array('areas', 'diseases', 'entities', 'moas', 'institutions', 'products')))
+	if(in_array($table, array('areas', 'diseases', 'diseasecategory', 'entities', 'moas', 'institutions', 'products')))
 	{
 		$MHMReferenceCount = getMHMAssociation($id);
 		$disabled = ($MHMReferenceCount>0)?true:false;
@@ -2990,7 +3009,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$lnk="";$lnk2="";
 	}
 	
-	if( ($table=='products' || $table=='areas'  || $table=='diseases') && isset($options['preindexProgress']) && isset($options['preindexStatus']) && $id)
+	if( ($table=='products' || $table=='areas'  || $table=='diseases' || $table=='diseasecategory') && isset($options['preindexProgress']) && isset($options['preindexStatus']) && $id)
 	{
 		$status = array('Completed','Ready','Running','Error','Cancelled');
 		echo "<tr><td>".$lnk."Preindex".$lnk2." Status:</td><td align=\"left\" class=\"norm\">";
