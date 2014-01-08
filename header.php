@@ -87,6 +87,7 @@ if($db->loggedIn())
 	.'<a href="entities.php?entity=areas">Areas</a><br/>'
 	.'<a href="entities.php?entity=products">Products</a><br/>'
 	.'<a href="entities.php?entity=diseases">Diseases</a><br/>'
+	.'<a href="entities.php?entity=diseasecategory">Disease Category</a><br/>'
 	.'<a href="entities.php?entity=moas">MOAs</a><br/>'
 	.'<a href="entities.php?entity=moacategories"> MOA Categories </a><br/>'
 	.'<a href="entities.php?entity=institutions">Institutions</a><br/>'

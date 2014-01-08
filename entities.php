@@ -168,6 +168,12 @@ if($_REQUEST['save']=='Save')
 	}
 	$searchDataOld = $_REQUEST['id']?getSearchData('entities', 'searchdata', $_REQUEST['id']):null;	
 	$_REQUEST = array_merge($_GET, $_POST);
+	
+	if($table == 'diseases' || $table == 'diseasecategory'){
+	  if(!isset($_REQUEST['is_active'])){
+		$_REQUEST['is_active'] = 0;
+	   }
+	 }
 	$saveStatus = saveData($_REQUEST,$table);
 }
 
@@ -212,7 +218,7 @@ if($table=='products')
 	$ignoreFields = array('searchdata','xml','old_id','display_name','client_name','mesh_name','affiliation','class','first_name','surname','degrees','middle_name');
 	$skipArr = array('xml','old_id','is_active','display_name','client_name','mesh_name','affiliation','class','first_name','surname','degrees','middle_name');
 }
-elseif($table=='diseases')
+elseif($table=='diseases' or $table=='diseasecategory')
 {
  $ignoreFields = array('administration_mode','approvals','brand_names','client_name','code_names','comments','company','created','discontinuation_status_comment','discontinuation_status','generic_names','is_key','licensing_mode','modified','old_id','product_type','search_name','xml','searchdata','affiliation','class','first_name','surname','degrees','middle_name');
  $skipArr = array('xml','old_id','client_name','comments','product_type','licensing_mode','administrative_mode','created','modified','company','brand_names','generic_names','code_names','approvals','search_name','administration_mode','discontinuation_status','is_key','discontinuation_status_comment','affiliation','class','first_name','surname','degrees','middle_name');

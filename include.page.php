@@ -22,6 +22,7 @@ function tableColumns($table)
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'diseasecategory': $actual_table = "entities"; break;
 			case 'investigator': $actual_table = "entities"; break;
 		}	
 	
@@ -76,6 +77,7 @@ function tableColumnDetails($table)
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'diseasecategory' : $actual_table = "entities"; break;
 			case 'investigator': $actual_table = "entities"; break;
 		}	
 	$query = "SHOW COLUMNS FROM $actual_table";
@@ -122,6 +124,42 @@ switch($table)
 		case 'moacategories': $actual_table = "entities"; break;
 		case 'investigator': $actual_table = "entities"; break;
 		case 'diseases': 
+			
+			/****** MESH ********/
+			
+			$mesh = $_GET['mesh_display'];
+			if ($mesh=='YES') 
+			{
+				$checked='checked="checked"';
+			}
+			else 
+			{
+				$checked = "";
+			}
+						
+			$url=fixurl(array('mesh_display'));
+
+			if ($mesh=='YES') 
+				{
+					$show_mesh=
+					'<form name="mesh" action="'. $url .'&mesh_display=NO" method="POST">'.
+					'<b><span style="color:red">Show MeSH</span></b>&nbsp;
+					<input type="checkbox" name="mesh_display" value="NO" onClick="submit();"'. $checked .'</span>'.
+					'</form><br>';
+				}
+			else		
+				{
+					$show_mesh=
+					'<form name="mesh" action="'. $url .'&mesh_display=YES" method="POST">'.
+					'<b><span style="color:red">Show MeSH</span></b>&nbsp;
+					<input type="checkbox" name="mesh_display" value="YES" onClick="submit();"'. $checked .'</span>'.
+					'</form><br>';
+				}
+			/*************/
+			
+			$actual_table = "entities"; 
+			break;
+			case 'diseasecategory': 
 			
 			/****** MESH ********/
 			
@@ -712,6 +750,7 @@ function calculateWhere($table,$orig_table="")
 			case 'moas': $class = "MOA"; break;
 			case 'moacategories': $class = "MOA_Category"; break;
 			case 'diseases': $class = "Disease"; break;
+			case 'diseasecategory' : $class = "Disease_Category"; break;
 			case 'investigator': $class = "Investigator"; break;
 		}
 
@@ -744,6 +783,7 @@ function getTotalCount($table)
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'diseasecategory': $actual_table = "entities"; break;
 			case 'investigator': $actual_table = "entities"; break;
 			
 		}
@@ -940,7 +980,7 @@ function input_tag($row,$dbVal=null,$options=array())
 			if(isset($options) && isset($options['look_for_bool']) && $options['look_for_bool'] === true)
 			{
 				//normally mysql bool types are handled with a 1/0 for true/false case in php so we implmement the same handler here for this case.
-				$checkedStat = ($dbVal=='1')?'checked="checked"':null;
+				$checkedStat = ($dbVal == '0')?null:'checked="checked"';
 				return '<input type="checkbox" name="'.$nameIndex.$row['Field'].'" id="'.$row['Field'].'" title="'.$altTitle.'" alt="'.$altTitle.'" '.$checkedStat.'/ value="1">';
 			}
 		default:
@@ -995,6 +1035,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'diseasecategory': $actual_table = "entities"; break;
 			case 'therapeuticareas': $actual_table = "entities"; break;
 			case 'investigator': $actual_table = "entities"; break;
 			
@@ -2511,6 +2552,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		case 'moas': $actual_table = "entities"; break;
 		case 'moacategories': $actual_table = "entities"; break;
 		case 'diseases': $actual_table = "entities"; break;
+		case 'diseasecategory': $actual_table = "entities"; break;
 		case 'investigator': $actual_table = "entities"; break;
 	}
 	
@@ -2719,6 +2761,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'diseasecategory' : $actual_table = "entities"; break;
 			case 'investigator': $actual_table = "entities"; break;
 		}
 	$searchType = calculateSearchType($db->sources,unserialize(base64_decode($searchData)));
@@ -3272,6 +3315,7 @@ function getSearchData($table,$searchdata,$id)
 			case 'moas': $actual_table = "entities"; break;
 			case 'moacategories': $actual_table = "entities"; break;
 			case 'diseases': $actual_table = "entities"; break;
+			case 'diseasecategory': $actual_table = "entities"; break;
 		}
 	$query = "select $searchdata from $actual_table where id=$id";
 	$result = mysql_query($query);
