@@ -46,9 +46,9 @@
 	
 	$disTrackerData = showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
 	
-	if($categoryFlag == 1){
+	/*if($categoryFlag == 1){
 		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($e1, 'Product'));
-	}	
+	}*/	
 	
 	if(isset($_REQUEST['dwcount']))
 	$dwcount = $_REQUEST['dwcount'];

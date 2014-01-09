@@ -434,9 +434,9 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 			$DiseaseQuery = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";
 			$DiseaseQueryResult = mysql_query($DiseaseQuery) or die($DiseaseQuery.'- '.mysql_error());
 		}
-		
+
 		if(count($Ids)){
-			$key = 0;	
+			$key = 0;
 			while($result = mysql_fetch_array($DiseaseQueryResult))
 			{
 				if($categoryFlag){
@@ -445,15 +445,15 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 					$DiseaseQuery2 = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') WHERE et.`entity` IN ('" . implode("','",$DiseaseIds) . "') AND et2.`entity`='" . $id ."'";
 					$resultCat = mysql_query($DiseaseQuery2) or die($DiseaseQuery2.' - '.mysql_error());
 					
-					
 
+					$rowDiseases = array();
 					while($row = mysql_fetch_array($resultCat)){
 						$rowDiseases[] = $row;
 					}
 				}else{
 					$key = $DiseaseId = $result['id']; 
 				}
-				if(((isset($DiseaseId) && $DiseaseId != NULL) || (isset($DiseaseCategoryId) && $DiseaseCategoryId != NULL)) && isset($rowDiseases))
+				if((isset($DiseaseId) && $DiseaseId != NULL) || (isset($DiseaseCategoryId) && $DiseaseCategoryId != NULL))
 				{
 					if($data_matrix[$key]['RowHeader'] == '' || $data_matrix[$key]['RowHeader'] == NULL)
 					{
@@ -2800,7 +2800,7 @@ function GetDiseasesFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 					";
 	}
 	
-	$res = mysql_query($query) or die('Bad SQL query getting Diseases from Investigator id');
+	$res = mysql_query($query);// or die('Bad SQL query getting Diseases from Investigator id');
 	
 	if($res)
 	{
@@ -2819,6 +2819,7 @@ function GetDiseasesCatFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 	global $db;
 	global $now;
 	$Diseases = array();
+	$DiseasesCatgories = array();
 	
 	if($GobalEntityType == 'Product')
 	{
@@ -2833,7 +2834,7 @@ function GetDiseasesCatFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) JOIN `entities` e2 ON (er.`child`=e2.`id`) JOIN `entity_relations` er2 ON(er2.`parent` = e2.`id`) JOIN `entities` e3 ON (er2.`child`=e3.`id`) JOIN `entity_relations` er3 ON(er3.`child` = e3.`id`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product' AND e3.`class` = 'MOA' AND er3.`parent`='" . mysql_real_escape_string($EntityID) . "' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL)";
 	}
 	
-	$res = mysql_query($query) or die('Bad SQL query getting Diseases from products ids in DT');
+	$res = mysql_query($query); // or die('Bad SQL query getting Diseases from products ids in DT');
 	
 	if($res)
 	{
@@ -2847,11 +2848,11 @@ function GetDiseasesCatFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 		if(count($UniqueDiseases) > 0){
 			$UniqueDiseasesIds = implode(", ", $UniqueDiseases);
 		}else{
-			$UniqueDiseasesIds = '';
+			return array();//$UniqueDiseasesIds = '';
 		}
 			
 		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease_Category' AND er.`child` IN (" . $UniqueDiseasesIds . ")  AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
-		$res = mysql_query($query) or die('Bad SQL query getting Diseases from products ids in DT');
+		$res = mysql_query($query); // or die('Bad SQL query getting Diseases from products ids in DT');
 		if($res)
 		{
 			while($row = mysql_fetch_array($res))
