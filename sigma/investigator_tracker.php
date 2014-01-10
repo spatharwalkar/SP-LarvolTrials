@@ -8,7 +8,7 @@ require_once('include.excel.php');
 
 chdir ($cwd);
 ini_set('memory_limit','-1');
-ini_set('max_execution_time','36000');	
+ini_set('max_execution_time','60');	
 
 if(!isset($_REQUEST['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));

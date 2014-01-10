@@ -5,7 +5,7 @@ require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 
 ini_set('memory_limit','-1');
-ini_set('max_execution_time','36000');	//10 hours
+ini_set('max_execution_time','60');	//1min
 if(isset($_REQUEST['InvestigatorId']))
 		{
 			$InvestigatorId = mysql_real_escape_string($_REQUEST['InvestigatorId']);
