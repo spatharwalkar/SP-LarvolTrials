@@ -162,8 +162,10 @@ switch($table)
 			case 'diseasecategory': 
 			
 			/****** MESH ********/
-			
-			$mesh = $_GET['mesh_display'];
+			if(!isset($_GET['mesh_display']))
+				$mesh = "YES";
+			else
+				$mesh = $_GET['mesh_display'];
 			if ($mesh=='YES') 
 			{
 				$checked='checked="checked"';
@@ -374,10 +376,13 @@ while ($row = mysql_fetch_assoc($res))
 			$j++;
 			$i++;
 		}
+		if(!isset($_GET['mesh_display']))
+			$mesh = "YES";
+		else
+			$mesh = $_GET['mesh_display'];
 		if($deleteFlag)
 		echo '<th>Del</th>';
 		echo '</tr>';
-	
 		echo '<tr style="text-align:center">';
 		foreach($row as $columnName=>$v)
 		{
@@ -386,8 +391,8 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-					$edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
-                                
+					$edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$mesh.'">'.$v.'</a>';
+                
 				echo '<td style="'.$defaultTdStyle.'">';
 				echo $edit_url;
 				echo '</a></td>';				
@@ -460,6 +465,10 @@ while ($row = mysql_fetch_assoc($res))
 	}
 	else
 	{
+		if(!isset($_GET['mesh_display']))
+			$mesh = "YES";
+		else
+			$mesh = $_GET['mesh_display'];
 		echo '<tr style="text-align:center">';
 		foreach($row as $columnName=>$v)
 		{
@@ -468,7 +477,7 @@ while ($row = mysql_fetch_assoc($res))
 			if($columnName == 'id')
 			{
 				$upmId = $v;
-                                $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$_GET['mesh_display'].'">'.$v.'</a>';
+                                $edit_url = '<a href="'.$script.'.php?id='.$v.'&entity='.$_GET['entity'].'&mesh_display='.$mesh.'">'.$v.'</a>';
                                 
 				echo '<td style="'.$defaultTdStyle.'">';
 				echo $edit_url;
@@ -2552,10 +2561,11 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		case 'moas': $actual_table = "entities"; break;
 		case 'moacategories': $actual_table = "entities"; break;
 		case 'diseases': $actual_table = "entities"; break;
-		case 'diseasecategory': $actual_table = "entities"; break;
+		// case 'diseasecategory': $actual_table = "entities"; break;
 		case 'investigator': $actual_table = "entities"; break;
 	}
-	
+	if($table != 'diseasecategory')
+	{
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
 	if(isset($_GET['next']))
 	$page = $_GET['oldval']+1;
@@ -2570,7 +2580,6 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		
 	$pend  = ($visualPage*$limit)<=$totalCount?$visualPage*$limit:$totalCount;
 	$pstart = (($pend - $limit+1)>0)?$pend - $limit+1:0;
-	
 	echo '<form name="pager" method="get" '.$formOnSubmit.' action="'.$script.'.php"><fieldset class="floatl">'
 		 	. '<legend>Page ' . $visualPage . ' of '.$maxPage
 			. ': records '.$pstart.'-'.$pend.' of '.$totalCount
@@ -2734,7 +2743,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 
 				
 echo '<br/>';	
-	
+	}
 }
 
 

@@ -273,8 +273,11 @@ if($_REQUEST['import']=='Import' || $_REQUEST['uploadedfile'])
 }
 */
 //define skip array table fields
-$skipArr = array('comments','entity_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','old_id','searchdata','created','modified','brand_names','generic_names','code_names','approvals','xml','display_name', 'class', 'category','affiliation');
 
+if ($table == 'diseasecategory')
+	$skipArr = array('comments','entity_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','old_id','searchdata','created','modified','brand_names','generic_names','code_names','approvals','xml','display_name', 'class', 'category','affiliation','first_name','surname','degrees','middle_name','description','company','LI_id','client_name','product_type','search_name');
+else
+	$skipArr = array('comments','entity_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','old_id','searchdata','created','modified','brand_names','generic_names','code_names','approvals','xml','display_name', 'class', 'category','affiliation');
 $ExtraSortFields = array(0=>'LI_id',1=>'name',2=>'company');
 //normal upm listing
 $start = $page*$limit;
