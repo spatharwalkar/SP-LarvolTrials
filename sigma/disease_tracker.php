@@ -2776,15 +2776,15 @@ function GetDiseasesFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 	
 	if($GobalEntityType == 'Product')
 	{
-		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease' AND er.`child`='" . mysql_real_escape_string($EntityID) . "'";
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) WHERE e.`class` = 'Disease' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '') AND er.`child`='" . mysql_real_escape_string($EntityID) . "'";
 	}
 	else if($GobalEntityType == 'Institution' || $GobalEntityType == 'MOA')
 	{
-		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) JOIN `entities` e2 ON (er.`child`=e2.`id`) JOIN `entity_relations` er2 ON(er2.`parent` = e2.`id`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product' AND er2.`child`='" . mysql_real_escape_string($EntityID) . "' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL)";
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) JOIN `entities` e2 ON (er.`child`=e2.`id`) JOIN `entity_relations` er2 ON(er2.`parent` = e2.`id`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product' AND er2.`child`='" . mysql_real_escape_string($EntityID) . "' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')";
 	}
 	else if($GobalEntityType == 'MOA_Category')
 	{
-		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) JOIN `entities` e2 ON (er.`child`=e2.`id`) JOIN `entity_relations` er2 ON(er2.`parent` = e2.`id`) JOIN `entities` e3 ON (er2.`child`=e3.`id`) JOIN `entity_relations` er3 ON(er3.`child` = e3.`id`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product' AND e3.`class` = 'MOA' AND er3.`parent`='" . mysql_real_escape_string($EntityID) . "' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL)";
+		$query = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) JOIN `entities` e2 ON (er.`child`=e2.`id`) JOIN `entity_relations` er2 ON(er2.`parent` = e2.`id`) JOIN `entities` e3 ON (er2.`child`=e3.`id`) JOIN `entity_relations` er3 ON(er3.`child` = e3.`id`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product' AND e3.`class` = 'MOA' AND er3.`parent`='" . mysql_real_escape_string($EntityID) . "' AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')";
 	}
 	else if($GobalEntityType == 'Investigator' )
 	{
@@ -2796,7 +2796,7 @@ function GetDiseasesFromEntity_DiseaseTracker($EntityID, $GobalEntityType)
 					JOIN `entity_relations` er ON(e.id=er.parent) 
 					JOIN `entity_trials` et1 ON(er.child = et1.entity and et.trial=et1.trial ) 
 					JOIN entities e1 on (et1.entity = e1.id and e1.class='Product')
-					
+					where (e.`is_active` <> '0' OR e.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')
 					";
 	}
 	
