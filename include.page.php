@@ -176,24 +176,6 @@ switch($table)
 			}
 						
 			$url=fixurl(array('mesh_display'));
-
-			if ($mesh=='YES') 
-				{
-					$show_mesh=
-					'<form name="mesh" action="'. $url .'&mesh_display=NO" method="POST">'.
-					'<b><span style="color:red">Show MeSH</span></b>&nbsp;
-					<input type="checkbox" name="mesh_display" value="NO" onClick="submit();"'. $checked .'</span>'.
-					'</form><br>';
-				}
-			else		
-				{
-					$show_mesh=
-					'<form name="mesh" action="'. $url .'&mesh_display=YES" method="POST">'.
-					'<b><span style="color:red">Show MeSH</span></b>&nbsp;
-					<input type="checkbox" name="mesh_display" value="YES" onClick="submit();"'. $checked .'</span>'.
-					'</form><br>';
-				}
-			/*************/
 			
 			$actual_table = "entities"; 
 			break;
@@ -2564,8 +2546,7 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		// case 'diseasecategory': $actual_table = "entities"; break;
 		case 'investigator': $actual_table = "entities"; break;
 	}
-	if($table != 'diseasecategory')
-	{
+	
 	$formOnSubmit = isset($options['formOnSubmit'])?$options['formOnSubmit']:null;
 	if(isset($_GET['next']))
 	$page = $_GET['oldval']+1;
@@ -2743,7 +2724,6 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 
 				
 echo '<br/>';	
-	}
 }
 
 
@@ -3017,7 +2997,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		echo '</tr>';
 	}
 	
-	if(in_array($table, array('areas', 'diseases', 'diseasecategory', 'entities', 'moas', 'institutions', 'products')))
+	if(in_array($table, array('areas', 'diseases', 'entities', 'moas', 'institutions', 'products')))
 	{
 		$MHMReferenceCount = getMHMAssociation($id);
 		$disabled = ($MHMReferenceCount>0)?true:false;
@@ -3061,7 +3041,7 @@ function addEditUpm($id,$table,$script,$options=array(),$skipArr=array())
 		$lnk="";$lnk2="";
 	}
 	
-	if( ($table=='products' || $table=='areas'  || $table=='diseases' || $table=='diseasecategory') && isset($options['preindexProgress']) && isset($options['preindexStatus']) && $id)
+	if( ($table=='products' || $table=='areas'  || $table=='diseases') && isset($options['preindexProgress']) && isset($options['preindexStatus']) && $id)
 	{
 		$status = array('Completed','Ready','Running','Error','Cancelled');
 		echo "<tr><td>".$lnk."Preindex".$lnk2." Status:</td><td align=\"left\" class=\"norm\">";
