@@ -1195,8 +1195,7 @@ $query = 'SELECT `update_id`,`process_id`,`start_time`,`updated_time`,`status`,
 			';
 		
 		}
-	
-	
+		
 	/****/
 	
 	$disabled=0;
