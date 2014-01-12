@@ -1162,8 +1162,8 @@ $.initialBracesFlag = 9;
                     '<p class=sqlalldata></p>' +
                     '<font size="4" face="Bold" color="Grey">Conditions</font>' +
 					'<div style="text-align:right">'+
-					'<!--<b>Record changes resulting from this action:</b>-->'+
-					'<input type="checkbox" id="ignore_changes" style="visibility:hidden;">'+
+					'<b>Record changes resulting from this action:</b>'+
+					'<input type="checkbox" id="ignore_changes">'+
 					'</div>'+
                     '<p class=sqlbuilderwhere>' + 
                     '<span class="sqlwhere2" id="1">' +
