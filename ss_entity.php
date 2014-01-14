@@ -64,11 +64,14 @@ function find_entity($q)
 		$pos = strpos($q, "-");
 		if ($pos !== false) 
 		{
+			$q2=str_replace("-", "", $q);
 			$q = '"'.$q.'"';
+			if(strlen($q2)>=2) $q2 = '*'.$q2.'*';
 		}
 		if(strlen($q)>=2) $q = '*'.$q.'*';
 		$res = $cl->Query ( $q, $index );
-
+		if($q2) $res1 = $cl->Query ( $q2, $index );
+//	pr($res);
 		if ( $res===false )
 		{
 	//		print "Query failed: " . $cl->GetLastError() . ".\n";
@@ -82,6 +85,18 @@ function find_entity($q)
 				$n = 1;
 				if(!isset($entity_ids)) $entity_ids=array();
 				foreach ( $res["matches"] as $docinfo )
+				{
+					if($docinfo[weight]>1900)
+					{
+						$entity_ids[] = $docinfo[id];
+					}
+					$n++;
+					//pr($res["class"]);
+				}
+			}
+			if ( is_array($res1["matches"]) )
+			{
+				foreach ( $res1["matches"] as $docinfo )
 				{
 					if($docinfo[weight]>1900)
 					{
