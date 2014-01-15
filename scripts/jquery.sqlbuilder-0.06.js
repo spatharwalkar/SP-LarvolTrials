@@ -11,7 +11,17 @@
 
    
 (function ($) {
-$.initialBracesFlag = 9;
+	var pageAddress = window.location.href.substr(window.location.href.lastIndexOf("/")+1);
+	var pageParam = pageAddress.split(".php");
+	var pageName = pageParam[0];
+	var ignoreChanges = '';
+	if(pageName == 'newsearch'){
+		ignoreChanges = '<div style="text-align:right">'+'<input type="checkbox" id="ignore_changes" style="visibility: hidden;">'+'</div>';
+	}else{
+		ignoreChanges = '<div style="text-align:right">'+'<b>Record changes resulting from this action:</b>'+
+						'<input type="checkbox" id="ignore_changes">'+'</div>';
+	}
+	$.initialBracesFlag = 9;
 
 /************* Tree View Functions ***********/
     $.fn.sqlsimpletreeview = function (options) {
@@ -1161,10 +1171,7 @@ $.initialBracesFlag = 9;
                     '<p class=sqlgroupbydata></p>' +
                     '<p class=sqlalldata></p>' +
                     '<font size="4" face="Bold" color="Grey">Conditions</font>' +
-					'<div style="text-align:right">'+
-					'<b>Record changes resulting from this action:</b>'+
-					'<input type="checkbox" id="ignore_changes">'+
-					'</div>'+
+					ignoreChanges +
                     '<p class=sqlbuilderwhere>' + 
                     '<span class="sqlwhere2" id="1">' +
 	                 '<a class="addnewsqlwherechain" id="9990" href="javascript:void(0)" alt="#0" >' + opts.chainInitial[2].name + '</a>&nbsp;' +
