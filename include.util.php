@@ -692,4 +692,20 @@ function productFormatLI($name, $companies, $tag='')
 	if(strlen($tag)) $tag = ' <span class="gray">[' . htmlspecialchars($tag) . ']</span>';
 	return $name . ' / <i>' . htmlspecialchars(implode(', ', $companies)) . '</i>' . $tag;
 }
+
+//Generates the pagination links
+function generateLink($counter,$totalPages,$CurrentPage,$rootUrl,$url){
+	for($counter; $counter <= $totalPages; $counter++)
+	{
+		if ($counter == $CurrentPage)
+		{
+			$paginateStr .= '<span>' . $counter . '</span>';
+		}
+		else
+		{
+			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
+		}
+	}
+	return $paginateStr;
+}
 ?>

@@ -985,21 +985,6 @@ function pagination($globalOptions = array(), $totalPages)
 	return array($url, $paginateStr);
 }
 
-function generateLink($counter,$totalPages,$CurrentPage,$rootUrl,$url){
-	for($counter; $counter <= $totalPages; $counter++)
-	{
-		if ($counter == $CurrentPage)
-		{
-			$paginateStr .= '<span>' . $counter . '</span>';
-		}
-		else
-		{
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-		}
-	}
-	return $paginateStr;
-}
-
 	/* get all the product name those dont have an entry in the entity trials table*/
 	function getNonProductTrials(){
 		$dataList = "SELECT intervention_name,larvol_id FROM data_trials WHERE larvol_id NOT IN (SELECT trial FROM entity_trials) LIMIT 0,100";

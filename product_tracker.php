@@ -1333,7 +1333,7 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 					
 	if($TrackerType == 'PTH')
 	$htmlContent .= '<td style="vertical-align:top; border:0px;"><div class="records">'. $TotalRecords .'&nbsp;Product'. (($TotalRecords == 1) ? '':'s') .'</div></td>';
-	
+
 	if($TotalPages > 1)
 	{
 		$paginate = pagination($TrackerType, $TotalPages, $id, $dwcount, $page, $MainPageURL, $OptionArray);
@@ -1714,7 +1714,7 @@ function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
 function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $MainPageURL, $OptionArray)
 {	
 	$url = '';
-	$stages = 1;
+	$stages = 5;
 	$phase = $OptionArray['Phase'];		
 	$url = 'id=' . $id .'&amp;dwcount=' . $dwcount;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	if($TrackerType == 'DISCATPT')	//DISCATPT=DISEASE CATEGORY COMPANY PRODUCT TRACKER
@@ -1733,8 +1733,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 		$url = 'MoaCatId=' . $id . '&amp;DiseaseId=' . $OptionArray['DiseaseId'] .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType.((isset($phase) && $phase != NULL && $phase != '') ? '&amp;phase=' . $phase:'' );
 	else if($TrackerType == 'DPT')	//DPT=DISEASE PRODUCT TRACKER
 		$url = 'DiseaseId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;tab=Products';
-		
-	
+
 	$rootUrl = $MainPageURL.'?';
 	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
 	
@@ -1742,39 +1741,33 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage-1) . '\'>&laquo;</a>';
 	}
-	if($totalPages > 10)
+
+	$prelink = 	'<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>'
+				.'<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>'
+				.'<span>...</span>';
+	$postlink = '<span>...</span>'
+				.'<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>'
+				.'<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+			
+	if($totalPages > (($stages * 2) + 3))
 	{
-		if($CurrentPage >= 7){
-			$counter = $CurrentPage - 5;
+		if($CurrentPage >= ($stages+3)){
+			$paginateStr .= $prelink;
+			if($totalPages >= $CurrentPage + $stages + 2)
+			{
+				$paginateStr .= generateLink($CurrentPage - $stages,$CurrentPage + $stages,$CurrentPage,$rootUrl,$url);
+				$paginateStr .= $postlink;			
+			}else{
+					$paginateStr .= generateLink($totalPages - (($stages*2) + 2),$totalPages,$CurrentPage,$rootUrl,$url);
+			}
 		}else{
-			$counter = 1;
-		}
-		$top_count = $counter + 9;
-		for($counter; $counter <= $top_count; $counter++)
-		{
-			if ($counter == $CurrentPage)
-			{
-				$paginateStr .= '<span>' . $counter . '</span>';
-			}
-			else
-			{
-				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-			}
-		}	
-	}else{
-		for($counter = 1; $counter <= $totalPages; $counter++)
-		{
-			if ($counter == $CurrentPage)
-			{
-				$paginateStr .= '<span>' . $counter . '</span>';
-			}
-			else
-			{
-				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-			}
+			$paginateStr .= generateLink(1,($stages*2) + 3,$CurrentPage,$rootUrl,$url);	
+			$paginateStr .= $postlink;
 		}		
-	}
-	
+	}else{
+		$paginateStr .= generateLink(1,$totalPages,$CurrentPage,$rootUrl,$url);	
+	}	
+
 	if($CurrentPage != $totalPages)
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
@@ -1783,7 +1776,6 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	
 	return array($url, $paginateStr);
 }
-
 
 if(isset($_REQUEST['id']))
 print showProductTracker($_REQUEST['id'], $dwcount, 'PTH', $page);	//PTH - Normal PRODUCT TRACKER WITH HEADER

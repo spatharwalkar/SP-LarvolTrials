@@ -1536,7 +1536,7 @@ function DrawExtraHTMLCellsDiseaseTracker($phase_space, $inner_columns, $remain_
 function DiseaseTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $MainPageURL, $GobalEntityType, $CountType)
 {	
 	$url = '';
-	$stages = 1;
+	$stages = 5;
 			
 	$url = 'id=' . $id .'&amp;tab=diseasetrac';
 	
@@ -1561,79 +1561,33 @@ function DiseaseTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, 
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage-1) . '\'>&laquo;</a>';
 	}
-	
-	if($totalPages < 7 + ($stages * 2))
-	{	
-		for($counter = 1; $counter <= $totalPages; $counter++)
-		{
-			if ($counter == $CurrentPage)
-			{
-				$paginateStr .= '<span>' . $counter . '</span>';
-			}
-			else
-			{
-				$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-			}
-		}
-	}
-	elseif($totalPages > 5 + ($stages * 2))
+
+	$prelink = 	'<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>'
+				.'<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>'
+				.'<span>...</span>';
+	$postlink = '<span>...</span>'
+				.'<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>'
+				.'<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+			
+	if($totalPages > (($stages * 2) + 3))
 	{
-		if($CurrentPage <= 1 + ($stages * 2))
-		{
-			for($counter = 1; $counter < 4 + ($stages * 2); $counter++)
+		if($CurrentPage >= ($stages+3)){
+			$paginateStr .= $prelink;
+			if($totalPages >= $CurrentPage + $stages + 2)
 			{
-				if ($counter == $CurrentPage)
-				{
-					$paginateStr .= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr .='<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
+				$paginateStr .= generateLink($CurrentPage - $stages,$CurrentPage + $stages,$CurrentPage,$rootUrl,$url);
+				$paginateStr .= $postlink;			
+			}else{
+					$paginateStr .= generateLink($totalPages - (($stages*2) + 2),$totalPages,$CurrentPage,$rootUrl,$url);
 			}
-			$paginateStr.= '<span>...</span>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' .  ($totalPages-1) . '</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
-		}
-		elseif($totalPages - ($stages * 2) > $CurrentPage && $CurrentPage > ($stages * 2))
-		{
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
-			$paginateStr.= '<span>...</span>';
-			for($counter = $CurrentPage - $stages; $counter <= $CurrentPage + $stages; $counter++)
-			{
-				if ($counter == $CurrentPage)
-				{
-					$paginateStr.= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
-			}
-			$paginateStr.= '<span>...</span>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>';
-			$paginateStr.= '<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
-		}
-		else
-		{
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>';
-			$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>';
-			$paginateStr .= "<span>...</span>";
-			for($counter = $totalPages - (2 + ($stages * 2)); $counter <= $totalPages; $counter++)
-			{
-				if ($counter == $CurrentPage)
-				{
-					$paginateStr .= '<span>' . $counter . '</span>';
-				}
-				else
-				{
-					$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . $counter . '\'>' . $counter . '</a>';
-				}
-			}
-		}
-	}
-	
+		}else{
+			$paginateStr .= generateLink(1,($stages*2) + 3,$CurrentPage,$rootUrl,$url);	
+			$paginateStr .= $postlink;
+		}		
+	}else{
+		$paginateStr .= generateLink(1,$totalPages,$CurrentPage,$rootUrl,$url);	
+	}	
+
 	if($CurrentPage != $totalPages)
 	{
 		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
