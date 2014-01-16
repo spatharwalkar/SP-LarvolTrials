@@ -19,14 +19,9 @@ $HEADER_INCLUDES = '<link href="css/ohm/ohm.css" rel="stylesheet" type="text/css
 require_once('header.php');
 
 /*todo:
-- require javascript because the only non-js way to support only sending individual updates in the POST (as opposed to the whole HM) is to have a million separate submit buttons
-- changing things will fill a change queue visible to the user where individual things can be canceled
 - color code changes. use red for destructive edits
 - before submitting, require confirmation if there are destructive edits
 - report list search in a way that can accept GET searches or result sets from elsewhere
-- ohm style sidebar:
-	- Global items: list/search
-	- This report: ohm, export(html, excel, pdf, word), input check, product tracker, recalculate cells
 */
 
 $where="";
@@ -309,7 +304,12 @@ function process_edits($id)
 			{
 				case 'e':
 				$fieldName = 'type_id';
-				$value = (int)$value;
+				$query = 'SELECT id FROM entities WHERE name="' . mysql_real_escape_string($value) . '"';
+				$res = mysql_query($query);
+				if($res === false){ $errors[] = "Bad SQL query getting ID of entity." . mysql_error();	continue;}
+				$res = mysql_fetch_assoc($res);
+				if($res === false){ $errors[] = "ID of entity not found.";	continue;}
+				$value = $res['id'];
 				break;
 				
 				case 'd':
@@ -976,7 +976,23 @@ Row: <span id="iconrow"></span><br />Column: <span id="iconcol"></span><br />Typ
 			
 			switch(fieldName)
 			{
-				case 'e': fieldName = 'entity';			break;
+				case 'e':
+				fieldName = 'entity';
+				//check for duplicate
+				if(edits.length>0)
+				{
+					var lastedit = edits[edits.length-1];
+					var lastsource = lastedit.split('`');
+					var lastinput = lastsource[0].substring(1).split('_');
+					var lastfieldName = lastinput[0];
+					var lastid = lastinput[3];
+					if(lastfieldName == 'e' && lastid == id)
+					{
+						edits.pop();
+					}
+				}
+				break;
+				
 				case 'd': fieldName = 'display name';	break;
 				case 'c': fieldName = 'category';		break;
 				case 't': fieldName = 'tag';			break;
