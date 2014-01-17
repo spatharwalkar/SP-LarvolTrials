@@ -181,6 +181,9 @@ switch($table)
 			break;
 	}
 $where = calculateWhere($actual_table,$table);
+if($actual_table == 'entities' && $table =='diseases'){
+	$where =  str_replace("entities.`is_active` = '1'","(entities.`is_active` = '1' OR entities.`is_active` IS NULL)",$where);
+}
 //calculate sortable fields
 //upm area field is included directly from upm custom query so ignore sort& other customizations for upm areas should be done elsewhere.
 $query = "SHOW COLUMNS FROM $actual_table";
@@ -246,7 +249,6 @@ if(isset($_GET['sort_order']) && $_GET['sort_order']=='DESC' )
 {
 	$sortImg = 'DESC';
 }
-
 if($table !='upm')
 {
 	
@@ -291,7 +293,6 @@ echo $show_mesh;
 echo '<table border="1" width="99%">';
 while ($row = mysql_fetch_assoc($res))
 {
-	
 	if($table == 'areas' && $row['coverage_area'] == 1)
 	{
 		$defaultTdStyle = 'background-color:#7FBEFF';
@@ -427,13 +428,13 @@ while ($row = mysql_fetch_assoc($res))
 					echo (($v==='0')?'False':'True');
 					echo '</td>';
 			}
-			// else
-			// if($columnName == 'is_active' && $table == 'diseases')
-			// {
-					// echo '<td>';
-					// echo (($v==='0')?'False':'True');
-					// echo '</td>';
-			// }				
+			/*else
+			if($columnName == 'is_active' && $table == 'diseases')
+			 {
+					echo '<td>';
+					echo (($v==='0')?'False':'True');
+					echo '</td>';
+			 }*/				
 			else 
 			{
 				echo '<td style="'.$defaultTdStyle.'">';
@@ -624,9 +625,7 @@ function getUpmSourceIDFrmLarvolIDs($LarvolId)
  */
 function calculateWhere($table,$orig_table="")
 {
-	//pr($_GET);
 	$postKeys = array_keys($_GET);
-	
 	$whereArr = array();
 	foreach($postKeys as $keys)
 	{
@@ -646,8 +645,6 @@ function calculateWhere($table,$orig_table="")
 		}
 	}
 	
-	
-	
 	//start bool checkbox filtering
 	//TODO: make dynamic with tablecolumndetails & bool tinyint(1) type filtering
 	//commented out as for areas unchecked in search is considered as for showing both types of coverage area.
@@ -663,8 +660,8 @@ function calculateWhere($table,$orig_table="")
 	
 	if(count($whereArr)>0)
 	{
-		$whereKeys = array_keys($whereArr);
-		foreach($whereKeys as $k => $v) $whereKeys[$k] = $table . '.`' . $v . '`';
+		$whereKeys = array_keys($whereArr);		
+		foreach($whereKeys as $k => $v){$whereKeys[$k] = $table . '.`' . $v . '`';	}			
 		$whereValues = array_values($whereArr);
 		$whereArr = array_map(
 							function($whereKeys,$whereValues)
@@ -753,7 +750,6 @@ function calculateWhere($table,$orig_table="")
 			$where=$where.' and (class = "'.$class.'")';
 	}
 	return $where;	
-
 }
 
 /**
@@ -2109,7 +2105,6 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 
 	//end precheck
 	//column input filtering
-	
 	$columnList = tableColumns($table);
 	
 	//start bool checkbox filtering 
@@ -2612,6 +2607,14 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 		$searchDataCheckStatus = (isset($_GET['searchDataCheck']))?$_GET['searchDataCheck']:null;
 		echo '<tr>';
 		echo '<td>Search Data : </td><td>'.input_tag(array('Type'=>'checkbox','Field'=>'searchDataCheck'),$searchDataCheckStatus,array('alttitle'=>'Search for records having search data.')).'</td>';
+		echo '</tr>';
+	}
+	/*Added by PK on 10/01/2014*/
+	if($options['ignore_changes'])
+	{
+		$searchIgnoreChangeStatus = (isset($_GET['ignore_changes']))?$_GET['ignore_changes']:null;
+		echo '<tr>';
+		echo '<td>Record changes resulting from this action: </td><td>'.input_tag(array('Type'=>'checkbox','Field'=>'ignore_changes'),$searchIgnoreChangeStatus,array('alttitle'=>'Record changes resulting from this action.')).'</td>';
 		echo '</tr>';
 	}
 	
