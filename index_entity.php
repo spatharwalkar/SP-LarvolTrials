@@ -1,7 +1,6 @@
 <?php
 require_once('db.php');
 require_once('preindex_trial.php');
-//require_once('preindex_trial_old.php');  // TO BE REMOVED LATER
 ini_set('max_execution_time', '36000'); //10 hours
 ignore_user_abort(true);
 
@@ -36,7 +35,6 @@ $row = mysql_fetch_assoc($res);
 if($row['class']=='Product')	$entity='products';
 else	$entity='areas';
 
-//tindex_old(NULL,$entity,NULL,NULL,NULL,$productID);  // TO BE REMOVED
 tindex(NULL,$entity,NULL,NULL,NULL,$productID);
 echo '<br><br>All done.<br>';
 

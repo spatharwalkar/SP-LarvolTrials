@@ -1,7 +1,6 @@
 <?php
 require_once('db.php');
 require_once('preindex_trial.php');
-require_once('preindex_trial_old.php');  // TO BE REMOVED LATER
 ini_set('max_execution_time', '36000'); //10 hours
 ignore_user_abort(true);
 
@@ -31,7 +30,6 @@ if (isset($_GET['id']))
     die('No ID passed');
 }
 tindex(NULL,'products',NULL,NULL,NULL,$productID);
-tindex_old(NULL,'products',NULL,NULL,NULL,$productID);  // TO BE REMOVED
 echo '<br><br>All done.<br>';
 
 // recalculate mhm cells without recording changes incase of regex change

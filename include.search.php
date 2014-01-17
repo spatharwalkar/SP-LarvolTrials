@@ -250,7 +250,7 @@ function search($params=array(),$list=array('overall_status','brief_title'),$pag
 			echo "<h2>";
 			echo "Please, correct search parameters.";
 			echo "</h2>";
-			echo('<form method="post" action="' . ($_POST['simple']?'search_simple.php':'search.php') . '?'.$getVars.'">'
+			echo('<form method="post" action="' . ($_POST['simple']?'search_simple.php':'newsearch.php') . '?'.$getVars.'">'
 				. '<input name="oldsearch" type="hidden" value="' . base64_encode(serialize($_POST)) . '" />'
 				. '<input type="submit" name="back2s" value="Edit Search" /></form>');
 				
@@ -2330,7 +2330,7 @@ function validateInputPCRE($post)
 			echo "<li>$name =>  $mask";
 		echo "</ul>";
 		echo "</h2>";
-		echo('<form method="post" action="' . ($_POST['simple']?'search_simple.php':'search.php') . '?'.$getVars.'">'
+		echo('<form method="post" action="' . ($_POST['simple']?'search_simple.php':'newsearch.php') . '?'.$getVars.'">'
 			. '<input name="oldsearch" type="hidden" value="' . base64_encode(serialize($_POST)) . '" />'
 			. '<input type="submit" name="back2s" value="Edit Search" /></form>');
 			

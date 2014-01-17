@@ -113,23 +113,6 @@ if (isset($_POST['e_nall']) and $_POST['e_nall']=='ALL')
 	return;
 }
 
-// FULL refresh old schema
-if (isset($_POST['oall']) and $_POST['oall']=='ALL') 
-{
-	echo '
-		<form name="mode" action="fetch_nct_fullhistory_all.php" method="POST">
-	<div align="center"><br><br><br><br><hr />
-	<input type="radio" name="mode" value="db" checked> Use database for validating NCTIDs 
-	&nbsp; &nbsp; &nbsp;
-	<input type="radio" name="mode" value="web"> Use clinicaltrials.gov for validating NCTIDs
-	&nbsp; &nbsp; &nbsp;
-	<input type="submit" name="submit" value="Start Import" />
-	<hr />
-	</div>
-	</form>'
-	;
-	exit;
-}
 
 // single trial REMAP using NCTID
 if (isset($_POST['t_id'])) 
@@ -774,7 +757,7 @@ function editor()
 		  }
 		  
 		</script>
-		<br><div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NCT - NEW SCHEMA) </font> </b></legend>'
+		<br><div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NCT) </font> </b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter NCT Id to refresh a Single Trial: <input type="text" name="nt_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
@@ -801,33 +784,32 @@ function editor()
 			
 	$out .= '</fieldset></div>';
 	
-	//SCRAPER - OLD SCHEMA
-	$out .= '<div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(NCT - OLD SCHEMA) </font> </b></legend>'
+	
+	// EUDRACT
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(EUDRACT) </font> </b></legend>'
 			. '<form action="database.php" method="post">'
-			. 'Enter NCT Id to refresh a Single Trial: <input type="text" name="ot_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
+			. 'Enter EudraCT Id to refresh a Single Trial: <input type="text" name="eudract_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
 			. ''
 			. '<input type="submit" name="singletrial" value="Refresh Trial" />'
 			. '</form>'
 			
 			. '<form action="database.php" method="post">'
-			. 'Enter no. of days (look back period) : <input type="text" name="days_o" value=""/>&nbsp;&nbsp;&nbsp;
-				<input type="hidden" name="scraper_o" value="fetch_nct.php"/>
+			. 'Enter no. of days (look back period) : <input type="text" name="days_n" value=""/>&nbsp;&nbsp;&nbsp;
+				<input type="hidden" name="e_scraper_n" value="fetch_eudract.php"/>
 				'
 			. ''
 			. '<input type="submit" value="Fetch from source" />'
 			. '</form>'
-			
 			. '<form action="database.php" method="post">'
-			. '<input type="hidden" name="oall" value="ALL"/>'
+			. '<input type="hidden" name="e_nall" value="ALL"/>'
 			. 'Click <b>FULL Refresh</b> button to refresh all trials in the database &nbsp;'
-			. '<input type="submit" name="alltrials" value="FULL Refresh" />'
-			. '</form>'			;
+			. '<input type="submit" name="alleudracttrials" value="FULL Refresh" />'
+			. '</form></fieldset></div>';
 			
-			
-	$out .= '</fieldset></div>';
+		$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
-	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
-	// REMAPPING
+		
+		// REMAPPING
 	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> REMAP TRIALS <font color="red">(NCT) </font></b></legend>'
 			. '<form action="database.php" method="post">'
 			. 'Enter NCT Id to remap : <input type="text" name="t_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
@@ -888,28 +870,7 @@ function editor()
 
 		
 
-	// EUDRACT
-	$out .= '<div style="float:left;width:610px; padding:5px;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(EUDRACT) </font> </b></legend>'
-			. '<form action="database.php" method="post">'
-			. 'Enter EudraCT Id to refresh a Single Trial: <input type="text" name="eudract_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
-			. ''
-			. '<input type="submit" name="singletrial" value="Refresh Trial" />'
-			. '</form>'
-			
-			. '<form action="database.php" method="post">'
-			. 'Enter no. of days (look back period) : <input type="text" name="days_n" value=""/>&nbsp;&nbsp;&nbsp;
-				<input type="hidden" name="e_scraper_n" value="fetch_eudract.php"/>
-				'
-			. ''
-			. '<input type="submit" value="Fetch from source" />'
-			. '</form>'
-			. '<form action="database.php" method="post">'
-			. '<input type="hidden" name="e_nall" value="ALL"/>'
-			. 'Click <b>FULL Refresh</b> button to refresh all trials in the database &nbsp;'
-			. '<input type="submit" name="alleudracttrials" value="FULL Refresh" />'
-			. '</form>';
-			
-	$out .= '</fieldset></div>';
+	
 	
 	
 		// REMAPPING EUDRACT
@@ -934,7 +895,20 @@ function editor()
 			
 	$out 	.= '</fieldset></div>';
 	
-			$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+		// generate news
+	$out .= '<br><br><br><div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> GENERATE NEWS</b></legend>'
+			. '<form action="database.php" method="post">'
+			. 'Enter no. of days (look back period) : <input type="text" name="news_days" value=""/>&nbsp;&nbsp;&nbsp;'	
+			. ''
+			. '<input type="submit" value="Generate News" />'
+					. '</form>'
+							. '</fieldset></div>';
+	
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+	
+	
 	
 	
 	// RECALCULATE
@@ -1109,16 +1083,7 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
 	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
-	// generate news
-	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> GENERATE NEWS</b></legend>'
-			. '<form action="database.php" method="post">'
-			. 'Enter no. of days (look back period) : <input type="text" name="news_days" value=""/>&nbsp;&nbsp;&nbsp;'	
-			. ''
-			. '<input type="submit" value="Generate News" />'
-					. '</form>'
-							. '</fieldset></div>';
-	
-	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+
 	
 	
 	return $out;

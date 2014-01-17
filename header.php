@@ -78,10 +78,9 @@ echo('<a href="index.php" style="text-align:center;display:block;width:100%;">'
 	 . '</a><div id="bar"><div id="nav">');
 if($db->loggedIn())
 {
-	echo('Search (<a href="search.php">Main</a>,<a href="search_simple.php">Simple</a>,<a href="newsearch.php">New</a>) :: <a href="inspect.php">ID Lookup</a>');
+	echo('<a href="newsearch.php">Search</a> :: <a href="edit_trials.php">ID Lookup</a>');
 	echo(' :: ');
 	echo('<div class="drop">Editing<br/>'
-	.'<a href="import.php">XML Import</a><br/>'
 	.'<a href="edit_trials.php">Trial Entry</a><br/>'
 	.'<a href="upm.php">UPM</a><br/>'
 	.'<a href="entities.php?entity=areas">Areas</a><br/>'
@@ -109,7 +108,6 @@ if($db->loggedIn())
 		echo('::');
 		echo('<div class="drop">Admin<br />'
 			. '<a href="admin_users.php">Users</a><br />'
-			. '<a href="custom.php">Field editor</a><br />'
 			. '<a href="schedule.php">Scheduler</a><br />'
 			. '<a href="status.php">Status</a><br />'
 			. $dbpage
