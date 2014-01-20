@@ -521,7 +521,7 @@ function get_sphinx_idlist($srch_string=null)
 	if(!isset($srch_string)) return false;
 	$_POST['sphinx_s']=$srch_string;
 	$str=$srch_string;
-	$qry="SELECT id FROM rtindex1 where MATCH('".$str."') limit 10000 OPTION max_matches=10000" ;
+	$qry="SELECT id FROM rtindex1 where MATCH('*".$str."*') limit 10000 OPTION max_matches=10000" ;
 
 	$rs = mysql_query($qry,$sphinx);
 	$cnt=0;
