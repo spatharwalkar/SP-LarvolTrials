@@ -68,7 +68,7 @@ h1 { font-size: 1.2em; margin: .6em 0; }
 .feedback-success {color:blue;}
 .feedback-success, .feedback-error{text-align:center;margin-top:98px;margin-bottom: 127px;}
 .feedback-container {width:100%;height:8px;}
-#feedback-button {float:right;background:#4F2683;color:#fff;font-size:12px;font-weight:bold !important;}
+#feedback-button {float:right;background:#4F2683;color:#fff;font-size:12px;font-weight:bold !important; border: 2px outset;border-radius: 0px;}
 #dialog-form {display:none;height:auto !important;}
 .ui-widget-header, .ui-dialog-buttonset .ui-button-text{background:#6A4E8F !important;color:#fff !important;font-size:13px;}
 #feedback-wrapper,#dialog-form{font-size: 11px !important;clear:both;}
@@ -186,6 +186,6 @@ $( "#dialog-form" ).dialog( "open" );
 </form>
 </div>
 
-<div class="feedback-container"><button id="feedback-button">Feedback</button></div>
+<div class="feedback-container"><button id="feedback-button" title="Feedback">Feedback</button></div>
 <?php }?>
 </div>
