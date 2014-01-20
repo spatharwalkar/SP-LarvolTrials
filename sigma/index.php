@@ -651,7 +651,7 @@ if((trim($globalOptions['TzSearch']) == '' || $globalOptions['TzSearch'] == NULL
 <div align="center" style="padding-top:25px; color:#4f2683; font-weight:normal; font-size:16px">Welcome to <b>Larvol Sigma</b>. To find information please use the search field above or click on the links under it for a full list of covered items.</div>
 <?php
 	// Start of 'Recent Comments'
-$cmtx_mysql_table_prefix = "commentics_";
+/* $cmtx_mysql_table_prefix = "commentics_";
 echo "<h3>Recent Comments:</h3>";
 $comments = mysql_query("SELECT * FROM `" . $cmtx_mysql_table_prefix . "comments` WHERE `is_approved` = '1' ORDER BY `dated` DESC LIMIT 5");
 while ($comment = mysql_fetch_array($comments)) {	
@@ -709,7 +709,7 @@ while ($name = mysql_fetch_assoc($names)) {
 		<!--<span class='com_at'>at " . date("g:ia (jS-M)", strtotime($name["dated"]))."</span>--></p>
 	</div>";	
 	echo "<br/>";
-}
+} */
 // End of 'Top Posters'
 }
 ?>
