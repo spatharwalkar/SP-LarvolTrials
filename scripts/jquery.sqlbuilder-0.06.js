@@ -15,7 +15,7 @@
 	var pageParam = pageAddress.split(".php");
 	var pageName = pageParam[0];
 	var ignoreChanges = '';
-	if(pageName == 'newsearch'){
+	if(pageName == 'search'){
 		ignoreChanges = '<div style="text-align:right">'+'<input type="checkbox" id="ignore_changes" style="visibility: hidden;">'+'</div>';
 	}else{
 		ignoreChanges = '<div style="text-align:right">'+'<b>Record changes resulting from this action:</b>'+

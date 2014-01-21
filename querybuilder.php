@@ -481,7 +481,7 @@ if(isset($_POST['delsch']) && is_array($_POST['delsch']))
 	         <tr>
 
 						<td valign="top" style="border: 1px solid #ccc; width: 200px;">
-                        <form method="post" action="newsearch.php" class="lisep">
+                        <form method="post" action="search.php" class="lisep">
 						<p id="6000">
 <?php
 	global $db;

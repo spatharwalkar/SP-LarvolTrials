@@ -23,7 +23,7 @@ if(!isset($_POST['mode']))
 {
 echo ' 
 
-<form name="mode" action="fetch_nct_fullhistory_all_new.php" method="POST">
+<form name="mode" action="fetch_nct_fullhistory_all.php" method="POST">
 <div align="center"><br><br><br><br><hr />
 <input type="radio" name="mode" value="db" checked> Use database for validating NCTIDs 
 &nbsp; &nbsp; &nbsp;

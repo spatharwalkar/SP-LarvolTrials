@@ -78,7 +78,7 @@ echo('<a href="index.php" style="text-align:center;display:block;width:100%;">'
 	 . '</a><div id="bar"><div id="nav">');
 if($db->loggedIn())
 {
-	echo('<a href="newsearch.php">Search</a> :: <a href="edit_trials.php">ID Lookup</a>');
+	echo('<a href="search.php">Search</a> :: <a href="edit_trials.php">ID Lookup</a>');
 	echo(' :: ');
 	echo('<div class="drop">Editing<br/>'
 	.'<a href="edit_trials.php">Trial Entry</a><br/>'

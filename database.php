@@ -33,15 +33,7 @@ if (isset($_POST['eudract_id']))
 	}
 	return;
 }
-// single trial refresh old schema
-if (isset($_POST['ot_id'])) 
-{
-	require_once('include.import.php');
-	require_once('nct_common.php');
-	require_once('include.import.history.php');
-    scrape_history($_POST['ot_id']);
-	return;
-}
+
 
 //fetch from source new schema
 if (isset($_POST['scraper_n']) and isset($_POST['days_n'])) 
@@ -92,7 +84,7 @@ return ;
 if (isset($_POST['nall']) and $_POST['nall']=='ALL') 
 {
 	echo '
-	<form name="mode" action="fetch_nct_fullhistory_all_new.php" method="POST">
+	<form name="mode" action="fetch_nct_fullhistory_all.php" method="POST">
 	<div align="center"><br><br><br><br><hr />
 	<input type="radio" name="mode" value="db" checked> Use database for validating NCTIDs 
 	&nbsp; &nbsp; &nbsp;
@@ -766,7 +758,7 @@ function editor()
 			
 			. '<form action="database.php" method="post">'
 			. 'Enter no. of days (look back period) : <input type="text" name="days_n" value=""/>&nbsp;&nbsp;&nbsp;
-				<input type="hidden" name="scraper_n" value="fetch_nct_new.php"/>
+				<input type="hidden" name="scraper_n" value="fetch_nct.php"/>
 				'
 			. ''
 			. '<input type="submit" value="Fetch from source" />'

@@ -112,7 +112,7 @@ html,body {
 
    function goBack()
    {
-	   var url = "newsearch.php?data=" + <?php echo("'" . $jsonData) . "'"; ?>;
+	   var url = "search.php?data=" + <?php echo("'" . $jsonData) . "'"; ?>;
 	   window.location.href= url;
    }
 
