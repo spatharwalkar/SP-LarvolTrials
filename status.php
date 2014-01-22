@@ -5,8 +5,8 @@ require_once('db.php');
 require_once('include.search.php');
 require_once('include.util.php');
 require_once('nct_common.php');
-require_once('include.import_new.php');
-require_once('include.import.history_new.php');
+require_once('include.import.php');
+require_once('include.import.history.php');
 if(!$db->loggedIn() || ($db->user->userlevel!='admin' && $db->user->userlevel!='root'))
 {
 	header('Location: ' . urlPath() . 'index.php');

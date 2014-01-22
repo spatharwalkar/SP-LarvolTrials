@@ -6,7 +6,7 @@ require_once('include.search.php');
 require_once('include.util.php');
 require_once('preindex_trial.php');
 require_once('db.php');
-require_once('include.import_new.php');
+require_once('include.import.php');
 require_once('eudract_common.php');
 require_once('include.import.eudract.history.php');
 ini_set('max_execution_time', '36000'); //10 hours

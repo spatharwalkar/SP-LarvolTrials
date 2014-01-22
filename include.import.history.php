@@ -1,7 +1,7 @@
 <?php
 
 require_once('db.php');
-require_once('include.import_new.php');
+require_once('include.import.php');
 require_once('nct_common.php');
 require_once('preindex_trial.php');
 require_once('detect_investigator.php');

@@ -4,7 +4,7 @@ require_once('db.php');
 require_once('include.util.php');
 require_once ('include.derived.php');
 require_once('preindex_trial.php');
-require_once ('include.import_new.php');
+require_once ('include.import.php');
 ini_set('max_execution_time', '9000000'); //250 hours
 ignore_user_abort(true);
 global $db;

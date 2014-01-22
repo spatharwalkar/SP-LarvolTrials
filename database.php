@@ -2,7 +2,6 @@
 //connect to Sphinx
 if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 require_once('db.php');
-
 if(!$db->loggedIn() || ($db->user->userlevel!='root' && $db->user->userlevel!='admin'))
 {
 	header('Location: ' . urlPath() . 'index.php');
@@ -14,16 +13,16 @@ ignore_user_abort(true);
 // single trial refresh new schema
 if (isset($_POST['nt_id'])) 
 {
-	require_once('include.import_new.php');
+	require_once('include.import.php');
 	require_once('nct_common.php');
-	require_once('include.import.history_new.php');
+	require_once('include.import.history.php');
     scrape_history($_POST['nt_id']);
 	return;
 }
 // EudraCT trial refresh
 if (isset($_POST['eudract_id'])) 
 {
-	require_once('include.import_new.php');
+	require_once('include.import.php');
 	require_once('eudract_common.php');
 	require_once('include.import.eudract.history.php');
 	$ids=getEudraIDs($_POST['eudract_id']);
@@ -38,9 +37,9 @@ if (isset($_POST['eudract_id']))
 //fetch from source new schema
 if (isset($_POST['scraper_n']) and isset($_POST['days_n'])) 
 {
-	require_once('include.import_new.php');
+	require_once('include.import.php');
 	require_once('nct_common.php');
-	require_once('include.import.history_new.php');
+	require_once('include.import.history.php');
 	require_once($_POST['scraper_n']);
 	$update_id = 3;
 	run_incremental_scraper($_POST['days_n']);
@@ -50,7 +49,7 @@ if (isset($_POST['scraper_n']) and isset($_POST['days_n']))
 //fetch Eudract from source 
 if (isset($_POST['e_scraper_n']) and isset($_POST['days_n'])) 
 {
-	require_once('include.import_new.php');
+	require_once('include.import.php');
 	require_once('eudract_common.php');
 	require_once('include.import.eudract.history.php');  
 	require_once($_POST['e_scraper_n']);
@@ -61,7 +60,7 @@ if (isset($_POST['e_scraper_n']) and isset($_POST['days_n']))
 	require_once('include.util.php');
 	require_once('preindex_trial.php');
 	require_once('db.php');
-	require_once('include.import_new.php');
+	require_once('include.import.php');
 	require_once('eudract_common.php');
 	require_once('include.import.eudract.history.php');
 	ini_set('max_execution_time', '36000'); //10 hours

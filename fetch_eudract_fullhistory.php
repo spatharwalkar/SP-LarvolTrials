@@ -2,7 +2,7 @@
 //connect to Sphinx
 if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 require_once('db.php');
-require_once('include.import_new.php');
+require_once('include.import.php');
 require_once('eudract_common.php');
 require_once('include.import.eudract.history.php');
 $current_country='';
