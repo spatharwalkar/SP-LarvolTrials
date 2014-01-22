@@ -272,9 +272,16 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			$failwords = preg_match_all('/(admin|medical|director|trial|monitor|clinical|science|strategy|study)/i', $overall_official_name);
 			if($failwords > 0) continue;
 			$name_parts = parse_name($overall_official_name);
+			if($name_parts['surname'] == "")
+				$display_name = $name_parts['first_name'].' '.$name_parts['middle_name'];
+			else if($name_parts['first_name'] == "")
+				$display_name = $name_parts['surname'].' '.$name_parts['middle_name'];
+			else
+				$display_name = $name_parts['surname'].', '.$name_parts['first_name'].' '.$name_parts['middle_name'];
+			
+			
 			$query = 'SELECT id FROM entities where class="Investigator"'
-					. ' and first_name = "'.$name_parts['first_name']
-					. '" and surname = "'.$name_parts['surname'].'" limit 1';
+					. ' and name = "'.$overall_official_name.'" limit 1';
 				
 			if(!$res = mysql_query($query))
 			{
@@ -286,12 +293,45 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			$res = mysql_fetch_assoc($res);
 			$exists = $res !== false;
 			
+			if(!$exists) {
+				$query = 'SELECT id FROM entities where class="Investigator"'
+						. ' and first_name = "'.$name_parts['first_name']
+						. '" and surname = "'.$name_parts['surname'].'" limit 1';
+					
+				if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+				$res = mysql_fetch_assoc($res);
+				$exists = $res !== false;
+			} else {
+				$eid = $res['id'];
+				
+				$query = 'UPDATE IGNORE entities 
+					set class="Investigator", name = "'.$overall_official_name.'", display_name = "'.$display_name.'", affiliation = "'.$overall_official_affiliation.'" '
+					.', first_name = "'.$name_parts['first_name']
+					.'", middle_name = "'.$name_parts['middle_name']
+					.'", surname = "'.$name_parts['surname']
+					.'", degrees = "'.$name_parts['degrees']
+					.'" WHERE id="'.$eid.'"';
+					
+				if(!mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+				
+			}
 			
 			if(!$exists)
-			{
-				
+			{				
 				$query = 'INSERT IGNORE INTO entities 
-					set class="Investigator", name = "'.$overall_official_name.'", display_name = "'.$overall_official_name.'", affiliation = "'.$overall_official_affiliation.'" '
+					set class="Investigator", name = "'.$overall_official_name.'", display_name = "'.$display_name.'", affiliation = "'.$overall_official_affiliation.'" '
 					.', first_name = "'.$name_parts['first_name']
 					.'", middle_name = "'.$name_parts['middle_name']
 					.'", surname = "'.$name_parts['surname']
@@ -307,21 +347,21 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 				}
 				$eid = mysql_insert_id();
 				
-				$query = 'INSERT IGNORE INTO entity_trials 
-							set entity= "'.$eid.'", trial = "'.$larvol_id.'"';
-					
-				if(!$res = mysql_query($query))
-				{
-					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-					$logger->error($log);
-					echo $log;
-					return false;
+				if($eid > 0) {
+					$query = 'INSERT INTO entity_trials 
+								set entity= "'.$eid.'", trial = "'.$larvol_id.'"';
+						
+					if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						$logger->error($log);
+						echo $log;
+						return false;
+					}
 				}
 				mysql_query('COMMIT');
 								
-			}
-			else
-			{
+			} else {
 				$eid=$res['id'];
 				$query = 'SELECT * FROM entity_trials where entity="'.$eid.'" and trial = "'.$larvol_id.'" limit 1'; 
 				
@@ -339,7 +379,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 				if(!$exists)
 				{
 					
-					$query = 'INSERT IGNORE INTO entity_trials 
+					$query = 'INSERT INTO entity_trials 
 									set entity= "'.$eid.'", trial = "'.$larvol_id.'"';
 					
 					if(!$res = mysql_query($query))
