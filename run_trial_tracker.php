@@ -6876,14 +6876,16 @@ class TrialTracker
 						//$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 					}
 					if(!empty($row['category']))
-						$hname=$row['category'].", ".(!empty($row['display_name']) ? $row['display_name'] : $row['name']);
+						$hname=$row['category'].', ';
 					else
-						$hname=(!empty($row['display_name']) ? $row['display_name'] : $row['name']);
+						$hname='';
 					$productSelector[$productId] = $row['name'];
 					if($row['class']=='Product')
-						$sectionHeader = formatBrandName($hname, 'product');
+						$sectionHeader = formatBrandName($hname.$row['name'], 'product');
+					elseif(!empty($row['display_name']))
+						$sectionHeader = formatBrandName($hname.$row['display_name'], 'area');
 					else
-						$sectionHeader = formatBrandName($hname, 'area');
+						$sectionHeader = formatBrandName($hname.$row['name'], 'area');
 					
 					if($row['class']=='Product')	
 					$row['company'] = GetCompanyNames($productId);
@@ -6975,18 +6977,20 @@ class TrialTracker
 				{
 					$sectionHeader = "";
 					$areaId = $row['type_id'];
-					if(!empty($row['category']))
-							$hname      = $row['category'].", ".(!empty($row['display_name']) ? $row['display_name'] : $row['name']);
-					else 
-							$hname      = (!empty($row['display_name']) ? $row['display_name'] : $row['name']);
-					
-					if($row['class']=='Product')
-						$sectionHeader = formatBrandName($hname, 'product');
-					elseif(empty($row['name']) && empty($row['display_name']))
-						$sectionHeader = formatBrandName($row['class'].' ' . $areaId, 'area');
-					else
-						$sectionHeader = formatBrandName($hname, 'area');
 
+					
+					if(!empty($row['category']))
+						$hname=$row['category'].', ';
+					else
+						$hname='';
+					$productSelector[$productId] = $row['name'];
+					if($row['class']=='Product')
+						$sectionHeader = formatBrandName($hname.$row['name'], 'product');
+					elseif(!empty($row['display_name']))
+						$sectionHeader = formatBrandName($hname.$row['display_name'], 'area');
+					else
+						$sectionHeader = formatBrandName($hname.$row['name'], 'area');
+					
 					$Ids[$areaId]['area'] = $areaId;
 					$productSelector[$areaId] = $sectionHeader;
 					
