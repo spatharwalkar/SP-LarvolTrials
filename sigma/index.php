@@ -581,8 +581,7 @@ if($ClassFlg)
 				}
 				else if($DataArray[$index]['type'] == 'Product')
 				{
-					$ProdRelateCompany = GetCompanyNames($DataArray[$index]['id']);
-					print ' 		<a href="product.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" ><b>'.$DataArray[$index]['name'] . '</b>' . ((trim($ProdRelateCompany) != '') ? ' / '.$ProdRelateCompany:'') .'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
+					print ' 		<a href="product.php?e1='. trim($DataArray[$index]['id']) .'&sourcepg=TZ" title="Product" >'.productLIFormat($DataArray[$index]['id']).'</a>&nbsp;&nbsp;('.GetTrialsCountFromProduct(trim($DataArray[$index]['id'])).' Trials)';
 				}
 				else if($DataArray[$index]['type'] == 'NPT'){
 					print ' <a href="npt_tracker.php?tid='. trim($DataArray[$index]['id']) .'&nptname='.$DataArray[$index]['name'].'" title="Product" ><b>'.$DataArray[$index]['name'] . '</b></a>&nbsp;&nbsp;('.$DataArray[$index]['noOfTrials'].' Trials)';
@@ -1014,5 +1013,29 @@ function pagination($globalOptions = array(), $totalPages)
 			}
 		}
 		return $productListArr;
+	}
+	//Formats a product name with company per standard from LI
+	function productLIFormat($id='')
+	{
+		$name='';
+		$companies='';
+		if(trim($id) != '')
+		{
+			$query = 'SELECT `name`, `id`,company FROM `entities` WHERE `class` = "Product" AND `id`=' . mysql_real_escape_string($id) .' LIMIT 1';
+			$res = mysql_query($query) or die($query.' '.mysql_error());
+			$header = mysql_fetch_array($res);
+			$e1 = $header['id'];
+			$name = htmlspecialchars($header['name']);
+			$companies = htmlspecialchars($header['company']);
+			$paren = strpos($name, '(');
+			if($paren === false)
+			{
+				$name = '<b>' . $name . '</b>';
+			}else{
+				$name = '<b>' . substr($name,0,$paren) . substr($name,$paren) . '</b>';
+			}
+		}
+
+		return $name . ' / <i>' . $companies . '</i>';
 	}
 ?>
