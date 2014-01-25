@@ -6880,6 +6880,11 @@ class TrialTracker
 					else
 						$hname='';
 					$productSelector[$productId] = $row['name'];
+					if(!empty($row['company']))
+						$product_company_names=$row['company'];
+					else
+						$product_company_names='';
+						
 					if($row['class']=='Product')
 						$sectionHeader = formatBrandName($hname.$row['name'], 'product');
 					elseif(!empty($row['display_name']))
@@ -6892,8 +6897,8 @@ class TrialTracker
 					
 					if($row['company'] !== NULL && $row['company'] != '')
 					{
-						$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
-						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
+						$productSelector[$productId] .= " / <i>"  .$row['company'] . "</i>";
+						$sectionHeader .= " / <i>" . $product_company_names . "</i>";
 					}
 						
 					if($row['tag'] != '' && $row['tag'] !== NULL)
@@ -6983,6 +6988,12 @@ class TrialTracker
 						$hname=$row['category'].', ';
 					else
 						$hname='';
+						
+					if(!empty($row['company']))
+						$product_company_names=$row['company'];
+					else
+						$product_company_names='';
+						
 					$productSelector[$productId] = $row['name'];
 					if($row['class']=='Product')
 						$sectionHeader = formatBrandName($hname.$row['name'], 'product');
@@ -7561,6 +7572,11 @@ class TrialTracker
 							//$disContinuedTxt = " <span style='color:gray'>Discontinued</span>";
 						}
 						
+						if(!empty($row['company']))
+							$product_company_names=$row['company'];
+						else
+							$product_company_names='';
+						
 						if($row['class']=='Product')
 						{
 							$sectionHeader = formatBrandName($row['name'], 'product');
@@ -7582,7 +7598,7 @@ class TrialTracker
 						
 						if($row['company'] !== NULL && $row['company'] != '')
 						{
-							$sectionHeader .= " / <i>" . $row['company'] . "</i>";
+							$sectionHeader .= " / <i>" . $product_company_names .  "</i>";
 							$productSelector[$productId] .= " / <i>" . $row['company'] . "</i>";
 						}
 				
@@ -7633,6 +7649,13 @@ class TrialTracker
 					{
 						$sectionHeader = $row['category'];
 					}
+					
+					if(!empty($row['company']))
+						$product_company_names=$row['company'];
+					else
+						$product_company_names='';
+						
+					
 					if($row['class']=='Product')
 					{
 						$sectionHeader = formatBrandName($row['name'], 'product');
@@ -7711,24 +7734,30 @@ class TrialTracker
 		$resultArray = array_merge($resultIds['e1'], $resultIds['e2']);
 		$ids = implode("','", $resultArray);
 		
-		$query = "SELECT id, name, class, display_name FROM entities WHERE id IN ('" . $ids . "') ";
+		$query = "SELECT id, name, class,company display_name FROM entities WHERE id IN ('" . $ids . "') ";
 		$res = m_query(__LINE__, $query);
-		
+				
 		if($res)
 		{
 			while($row = mysql_fetch_assoc($res))
 			{
 				$id = $row['id'];
+				
+				
+				if(!empty($row['company']))
+					$product_company_names=$row['company'];
+				else
+					$product_company_names='';
+		
 				if($row['class'] == 'Product')
 				{
 					$pId = $id;
 					$sectionHeader = formatBrandName($row['name'], 'product');
-				
 					$row['company'] = GetCompanyNames($pId);
 					
 					if($row['company'] !== NULL && $row['company'] != '')
 					{
-						$sectionHeader .= " / <i>" . $row['company'] . "</i>";
+						$sectionHeader .= " / <i>" .$product_company_names . "</i>";
 					}
 					if($row['discontinuation_status'] !== NULL && $row['discontinuation_status'] != 'Active')
 					{
