@@ -137,7 +137,21 @@ foreach($tasks as $row)
 			$LISyncTasks[] = $row;
 			continue;
 		}		
-		
+		//clean stall queries
+		if( !is_null($row['clean_stalled_query']) and $row['clean_stalled_query']==1 )
+		{
+			echo '<br>Clean Up of all Stalled Queries ...<br>';
+			$query = 'UPDATE schedule SET lastrun="' . date("Y-m-d H:i:s",strtotime('now')) . '" WHERE id=' . $row['id'] . ' LIMIT 1';
+			global $logger;
+			if(!mysql_query($query))
+			{
+				$log='Error saving changes to schedule: ' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+				$logger->fatal($log);
+				die($log);
+			}
+			require_once('kill_mysql_proceses.php'); 
+			continue;
+		}
 		//Calculate Master HM cells if scheduled
 		if( !is_null($row['calc_HM']) and $row['calc_HM']==1 )
 		{
@@ -204,6 +218,7 @@ foreach($tasks as $row)
 			require_once('fetch_disease_categories.php');
 			continue;
 		}
+		
 		//Update UPM status (fire the trigger)  if scheduled
 		if( !is_null($row['upm_status']) and $row['upm_status']==1 )
 		{

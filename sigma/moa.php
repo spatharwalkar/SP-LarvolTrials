@@ -1,4 +1,5 @@
 <?php
+	define("SIGMA","1");
 	$cwd = getcwd();
 	chdir ("..");
 	require_once('db.php');

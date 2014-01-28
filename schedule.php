@@ -48,6 +48,10 @@ function editor()
 		$chkd5=" checked='checked' ";
 	else
 		$chkd5="";
+	if($rpt['clean_stalled_query']==1)
+		$chkd6=" checked='checked' ";
+	else
+		$chkd6="";
 	$out = '<form action="schedule.php" method="post"><fieldset class="schedule"><legend>Edit schedule item ' . $id . '</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />'
 			. '<input type="submit" name="reportsave" value="Save edits" /><br clear="all"/>'
@@ -60,7 +64,8 @@ function editor()
 			//. '<input type="checkbox" name="fetch"'	. ($rpt['fetch'] ? 'checked="checked"' : '') . '/>'
 			. makeDropdown('fetch',getEnumValues('schedule','fetch'),false,$rpt['fetch'])
 			. '</label><br />'  // checkbox for updating status of UPMs.
-			. '<label>Generate News?: <input type="checkbox" name="gen_news" value="news" ' . $chkd5 . ' /></label>'  // update deseases
+			. '<label>Generate News?: <input type="checkbox" name="gen_news" value="news" ' . $chkd5 . ' /></label><br />'  // update deseases
+			. '<label>Clean up Stalled Queries?: <input type="checkbox" name="clean_query" value="clean_q" ' . $chkd6 . ' /></label>'  // update deseases
 			. '<br clear="all"/>';
 
 	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
@@ -142,10 +147,10 @@ function postEd()
 		$query = 'UPDATE schedule SET `name`="' . $name . '",emails="' . $emails . '",`fetch`="' . $fetch . '",runtimes=' . $runtimes . ',format="' . $format . '"'
 					. ' WHERE id=' . $id . ' LIMIT 1';
 		mysql_query($query) or die('Bad SQL Query saving item');
-		$query = 'DELETE FROM schedule_heatmaps WHERE schedule=' . $id;
-		mysql_query($query) or die('Bad SQL query updating report associations2');
-		$query = 'DELETE FROM schedule_updatescans WHERE schedule=' . $id;
-		mysql_query($query) or die('Bad SQL query updating report associations3');
+		// $query = 'DELETE FROM schedule_heatmaps WHERE schedule=' . $id;
+		// mysql_query($query) or die('Bad SQL query updating report associations2');
+		// $query = 'DELETE FROM schedule_updatescans WHERE schedule=' . $id;
+		// mysql_query($query) or die('Bad SQL query updating report associations3');
 		if(is_array($_POST['reports']))
 		{
 			foreach($_POST['reports'] as $rep)
@@ -244,6 +249,15 @@ function postEd()
 		else
 		{
 			$query = 'UPDATE `schedule` SET `generate_news`= NULL where `id`="'.$id . '" limit 1';
+		}
+		mysql_query($query);
+		if( isset($_POST['clean_query']) and $_POST['clean_query']=='clean_q' )
+		{
+			$query = 'UPDATE `schedule` SET `clean_stalled_query`="1" where `id`="'.$id . '" limit 1';
+		}
+		else
+		{
+			$query = 'UPDATE `schedule` SET `clean_stalled_query`= NULL where `id`="'.$id . '" limit 1';
 		}
 		mysql_query($query);
 		if(!mysql_query($query))

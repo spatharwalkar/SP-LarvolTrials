@@ -169,6 +169,7 @@ CREATE TABLE IF NOT EXISTS `schedule` (
   `upm_status` tinyint(4) unsigned DEFAULT NULL,
   `get_diseases` tinyint(4) unsigned DEFAULT NULL,
   `get_disease_cat` tinyint(4) unsigned DEFAULT NULL,
+  `clean_stalled_query` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

@@ -1,4 +1,5 @@
 <?php
+	define("SIGMA","1");
 	header('P3P: CP="CAO PSA OUR"');
 	session_start();
 	//connect to Sphinx
