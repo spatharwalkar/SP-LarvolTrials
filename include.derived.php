@@ -566,7 +566,23 @@ function institutionMapping()
 	{
 		die('Cannot open directory derived/institution_type.');
 	}
-		
+	
+	
+	//All available names of companies in entity table are now considered to determine if institution_type is industry
+
+	$query = 'select name from entities where class="institution" and category="Industry" ';
+	
+	$res = mysql_query($query);
+	if($res)
+	{
+		while($row = mysql_fetch_array($res))
+		{
+			$out[trim($row['name'])] = 'industry';
+		}
+	}	
+	//
+	//$out = array_unique($out);
+	//
 	return $out;
 }
 
