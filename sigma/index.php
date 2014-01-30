@@ -5,6 +5,7 @@
 	chdir ("..");
 	require_once('db.php');
 	include('ss_entity.php');
+	include('disease_product_tracker.php');
 	chdir ($cwd);
 	$RecordsPerPage = 50;
 	$SearchFlg = false;
@@ -589,9 +590,9 @@ if($ClassFlg)
 				} 
 				else if($DataArray[$index]['type'] == 'Disease_Category')
 						print ' 		<a href="disease_category.php?DiseaseCatId='. trim($DataArray[$index]['id']) .'" title="Disease Category" >'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDiseaseCat(trim($DataArray[$index]['id'])).' Products)';
-				else if($DataArray[$index]['type'] == 'Disease')
-						print ' 		<a href="disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" >'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.GetProductsCountFromDisease(trim($DataArray[$index]['id'])).' Products)';
-				else if($DataArray[$index]['type'] == 'MOA_Category')
+				else if($DataArray[$index]['type'] == 'Disease'){
+						print ' 		<a href="disease.php?DiseaseId='. trim($DataArray[$index]['id']) .'" title="Disease" >'.$DataArray[$index]['name'] .'</a>&nbsp;&nbsp;('.DataGenerator(trim($DataArray[$index]['id']), 'DPT', $page=1, $dwcount='total').' Products)';
+				}else if($DataArray[$index]['type'] == 'MOA_Category')
 				{
 						print ' 	<a href="moacategory.php?MoaCatId='. trim($DataArray[$index]['id']) .'" title="MOA Category" ><b>'.$DataArray[$index]['name'] .'</b></a>&nbsp;&nbsp;('.GetProductsCountFromMOACat(trim($DataArray[$index]['id'])).' Products)';
 				}
@@ -770,7 +771,7 @@ function GetProductsCountFromMOA($moaID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  JOIN entity_trials etrial on er.parent=etrial.entity WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from moa id in TZ');
 	
 	if($res)
@@ -824,7 +825,8 @@ function GetProductsCountFromCompany($companyID)
 	global $now;
 	$ProductsCount = 0;
 	/* COUNT QUERY THROUGH ENTITY_RELATIONS*/
-	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN entity_trials etrial on er.parent=etrial.entity WHERE et.`class`='Product' AND er.`child`='".mysql_real_escape_string($companyID)."' AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+//"SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
 	/* COUNT QUERY THROUGH OLD RELATION TABLE*/
 	//$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `products_institutions` pi ON(et.`id` = pi.`product`) WHERE et.`class`='Product' AND pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
@@ -843,7 +845,7 @@ function GetProductsCountFromMOACat($moaCatID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  WHERE et.`class`='Product' and er.`child` IN (SELECT et2.`id` FROM `entities` et2 JOIN `entity_relations` er2 ON(et2.`id` = er2.`child`)  WHERE et2.`class`='MOA' AND er2.`parent`='". mysql_real_escape_string($moaCatID) ."')  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN entity_trials etrial on er.parent=etrial.entity WHERE et.`class`='Product' and er.`child` IN (SELECT et2.`id` FROM `entities` et2 JOIN `entity_relations` er2 ON(et2.`id` = er2.`child`)  WHERE et2.`class`='MOA' AND er2.`parent`='". mysql_real_escape_string($moaCatID) ."')  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
@@ -886,7 +888,7 @@ function GetProductsCountFromDisease($DiseaseID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(Distinct(e.`id`)) as proCount FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) WHERE e.`class`='Product' AND er.`parent`='" . mysql_real_escape_string($DiseaseID) . "' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+	$query = "SELECT count(Distinct(e.`id`)) as proCount FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) JOIN entity_trials etrial on er.parent=etrial.entity WHERE e.`class`='Product' AND er.`parent`='" . mysql_real_escape_string($DiseaseID) . "' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
