@@ -23,7 +23,7 @@
 <script type="text/javascript" src="scripts/jquery.sqlbuilder-0.06.js"></script>
 
 <?php echo($HEADER_INCLUDES);
-if($db->user->userlevel == 'public') die();
+if($db->user->userlevel == 'public') die('<p>Access Forbidden : It seems that you are logged in as a public user. To continue access to <b>LT</b> please <a href = ' . urlPath() . 'index.php?logout><b>logout</b></a> and <b>login</b> again as <b>Admin</b>.</p>'); // Modified By PK
 ?>
 
 <link rel="stylesheet" type="text/css" href="css/jquery.sqlbuilder.css" />
