@@ -7,10 +7,10 @@ require_once('include.excel.php');
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','60');	//1min
 if(isset($_REQUEST['InvestigatorId']))
-		{
-			$InvestigatorId = mysql_real_escape_string($_REQUEST['InvestigatorId']);
-			$OptionArray = array('InvestigatorId'=>$InvestigatorId, 'Phase'=> $_REQUEST['phase']);	
-		}
+{
+	$InvestigatorId = mysql_real_escape_string($_REQUEST['InvestigatorId']);
+	$OptionArray = array('InvestigatorId'=>$InvestigatorId, 'Phase'=> $_REQUEST['phase']);	
+}
 
 if(!isset($_REQUEST['id'])) return;
 $id = mysql_real_escape_string(htmlspecialchars($_REQUEST['id']));
@@ -1391,32 +1391,35 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 	*/
 	$htmlContent .= '<tr style="background-color:#CCCCCC;"><th class="prod_col" align="right">Trials</th><th width="8px" class="graph_rightWhite">&nbsp;</th>';
 	$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="1" width="8px">0</th>';
+	
+	$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 	for($j=0; $j < $columns; $j++)
 	{
 		if($column_interval == 0){
-			$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.($j+1 == $columns ? ($j+1) * $column_interval : "").'</th>';
+			$htmlContent .= '<span style="display: block; float: left; text-align: right;width: 10%;" align="right" class="graph_rightWhite" >'.($j+1 == $columns ? ($j+1) * $column_interval : "").'</span>';
 		}else{
-			$htmlContent .= '<th align="right" class="graph_rightWhite" colspan="'.$inner_columns.'">'.(($j+1) * $column_interval).'</th>';
+			$htmlContent .= '<span style="display: block; float: left; text-align: right;width: 10%;" align="right" class="graph_rightWhite">'.(($j+1) * $column_interval).'</span>';
 		}
 	}		
-	$htmlContent .= '</tr>';
-	
+	$htmlContent .= '</th></tr>';
+	//[End]
 	$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
+	$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 	for($j=0; $j < $columns; $j++)
-	$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right graph_bottom"><font style="line-height:4px;">&nbsp;</font></th>';
-	$htmlContent .= '<th></th></tr>';
+	$htmlContent .= '<span style="display: block; float: left; text-align: right;width: 10%;margin-right:-1px;" class="graph_right graph_bottom"><font style="line-height:4px;">&nbsp;</font></span>';
+	$htmlContent .= '</th><th></th></tr>';
 	
 	
 	$htmlContent .='</thead>';
 	//scale ends
-
 	$htmlContent .= '<tr class="side_tick_height"><th class="prod_col" width="420px">&nbsp;</th><th width="8px" class="graph_right">&nbsp;</th>';
+	$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 	for($j=0; $j < $columns; $j++)
 	{
-		for($k=0; $k < $inner_columns; $k++)
-		$htmlContent .= '<th width="8px" colspan="1" class="'. (($k == ($inner_columns-1)) ? 'graph_right':'' ) .'">&nbsp;</th>';
+		$htmlContent .= '<span style="display: block; float: left; text-align: right;width: 10%;margin-right:-1px;" class="graph_right">&nbsp;</span>';
 	}
-	$htmlContent .= '<th width="8px"></th></tr>';
+	$htmlContent .= '</th><th width="8px"></th></tr>';
+
 	if(empty($OptionArray['InvestigatorId']))
 		$OptionArray['InvestigatorId']=$_REQUEST['InvestigatorId'];
 	for($incr=0; $incr < count($rows); $incr++)
@@ -1454,11 +1457,12 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 		$totalLink = $commonPart1 . $commonPart2 . '&list=2';
 		
 		$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
+		$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 		for($j=0; $j < $columns; $j++)
 		{
-			$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+			$htmlContent .= '<span style="display: block; float: left; text-align: right;width: 10%;margin-right:-1px;" class="graph_right">&nbsp;</span>';
 		}
-		$htmlContent .= '<th></th></tr>';
+		$htmlContent .= '</th><th width=8px>&nbsp;</th></tr>';
 		
 		////// Color Graph - Bar Starts
 		
@@ -1476,39 +1480,42 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
 			///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
 			$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
-		
+			
+			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 			for($j=0; $j < $columns; $j++)
 			{
-				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+				$htmlContent .= '<span style="width:10%;margin-right:-1px;display:block;float:left;height:'.$ExtraAdjusterHeight.'px;"  class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
-			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_indlead_Graph_Row_B_'.$row.'" class="Link indlead_Graph" >';
 			
+			$htmlContent .= '</th><th></th></tr><tr id="'.$uniqueId.'_indlead_Graph_Row_B_'.$row.'" class="Link indlead_Graph" >';
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['indlead']);
 			$phase_space = 0;
-	
+			
+			$htmlContent .= '<th colspan="'.$total_cols.'" align="left" style="">';  // Modified By PK
 			foreach($phase_legend_nums as $key => $phase_nums)
 			{
 				if($data_matrix[$row]['indlead_phase_'.$phase_nums] > 0)
 				{
 					$Color = getClassNColorforPhase($phase_nums);
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;					
-					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $industryLink . '&phase='.$phase_nums . '"  class="Link" >&nbsp;</a></th>';
+					$ind_width_in_per = ($data_matrix[$row]['indlead_phase_'.$phase_nums]/($column_interval*10))*100;
+					$phase_space =  $phase_space + $ind_width_in_per;
+					$htmlContent .= '<span class="Link '.$Color[0].'" title="'.$data_matrix[$row]['indlead_phase_'.$phase_nums].'" style="width:'.$ind_width_in_per.'%;height:20px; _height:20px;display:inline-block;"><a style="display:inline-block;" href="'. $industryLink . '&phase='.$phase_nums . '"  class="Link" >&nbsp;</a></span>';
 				}
 			}
-		
-			$remain_span = $total_cols - $phase_space;
+			$remain_span_in_per = 100 - $phase_space;
+			$inner_col_in_per= 10;
+			if($remain_span_in_per > 0)
+			$htmlContent .= DrawExtraHTMLCellsInPercentage($phase_space, $inner_col_in_per, $remain_span_in_per);// Modified By PK
 			
-			if($remain_span > 0)
-			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			$htmlContent .= '</th><th></th></tr><tr class="indlead_Graph" id="'.$uniqueId.'_indlead_Graph_Row_C_'.$row.'" >';
 			
-			$htmlContent .= '<th></th></tr><tr class="indlead_Graph" id="'.$uniqueId.'_indlead_Graph_Row_C_'.$row.'" >';
+			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 			for($j=0; $j < $columns; $j++)
 			{
-				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+				$htmlContent .= '<span style="display:block;float:left;width:10%;margin-right:-1px;height:'.$ExtraAdjusterHeight.'px" class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
-			$htmlContent .= '<th></th></tr>';
+			$htmlContent .= '</th><th></th></tr>';
 		}
 		//// Code for Active
 		if($dwcount == 'active')
@@ -1518,39 +1525,42 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['active_phase_na'], $data_matrix[$row]['active_phase_0'], $data_matrix[$row]['active_phase_1'], $data_matrix[$row]['active_phase_2'], $data_matrix[$row]['active_phase_3'], $data_matrix[$row]['active_phase_4']);
 					
 			$htmlContent .= '<tr class="active_Graph" id="'.$uniqueId.'_active_Graph_Row_A_'.$row.'" ><th align="right" class="prod_col" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $procommonPart1.'&sourcepg=TZP': $activeLink) . '"  style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
-	
+			
+			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 			for($j=0; $j < $columns; $j++)
 			{
-				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+				$htmlContent .= '<span style="width:10%;margin-right:-1px;display:block;float:left;height:'.$ExtraAdjusterHeight.'px;"  class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
-			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_active_Graph_Row_B_'.$row.'" class="Link active_Graph" >';
+			$htmlContent .= '</th><th></th></tr><tr id="'.$uniqueId.'_active_Graph_Row_B_'.$row.'" class="Link active_Graph" >';
 			
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['active']);
 			$phase_space = 0;
-		
+			
+			$htmlContent .= '<th colspan="'.$total_cols.'" align="left" style="">'; // Modified By PK
 			foreach($phase_legend_nums as $key => $phase_nums)
 			{
 				if($data_matrix[$row]['active_phase_'.$phase_nums] > 0)
 				{
 					$Color = getClassNColorforPhase($phase_nums);
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;					
-					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $activeLink . '&phase='.$phase_nums . '"  class="Link" >&nbsp;</a></th>';
+					$ind_width_in_per = ($data_matrix[$row]['active_phase_'.$phase_nums]/($column_interval*10))*100;
+					$phase_space =  $phase_space + $ind_width_in_per;
+					$htmlContent .= '<span class="Link '.$Color[0].'" title="'.$data_matrix[$row]['active_phase_'.$phase_nums].'" style="width:'.$ind_width_in_per.'%;height:20px; _height:20px;display:inline-block;"><a style="display:inline-block;" href="'. $activeLink . '&phase='.$phase_nums . '"  class="Link" >&nbsp;</a></span>';
 				}
 			}
-		
-			$remain_span = $total_cols - $phase_space;
+			$remain_span_in_per = 100 - $phase_space;
+			$inner_col_in_per= 10;
+			if($remain_span_in_per > 0)
+			$htmlContent .= DrawExtraHTMLCellsInPercentage($phase_space, $inner_col_in_per, $remain_span_in_per); // Modified By PK
 			
-			if($remain_span > 0)
-			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			$htmlContent .= '</th><th></th></tr><tr class="active_Graph" id="'.$uniqueId.'_active_Graph_Row_C_'.$row.'" >';
 			
-			$htmlContent .= '<th></th></tr><tr class="active_Graph" id="'.$uniqueId.'_active_Graph_Row_C_'.$row.'" >';
+			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 			for($j=0; $j < $columns; $j++)
 			{
-				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+				$htmlContent .= '<span style="display:block;float:left;width:10%;margin-right:-1px;height:'.$ExtraAdjusterHeight.'px"  class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
-			$htmlContent .= '<th></th></tr>';
+			$htmlContent .= '</th><th></th></tr>';
 		}	
 		//// Code for Total
 		if($dwcount == 'total')
@@ -1560,37 +1570,39 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			$Max_ValueKey = Max_ValueKey($data_matrix[$row]['total_phase_na'], $data_matrix[$row]['total_phase_0'], $data_matrix[$row]['total_phase_1'], $data_matrix[$row]['total_phase_2'], $data_matrix[$row]['total_phase_3'], $data_matrix[$row]['total_phase_4']);
 	
 			$htmlContent .= '<tr class="total_Graph" id="'.$uniqueId.'_total_Graph_Row_A_'.$row.'"><th align="right" class="prod_col" rowspan="3"><a href="'. (($TrackerType != 'PTH') ? $procommonPart1.'&sourcepg=TZP': $totalLink) . '"  style="text-decoration:underline;">'.formatBrandName($data_matrix[$row]['productName'], 'product').$data_matrix[$row]['product_CompanyName'].'</a>'.((trim($data_matrix[$row]['productTag']) != '') ? ' <font class="tag">['.$data_matrix[$row]['productTag'].']</font>':'').'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
-	
+			
+			$htmlContent .= '<th colspan="100" align="left" style="">';  // Modified By PK
 			for($j=0; $j < $columns; $j++)
 			{
-				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+				$htmlContent .= '<span style="display:block;float:left;width:10%;margin-right:-1px;height:'.$ExtraAdjusterHeight.'px"  class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
-			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_total_Graph_Row_B_'.$row.'" class="Link total_Graph" >';
+			$htmlContent .= '</th><th></th></tr><tr id="'.$uniqueId.'_total_Graph_Row_B_'.$row.'" class="Link total_Graph" >';
 		
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['total']);
 			$phase_space = 0;
-		
+			
+			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 			foreach($phase_legend_nums as $key => $phase_nums)
 			{
 				if($data_matrix[$row]['total_phase_'.$phase_nums] > 0)
 				{
 					$Color = getClassNColorforPhase($phase_nums);
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;					
-					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $totalLink . '&phase='.$phase_nums . '"  class="Link" >&nbsp;</a></th>';
+					$ind_width_in_per = ($data_matrix[$row]['total_phase_'.$phase_nums]/($column_interval*10))*100;
+					$phase_space =  $phase_space + $ind_width_in_per;
+					$htmlContent .= '<span class="Link '.$Color[0].'" title="'.$data_matrix[$row]['total_phase_'.$phase_nums].'" style="width:'.$ind_width_in_per.'%;height:20px; _height:20px;display:inline-block;"><a style="display:inline-block;" href="'. $totalLink . '&phase='.$phase_nums . '"  class="Link" >&nbsp;</a></span>';
 				}
 			}
-	
-			$remain_span = $total_cols - $phase_space;
-		
-			if($remain_span > 0)
-			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			$remain_span_in_per = 100 - $phase_space;
+			$inner_col_in_per= 10;
+			if($remain_span_in_per > 0)
+			$htmlContent .= DrawExtraHTMLCellsInPercentage($phase_space, $inner_col_in_per, $remain_span_in_per); // Modified By PK
 			
-			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_total_Graph_Row_C_'.$row.'" class="total_Graph">';
+			$htmlContent .= '</th><th></th></tr><tr id="'.$uniqueId.'_total_Graph_Row_C_'.$row.'" class="total_Graph">';
+			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 			for($j=0; $j < $columns; $j++)
 			{
-				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+				$htmlContent .= '<span style="display:block;float:left;width:10%;margin-right:-1px;height:'.$ExtraAdjusterHeight.'px"  class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
 			$htmlContent .= '<th></th></tr>';
 		}
@@ -1608,55 +1620,61 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			///for product column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
 			///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
 			$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
-		
+			
+			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 			for($j=0; $j < $columns; $j++)
 			{
-				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+				$htmlContent .= '<span style="display:block;float:left;width:10%;margin-right:-1px;height:'.$ExtraAdjusterHeight.'px"  class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
-			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_owner_sponsored_Graph_Row_B_'.$row.'" class="Link owner_sponsored_Graph" >';
+			$htmlContent .= '</th><th></th></tr><tr id="'.$uniqueId.'_owner_sponsored_Graph_Row_B_'.$row.'" class="Link owner_sponsored_Graph" >';
 			
 			$total_cols = $inner_columns * $columns;
 			$Total_Bar_Width = ceil($ratio * $data_matrix[$row]['owner_sponsored']);
 			$phase_space = 0;
-	
+			
+			$htmlContent .= '<th colspan="'.$total_cols.'" align="left" style="">'; // Modified By PK
 			foreach($phase_legend_nums as $key => $phase_nums)
 			{
 				if($data_matrix[$row]['owner_sponsored_phase_'.$phase_nums] > 0)
 				{
 					$Color = getClassNColorforPhase($phase_nums);
-					$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-					$phase_space =  $phase_space + $Mini_Bar_Width;					
-					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$row]['owner_sponsored_phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="'. $ownerSponsoredLink . '&phase='.$phase_nums . '"  class="Link" >&nbsp;</a></th>';
+					$ind_width_in_per = ($data_matrix[$row]['owner_sponsored_phase_'.$phase_nums]/($column_interval*10))*100;
+					$phase_space =  $phase_space + $ind_width_in_per;
+					$htmlContent .= '<span class="Link '.$Color[0].'" title="'.$data_matrix[$row]['owner_sponsored_phase_'.$phase_nums].'" style="width:'.$ind_width_in_per.'%;height:20px; _height:20px;display:inline-block;"><a style="display:inline-block;" href="'. $ownerSponsoredLink . '&phase='.$phase_nums . '"  class="Link" >&nbsp;</a></span>';
 				}
 			}
-		
-			$remain_span = $total_cols - $phase_space;
+			$remain_span_in_per = 100 - $phase_space;
+			$inner_col_in_per= 10;
+			if($remain_span_in_per > 0)
+			$htmlContent .= DrawExtraHTMLCellsInPercentage($phase_space, $inner_col_in_per, $remain_span_in_per); //Modified By PK
 			
-			if($remain_span > 0)
-			$htmlContent .= DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span);
+			$htmlContent .= '</th><th></th></tr><tr class="owner_sponsored_Graph" id="'.$uniqueId.'_owner_sponsored_Graph_Row_C_'.$row.'" >';
 			
-			$htmlContent .= '<th></th></tr><tr class="owner_sponsored_Graph" id="'.$uniqueId.'_owner_sponsored_Graph_Row_C_'.$row.'" >';
+			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 			for($j=0; $j < $columns; $j++)
 			{
-				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+				$htmlContent .= '<span style="display:block;left:right;width:10%;margin-right:-1px;height:'.$ExtraAdjusterHeight.'px"  class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
-			$htmlContent .= '<th></th></tr>';
+			$htmlContent .= '</th><th></th></tr>';
 		}
 		////// End Of - Color Graph - Bar Starts
 		
 		$htmlContent .= '<tr class="side_tick_height"><th class="prod_col side_tick_height">&nbsp;</th><th class="'. (($incr == (count($rows)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
+		
+		$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 		for($j=0; $j < $columns; $j++)
 		{
-			$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+			$htmlContent .= '<span style="width:10%;margin-right:-1px;display:block;float:left;line-height:2px;" class="graph_right">&nbsp;</span>';
 		}
-		$htmlContent .= '<th></th></tr>';
+		$htmlContent .= '</th><th></th></tr>';
 	}			   
 
 	//Draw scale			   
 	$htmlContent .= '<tr class="last_tick_height"><th class="last_tick_height prod_col"><font style="line-height:4px;">&nbsp;</font></th><th class="graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
+	$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
 	for($j=0; $j < $columns; $j++)
-	$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></th>';
-	$htmlContent .= '<th></th></tr>';
+	$htmlContent .= '<span style="display:block;width:10%;margin-right:-1px;float:left;" colspan="'.$inner_columns.'" class="graph_top graph_right"><font style="line-height:4px;">&nbsp;</font></span>';
+	$htmlContent .= '</th><th></th></tr>';
 	/* Current no need of lower scale
 	$htmlContent .= '<tr><th class="prod_col"></th><th class="graph_rightWhite"></th>';
 	for($j=0; $j < $columns; $j++)
@@ -1706,6 +1724,25 @@ function DrawExtraHTMLCells($phase_space, $inner_columns, $remain_span)
 	while($remain_span > 0)
 	{
 		$extraHTMLContent .= '<th colspan="'.($inner_columns).'" class="graph_right Link">&nbsp;</th>';
+		$remain_span = $remain_span - $inner_columns;
+	}
+	
+	return $extraHTMLContent;
+}
+function DrawExtraHTMLCellsInPercentage($phase_space, $inner_columns, $remain_span) // Modified By PK
+{
+	$aq_sp = 10;
+	while($aq_sp < $phase_space){
+		$aq_sp = $aq_sp + $inner_columns;
+	}
+	$extra_sp = $aq_sp - $phase_space;
+	if($extra_sp > 0.0001)
+	$extraHTMLContent .= '<span style="display:inline-block;width:'.$extra_sp.'%;margin-right:-1px;" class="graph_right Link">&nbsp;</span>';
+	
+	$remain_span = $remain_span - $extra_sp;
+	while($remain_span > 0)
+	{
+		$extraHTMLContent .= '<span style="display:inline-block;width:10%;margin-right:-1px;" class="graph_right Link">&nbsp;</span>';
 		$remain_span = $remain_span - $inner_columns;
 	}
 	
