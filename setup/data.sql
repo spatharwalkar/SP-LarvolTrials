@@ -98,3 +98,7 @@ INSERT INTO `redtags`(`id`, `name`, `type`, `rUIS`, `formula`, `statement`)
         (21, 'Phase Classification', 'Clinical Trial status', 2, 'Phase classification: N/A ->[phase]', "select larvol_id, cast(coalesce( phase_lastchanged,current_date())as date) as added from data_history join data_trials dt using (larvol_id) where adddate(phase_lastchanged,%d)>= current_date() and phase_prev = 'N/A' and dt.phase != 'N/A'  "),
         (22, 'Phase Shift', 'Clinical Trial status', 10, '[phase_prev] -> [phase]', "select larvol_id, cast(coalesce( phase_lastchanged,current_date())as date) as added from data_history join data_trials dt using (larvol_id) where adddate(phase_lastchanged,%d)>= current_date() and phase_prev != dt.phase");
 
+		
+INSERT INTO `ga_profile` (`id`, `profile_name`, `ga_id`, `status`) VALUES
+(1, 'SIGMA', 'UA-18240582-3', 0),
+(2, 'LT', 'UA-18240582-3', 0);
