@@ -4,8 +4,8 @@
 <form action="index.php" method="post" name="trialzillaFrm" id="trialzillaFrm">
 <table width="100%" border="0" style="padding-top:2px;">
 <tr>
-<td width="300px">
-<a style="text-decoration:none;" href="."><img src="../images/larvol_sigma_logo_beta.jpg" width="300" height="58" style="border: none;margin-top:-8px;" /></a>
+<td width="337px">
+<a style="text-decoration:none;" href="."><img src="../images/larvol_sigma_logo_beta.jpg" width="335px" height="75px" style="border: none;margin-top:-25px;" /></a>
 </td>
 <td width="600px" style="vertical-align:bottom; padding-left:20px;" align="left">
 <input class="SearchBox" type="text" value="<?php echo htmlspecialchars($globalOptions['TzSearch']); ?>" autocomplete="off" style="font-weight:bold;" name="TzSearch" id="TzSearch" />
