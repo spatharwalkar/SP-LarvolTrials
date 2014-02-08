@@ -204,6 +204,7 @@ function ProcessNew($id) {
 
     echo('Getting XML for ' . $id . '... - ');
     $xml = file_get_contents('http://www.clinicaltrials.gov/show/' . $id . '?displayxml=true');
+//    file_put_contents("/tmp/ProcessNew-". rand().".xml", $xml);
     echo('Parsing XML... - ');
     $xml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOWARNING | LIBXML_NOERROR);
     if ($xml === false) 
@@ -230,9 +231,10 @@ function ProcessNew($id) {
 		$parse_retry=0;
         echo('Importing... - ');
         if (addRecord($xml, 'nct') === false) {
-            echo('Import failed for this record.' . "\n<br />");
+            echo(' Import failed for this record.' . "\n<br />");
         } else {
-            echo('Record imported.' . "\n<br />");
+            echo(' Record imported.' . "\n<br />");
+	    # ^ Space in front for readability
         }
     }
 

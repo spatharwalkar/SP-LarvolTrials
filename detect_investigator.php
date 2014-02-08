@@ -264,6 +264,26 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			$affiliations = explode("`", $overall_official_affiliation);
 		}
 		
+		// Add investigators from `locations_xml`
+		$xml = $record_data['locations_xml'];
+		echo('Parsing locations_xml... ');
+		$xml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOWARNING | LIBXML_NOERROR);
+		if ($xml === false) {
+			echo(' Invalid locations_xml');
+		} 
+		else {
+			echo(' Adding location-specific investigators... ');
+			foreach ($xml->location as $location) {
+				$affiliation = defined($location->facility->name) ? $location->facility->name : "";
+				foreach ($location->investigator as $investigator) {
+					$investigator_names[] = assemble(' ', array(
+						$investigator->first_name, $investigator->middle_name, $investigator->last_name
+					));
+					$affiliations[] = $affiliation;
+				}
+			}
+		}
+
 		foreach ($investigator_names as $key=>$overall_official_name)
 		{
 			$overall_official_affiliation = $affiliations[$key];
