@@ -609,13 +609,14 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storecha
 }
 function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_type,$end_date,$phase_value,$sourcedb=null)
 {
-
+	
 	$lastchanged_date = normal('date',$lastchanged_date);
 	global $logger,$nctid;
 	$DTnow = date("Y-m-d H:i:s", strtotime('now'));
 
 	//normalize the input
-	
+	// Commented existing remap code, will now use the new centralized function get_field_value() to get values.
+	/*
 	if(!is_array($value)) 
 	{
 		
@@ -628,7 +629,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		else   $value = preg_replace( '/\s+/', ' ', trim( $value ) );
 		if($fieldname=="phase") $value=$phase_value;
 	}
-
+	
 	elseif(is_numeric($value[0])) $value=max($value); 
 	elseif($fieldname=="phase") $value=max($phase_value);
 	else
@@ -769,7 +770,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		$str['inclusion']=mysql_real_escape_string($str['inclusion']);
 		$str['exclusion']=mysql_real_escape_string($str['exclusion']);
 		if(!empty($overridden_enddate)) $cdate=$overridden_enddate;
-		/*********/
+		/********* /
 		if( !is_null($cdate) and  $cdate <>'0000-00-00' )	// completion date
 		{
 			$cdate=normalize('date',$cdate);
@@ -823,7 +824,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 			}
 		}
 		
-		/*************/
+		/************* /
 				
 		if( !is_null($pcdate) and  $pcdate <>'0000-00-00' and $fieldname=='end_date') 	// primary completion date
 		{
@@ -878,7 +879,13 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 				
 			
 		}
-	return true;
+		//
+		*/
+		// get value using the new centralized function
+		require_once('field_mappings.php');
+		$fieldvalue=get_field_value($larvol_id,  $fieldname, $sourcedb);
+		update_history($larvol_id,$fieldname,$fieldvalue,$lastchanged_date);
+		return true;
 	}
 
 }
