@@ -886,7 +886,6 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		$fieldvalue=get_field_value($larvol_id,  $fieldname, $sourcedb);
 		update_history($larvol_id,$fieldname,$fieldvalue,$lastchanged_date);
 		return true;
-	}
 
 }
 
