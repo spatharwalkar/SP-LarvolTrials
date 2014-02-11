@@ -13,7 +13,7 @@
 	if($_REQUEST['CompanyId'] != NULL && $_REQUEST['CompanyId'] != '' && isset($_REQUEST['CompanyId']))
 	{
 		$CompanyId = $_REQUEST['CompanyId'];
-		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Institution" AND `id`=' . mysql_real_escape_string($CompanyId);
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `id`=' . mysql_real_escape_string($CompanyId);
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$CompanyId = $header['id'];
@@ -69,6 +69,7 @@
 	if(!isset($_REQUEST['DiseaseCatId']) && !isset($_REQUEST['DiseaseId']) ){
 		$OptionArray = array('DiseaseId'=>$DiseaseId, 'Phase'=> $phase);
 	}
+	
 	$InvestigatorId = null;
 	if(isset($_REQUEST['InvestigatorId']))
 	{
@@ -86,25 +87,39 @@
 	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'company.php?CompanyId='.$CompanyId;
 	$tabOTTUrl    = 'company.php?e1='.$CompanyId;
-	$disease = array();
-	if($categoryFlag == 1){
-		//$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($CompanyId, 'Institution' ));
-		$disease = DataGeneratorForDiseaseTracker($CompanyId, 'CDT', $page, $dwcount, $categoryFlag);
-		$TabDiseaseCount = $disease['TotalRecords'];
-	}
-	else{
-		//$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
-		$disease = DataGeneratorForDiseaseTracker($CompanyId, 'CDT', $page, $dwcount, $categoryFlag);
-		$TabDiseaseCount = $disease['TotalRecords'];
-	}	
 	
-	$product = array();
-	$product = DataGenerator($CompanyId, 'CPT', $page, $OptionArray, $dwcount);
-	$TabProductCount = $product['TotalRecords'];
-	$productIds = $product['ProductIds'];
-	$TabTrialCount = GetTrialsCountForCompany($productIds);	
-	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($CompanyId, 'Institution'));
-	$TabNewsCount = GetNewsCountForCompany($productIds);
+	$disease = array();
+	
+	if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $InvestigatorId == NULL) && (!isset($phase) || $phase == NULL)) {
+		
+		if($categoryFlag == 1){
+			//$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($CompanyId, 'Institution' ));
+			$disease = DataGeneratorForDiseaseTracker($CompanyId, 'CDT', $page, $dwcount, $categoryFlag);
+			$TabDiseaseCount = $disease['TotalRecords'];
+		}
+		else{
+			//$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
+			$disease = DataGeneratorForDiseaseTracker($CompanyId, 'CDT', $page, $dwcount, $categoryFlag);
+			$TabDiseaseCount = $disease['TotalRecords'];
+		}
+		
+		$product = array();
+		//$product = DataGenerator($CompanyId, 'CPT', $page, $OptionArray, $dwcount);
+		//$TabProductCount = $product['TotalRecords'];
+		$companyProducts = getcompanyProducts($CompanyId);
+		
+		$productIds = array_keys($companyProducts);
+		
+		//var_dump($productIds);	
+		//exit;
+		
+		$tabProductAndTrial = GetProductsAndTrialsForCompany($productIds);	
+		$TabTrialCount = $tabProductAndTrial[0];
+		$TabProductCount = $tabProductAndTrial[1];
+		
+		$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($CompanyId, 'Institution'));
+		$TabNewsCount = GetNewsCountForCompany($productIds);
+	}
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($CompanyName) ? $CompanyName. ' - '.$meta_title : $meta_title;	
@@ -257,7 +272,7 @@
 	<br/>
 	<table width="100%" border="0" style="" cellpadding="0" cellspacing="0">
 	<?php
-	if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NULL))
+	if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $InvestigatorId == NULL) && (!isset($phase) || $phase == NULL))
 	{
 		print '
 		<tr>
@@ -367,7 +382,7 @@
 				{
 					print '<div id="diseaseTab_content" align="center">';
 					if($tab == 'diseasetrac')
-						print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag);//CDT= COMPANY DISEASE TRACKER
+						print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag, $disease);//CDT= COMPANY DISEASE TRACKER
 					else if($tab == 'investigatortrac')
 						print showInvestigatorTracker($CompanyId, 'CIT', $page);		//CIT= COMPANY INVESTIGATOR TRACKER
 					else if($tab == 'newstrac')
@@ -377,12 +392,15 @@
 						DisplayOTT(); //SHOW OTT
 						chdir ("$cwd");
 					}
-					else
-						print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 
+					else {
+						$data_matrix = dataGeneratorForCPT($CompanyId, $CompanyName, $dwcount, 'CPT', $page, $OptionArray);
+						print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray, $data_matrix );	//CPT = COMPANY PRODUCT TRACKER 
+					}
+						
 					print '</div>';
 				}
 				else
-				{	 
+				{	
 					if(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DCPT')
 						print showProductTracker($CompanyId, $dwcount, 'DCPT', $page, $OptionArray);	//DCPT - DISEASE COMPANY PRODUCT TRACKER
 					elseif(isset($_REQUEST['TrackerType']) && $_REQUEST['TrackerType'] == 'DISCATCPT')
@@ -419,38 +437,324 @@ function m_query($n,$q)
 }*/
 
 /* Function to get Trials count from Products id */
-function GetTrialsCountForCompany($productIds)
+function GetProductsAndTrialsForCompany($productIds)
 {
 	global $db;
 	global $now;
-	$impArr = implode("','", $productIds);	
+	$impArr = implode("','", $productIds);
 	$TrialsCount = 0;
-	$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity` in('" . $impArr . "')";
+	global $allTrials;
+	global $entityTrials;
+	$query = "SELECT dt.`larvol_id`,et.`entity`, dt.`is_active`, dt.`phase`, dt.`institution_type`,et.relation_type as relation_type FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity` in ('".$impArr."')";
+	
+	//echo $query;
+	
 	$res = mysql_query($query) or die($query.'- Bad SQL query getting trials count for Products ids in Sigma Companys Page');
-
+		
 	if($res)
 	{
-		while($row = mysql_fetch_array($res))
-			$TrialsCount = $row['trialCount'];
+		while($row = mysql_fetch_array($res)) {
+			$allTrials[$row['larvol_id']] = $row['larvol_id'];
+			$entityTrials[$row['entity']][$row['larvol_id']]['is_active'] = $row['is_active'];
+			$entityTrials[$row['entity']][$row['larvol_id']]['phase'] = $row['phase'];
+			$entityTrials[$row['entity']][$row['larvol_id']]['institution_type'] = $row['institution_type'];
+			$entityTrials[$row['entity']][$row['larvol_id']]['relation_type'] = $row['relation_type'];
+		}
 	}
-	return $TrialsCount;
+	
+	$return[] = count($allTrials);
+	$return[] = count($entityTrials);
+	
+	return $return;
 }
 /* Function to get Trials count from Products id */
 function GetNewsCountForCompany($productIds)
 {
 	global $db;
 	global $now;
-	$impArr = implode("','", $productIds);
+	global $allTrials;
 	$NewsCount = 0;
-	$query = "SELECT count(dt.`larvol_id`) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity` in('" . $impArr . "')";
-	$res = mysql_query($query) or die($query.'-> Bad SQL query getting trials count for Products ids in Sigma Companys Page');
+	if(count($allTrials)) {
+		$allNewsTrials = implode("','", $allTrials);
+		$query = "SELECT n.`larvol_id` FROM `news` n  WHERE n.larvol_id in('".$allNewsTrials."') LIMIT 0, 50";
+		$res = mysql_query($query) or die($query.'-> Bad SQL query getting news count in Sigma Companys Page');
 
-	if($res)
-	{
-		while($row = mysql_fetch_array($res))
-			$NewsCount = $row['newsCount'];
+		if($res){
+			$NewsCount = mysql_num_rows($res);
+		}
+		if ($NewsCount > 50) $NewsCount = 50;
 	}
-	if ($NewsCount > 50) $NewsCount = 50;
 	return $NewsCount;
 }
+
+
+function dataGeneratorForCPT($CompanyId, $CompanyName, $dwcount, $TrackerType, $page, $OptionArray) {
+	
+	global $companyProducts;
+	global $entityTrials;
+	
+	//IMP DATA
+	$data_matrix=array();
+	
+	///// No of columns in our graph
+	$columns = 10;
+	$inner_columns = 10;
+	$column_width = 80;
+	$max_count = 0;
+	
+	$max_count = 0;
+	
+	$Report_DisplayName = $CompanyName;
+	$id = $CompanyId;
+	$ExtName = GetReportNameExtension($OptionArray);	
+	$Report_DisplayName = $ExtName['ReportName1'] . $Report_DisplayName . $ExtName['ReportName2'];
+	
+	if($CompanyName != NULL && trim($CompanyName) != '')
+	{
+		$CompanyName = ' / '.$CompanyName;
+	} 
+	
+	//print_r($companyProducts);
+	$i = 0;
+	if(count($entityTrials)) {
+		foreach($entityTrials as $row => $rval) {
+			
+			$data_matrix[$i]['productName'] = $companyProducts[$row];
+			$data_matrix[$i]['product_CompanyName'] = $CompanyName;
+			$data_matrix[$i]['productIds'] = $row;
+			$data_matrix[$i]['productTag'] = '';
+			
+			//print_r($rval['larvol_id']); 
+			//exit;
+			
+			///// Initialize data
+			$data_matrix[$i]['active']=0;
+						  
+			$data_matrix[$i]['total']=0;
+						  
+			$data_matrix[$i]['indlead']=0;
+						 
+			$data_matrix[$i]['owner_sponsored']=0;
+						 
+			$data_matrix[$i]['total_phase_na']=0;
+			$data_matrix[$i]['active_phase_na']=0;
+			$data_matrix[$i]['indlead_phase_na']=0;
+			$data_matrix[$i]['total_phase_0']=0;
+			$data_matrix[$i]['active_phase_0']=0;
+			$data_matrix[$i]['indlead_phase_0']=0;
+			$data_matrix[$i]['total_phase_1']=0;
+			$data_matrix[$i]['active_phase_1']=0;
+			$data_matrix[$i]['indlead_phase_1']=0;
+			$data_matrix[$i]['total_phase_2']=0;
+			$data_matrix[$i]['active_phase_2']=0;
+			$data_matrix[$i]['indlead_phase_2']=0;
+			$data_matrix[$i]['total_phase_3']=0;
+			$data_matrix[$i]['active_phase_3']=0;
+			$data_matrix[$i]['indlead_phase_3']=0;
+			$data_matrix[$i]['total_phase_4']=0;
+			$data_matrix[$i]['active_phase_4']=0;
+			$data_matrix[$i]['indlead_phase_4']=0;
+						 
+			$data_matrix[$i]['owner_sponsored_phase_na']=0;
+			$data_matrix[$i]['owner_sponsored_phase_0']=0;
+			$data_matrix[$i]['owner_sponsored_phase_1']=0;
+			$data_matrix[$i]['owner_sponsored_phase_2']=0;
+			$data_matrix[$i]['owner_sponsored_phase_3']=0;
+			$data_matrix[$i]['owner_sponsored_phase_4']=0;
+			
+			
+			 foreach($rval as $phase_row) {	
+			 
+				$data_matrix[$i]['total']++;
+					if($phase_row['is_active'])
+					{
+						$data_matrix[$i]['active']++;
+						if($phase_row['institution_type'] == 'industry_lead_sponsor')
+							$data_matrix[$i]['indlead']++;
+						if($phase_row['relation_type'] == 'ownersponsored')
+							$data_matrix[$i]['owner_sponsored']++;
+					}
+						
+					if($phase_row['phase'] == 'N/A' || $phase_row['phase'] == '' || $phase_row['phase'] === NULL)
+					{
+						
+						$data_matrix[$i]['total_phase_na']++;
+						if($phase_row['is_active'])
+						{
+							$data_matrix[$i]['active_phase_na']++;
+							if($phase_row['institution_type'] == 'industry_lead_sponsor')
+								$data_matrix[$i]['indlead_phase_na']++;
+							if($phase_row['relation_type'] == 'ownersponsored')
+								$data_matrix[$i]['owner_sponsored_phase_na']++;
+						}
+					}
+					else if($phase_row['phase'] == '0')
+					{
+						$data_matrix[$i]['total_phase_0']++;
+						if($phase_row['is_active'])
+						{
+							$data_matrix[$i]['active_phase_0']++;
+							if($phase_row['institution_type'] == 'industry_lead_sponsor')
+								$data_matrix[$i]['indlead_phase_0']++;
+							if($phase_row['relation_type'] == 'ownersponsored')
+								$data_matrix[$i]['owner_sponsored_phase_0']++;
+						}
+					}
+					else if($phase_row['phase'] == '1' || $phase_row['phase'] == '0/1' || $phase_row['phase'] == '1a' 
+					|| $phase_row['phase'] == '1b' || $phase_row['phase'] == '1a/1b' || $phase_row['phase'] == '1c')
+					{
+						
+						$data_matrix[$i]['total_phase_1']++;
+						if($phase_row['is_active'])
+						{
+							$data_matrix[$i]['active_phase_1']++;
+							if($phase_row['institution_type'] == 'industry_lead_sponsor')
+								$data_matrix[$i]['indlead_phase_1']++;
+							if($phase_row['relation_type'] == 'ownersponsored')
+								$data_matrix[$i]['owner_sponsored_phase_1']++;
+						}
+					}
+					else if($phase_row['phase'] == '2' || $phase_row['phase'] == '1/2' || $phase_row['phase'] == '1b/2' 
+					|| $phase_row['phase'] == '1b/2a' || $phase_row['phase'] == '2a' || $phase_row['phase'] == '2a/2b' 
+					|| $phase_row['phase'] == '2a/b' || $phase_row['phase'] == '2b' || $phase_row['phase'] == 2)
+					{
+						
+						
+						$data_matrix[$i]['total_phase_2']++;
+						
+						if($phase_row['is_active'])
+						{
+							$data_matrix[$i]['active_phase_2']++;
+							if($phase_row['institution_type'] == 'industry_lead_sponsor')
+								$data_matrix[$i]['indlead_phase_2']++;
+							if($phase_row['relation_type'] == 'ownersponsored')
+								$data_matrix[$i]['owner_sponsored_phase_2']++;
+						}
+					}
+					else if($phase_row['phase'] == '3' || $phase_row['phase'] == '2/3' || $phase_row['phase'] == '2b/3' 
+					|| $phase_row['phase'] == '3a' || $phase_row['phase'] == '3b')
+					{
+						
+						$data_matrix[$i]['total_phase_3']++;
+						if($phase_row['is_active'])
+						{
+							$data_matrix[$i]['active_phase_3']++;
+							if($phase_row['institution_type'] == 'industry_lead_sponsor')
+							$data_matrix[$i]['indlead_phase_3']++;
+							if($phase_row['relation_type'] == 'ownersponsored')
+							$data_matrix[$i]['owner_sponsored_phase_3']++;
+						}
+					}
+					else if($phase_row['phase'] == '4' || $phase_row['phase'] == '3/4' || $phase_row['phase'] == '3b/4')
+					{
+						
+						$data_matrix[$i]['total_phase_4']++;
+						if($phase_row['is_active'])
+						{
+							$data_matrix[$i]['active_phase_4']++;
+							if($phase_row['institution_type'] == 'industry_lead_sponsor')
+							$data_matrix[$i]['indlead_phase_4']++;
+							if($phase_row['relation_type'] == 'ownersponsored')
+							$data_matrix[$i]['owner_sponsored_phase_4']++;
+						}	
+					}
+				}	//// End of while
+				if($data_matrix[$i]['total'] > $max_count)
+				$max_count = $data_matrix[$i]['total'];
+				
+				//var_dump($data_matrix);
+				
+				$i++;
+				
+		}
+	 }
+	 
+	 $data_matrix = sortTwoDimensionArrayByKey($data_matrix, $dwcount);	//Sort according to default view as other than LI default view is total
+	
+	$RecordsPerPage = 50;
+	$TotalPages = 0;
+	$TotalRecords = count($data_matrix);
+	if(!isset($_POST['download']))
+	{
+		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
+		
+		//Get only those product Ids which we are planning to display on current page to avoid unnecessary queries
+		$StartSlice = ($page - 1) * $RecordsPerPage;
+		$EndSlice = $StartSlice + $RecordsPerPage;
+		if(!empty($data_matrix))
+		{
+			$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$rows = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		}
+		else
+		{
+			$data_matrix=array();
+			$rows = array();
+		}
+	}
+	/////////PAGING DATA ENDS
+	
+	///// No of inner columns
+	$original_max_count = $max_count;
+	$max_count = ceil(($max_count / $columns)) * $columns;
+	$column_interval = $max_count / $columns;
+	$inner_columns = 10;
+	$inner_width = $column_width  / $inner_columns;
+	
+	if($max_count > 0)
+	$ratio = ($columns * $inner_columns) / $max_count;
+
+	///All Data send
+	$Return['matrix'] = $data_matrix;
+	$Return['report_name'] = $Report_DisplayName;
+	$Return['id'] = $id;
+	$Return['rows'] = $data_matrix;
+	$Return['columns'] = $columns;
+	$Return['ProductIds'] = array_keys($companyProducts);
+	$Return['inner_columns'] = $inner_columns;
+	$Return['inner_width'] = $inner_width;
+	$Return['column_width'] = $column_width;
+	$Return['ratio'] = $ratio;
+	$Return['entity2Id'] = $entity2Id;
+	$Return['column_interval'] = $column_interval;
+	$Return['TrackerType'] = $TrackerType;
+	$Return['TotalPages'] = $TotalPages;
+	$Return['TotalRecords'] = $TotalRecords;
+		 
+	//var_dump($Return);
+	
+	return $Return;
+	
+}
+
+function getcompanyProducts($companyID) {
+
+	$products = array();
+	$query = "SELECT  id, name  FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) 
+			WHERE et.`class`='Product' 
+			AND er.`child`='" . mysql_real_escape_string($companyID) . "' AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+	
+	$res = mysql_query($query) or die($query.'- Bad SQL query getting trials count for Products ids in Sigma Companys Page');
+	
+	if($res)
+	{
+		while($row = mysql_fetch_array($res)) {
+			
+			$products[$row['id']] = $row['name'];			
+		}
+	}
+	
+	return $products;
+}
+
+
+
+
+
+
+
+
+
+
+
 ?>

@@ -33,15 +33,19 @@ if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 }
 
 ////Process Report Tracker
-function showDiseaseTracker($id, $TrackerType, $page=1, $categoryFlag = false)
+function showDiseaseTracker($id, $TrackerType, $page=1, $categoryFlag = false,  $data_matrix = array())
 {
-	$HTMLContent = '';
+	$HTMLContent = '';  
 	if(isset($_REQUEST['dwcount']))
 		$CountType = $_REQUEST['dwcount'];
 	else
 		$CountType = 'total';
 		
-	$Return = DataGeneratorForDiseaseTracker($id, $TrackerType, $page, $CountType, $categoryFlag);
+	if($TrackerType == 'CDT') {
+		$Return = $data_matrix;
+	} else {
+		$Return = DataGeneratorForDiseaseTracker($id, $TrackerType, $page, $CountType, $categoryFlag);
+	}
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -162,30 +166,42 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 				$ImplodeDiseaseIds = '';
 			}
 			
-				if($GobalEntityType == 'MOA' || $GobalEntityType == 'Institution')
-				{
-					$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
-					$DiseaseQuery2= "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity2`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
-				}
-				elseif ($GobalEntityType == 'Investigator')
-				{
-										
-					$DiseaseQuery = "	SELECT DISTINCT er.child, er.parent as id, 
-										e1.`name` AS name, e1.`display_name` AS dispname,er.child AS ProdId, dt.`phase` AS phase,  
-										er.parent as entity1, er.child as entity2
-										from entity_trials et
-										JOIN data_trials dt ON ( et.trial=dt.larvol_id  and et.entity = '". $id ."' )
-										JOIN entity_trials et2 ON (dt.larvol_id = et2.trial )
-										JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
-										JOIN entity_relations er ON (e.id = er.child and er.parent IN ('" . $ImplodeDiseaseIds . "')   )
-										JOIN entities e1 ON (er.parent=e1.id)
-										group by er.parent,er.child, dt.phase desc";
-				}
-				else if($GobalEntityType == 'MOA_Category')
-				{
-					$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-					$DiseaseQuery2 = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity2`=e2.`id` AND e2.`class`='Disease')) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
-				}
+			if($GobalEntityType == 'MOA' || $GobalEntityType == 'Institution')
+			{
+				$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+				$DiseaseQuery2= "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON((rpt.`entity2`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er.`child` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+								
+				$DiseaseQueryResult = mysql_query($DiseaseQuery) or die($DiseaseQuery.' '.mysql_error());
+				if($DiseaseQuery2)
+					$DiseaseQueryResult2 = mysql_query($DiseaseQuery2) or die($DiseaseQuery2.' '. mysql_error());
+				$results=array();
+				while ($results[] = mysql_fetch_array($DiseaseQueryResult));
+				if($DiseaseQuery2)
+					while($results[] = mysql_fetch_array($DiseaseQueryResult2));
+			
+			}
+			elseif ($GobalEntityType == 'Investigator')
+			{
+									
+				$DiseaseQuery = "	SELECT DISTINCT er.child, er.parent as id, 
+									e1.`name` AS name, e1.`display_name` AS dispname,er.child AS ProdId, dt.`phase` AS phase,  
+									er.parent as entity1, er.child as entity2
+									from entity_trials et
+									JOIN data_trials dt ON ( et.trial=dt.larvol_id  and et.entity = '". $id ."' )
+									JOIN entity_trials et2 ON (dt.larvol_id = et2.trial )
+									JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
+									JOIN entity_relations er ON (e.id = er.child and er.parent IN ('" . $ImplodeDiseaseIds . "')   )
+									JOIN entities e1 ON (er.parent=e1.id)
+									group by er.parent,er.child, dt.phase desc";
+									
+				$DiseaseQueryResult = mysql_query($DiseaseQuery) or die($DiseaseQuery.' '.mysql_error());
+				$results=array();
+				while ($results[] = mysql_fetch_array($DiseaseQueryResult));
+			}
+			else if($GobalEntityType == 'MOA_Category')
+			{
+				$DiseaseQuery = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity1`=e2.`id` AND e2.`class`='Disease') ) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+				$DiseaseQuery2 = "SELECT e2.`id` AS id, e2.`name` AS name, e2.`display_name` AS dispname,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e3 ON (e3.`id`= er.`child`) JOIN `entity_relations` er3 ON(e3.`id` = er3.`child`) JOIN `entities` e2 ON((rpt.`entity2`=e2.`id` AND e2.`class`='Disease')) WHERE (rpt.`count_total` > 0) AND er3.`parent` = '". $id ."' AND e2.`id` IN ('" . $ImplodeDiseaseIds . "') AND e3.`class`='MOA' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 				
 				$DiseaseQueryResult = mysql_query($DiseaseQuery) or die($DiseaseQuery.' '.mysql_error());
 				if($DiseaseQuery2)
@@ -194,6 +210,10 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 				while ($results[] = mysql_fetch_array($DiseaseQueryResult));
 				if($DiseaseQuery2)
 					while($results[] = mysql_fetch_array($DiseaseQueryResult2));
+			
+			}
+			
+			
 		}
 		
 		

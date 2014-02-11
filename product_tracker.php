@@ -39,12 +39,16 @@ if($_POST['download'])
 }
 
 ////Process Report Tracker
-function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray = array())
+function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray = array(), $data_matrix = array())
 {
 	$HTMLContent = '';
 	global $TabProductCount;
 	
-	$Return = DataGenerator($id, $TrackerType, $page, $OptionArray, $dwcount);
+	if($TrackerType == 'CPT') {
+		$Return = $data_matrix;
+	} else {
+		$Return = DataGenerator($id, $TrackerType, $page, $OptionArray, $dwcount);
+	}
 	global $TabProductCount;
 	$TabProductCount=count($Return);
 	$uniqueId = uniqid();
@@ -174,7 +178,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'DISCATCPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER 
 	{
-	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
+	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE  id=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -191,7 +195,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'INVESTCT')	
 	{
-	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
+	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -213,7 +217,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'INVESTPT')	
 	{
-	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Investigator" and id=' . $id;
+	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -236,7 +240,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'INVESTMT')	
 	{
 	global $productIds;
-	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
+	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 	
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
@@ -262,7 +266,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	global $productIds;
 	if(isset($_REQUEST['DiseaseId'])) $id=$_REQUEST['DiseaseId'];
 	
-	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Disease" and id=' . $id;
+	$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 	
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
@@ -288,7 +292,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'DISCATPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
 	{
 		global $productIds;
-		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' . $id;
+		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `id`=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -302,7 +306,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'CPT' || $TrackerType=='DCPT')	//CPT=COMPANY PRODUCT TRACKER	//DCPT=DISEASE COMPANY PRODUCT TRACKER
 	{
-		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -320,7 +324,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'MPT' || $TrackerType == 'DMPT' || $TrackerType == 'DISCATMPT' || $TrackerType == 'IMPT')	//MPT=MOA PRODUCT TRACKER || DMPT=DISEASE MOA PRODUCT TRACKER || DCMPT=DISEASE CATEGORY MOA PRODUCT TRACKER
 	{
-		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -343,7 +347,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'MCPT' || $TrackerType == 'DMCPT' || $TrackerType == 'DISCATMCPT' || $TrackerType == 'IMCPT')	//MCPT= MOA CATEGORY PRODUCT TRACKER || DMCPT=DISEASE MOA CATEGORY PRODUCT TRACKER || DISCATMCPT==DISEASE CATEGORY MOA CATEGORY PRODUCT TRACKER
 	{
-		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="MOA_Category" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -369,7 +373,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	{
 	if(isset($_REQUEST['DiseaseId'])) $id=$_REQUEST['DiseaseId'];
 	
-		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Disease" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -380,7 +384,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'ICPT')	//ICPT=COMPANY INVESTIGATOR PRODUCT TRACKER
 	{
-		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class`="Institution" and id=' . $id;
+		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE id=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -395,18 +399,25 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	$rowsCompanyName=array();
 	$rowsDescription=array();
 	
-	foreach($productIds as $key=> $product)
-	{
-		
-		$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `entities` WHERE `class`='Product' and id = '" . $product . "' "));
+	$comProductIds = implode(',', $productIds);
+	$sqlProducts = mysql_query("SELECT id, name, description, company FROM `entities` WHERE id IN ($comProductIds)");
+	
+	$companyName = $header['name'];
+	if($header['display_name'] != NULL && $header['display_name'] != '')
+	$companyName = $header['display_name'];	
+	
+	$i = 0;
+	while($result = mysql_fetch_array($sqlProducts))
+	{		
+		$key = $i;
 		$rows[$key] = $result['name'];
-		$result['company'] = GetCompanyNames($result['id']);
+		$result['company'] = $companyName;
 		if($result['company'] != NULL && trim($result['company']) != '')
 		{
 			$rowsCompanyName[$key] = ' / '.$result['company'];
 		} 
 		$rowsDescription[$key] = $result['description'];
-		
+		$i++;
 	}
 	
 	
