@@ -36,7 +36,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Online Heatmap</title>
 <base target="_blank"/>
-<script type="text/javascript" src="scripts/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="scripts/jquery-1.11.0.min.js"></script>
 <script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
@@ -288,7 +288,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 
 <div class="hmdata">
 <table width="200" border="0" cellspacing="1" cellpadding="0" id="mainhm">
-<tr class="hrow">
+<tr class="hrow colfloat">
 <th class="spc" rowspan="2"><div>' . ($li ? '&nbsp;' : $heatmapName) . '</div></th>';
 	//Determine column category ranges
 	$cats = array();
@@ -308,7 +308,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 	{
 		echo('<th colspan="' . $cat['count'] . '" class="cat"><div>' . $cat['name'] . '</div></th>');
 	}
-	echo('</tr><tr>');
+	echo('</tr><tr class="colfloat">');
 	//output column headers
 	foreach($cols as $col)
 	{

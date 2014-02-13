@@ -177,7 +177,7 @@ tr.hrow{
 	width:100%;
 	text-align:center;
 }
-.col{
+.hmdata table .col{
 	height:144px;
 	vertical-align:bottom;
 	margin:0;padding:0;
@@ -346,4 +346,7 @@ th.over {
 
 .delete{
 	cursor:pointer;
+}
+.hmdata .colfloat th div:not(.colfloat th div div){
+	position:relative;
 }

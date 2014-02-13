@@ -1,16 +1,7 @@
-var columnHeaders = getCSSRule('.col div');
-var rowHeaders = getCSSRule('.row div');
-var sections = getCSSRule('.hmdata td.sect div');
-var spacer = getCSSRule('.spc div');
-var columnCategories = getCSSRule('.cat div');
-window.onscroll = function (oEvent) {
-    columnHeaders.style.top = (document.documentElement.scrollTop || (document.body.scrollTop/2))+'px';
-	columnCategories.style.top = (document.documentElement.scrollTop || (document.body.scrollTop))+'px';
-    rowHeaders.style.left = (document.documentElement.scrollLeft || document.body.scrollLeft)+'px';
-    sections.style.left = (document.documentElement.scrollLeft || document.body.scrollLeft)+'px';
-	spacer.style.top = (document.documentElement.scrollTop || (document.body.scrollTop))+'px';
-	spacer.style.left = (document.documentElement.scrollLeft || document.body.scrollLeft)+'px';
-  }
+$(document).scroll( function (oEvent) {
+	$('.colfloat th div:not(.colfloat th div div)').css({"top" : $(window).scrollTop()+'px'});
+	$('.row div,.hmdata td.sect div,.spc div').css({"left" : $(window).scrollLeft()+'px'});
+  });
 
 function timeEnum($timerange)
 {
