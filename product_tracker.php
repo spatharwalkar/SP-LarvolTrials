@@ -399,27 +399,19 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	$rowsCompanyName=array();
 	$rowsDescription=array();
 	
-	$comProductIds = implode(',', $productIds);
-	$sqlProducts = mysql_query("SELECT id, name, description, company FROM `entities` WHERE id IN ($comProductIds)");
-	
-	$companyName = $header['name'];
-	if($header['display_name'] != NULL && $header['display_name'] != '')
-	$companyName = $header['display_name'];	
-	
-	$i = 0;
-	while($result = mysql_fetch_array($sqlProducts))
-	{		
-		$key = $i;
+	foreach($productIds as $key=> $product)
+	{
+		
+		$result =  mysql_fetch_assoc(mysql_query("SELECT id, name, description, company FROM `entities` WHERE `class`='Product' and id = '" . $product . "' "));
 		$rows[$key] = $result['name'];
-		$result['company'] = $companyName;
+		$result['company'] = GetCompanyNames($result['id']);
 		if($result['company'] != NULL && trim($result['company']) != '')
 		{
 			$rowsCompanyName[$key] = ' / '.$result['company'];
 		} 
 		$rowsDescription[$key] = $result['description'];
-		$i++;
+		
 	}
-	
 	
 	foreach($rows as $row => $rval)
 	{
