@@ -67,10 +67,7 @@ if($db->user->userlevel == 'public') die('<p>Access Forbidden : It seems that yo
 	color: #FF0000;
 }
 </style>
-<?php if($_GET && isset($_GET['header'])) { echo($_GET['header']); }
-include_once('ga.php');
-echo ga("LT");
-?>
+<?php if($_GET && isset($_GET['header'])) { echo($_GET['header']); } ?>
 </head>
 <body>
 <?php
@@ -116,7 +113,6 @@ if($db->loggedIn())
 			. $dbpage
 			. '<a href="admin_settings.php">Settings</a><br />'			
 			. '<a href="upt.php">Unknown Product Trials</a><br />'
-			. '<a href="admin_ga.php">Google Analytics Profiles</a><br />'			
 			. '</div>');
 	}
 	echo('::<div class="drop">Heatmap<br />'

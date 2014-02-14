@@ -1,9 +1,5 @@
 <?php
 include("comments.php");
-$cwd = getcwd();
-chdir ("..");
-include_once('ga.php');
-chdir ($cwd);
 ?>
 <style type="text/css">
 #footer-spacer {
@@ -44,6 +40,3 @@ $(window).scroll(function(){
 	} 
 });  
 </script>
-<?php
-echo ga("SIGMA");
-?>

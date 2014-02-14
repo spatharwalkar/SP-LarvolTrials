@@ -1429,14 +1429,6 @@ CREATE TABLE IF NOT EXISTS `news`  (
 	)
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `ga_profile` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `profile_name` varchar(27) NOT NULL,
-  `ga_id` varchar(20) NOT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 ALTER TABLE `products_moas`
   ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
