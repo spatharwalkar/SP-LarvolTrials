@@ -10642,27 +10642,101 @@ class TrialTracker
 		}
 
 		if($count > 0)
-		{		
-			echo '<table cellpadding="0" cellspacing="0" class="manage">'
-						 . '<tr>' . (($loggedIn) ? '<th style="width:70px;">ID</th>' : '' )
-						 . '<th style="width:270px;">Title</th>'
-						 . '<th style="width:30px;" title="Red: Change greater than 20%">N</th>'
-						 . '<th style="width:64px;" title="&quot;RoW&quot; = Rest of World">Region</th>'
-						 . '<th style="width:100px;">Interventions</th>'
-						 . '<th style="width:90px;">Sponsor</th>'
-						 . '<th style="width:105px;">Status</th>'
-						 . '<th style="width:100px;">Conditions</th>'
-						 . '<th title="MM/YY" style="width:33px;">End</th>'
-						 . '<th style="width:25px;">Ph</th>'
-						 . '<th style="width:25px;">Data</th>'
-						 . '<th colspan="3" style="width:12px;">-</th>'
-						 . '<th colspan="12" style="width:32px;">' . (date('Y')) . '</th>'
-						 . '<th colspan="12" style="width:32px;">' . (date('Y')+1) . '</th>'
-						 . '<th colspan="12" style="width:32px;">' . (date('Y')+2) . '</th>'
-						 . '<th colspan="3" style="width:12px;">+</th></tr>';
+		{
+			$u_agent = $_SERVER['HTTP_USER_AGENT'];
+?>
+<style>
+.manage thead{
+background:#fff;
+}
+.container{
+margin:0 auto;
+overflow-y:hidden;
+padding-right:2px;
+}
+.datatable{
+width:100% !important;
+}
+.fixed{
+display:none;
+}
+.fixed table{
+ z-index:999;
+ position:relative;
+}
+.fixed table tbody{
+opacity:0;
+}
+<?php
+if(!preg_match('/MSIE/i',$u_agent))
+{ 
+?>
+.fixed table thead tr th{
+border-bottom: 1px solid #0000FF;
+}
+<?php } ?>
+.fixed{
+top: 0px; position: fixed; 
+max-height:<?php echo (preg_match('/Chrome/i',$u_agent) || (preg_match('/Safari/i',$u_agent)))? "27px":"38px"; ?> !important;
+}
+</style>
+<script>
+;(function($) {
+   $.fn.fixMe = function() {
+      return this.each(function() {
+         var $this = $(this);
+         function init() {
+			$t_fixed = $this.clone();
+			$t_fixed.addClass("fixed").insertAfter($this);
+			$this.addClass("datatable");
+			$t_fixed.css("width",$this.width()+"px");
+         }
+		 function resizeFixed() {
+			$t_fixed.css("width",($this.width()<?php if(preg_match('/Chrome/i',$u_agent)){echo "+ 1";} ?>)+"px");
+		 }
+         function scrollFixed() {
+            var offset = $(this).scrollTop(),
+            tableOffsetTop = $this.offset().top,
+            tableOffsetBottom = tableOffsetTop + $this.height() - $this.find("thead").height();
+            if(offset < tableOffsetTop || offset > tableOffsetBottom && $(".fixed").is(":hidden")==false)
+               $(".fixed").css("display","none");
+            else if(offset >= tableOffsetTop && offset <= tableOffsetBottom && $(".fixed").is(":hidden"))
+               $(".fixed").css("display","table-header-group");
+            var offset1 = $(this).scrollLeft();
+			$(".fixed").css("margin-left","-"+offset1+"px");
+         }
+         $(window).resize(resizeFixed);
+         $(window).scroll(scrollFixed);
+         init();
+      });
+   };
+})(jQuery);
+
+$(document).ready(function(){
+   $(".container").fixMe();
+});
+</script>
+<?php		 
+			echo '<div class="container"><table cellpadding="0" cellspacing="0" class="manage"><thead>'
+						 . '<tr>' . (($loggedIn) ? '<th style="width:7%;">ID</th>' : '' )
+						 . '<th style="width:27%;">Title</th>'
+						 . '<th style="width:3%;" title="Red: Change greater than 20%">N</th>'
+						 . '<th style="width:6.4%;" title="&quot;RoW&quot; = Rest of World">Region</th>'
+						 . '<th style="width:10%;">Interventions</th>'
+						 . '<th style="width:7%;">Sponsor</th>'
+						 . '<th style="width:8.5%;">Status</th>'
+						 . '<th style="width:10%;">Conditions</th>'
+						 . '<th title="MM/YY" style="width:3.3%;">End</th>'
+						 . '<th style="width:2.5%;">Ph</th>'
+						 . '<th style="width:2.5%;">Data</th>'
+						 . '<th colspan="3" style="width:1.2%;">-</th>'
+						 . '<th colspan="12" style="width:3.2%;">' . (date('Y')) . '</th>'
+						 . '<th colspan="12" style="width:3.2%;">' . (date('Y')+1) . '</th>'
+						 . '<th colspan="12" style="width:3.2%;">' . (date('Y')+2) . '</th>'
+						 . '<th colspan="3" style="width:1.2%;">+</th></tr></thead><tbody>';
 					
 			echo $this->displayTrials($globalOptions, $loggedIn, $Values, $ottType, $totalPages);	
-			echo '</table>';			
+			echo '</tbody></table></div>';			
 		}
 		else
 		{
