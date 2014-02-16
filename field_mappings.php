@@ -8,9 +8,7 @@ global $logger;
 error_reporting(E_ERROR);
 if($_GET['l']&&$_GET['f']&&$_GET['s'])
 {
-	pr($_GET['l'].$_GET['f'].$_GET['s']);
 	$xx=get_field_value($_GET['l'],$_GET['f'],$_GET['s']);
-	pr($xx);
 }
 function get_field_value($larvol_id,  $field_name, $source)
 {
@@ -20,7 +18,6 @@ function get_field_value($larvol_id,  $field_name, $source)
 	global $logger;
 
 		$query = 'SELECT * FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-		pr($query);
 		if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -96,13 +93,11 @@ function get_field_value($larvol_id,  $field_name, $source)
 		
 		if(!empty($dm_mappings[$field_name]))
 		{
-			pr('NOT EMPTY');
 			return $dm_mappings[$field_name];
 		}
 		
 		//nothing in data_manual, so continue.
 		$query = 'SELECT * FROM data_'. strtolower($source) . ' where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-		pr($query);
 		if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
