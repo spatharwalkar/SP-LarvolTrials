@@ -870,6 +870,35 @@ CREATE TABLE IF NOT EXISTS `product_trials` (
   KEY `trial` (`trial`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `facility` (
+	`id`		INT(10) unsigned AUTO_INCREMENT,
+	`name`		VARCHAR(250) NOT NULL,
+	`city`		VARCHAR(200) NOT NULL,
+	`state`		VARCHAR(50),
+	`zip`		VARCHAR(20),
+	`country`	VARCHAR(150) NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY `facility` (`name`, `city`, `country`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `site` (
+	`id`  	INT(10) unsigned AUTO_INCREMENT,
+	`facility_id`   	INT(10) unsigned,
+	`investigator_id`	INT(10) unsigned,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY (`facility_id`, `investigator_id`),
+	FOREIGN KEY (`facility_id`) 	REFERENCES `facility` (`id`) ON DELETE CASCADE,
+	FOREIGN KEY (`investigator_id`)	REFERENCES `entities` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `site_trials` (
+	`site_id`  	INT(10) unsigned,
+	`trial_id`	INT(10) unsigned,
+	UNIQUE KEY (`site_id`, `trial_id`),
+	FOREIGN KEY (`site_id`) 	REFERENCES `site` (`id`) ON DELETE CASCADE,
+	FOREIGN KEY (`trial_id`)	REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS `rpt_masterhm_cells` (
   `entity1` int(10) unsigned NOT NULL COMMENT 'Foreign key to entities table ID',
   `entity2` int(10) unsigned NOT NULL COMMENT 'Foreign key to entities table ID',

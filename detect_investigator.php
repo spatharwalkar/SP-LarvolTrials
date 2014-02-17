@@ -241,6 +241,8 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 		/********** Split multiple investigator names in same field , and save them as separate entities */
 		$investigator_names=array();
 		$affiliations=array();
+		$facilities = array();
+		$locations = array();
 		
 		//split investigator names
 		$pos = strpos($overall_official_name, '`');
@@ -263,24 +265,55 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 		{
 			$affiliations = explode("`", $overall_official_affiliation);
 		}
-		
+
+		// Mark placeholders for the investigators from the `overall_official_name`
+		// These will be replaced by the Primary facility later.
+		foreach ($investigator_names as $key => $overall_official_name) {
+			$facilities[$key] = false;
+		}
+
 		// Add investigators from `locations_xml`
-		$xml = $record_data['locations_xml'];
 		echo('Parsing locations_xml... ');
-		$xml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOWARNING | LIBXML_NOERROR);
+		$xml = simplexml_load_string(
+			$record_data['locations_xml'],
+			'SimpleXMLElement', LIBXML_NOWARNING | LIBXML_NOERROR
+		);
 		if ($xml === false) {
-			echo(' Invalid locations_xml');
+			echo(' Invalid locations_xml. ');
 		} 
 		else {
 			echo(' Adding location-specific investigators... ');
 			foreach ($xml->location as $location) {
-				$affiliation = defined($location->facility->name) ? $location->facility->name : "";
+				$facility = array(
+					'name'		=> (string)$location->facility->name,
+					'city'		=> (string)$location->facility->address->city,
+					'state'		=> (string)$location->facility->address->state,
+					'zip'		=> (string)$location->facility->address->zip,
+					'country'	=> (string)$location->facility->address->country,
+				);
+				$num_inv = 0;
 				foreach ($location->investigator as $investigator) {
+					$num_inv++;
 					$investigator_names[] = assemble(' ', array(
-						$investigator->first_name, $investigator->middle_name, $investigator->last_name
+						$investigator->first_name, 
+						$investigator->middle_name, 
+						$investigator->last_name
 					));
-					$affiliations[] = $affiliation;
+					$affiliations[] = $facility['name'];
+					$facilities[] = $facility;
 				}
+				$locations[] = array(
+					'facility'	=> $facility,
+					'num_inv'	=> $num_inv
+				);
+			}
+		}
+		
+		// Assign Primary location as a facility 
+		// to all investigators mentioned in `overall_official_name`
+		foreach (array_keys($facilities) as $key) {
+			if ($facilities[$key] === false) {
+				$facilities[$key] = primary_location($record_data, $locations, $affiliations[$key]);
 			}
 		}
 
@@ -413,6 +446,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 				}
 				
 			}
+			add_site($eid, $facilities[$key], $larvol_id);
 		}
 		$query = ' UPDATE  update_status_fullhistory SET process_id = "'. $pid  .'" , update_items_progress= "' . ( ($totalncts >= $updateitems+$counter) ? ($updateitems+$counter) : $totalncts  ) . '" , status="2", current_nctid="'. $larvol_id .'", updated_time="' . date("Y-m-d H:i:s", strtotime('now'))  . '" WHERE update_id="' . $up_id .'" and trial_type="INVESTIGATOR"  ;' ;
 		
@@ -421,6 +455,165 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 	}
 	return true;
 }
+
+
+// Create facilities and sites and connect the sites to trials.
+// 
+// A facility is given in the facility section of a location in locations_xml. 
+// A site is created from the combination of the investigator and facility given in a single location of locations_xml. 
+// One more site is also created from the combination of investigator given in overall_official and the facility of the primary location, if there is one. 
+// The primary location is determined by this: 
+// (1) If there is only one location, it is the primary. 
+// (2) If there is only one location having no entity-specific investigator, it is the primary. 
+// (3) Otherwise the primary one is the one having a facility name matching the affiliation of the overall official.
+// Any facility is invalid if its name CONTAINS anything matching the name of a company (that is, industry institution. Non-industry insitutions can be valid facility names). 
+// Blank fields are invalid.
+//
+function add_site($eid, $facility, $trial_id)
+{
+	global $logger;
+	if (
+		$eid <= 0 ||
+		!$facility['name'] ||
+		!$facility['city'] ||
+		!$facility['country']
+	)
+	{
+		return;
+	}
+	$company = preg_quote(get_attr('entities', 'company', $eid));
+	if ($company && preg_match("/$company/", $facility['name']))
+	{
+		return;
+	}
+
+	mysql_query('START TRANSACTION');
+
+	foreach ($facility as &$v) {
+		if (is_string($v)) {
+			$v = "'".mysql_real_escape_string($v)."'";
+		}
+	}
+	$query = 
+		"INSERT ".
+		"INTO `facility` (`name`, `city`, `state`, `zip`, `country`) ".
+		"VALUES (".
+			implode(', ', array(
+				$facility['name'],
+				$facility['city'],
+				$facility['state'],
+				$facility['zip'],
+				$facility['country']
+			)).
+		") ".
+		"ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
+	if(!$res = mysql_query($query))
+	{
+		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		mysql_query('ROLLBACK');
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+	$fid = mysql_insert_id();
+
+	$query = 
+		"INSERT ".
+		"INTO `site` (`facility_id`, `investigator_id`) ".
+		"VALUES ($fid, $eid) ".
+		"ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
+	if(!$res = mysql_query($query))
+	{
+		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		mysql_query('ROLLBACK');
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+	$sid = mysql_insert_id();
+
+	$query = 
+		"INSERT IGNORE ".
+		"INTO `site_trials` (`site_id`, `trial_id`) ".
+		"VALUES ($sid, $trial_id)";
+	if(!$res = mysql_query($query))
+	{
+		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		mysql_query('ROLLBACK');
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+
+	mysql_query('COMMIT');
+}
+
+
+// Determine primary location for an overall official represented by their affilitaion
+// 
+// The primary location is determined by this: 
+// (1) If there is only one location, it is the primary. 
+// (2) If there is only one location having no entity-specific investigator, it is the primary. 
+// (3) Otherwise the primary one is the one having a facility name matching the affiliation of the overall official.
+function primary_location($record_data, $locations, $affiliation)
+{
+	if (count($locations) == 0) {
+		return array(
+			'name'		=> $record_data['location_name'],
+			'city'		=> $record_data['location_city'],
+			'state'		=> $record_data['location_state'],
+			'zip'		=> $record_data['location_zip'],
+			'country'	=> $record_data['location_country'],
+		);
+	}
+	if (count($locations) == 1 and !$record_data['location_name']) {
+		return $locations[0]['facility'];
+	}
+
+	$primaries = array();
+	foreach ($locations as $l) {
+		if ($l['num_inv'] === 0) {
+			$primaries[] = $l['facility'];
+		}
+	}
+	if (count($primaries) == 1) {
+		return reset($primaries);
+	}
+
+	foreach ($locations as $l) {
+		if ($l['facility']['name'] === $affiliation) {
+			return $l['facility'];
+		}
+	}
+
+	return FALSE;
+}
+
+
+// Fetch particular column value from given table by row id
+function get_attr($table, $attribute_name, $id)
+{
+	global $logger;
+	if (!is_int($id)) {
+		return false;
+	}
+	$query = 
+		"SELECT `$attribute_name` ".
+		"FROM `$table` ".
+		"WHERE `id`=$id ".
+		"LIMIT 1";
+	if(!$res = mysql_query($query))
+	{
+		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+	$res = mysql_fetch_row($res);
+	return $res[0];
+}
+
+
 function parse_name($name)
 {
 	$parts["first_name"]	= '';

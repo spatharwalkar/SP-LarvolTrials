@@ -6,6 +6,16 @@ require_once('PHPExcel.php');
 require_once('PHPExcel/Writer/Excel2007.php');
 require_once('include.excel.php');
 
+
+$testA1=array();
+$testA2=array();
+$testA3=array();
+
+$uniqueId1='';
+$uniqueId2='';
+$uniqueId3='';
+
+
 chdir ($cwd);
 ini_set('memory_limit','-1');
 ini_set('max_execution_time','60');	
@@ -40,10 +50,13 @@ if($_POST['Idownload'])
 function showInvestigatorTracker($id, $dwIcount, $TrackerType, $page=1, $OptionArray = array())
 {
 	$HTMLContent = '';
-	
+	global 	$uniqueId1,$uniqueId2,$uniqueId3;
+
 	$Return = InvDataGenerator($id, $TrackerType, $page, $OptionArray, $dwIcount);
 	$uniqueId = uniqid();
-		
+	$uniqueId1 = 'c'.$uniqueId.'1';
+	$uniqueId2 = 's'.$uniqueId.'2';
+	$uniqueId3 = 'y'.$uniqueId.'3';
 	$data_matrix = $Return['matrix'];
 	$Report_DisplayName = $Return['report_name'];
 	$id = $Return['id'];
@@ -74,9 +87,8 @@ function showInvestigatorTracker($id, $dwIcount, $TrackerType, $page=1, $OptionA
 		$paginate = Ipagination($TrackerType, $TotalPages, $id, $dwIcount, $page, $MainPageURL, $OptionArray);
 		$HTMLContent .= '<br/><br/>'.$paginate[1];
 	}
-	
+
 	$HTMLContent .= InvTrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL, $OptionArray);
-	
 	
 	return $HTMLContent;
 
@@ -679,6 +691,7 @@ function InvTrackerCommonCSS($uniqueId, $TrackerType)
 
 function InvTrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL, $OptionArray)
 {
+	global 	$uniqueId1,$uniqueId2,$uniqueId3;
 	$htmlContent = '';
 	
 	$url = 'id=' . $id .'&page=' . $page;	
@@ -700,8 +713,60 @@ function InvTrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageU
 							location.href = \"". $MainPageURL ."?".$url."&dwIcount=active\";
 						}
 					}
-						</script>";
-		
+					function change_view_".$uniqueId1."_()
+					{
+						var icountry = document.getElementById('".$uniqueId1."_icountry');
+						var newURL = updateURLParameter(window.location.href, 'icountry', icountry.value);
+						window.location.href = newURL;
+					}
+					function change_view_".$uniqueId2."_()
+					{
+						var istate = document.getElementById('".$uniqueId2."_istate');
+						var newURL = updateURLParameter(window.location.href, 'istate', istate.value);
+						window.location.href = newURL;
+					}
+					function change_view_".$uniqueId3."_()
+					{
+						var icity = document.getElementById('".$uniqueId3."_icity');
+						var newURL = updateURLParameter(window.location.href, 'icity', icity.value);
+						window.location.href = newURL;
+					}
+					function reset_filters()
+					{
+						var newURL = updateURLParameter(window.location.href, 'icity', 'All cities');
+						var newURL2 = updateURLParameter(newURL, 'istate', 'All states');
+						var newURL3 = updateURLParameter(newURL2, 'icountry', 'All countries');
+						window.location.href = newURL3;
+						return false;
+						
+					}
+					";
+					
+					
+	$htmlContent .='function updateURLParameter(url, param, paramVal)
+					{
+						var newAdditionalURL = "";
+						var tempArray = url.split("?");
+						var baseURL = tempArray[0];
+						var additionalURL = tempArray[1];
+						var temp = "";
+						if (additionalURL) 
+						{
+							tempArray = additionalURL.split("&");
+							for (i=0; i<tempArray.length; i++)
+							{
+								if(tempArray[i].split(\'=\')[0] != param){
+									newAdditionalURL += temp + tempArray[i];
+									temp = "&";
+								}
+							}
+						}
+
+						var rows_txt = temp + "" + param + "=" + paramVal;
+						return baseURL + "?" + newAdditionalURL + rows_txt;
+					}
+
+					</script>';
 	//Script for view change ends
 
 	//Script for Fixed header while resize
@@ -961,7 +1026,8 @@ function InvTrackerHeaderHTMLContent($id, $Report_DisplayName, $TrackerType)
 }
 
 function InvTrackerHTMLContent($data_matrix, $id, $rows, $columns, $investigatorIds, $inner_columns, $inner_width, $column_width, $ratio, $entity2Id, $column_interval, $TrackerType, $dwIcount, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL, $OptionArray)
-{			
+{		
+	global 	$uniqueId1,$uniqueId2,$uniqueId3;
 	if(count($investigatorIds) == 0) return 'No Investigators Found';
 		global $cwd;
 	if(isset($cwd) && stripos($cwd,'sigma')!==false)
@@ -991,16 +1057,98 @@ function InvTrackerHTMLContent($data_matrix, $id, $rows, $columns, $investigator
 		$paginate = Ipagination($TrackerType, $TotalPages, $id, $dwIcount, $page, $MainPageURL, $OptionArray);
 		$htmlContent .= '<td style="padding-left:0px; vertical-align:top; border:0px;">'.$paginate[1].'</td>';
 	}				
+	
+	global $testA1,$testA2,$testA3,$logger;
+	
+			$qstr='';
+		if(isset($_GET['icountry']) && $_GET['icountry']<>'All countries')
+			$qstr.=' and f.country="'.$_GET['icountry'].'" ';
+		if(isset($_GET['istate']) && $_GET['istate']<>'All states')
+			$qstr.=' and f.state="'.$_GET['istate'].'" ';
+		if(isset($_GET['icity']) && $_GET['icity']<>'All cities')
+			$qstr.=' and f.city="'.$_GET['icity'].'" ';
+
+	
+	//get list of countries, states and cities.
+	$query="select distinct e.name, f.country,f.state,f.country,f.city
+			from entities e
+			join site s on 
+			( e.id=s.investigator_id and e.id IN (".implode(',',$investigatorIds).") )
+			join facility f on (s.facility_id=f.id " . $qstr . " )";
+	if(!$res = mysql_query($query))
+		{
+			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$logger->error($log);
+			echo $log;
+			return false;
+		}
+	
+	while ($row = mysql_fetch_assoc($res))
+	{
+		if(!empty($row['country'])) $testA1[]=$row['country'];
+		if(!empty($row['state'])) $testA2[]=$row['state'];
+		if(!empty($row['city'])) $testA3[]=$row['city'];
+	}
+	$testA1=array_unique($testA1);
+	$testA2=array_unique($testA2);
+	$testA3=array_unique($testA3);
+	//
+	
+	
+
+
 	$htmlContent .= '<td class="bottom right"><select id="'.$uniqueId.'_dwIcount" name="dwIcount" onchange="change_view_'.$uniqueId.'_();">'
 					. '<option value="total" '. (($dwIcount == 'total') ?  'selected="selected"' : '' ).'>All trials</option>'
 					. '<option value="active" '. (($dwIcount == 'active') ?  'selected="selected"' : '' ).'>Active trials</option>'
-					. '</select></td>'
-					. '<td class="bottom right">'
+					. '</select></td>';
+	
+	
+	$htmlContent .= '<td class="bottom right"><select style="width: 190px;" id="'.$uniqueId1.'_icountry" name="icountry" onchange="change_view_'.$uniqueId1.'_();">';
+					$selected = stripos(urldecode($_SERVER['REQUEST_URI']),'icountry');
+					$htmlContent .=  '<option value="All countries" '. (!empty($selected) ?  '' : 'selected="selected"').'>All countries</option>';
+					foreach($testA1 as $dk => $dv)
+					{
+						$dv1='icountry='.$dv;
+						$selected = stripos(urldecode($_SERVER['REQUEST_URI']),$dv1);
+						$htmlContent .=  '<option value="'.$dv.'" '. (!empty($selected) ?  'selected="selected"' : '' ).'>'. $dv .'</option>';
+					}
+					$htmlContent .= '</select></td>';
+	
+	$htmlContent .= '<td class="bottom right"><select style="width: 190px;" id="'.$uniqueId2.'_istate" name="istate" onchange="change_view_'.$uniqueId2.'_();">';
+					$selected = stripos(urldecode($_SERVER['REQUEST_URI']),'istate');
+					$htmlContent .=  '<option value="All states" '. (!empty($selected) ?   '' : 'selected="selected"'  ).'>All states</option>';
+					foreach($testA2 as $dk => $dv)
+					{
+						$dv1='istate='.$dv;
+						$selected = stripos(urldecode($_SERVER['REQUEST_URI']),$dv1);
+						$htmlContent .=  '<option value="'.$dv.'" '. (!empty($selected) ?  'selected="selected"' : '' ).'>'. $dv .'</option>';
+					}
+					$htmlContent .= '</select></td>';	
+	
+	$htmlContent .= '<td class="bottom right"><select  style="width: 190px;"id="'.$uniqueId3.'_icity" name="icity" onchange="change_view_'.$uniqueId3.'_();">';
+					$selected = stripos(urldecode($_SERVER['REQUEST_URI']),'icity');
+					$htmlContent .=  '<option value="All cities" '. (!empty($selected) ? '' : 'selected="selected"' ).'>All cities</option>';
+					foreach($testA3 as $dk => $dv)
+					{
+						$dv1='icity='.$dv;
+						$selected = stripos(urldecode($_SERVER['REQUEST_URI']),$dv1);
+						$htmlContent .=  '<option value="'.$dv.'" '. (!empty($selected) ?  'selected="selected"' : '' ).'>'. $dv .'</option>';
+					}
+					$htmlContent .= '</select></td>';	
+					
+					 $current_url=urldecode($_SERVER['REQUEST_URI']);
+					 
+	$htmlContent .= '<td class="bottom right">
+					<button onclick="reset_filters();return false;">Reset</button>
+					';
+	$htmlContent .= '</td>';	
+	
+	
+					$htmlContent .= '<td class="bottom right">'
 					. '<div style="border:1px solid #000000; float:right; margin-top: 0px; padding:2px; color:#000000;" id="'.$uniqueId.'_chromemenu"><a rel="'.$uniqueId.'_dropmenu"><span style="padding:2px; padding-right:4px; background-position:left center; background-repeat:no-repeat; background-image:url(\''.$dir.'images/save.png\'); cursor:pointer; ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#000000">Export</font></b></span></a></div>'
 					. '</td>'
 					. '</tr>'
 					. '</table>';
-				
 	$htmlContent  .= '<div id="'.$uniqueId.'_dropmenu" class="dropmenudiv" style="width: 310px;">'
 					.'<div style="height:100px; padding:6px;"><div class="downldbox"><div class="newtext">Download options</div>'
 					. '<input type="hidden" name="id" id="'.$uniqueId.'_id" value="' . $id . '" />'
@@ -2146,7 +2294,28 @@ function GetInvestigatorsFromDisease($DiseaseID)
 		}
 	}
 	if(empty($trials)) return false;
-	$query = "SELECT DISTINCT entity from entity_trials where trial IN (".implode(',',$trials).") and entity in (select id from entities where class='Investigator') ";
+	
+	//filtering 
+	$qstr='';
+	
+	if( isset($_GET['icountry']) or isset($_GET['istate']) or isset($_GET['icity']) )
+	{
+		$qstr=' 
+				JOIN site s on (e.id=s.investigator_id)
+				JOIN facility f on (s.facility_id=f.id' ;
+		if(isset($_GET['icountry']) && $_GET['icountry']<>'All countries')
+			$qstr.=' and f.country="'.$_GET['icountry'].'" ';
+		if(isset($_GET['istate']) && $_GET['istate']<>'All states')
+			$qstr.=' and f.state="'.$_GET['istate'].'" ';
+		if(isset($_GET['icity']) && $_GET['icity']<>'All cities')
+			$qstr.=' and f.city="'.$_GET['icity'].'" ';
+		$qstr.=' )';
+	}
+	
+	$query = "	SELECT DISTINCT et.entity 
+				FROM entity_trials et
+				JOIN entities e on (et.entity=e.id and e.class ='Investigator' and et.trial IN (".implode(',',$trials).")) "
+				. $qstr ;
 	
 	$res = mysql_query($query) or die('Bad SQL query getting investigators from Disease id in Investigator Tracker');
 	
