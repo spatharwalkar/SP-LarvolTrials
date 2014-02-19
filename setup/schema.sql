@@ -1441,20 +1441,18 @@ CREATE TABLE IF NOT EXISTS `news`  (
 	`sponsor`    	varchar(150) NULL,
 	`summary`    	varchar(150) NULL,
 	`added`      	date NOT NULL,
-	`period`     	smallint(6) NOT NULL
+	`period`     	smallint(6) NOT NULL,
+	`id`         	int(11) AUTO_INCREMENT NOT NULL,
+	`score`      	decimal(5,2) NOT NULL DEFAULT '0.00',
+	 PRIMARY KEY(id)
 	)
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `news`  ( 
-	`larvol_id`  	int(10) UNSIGNED NOT NULL,
-	`redtag_id`  	int(10) UNSIGNED NOT NULL,
-	`brief_title`	text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
-	`phase`      	enum('N/A','0','0/1','1','1a','1b','1a/1b','1c','1/2','1b/2','1b/2a','2','2a','2a/2b','2b','2/3','2b/3','3','3a','3b','3/4','3b/4','4') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N/A',
-	`enrollment` 	int(10) UNSIGNED NULL,
-	`sponsor`    	varchar(150) NULL,
-	`summary`    	varchar(150) NULL,
-	`added`      	date NOT NULL,
-	`period`     	smallint(6) NOT NULL
+CREATE TABLE IF NOT exists `tis_scores`  ( 
+	`phase`   	varchar(10) NOT NULL,
+	`score`   	decimal(5,2) NOT NULL,
+	`category`	int(11) NULL,
+	`input`   	int(11) NULL 
 	)
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -1548,6 +1546,7 @@ ALTER TABLE `news`
 	UNIQUE (redtag_id, larvol_id);
 
 DELIMITER $$
+
 CREATE PROCEDURE `generateTrialNews`( IN days int)
 BEGIN
 	
@@ -1600,7 +1599,7 @@ BEGIN
 			EXECUTE tmp_stmt2;
 
 			#populate the news table
-			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,lead_sponsor,',@comp_formula,' as summary, t.added, ',days,' as period from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,lead_sponsor,',@comp_formula,' as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			PREPARE news_stmt FROM @insert_news;
 			EXECUTE news_stmt;						
 
@@ -1615,3 +1614,90 @@ BEGIN
 END$$;
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE FUNCTION getMaxPhase (phase char(10)) RETURNS char(10) CHARSET latin1
+DETERMINISTIC
+BEGIN
+DECLARE max_phase char(10) DEFAULT phase;
+IF( phase REGEXP '[0-4]') THEN
+	IF (Locate('4',phase) >0) THEN
+		RETURN SUBSTRING(phase,LOCATE('4',phase),1);
+	END IF;
+	IF (Locate('3',phase) >0) THEN
+		RETURN SUBSTRING(phase,LOCATE('3',phase),1);
+	END IF;
+	IF (Locate('2',phase) >0) THEN
+		RETURN SUBSTRING(phase,LOCATE('2',phase),1);
+	END IF;
+	IF (Locate('1',phase) >0) THEN
+		RETURN SUBSTRING(phase,LOCATE('1',phase),1);
+	END IF;
+	IF (Locate('0',phase) >0) THEN
+		RETURN SUBSTRING(phase,LOCATE('0',phase),1);
+	END IF;
+END IF;
+RETURN max_phase;
+END$$;
+DELIMITER ;
+DELIMITER $$
+
+CREATE FUNCTION TIS (lid int(10)) RETURNS decimal(6,3)
+NOT DETERMINISTIC
+CONTAINS SQL
+BEGIN
+DECLARE v_enrollment int;
+DECLARE status char(100);
+DECLARE institution char(50);
+DECLARE cat_score decimal(6,3);
+DECLARE tis_score decimal(6,3) DEFAULT 1.0;
+DECLARE cat INT;
+DECLARE inputn INT;
+DECLARE done INT DEFAULT FALSE; 
+
+DECLARE dynamicCursor CURSOR FOR 
+SELECT `institution_type`,`overall_status`,`enrollment`,
+`score`,s.`category`,s.`input`
+FROM data_trials t
+JOIN tis_scores s on s.phase=getMaxPhase(t.phase)
+WHERE larvol_id=lid order by s.category, s.input;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE; 
+
+OPEN dynamicCursor; 
+dynamicCursorLoop: LOOP 
+	FETCH dynamicCursor INTO institution,status,v_enrollment,cat_score,cat,inputn;
+	IF (done) THEN LEAVE dynamicCursorLoop; 
+	END IF; 
+		CASE cat
+			WHEN 1 THEN 				
+				SET tis_score = cat_score;			
+			WHEN 2 THEN 
+				IF(inputn = 2 && (institution = 'industry' OR institution ='coop')) OR
+				(inputn = 1 && (institution != 'industry' AND institution != 'coop')) THEN
+					SET tis_score = tis_score * cat_score;				
+				END IF;
+			WHEN 3 THEN
+				IF( (inputn = 1 && (v_enrollment <= 10 OR v_enrollment is null)) 
+				OR (inputn = 2 && v_enrollment > 10 and v_enrollment < 51)
+				OR (inputn = 3 && v_enrollment > 50)) THEN
+					SET tis_score = tis_score * cat_score;
+				END IF;
+			WHEN 4 THEN				
+				IF ((inputn = 1 && (status not IN ('Terminated','Withdrawn','Suspended','unknown'))) 
+				OR (inputn = 2 && (status = 'Terminated' or status = 'Withdrawn')) 
+				OR (inputn = 3 && status = 'Suspended') 
+				OR (inputn = 4 && status = 'unknown')) THEN
+					SET tis_score = tis_score * cat_score;
+					
+				END IF;
+			ELSE
+				BEGIN
+				END;
+		END CASE;
+END LOOP; 
+
+CLOSE dynamicCursor; 
+return tis_score;
+END $$;
+
+DELIMITER ;

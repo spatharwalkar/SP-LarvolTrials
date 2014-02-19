@@ -107,7 +107,7 @@ function formatNews($result) {
 		$phase = 'P'. $phase;
 	}
 	$returnStr = '';
-	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['rUIS']).'</span>'.str_repeat('|',10-$result['rUIS']).'&nbsp;&nbsp;</span><span class="product_name">'.$result['product'].'</span><br>';
+	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['score']).'</span>'.str_repeat('|',10-$result['score']).'&nbsp;&nbsp;</span><span class="product_name">'.$result['product'].'</span><br>';
 	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span><span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
 	$returnStr .= '<a class="title" href="'.$ctLink.'" target="_blank">'.$result['brief_title'].'</a>&nbsp;-&nbsp;&nbsp;'.date('M jS, Y', strtotime($result['added'])) .'<br>';
 	$returnStr .= '<span class="summary">'.$result['summary'].'</span>';
