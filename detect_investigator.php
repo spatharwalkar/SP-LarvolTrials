@@ -313,7 +313,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 		// to all investigators mentioned in `overall_official_name`
 		foreach (array_keys($facilities) as $key) {
 			if ($facilities[$key] === false) {
-				$facilities[$key] = primary_location($record_data, $locations, $affiliations[$key]);
+				$facilities[$key] = primary_location($locations, $affiliations[$key]);
 			}
 		}
 
@@ -555,21 +555,11 @@ function add_site($eid, $facility, $trial_id)
 // (1) If there is only one location, it is the primary. 
 // (2) If there is only one location having no entity-specific investigator, it is the primary. 
 // (3) Otherwise the primary one is the one having a facility name matching the affiliation of the overall official.
-function primary_location($record_data, $locations, $affiliation)
+function primary_location($locations, $affiliation)
 {
-	if (count($locations) == 0) {
-		return array(
-			'name'		=> $record_data['location_name'],
-			'city'		=> $record_data['location_city'],
-			'state'		=> $record_data['location_state'],
-			'zip'		=> $record_data['location_zip'],
-			'country'	=> $record_data['location_country'],
-		);
-	}
-	if (count($locations) == 1 and !$record_data['location_name']) {
+if (count($locations) == 1) {
 		return $locations[0]['facility'];
 	}
-
 	$primaries = array();
 	foreach ($locations as $l) {
 		if ($l['num_inv'] === 0) {
