@@ -50,20 +50,22 @@ function NewsTrackerHTMLContent($res) {
 }
 
 function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
-	
+
 	global $db;
 	$query = "SELECT n.*,p.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN products p ON(et.entity = p.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `redtags` r ON(r.id=n.redtag_id)";
 
-	if($TrackerType == 'PNT')
+	if($TrackerType == 'PNT'){
 		$query .= "WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
+
+	} elseif($TrackerType == 'DNT' ) {
+	 	$query = "SELECT  n.*,en.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN entities en ON(et.entity = en.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `redtags` r ON(r.id=n.redtag_id) WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
+	}
 	else {
 		switch($TrackerType) {
 			case 'CNT':
 				$productIds = GetProductsFromCompany($id, 'CPT', array());
 				break;
-			case 'DNT':
-				$productIds = GetProductsFromDisease($id, 'DPT', array());
-				break;
+			
 			case 'MNT':
 				$productIds = GetProductsFromMOA($id, 'MPT', array());
 				break;
@@ -75,6 +77,7 @@ function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 		$query .= "WHERE et.`entity` in('" . $impArr . "')";
 	}
 	$query .= " order by added desc limit 50";
+
 	if(!$res = mysql_query($query))
 	{
 		global $logger;

@@ -3220,7 +3220,7 @@ function GetProductsFromCompany($companyID, $TrackerType, $OptionArray)
 				$Products[] = $row['id'];
 			}
 		}
-	
+
 		return array_filter(array_unique($Products));
 	}
 	elseif ($TrackerType == 'DISCATCPT')
