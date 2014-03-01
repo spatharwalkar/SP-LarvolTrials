@@ -63,6 +63,7 @@ function showDiseaseTracker($id, $TrackerType, $page=1, $categoryFlag = false,  
 	$TotalPages = $Return['TotalPages'];
 	$TotalRecords = $Return['TotalRecords'];
 	$GobalEntityType = $Return['GobalEntityType'];
+	$page = $Return['CurrentPage'];
 	
 	$MainPageURL = 'disease_tracker.php';
 	if($TrackerType == 'PDT')	//DPT=DISEASE Disease TRACKER
@@ -134,7 +135,6 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 		print "Disease tracker does not support disease as input.";
 		exit();
 	}
-	
 	
 	if($GobalEntityType != 'Product')	//FOR OTHER THAH
 	{
@@ -638,16 +638,30 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
 	$TotalRecords = count($data_matrix);
+	$page=!empty($_REQUEST['page'])?$_REQUEST['page']:1;
 	
 	if(!isset($_REQUEST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
-		
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		$NewDiseaseIds = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-
+		$NewDiseaseIdsTemp = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$data_matrix_temp = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		
+		
+		if (($TotalPages > 0 ) && (count($data_matrix_temp) == 0)){
+			
+			$StartSlice = ($TotalPages - 1) * $RecordsPerPage;
+			$EndSlice = $StartSlice + $RecordsPerPage;
+			$NewDiseaseIds = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$page=$TotalPages;
+			
+		} else {
+			$NewDiseaseIds = $NewDiseaseIdsTemp;
+			$data_matrix = $data_matrix_temp;
+		}
+		
 		
 	}
 	
@@ -687,6 +701,7 @@ function DataGeneratorForDiseaseTracker($id, $TrackerType, $page=1, $CountType, 
 	$Return['TotalPages'] = $TotalPages;
 	$Return['TotalRecords'] = $TotalRecords;
 	$Return['GobalEntityType'] = $GobalEntityType;
+	$Return['CurrentPage'] = $page;
 	
 	return $Return;
 }
@@ -1572,7 +1587,8 @@ function DiseaseTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, 
 	else if($TrackerType == 'INVESTDT')	
 		$url = 'InvestigatorId='.$id.'&tab=Diseases';
 	if($GobalEntityType == 'Product')
-		$url .= '&amp;dwcount=' . $dwcount;	
+		$url .= '&amp;dwcount=' . $CountType;	
+	
 	
 	$rootUrl = $MainPageURL.'?';
 	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
