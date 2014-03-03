@@ -284,23 +284,19 @@
 		<tr>
 			<td align="center">
 				<?php
-				print '<div id="diseaseTab_content" align="center">';
 				if($tab == 'diseasetrac'){
-					print $disTrackerData;		//PDT = PRODUCT DISEASE TRACKER
+					print '<div id="diseaseTab_content" align="center">'.$disTrackerData;		//PDT = PRODUCT DISEASE TRACKER
 				}
 				else if($tab == 'investigatortrac'){
-					print showInvestigatorTracker($e1, 'PIT', $page);		//PDT = PRODUCT INVESTIGATOR TRACKER  showInvestigatorTracker
+					print '<div id="diseaseTab_content" align="center">'.showInvestigatorTracker($e1, 'PIT', $page);		//PDT = PRODUCT INVESTIGATOR TRACKER  showInvestigatorTracker
 				}
 				else if($tab == 'newstrac'){
-					print showNewsTracker($e1, 'PNT', $page);		//PDT = PRODUCT NEWS TRACKER  showNewsTracker
-				}	
-				else if($tab == 'newstrac'){
-					print showNewsTracker($e1, 'PNT', $page);		//PDT = PRODUCT NEWS TRACKER  showNewsTracker
+					print '<div id="diseaseTab_content" align="left">'.showNewsTracker($e1, 'PNT', $page);		//PDT = PRODUCT NEWS TRACKER  showNewsTracker
 				}	
 				else
 				{
 					chdir ("..");
-					DisplayOTT(); //SHOW OTT 	
+					print '<div id="diseaseTab_content" align="center">'; DisplayOTT(); //SHOW OTT 	
 					chdir ("$cwd");
 				}
 				print '</div>';

@@ -380,21 +380,20 @@
 				<?php
 				if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $InvestigatorId == NULL) && (!isset($phase) || $phase == NULL))
 				{
-					print '<div id="diseaseTab_content" align="center">';
 					if($tab == 'diseasetrac')
-						print showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag, $disease);//CDT= COMPANY DISEASE TRACKER
+						print '<div id="diseaseTab_content" align="center">'.showDiseaseTracker($CompanyId, 'CDT', $page, $categoryFlag, $disease);//CDT= COMPANY DISEASE TRACKER
 					else if($tab == 'investigatortrac')
-						print showInvestigatorTracker($CompanyId, 'CIT', $page);		//CIT= COMPANY INVESTIGATOR TRACKER
+						print '<div id="diseaseTab_content" align="center">'.showInvestigatorTracker($CompanyId, 'CIT', $page);		//CIT= COMPANY INVESTIGATOR TRACKER
 					else if($tab == 'newstrac')
-						print showNewsTracker($CompanyId, 'CNT', $page);		//CNT = COMPANY NEWS TRACKER  showNewsTracker
+						print '<div id="diseaseTab_content" align="left">'.showNewsTracker($CompanyId, 'CNT', $page);		//CNT = COMPANY NEWS TRACKER  showNewsTracker
 					else if($tab == 'OTTtrac'){
 						chdir ("..");
-						DisplayOTT(); //SHOW OTT
+						print '<div id="diseaseTab_content" align="center">'; DisplayOTT(); //SHOW OTT
 						chdir ("$cwd");
 					}
 					else {
 						$data_matrix = dataGeneratorForCPT($CompanyId, $CompanyName, $dwcount, 'CPT', $page, $OptionArray);
-						print showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray, $data_matrix );	//CPT = COMPANY PRODUCT TRACKER 
+						print '<div id="diseaseTab_content" align="center">'.showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray, $data_matrix );	//CPT = COMPANY PRODUCT TRACKER 
 					}
 						
 					print '</div>';

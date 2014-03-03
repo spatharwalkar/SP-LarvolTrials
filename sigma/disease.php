@@ -445,7 +445,7 @@
 					}
 					//DCT=DISEASE NEWS TRACKER
 					if($tab == 'News')
-						print '<div id="News" align="center">'.showNewsTracker($DiseaseId, 'DNT', $page).'</div>';
+						print '<div id="News" align="left">'.showNewsTracker($DiseaseId, 'DNT', $page).'</div>';
 					//DOHM=DISEASE ONLINE HEATMAP 
 					if($tab == 'DiseaseOHM')
 						//print '<div id="DiseaseOHM" align="center">'; DisplayOHM($DiseaseId, 'DOHM').'</div>';

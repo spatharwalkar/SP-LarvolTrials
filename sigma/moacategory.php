@@ -297,16 +297,15 @@
 			<?php
 			if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($phase) || $phase == NULL))
 			{
-				print '<div id="diseaseTab_content" align="center">';
 				if($tab == 'diseasetrac')
-					print showDiseaseTracker($MoaCatId, 'MCDT', $page, $categoryFlag);		//MCDT= MOA CATEGORY DISEASE TRACKER
+					print '<div id="diseaseTab_content" align="center">'.showDiseaseTracker($MoaCatId, 'MCDT', $page, $categoryFlag);		//MCDT= MOA CATEGORY DISEASE TRACKER
 					//print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER
 				else if($tab == 'investigatortrac')
-					print showInvestigatorTracker($MoaCatId, 'MCIT', $page);
+					print '<div id="diseaseTab_content" align="center">'.showInvestigatorTracker($MoaCatId, 'MCIT', $page);
 				else if($tab == 'newstrac')
-					print showNewsTracker($MoaCatId, 'MCNT', $page);		//MCNT= MOA CATEGORY NEWS TRACKER
+					print '<div id="diseaseTab_content" align="left">'.showNewsTracker($MoaCatId, 'MCNT', $page);		//MCNT= MOA CATEGORY NEWS TRACKER
 				else
-					print showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
+					print '<div id="diseaseTab_content" align="center">'.showProductTracker($MoaCatId, $dwcount, 'MCPT', $page, $OptionArray);	//MCPT= MOA CATEGORY PRODUCT TRACKER 
 				print '</div>';
 			}
 			else
