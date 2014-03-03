@@ -309,6 +309,10 @@
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="DiseaseOHMImg" src="../images/selectTabConn.png" /></td><td id="DiseaseOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> -->
 							<td>
+								<img id="NewsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td>
+							<td>
 								<img id="lastImg" src="../images/lastTab.png" />
 							</td>
 							<td></td>
