@@ -20,7 +20,41 @@
 <td width="300px">&nbsp;</td>
 <td width="600px" style="font-weight:bold; padding-left:0px;" align="center">
 <!-- <font class="searchTypes" style="color:#666666;"><a href="index.php?class=Institution" style="text-decoration:underline; display:inline; color:#1122cc;">Companies</a> / <a href="index.php?class=Product" style="text-decoration:underline; display:inline; color:#1122cc;">Products</a> / <a href="index.php?class=MOA" style="text-decoration:underline; display:inline; color:#1122cc;">Mechanisms of Action</a> / <a href="index.php?class=Disease" style="text-decoration:underline; display:inline; color:#1122cc;">Diseases</a> / <a href="index.php?class=Investigator" style="text-decoration:underline; display:inline; color:#1122cc;">Investigators</a> / <a href="index.php?class=NPT" style="text-decoration:underline; display:inline; color:#1122cc;">Non product trials</a></font> -->
-<font class="searchTypes" style="color:#666666;"><a href="index.php?class=Institution" style="text-decoration:underline; display:inline; color:#1122cc;">Companies</a> / <a href="index.php?class=Product" style="text-decoration:underline; display:inline; color:#1122cc;">Products</a> / <a href="index.php?class=MOA" style="text-decoration:underline; display:inline; color:#1122cc;">Mechanisms of Action</a> / <a href="index.php?class=Disease" style="text-decoration:underline; display:inline; color:#1122cc;">Diseases</a> / <a href="index.php?class=Investigator" style="text-decoration:underline; display:inline; color:#1122cc;">Investigators</a> </font>
+<!--<font class="searchTypes" style="color:#666666;"><a href="index.php?class=Institution" style="text-decoration:underline; display:inline; color:#1122cc;">Companies</a> / <a href="index.php?class=Product" style="text-decoration:underline; display:inline; color:#1122cc;">Products</a> / <a href="index.php?class=MOA" style="text-decoration:underline; display:inline; color:#1122cc;">Mechanisms of Action</a> / <a href="index.php?class=Disease" style="text-decoration:underline; display:inline; color:#1122cc;">Diseases</a> / <a href="index.php?class=Investigator" style="text-decoration:underline; display:inline; color:#1122cc;">Investigators</a> </font>-->
+<style>
+.mainmenu {
+	list-style: none;
+	padding-left: 1.2em;
+	text-indent: -1.2em;
+	margin-top:-1px;
+	margin-bottom:0px;
+}
+.mainmenu .lists:before {
+	content: "/";
+    color: #666666;
+	padding-right: 3px;
+	font-weight:normal;
+	margin-left: -1px;
+}
+.mainmenu li a {
+	color: #1122CC;
+    text-decoration: underline;
+    font-weight: bold;
+}
+.mainmenu li, .mainmenu li a, .mainmenu li a:hover{
+	display:inline;	
+}
+.mainmenu .lists:before, .mainmenu li a {
+    font-size: 12px;
+}
+</style>
+<ul class="mainmenu">
+	<li><a href="index.php?class=Institution">Companies</a></li>
+	<li class="lists"><a href="index.php?class=Product">Products</a></li>
+	<li class="lists"><a href="index.php?class=MOA">Mechanismss of Action</a></li>
+	<li class="lists"><a href="index.php?class=Disease">Diseases</a></li>
+	<li class="lists"><a href="index.php?class=Investigator">Investigators</a></li>
+</ul>
 </td>
 </tr>
 </table>
