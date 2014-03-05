@@ -28,7 +28,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 		if($res['institution_type']=='industry_lead_sponsor')
 		{
 			echo 'Industry lead sponsor trial, skipping......<br>';
-			return false;
+//			return false;
 		}
 		if($exists)
 		{
@@ -59,7 +59,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 		if($res['institution_type']=='industry_lead_sponsor')
 		{
 			echo 'Industry lead sponsor trial, skipping......<br>';
-			return false;
+//			return false;
 		}
 		
 		
@@ -222,7 +222,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			if($res['institution_type']=='industry_lead_sponsor')
 			{
 				echo 'Industry lead sponsor trial, skipping ' . $res['source_id'] . '......<br>';
-				continue;
+//				continue;
 			}
 			/****************************/
 			
@@ -322,8 +322,9 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 			$overall_official_affiliation = $affiliations[$key];
 			$overall_official_name=mysql_real_escape_string($overall_official_name);
 			$overall_official_affiliation = mysql_real_escape_string($overall_official_affiliation);
-			$failwords = preg_match_all('/(admin|medical|director|trial|monitor|clinical|science|strategy|study)/i', $overall_official_name);
-			if($failwords > 0) continue;
+			if (name_is_noisy($overall_official_name)) {
+				continue;
+			}
 			$name_parts = parse_name($overall_official_name);
 			if($name_parts['surname'] == "")
 				$display_name = $name_parts['first_name'].' '.$name_parts['middle_name'];
@@ -557,9 +558,10 @@ function add_site($eid, $facility, $trial_id)
 // (3) Otherwise the primary one is the one having a facility name matching the affiliation of the overall official.
 function primary_location($locations, $affiliation)
 {
-if (count($locations) == 1) {
+	if (count($locations) == 1) {
 		return $locations[0]['facility'];
 	}
+
 	$primaries = array();
 	foreach ($locations as $l) {
 		if ($l['num_inv'] === 0) {
@@ -580,6 +582,46 @@ if (count($locations) == 1) {
 }
 
 
+// Determine if the investigator's name is "noisy" - grounds for investigator disqualification.
+// 
+// The name is considered "noisy" if the name contains:
+// (1) any exclusion word,
+// (2) a '@', or 
+// (3) the 'name' of any institution in the entities table
+function name_is_noisy($name)
+{
+	if (
+		preg_match_all(
+			'/(admin|medical|director|trial|monitor|clinical|science|strategy|study)/i', 
+			$name
+		) > 0
+	)
+	{
+		return TRUE;
+	}
+	if (strpos($name, '@')) {
+		return TRUE;
+	}
+	// Compare $name to all the institution names in the entities table
+	$query = 
+		"SELECT COUNT(`name`) ".
+		"FROM `entities` ".
+		"WHERE '$name' LIKE CONCAT('%', `name`, '%')";
+	if(!$res = mysql_query($query))
+	{
+		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		$logger->error($log);
+		echo $log;
+		return false;
+	}
+	$res = mysql_fetch_row($res);
+	if ($res[0] > 0) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+			
 // Fetch particular column value from given table by row id
 function get_attr($table, $attribute_name, $id)
 {
