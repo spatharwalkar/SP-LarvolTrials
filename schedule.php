@@ -52,6 +52,10 @@ function editor()
 		$chkd6=" checked='checked' ";
 	else
 		$chkd6="";
+	if($rpt['tab_count_entity']==1)
+		$chkd7=" checked='checked' ";
+	else
+		$chkd7="";
 	$out = '<form action="schedule.php" method="post"><fieldset class="schedule"><legend>Edit schedule item ' . $id . '</legend>'
 			. '<input type="hidden" name="id" value="' . $id . '" />'
 			. '<input type="submit" name="reportsave" value="Save edits" /><br clear="all"/>'
@@ -65,7 +69,8 @@ function editor()
 			. makeDropdown('fetch',getEnumValues('schedule','fetch'),false,$rpt['fetch'])
 			. '</label><br />'  // checkbox for updating status of UPMs.
 			. '<label>Generate News?: <input type="checkbox" name="gen_news" value="news" ' . $chkd5 . ' /></label><br />'  // update deseases
-			. '<label>Clean up Stalled Queries?: <input type="checkbox" name="clean_query" value="clean_q" ' . $chkd6 . ' /></label>'  // update deseases
+			. '<label>Clean up Stalled Queries?: <input type="checkbox" name="clean_query" value="clean_q" ' . $chkd6 . ' /></label>'  // clean stalled query
+			. '<label>Tab Count for Entities?: <input type="checkbox" name="tab_count" value="tab_c" ' . $chkd7 . ' /></label>'  // tab count
 			. '<br clear="all"/>';
 
 	//put product/areas schedule list prodcuts=1 areas=2 using bitmask.
@@ -258,6 +263,15 @@ function postEd()
 		else
 		{
 			$query = 'UPDATE `schedule` SET `clean_stalled_query`= NULL where `id`="'.$id . '" limit 1';
+		}
+		mysql_query($query);
+		if( isset($_POST['tab_count']) and $_POST['tab_count']=='tab_c' )
+		{
+			$query = 'UPDATE `schedule` SET `tab_count_entity`="1" where `id`="'.$id . '" limit 1';
+		}
+		else
+		{
+			$query = 'UPDATE `schedule` SET `tab_count_entity`= NULL where `id`="'.$id . '" limit 1';
 		}
 		mysql_query($query);
 		if(!mysql_query($query))

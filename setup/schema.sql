@@ -170,9 +170,25 @@ CREATE TABLE IF NOT EXISTS `schedule` (
   `get_diseases` tinyint(4) unsigned DEFAULT NULL,
   `get_disease_cat` tinyint(4) unsigned DEFAULT NULL,
   `clean_stalled_query` tinyint(4) DEFAULT NULL,
+  `tab_count_entity` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+
+CREATE TABLE IF NOT EXISTS `tabs` (
+  `entity_id` int(11) NOT NULL,
+  `table_name` varchar(100) NOT NULL,
+  `companies` int(11) NOT NULL,
+  `products` int(11) NOT NULL,
+  `moas` int(11) NOT NULL,
+  `moa_categories` int(11) NOT NULL,
+  `diseases` int(11) NOT NULL,
+  `diseases_categories` int(11) NOT NULL,
+  `investigators` int(11) NOT NULL,
+  `news` int(11) NOT NULL,
+  `trials` int(11) NOT NULL DEFAULT '0',
+  `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 CREATE TABLE IF NOT EXISTS `settings` (

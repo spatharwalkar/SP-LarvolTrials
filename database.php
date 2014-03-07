@@ -629,6 +629,13 @@ if (isset($_POST['news_days']))
 	return;
 }
 
+//Tab Count
+if(isset($_POST['updateEntityabCount']))
+{
+	$entityType = $_POST['updateEntityabCount'];
+	include_once('count_entities_tabs.php');
+}
+
 /****************************/
 echo(editor());
 echo('</body></html>');
@@ -1054,14 +1061,32 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			. '<input type="submit" name="detect_all" value="Detect ALL" />'
 			. '</form></formset></fieldset></div>';
 			
+	// TAB COUNT UPDATE
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> TAB COUNT UPDATE </b></legend>'
+			. '<formset><form action="database.php" method="post">'
+			. '
+			<select name="updateEntityabCount" id="updateEntityabCount" >
+			<option value="">All</option>
+			<option value="Institution">Institution</option>
+			<option value="Product">Product</option>
+			<option value="Disease">Disease</option>
+			<option value="Disease_Category">Disease Category</option>
+			<option value="MOA">MOA</option>
+			<option value="MOA_Category">MOA Category</option>
+			<option value="Investigator">Investigator</option>
+			</select>'
+			. '&nbsp;&nbsp;<input type="submit" value="Update" />'
+			. '</form></formset></fieldset></div>';
+
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
 	// RECALCULATE INVESTIGATOR CELLS
 	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b>RECALCULATE INVESTIGATORS (ALL)</b></legend>'
 	. '<formset><form action="database.php" method="post">'
 	. '<input type="hidden" name="recalc_investigators" value="YES">'
 	. '<br><input type="submit" value="Recalculate" />'
 	. '</form></formset></fieldset></div>';
-
-	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
 	// Diseases Category from clinicaltrials.gov
 	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> Import Disease Category </b></legend>'
 			. '<formset><form action="database.php" method="post">'

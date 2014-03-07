@@ -152,6 +152,21 @@ foreach($tasks as $row)
 			require_once('kill_mysql_proceses.php'); 
 			continue;
 		}
+		//tab count query
+		if( !is_null($row['tab_count_entity']) and $row['tab_count_entity']==1 )
+		{
+			echo '<br>Tab Count for Entities ...<br>';
+			$query = 'UPDATE schedule SET lastrun="' . date("Y-m-d H:i:s",strtotime('now')) . '" WHERE id=' . $row['id'] . ' LIMIT 1';
+			global $logger;
+			if(!mysql_query($query))
+			{
+				$log='Error saving changes to schedule: ' . mysql_error() . '('. mysql_errno() .'), Query:' . $query;
+				$logger->fatal($log);
+				die($log);
+			}
+			require_once('count_entities_tabs.php'); ///specify file name
+			continue;
+		}
 		//Calculate Master HM cells if scheduled
 		if( !is_null($row['calc_HM']) and $row['calc_HM']==1 )
 		{
