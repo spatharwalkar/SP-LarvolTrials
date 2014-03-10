@@ -590,23 +590,30 @@ function primary_location($locations, $affiliation)
 // (3) the 'name' of any institution in the entities table
 function name_is_noisy($name)
 {
-	if (
-		preg_match_all(
-			'/(admin|medical|director|trial|monitor|clinical|science|strategy|study)/i', 
-			$name
-		) > 0
+	$pieces = explode(",", $name);
+	pr($pieces);
+	if(empty($pieces)) pr('NAME='.$name);
+	if 
+	(
+		preg_match_all('/(admin|medical|director|trial|monitor|clinical|science|strategy|study|president|vp)/i', $pieces[0]) > 0
 	)
+		{
+			echo "$name contains an exclusion word. Skipping. ";
+			return TRUE;
+		}
+	if (strpos($name, '@')) 
 	{
-		return TRUE;
-	}
-	if (strpos($name, '@')) {
+		echo "$name contains an '@'. Skipping. ";
 		return TRUE;
 	}
 	// Compare $name to all the institution names in the entities table
+	$name = addcslashes(mysql_real_escape_string($name), '%_');
 	$query = 
-		"SELECT COUNT(`name`) ".
+		"SELECT `name` ".
 		"FROM `entities` ".
-		"WHERE '$name' LIKE CONCAT('%', `name`, '%')";
+		"WHERE `class`='Institution' ".
+			"AND `name` LIKE '%$name%' ".
+		"LIMIT 1";
 	if(!$res = mysql_query($query))
 	{
 		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -614,8 +621,9 @@ function name_is_noisy($name)
 		echo $log;
 		return false;
 	}
-	$res = mysql_fetch_row($res);
-	if ($res[0] > 0) {
+	if (mysql_num_rows($res) > 0) {
+		$res = mysql_fetch_row($res);
+		echo "$name is contained in an entry from entities ($res[0]). Skipping. ";
 		return TRUE;
 	}
 	return FALSE;
