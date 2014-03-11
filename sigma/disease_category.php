@@ -39,14 +39,31 @@
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
 	$tabCommonUrl    = 'disease_category.php?DiseaseCatId='.$DiseaseCatId;
+	
+	$sqlGetTabs = "SELECT * from tabs where entity_id = $DiseaseCatId AND  table_name = 'entities'";
+	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+	$TabProductCount = $rowGetTabs['products'];
+	$TabCompanyCount = $rowGetTabs['companies'];
+	$TabTrialCount = $rowGetTabs['trials'];
+	$TabMOACount = $rowGetTabs['moas'];
+	
 	$arrDiseaseIds   = getDiseaseIdsFromDiseaseCat($DiseaseCatId);
-	$productIds      = GetProductsFromDiseaseCat($arrDiseaseIds);
-	$CompanyIds      = GetCompaniesFromDiseaseCat_CompanyTracker($arrDiseaseIds);
-	$MOAData         = GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds);
-	$TabProductCount = count($productIds);
-	$TabCompanyCount = count($CompanyIds);
-	$TabMOACount     = count($MOAData['all']);
-	$TabTrialCount   = GetTrialsCountFromDiseaseCat($arrDiseaseIds);
+	if($tab == 'Companies') {
+		$CompanyIds      = GetCompaniesFromDiseaseCat_CompanyTracker($arrDiseaseIds);
+		$TabCompanyCount = count($CompanyIds);
+	}
+	
+	if($tab == 'Products') {
+		$productIds      = GetProductsFromDiseaseCat($arrDiseaseIds);
+		$TabProductCount = count($productIds);
+	}
+	
+	if($tab == 'MOAs') {
+		$MOAData         = GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds);
+		$TabMOACount     = count($MOAData['all']);
+	}
+	
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($DiseasecatName) ? $DiseasecatName. ' - '.$meta_title : $meta_title;	

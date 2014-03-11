@@ -40,12 +40,9 @@ function showDiseaseTracker($id, $TrackerType, $page=1, $categoryFlag = false,  
 		$CountType = $_REQUEST['dwcount'];
 	else
 		$CountType = 'total';
-		
-	if($TrackerType == 'CDT') {
-		$Return = $data_matrix;
-	} else {
-		$Return = DataGeneratorForDiseaseTracker($id, $TrackerType, $page, $CountType, $categoryFlag);
-	}
+
+	$Return = DataGeneratorForDiseaseTracker($id, $TrackerType, $page, $CountType, $categoryFlag);
+	
 	$uniqueId = uniqid();
 	
 	///Required Data restored

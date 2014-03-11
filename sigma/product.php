@@ -45,22 +45,25 @@
 	global $tabCommonUrl;
 	$tabCommonUrl = 'product.php?e1='.$e1;
 	
-	$disTrackerData = showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
-	
-	/*if($categoryFlag == 1){
-		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($e1, 'Product'));
-	}*/	
-	
 	if(isset($_REQUEST['dwcount']))
 	$dwcount = $_REQUEST['dwcount'];
 	else
 	$dwcount = 'total';
- 
-	$investigator = DataGeneratorForInvestigatorTracker($e1,'PIT', $page, $dwcount);
-	$TabInvestigatorCount = $investigator['TotalRecords'];
 	
-	$TabTrialsCount = GetTrialsCountFromProduct($e1);
-	$TabNewsCount = GetNewsCountFromProduct($e1);
+	$disTrackerData = showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
+
+	$sqlGetTabs = "SELECT * from tabs where entity_id = $e1 AND  table_name = 'entities'";
+	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+	if($categoryFlag == 1){
+		$TabDiseaseCount = $rowGetTabs['diseases_categories'];
+	}	
+	else{
+		$TabDiseaseCount = $rowGetTabs['diseases'];
+	}
+	$TabTrialsCount = $rowGetTabs['trials'];
+	$TabNewsCount = $rowGetTabs['news'];
+	$TabInvestigatorCount = $rowGetTabs['investigators'];
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($ProductName) ? $ProductName. ' - '.$meta_title : $meta_title;

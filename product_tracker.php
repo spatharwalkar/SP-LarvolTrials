@@ -43,12 +43,9 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 {
 	$HTMLContent = '';
 	global $TabProductCount;
-	
-	if($TrackerType == 'CPT') {
-		$Return = $data_matrix;
-	} else {
-		$Return = DataGenerator($id, $TrackerType, $page, $OptionArray, $dwcount);
-	}
+
+	$Return = DataGenerator($id, $TrackerType, $page, $OptionArray, $dwcount);
+		
 	global $TabProductCount;
 	$TabProductCount=count($Return);
 	$uniqueId = uniqid();

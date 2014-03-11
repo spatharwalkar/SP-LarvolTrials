@@ -67,22 +67,17 @@
 	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'moa.php?MoaId='.$MoaId;
 	
+	$sqlGetTabs = "SELECT * from tabs where entity_id = $MoaId AND  table_name = 'entities'";
+	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+	$TabProductCount = $rowGetTabs['products'];
 	if($categoryFlag == 1){
-		// $TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($MoaId, 'MOA'));
-		$disease = DataGeneratorForDiseaseTracker($MoaId, 'MDT', $page, $dwcount, $categoryFlag);
-		$TabDiseaseCount = $disease['TotalRecords'];
+		$TabDiseaseCount = $rowGetTabs['diseases_categories'];
 	}else{
-		// $TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaId, 'MOA'));
-		$disease = DataGeneratorForDiseaseTracker($MoaId, 'MDT', $page, $dwcount, $categoryFlag);
-		$TabDiseaseCount = $disease['TotalRecords'];
+		$TabDiseaseCount = $rowGetTabs['diseases'];
 	}	
-	
-	// $TabProductCount = count(GetProductsFromMOA($MoaId, 'MPT', array()));
-	$product = array();
-	$product = DataGenerator($MoaId, 'MPT', $page, $OptionArray, $dwcount);
-	$TabProductCount = $product['TotalRecords'];
-	$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($MoaId, 'MOA'));
-	$TabNewsCount = GetNewsCountFromMOA($product['ProductIds']);
+	$TabNewsCount = $rowGetTabs['news'];
+	$TabInvestigatorCount = $rowGetTabs['investigators'];
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaName) ? $MoaName. ' - '.$meta_title : $meta_title;		

@@ -65,19 +65,19 @@
 	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'moacategory.php?MoaCatId='.$MoaCatId;
 	
+	$sqlGetTabs = "SELECT * from tabs where entity_id = $MoaCatId AND  table_name = 'entities'";
+	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+	$TabProductCount = $rowGetTabs['products'];
 	
 	if($categoryFlag == 1){	
-		$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
+		$TabDiseaseCount = $rowGetTabs['diseases_categories'];
 	}else{
-		$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($MoaCatId, 'MOA_Category'));
+		$TabDiseaseCount = $rowGetTabs['diseases'];
 	}
+	$TabInvestigatorCount = $rowGetTabs['investigators'];
+	$TabNewsCount = $rowGetTabs['news'];
 	
-	$productIds      = GetProductsFromMOACategory($MoaCatId, 'MCPT', array());
-	$TabProductCount = count($productIds);
-	$MoaCatChildRecords = implode("','",getAllMoaChild($MoaCatId));
-	$Inv_data = GetInvestigatorFromEntity_InvestigatorTracker($MoaCatId, 'MOA_Category',true);
-	$TabInvestigatorCount = count($Inv_data["Ids"]);
-	$TabNewsCount = GetNewsCountFromMOA($productIds);
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaCatName) ? $MoaCatName. ' - '.$meta_title : $meta_title;		
 ?>

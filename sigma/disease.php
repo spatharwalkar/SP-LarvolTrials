@@ -51,20 +51,16 @@
 	}
 	$tabCommonUrl = 'disease.php?DiseaseId='.$DiseaseId;
 	
-	//$TabProductCount = count(GetProductsFromDisease($DiseaseId));
-	$product = array();
+	$sqlGetTabs = "SELECT * from tabs where entity_id = $DiseaseId AND  table_name = 'entities'";
+	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+	$TabCompanyCount = $rowGetTabs['companies'];
+	$TabProductCount = $rowGetTabs['products'];
+	$TabMOACount = $rowGetTabs['moas'];
+	$TabTrialCount = $rowGetTabs['trials'];
+	$TabNewsCount = $rowGetTabs['news'];
+	$TabInvCount = $rowGetTabs['investigators'];
 	
-	$product = DataGenerator($DiseaseId, 'DPT', $page, $OptionArray, $dwcount);
-	
-	$TabProductCount = $product['TotalRecords'];
-	$company = DataGeneratorForCompanyTracker($DiseaseId, 'DCT', $page);
-	$TabCompanyCount = $company['TotalRecords'];
-	$TabMOAData = DataGeneratorForMOATracker($DiseaseId, 'DMT', $page);
-	 $TabMOACount = count($TabMOAData['matrix']);
-	$TabTrialCount = GetTrialsCountFromDisease($DiseaseId);
-	$investigator = InvDataGenerator($DiseaseId,'DIT', $page, $OptionArray, $dwIcount);
-	$TabInvCount = $investigator['TotalRecords'];
-	$TabNewsCount = GetNewsCountFromDisease($DiseaseId);
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($DiseaseName) ? $DiseaseName. ' - '.$meta_title : $meta_title;	
 ?>

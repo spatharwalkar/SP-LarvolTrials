@@ -88,38 +88,23 @@
 	$tabCommonUrl = 'company.php?CompanyId='.$CompanyId;
 	$tabOTTUrl    = 'company.php?e1='.$CompanyId;
 	
-	$disease = array();
+	$sqlGetTabs = "SELECT * from tabs where entity_id = $CompanyId AND  table_name = 'entities'";
+	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
 	
-	if((!isset($DiseaseId) || $DiseaseId == NULL) && (!isset($InvestigatorId) || $InvestigatorId == NULL) && (!isset($phase) || $phase == NULL)) {
-		
-		if($categoryFlag == 1){
-			//$TabDiseaseCount = count(GetDiseasesCatFromEntity_DiseaseTracker($CompanyId, 'Institution' ));
-			$disease = DataGeneratorForDiseaseTracker($CompanyId, 'CDT', $page, $dwcount, $categoryFlag);
-			$TabDiseaseCount = $disease['TotalRecords'];
-		}
-		else{
-			//$TabDiseaseCount = count(GetDiseasesFromEntity_DiseaseTracker($CompanyId, 'Institution'));
-			$disease = DataGeneratorForDiseaseTracker($CompanyId, 'CDT', $page, $dwcount, $categoryFlag);
-			$TabDiseaseCount = $disease['TotalRecords'];
-		}
-		
-		$product = array();
-		//$product = DataGenerator($CompanyId, 'CPT', $page, $OptionArray, $dwcount);
-		//$TabProductCount = $product['TotalRecords'];
-		$companyProducts = getcompanyProducts($CompanyId);
-		
-		$productIds = array_keys($companyProducts);
-		
-		//var_dump($productIds);	
-		//exit;
-		
-		$tabProductAndTrial = GetProductsAndTrialsForCompany($productIds);	
-		$TabTrialCount = $tabProductAndTrial[0];
-		$TabProductCount = $tabProductAndTrial[1];
-		
-		$TabInvestigatorCount = count(GetInvestigatorFromEntity_InvestigatorTracker($CompanyId, 'Institution'));
-		$TabNewsCount = GetNewsCountForCompany($productIds);
+	if($categoryFlag == 1){
+		$TabDiseaseCount = $rowGetTabs['diseases_categories'];
 	}
+	else{
+		$TabDiseaseCount = $rowGetTabs['diseases'];
+	}
+	$TabTrialCount = $rowGetTabs['trials'];
+	$TabNewsCount = $rowGetTabs['news'];
+	$TabInvestigatorCount = $rowGetTabs['investigators'];
+	$TabProductCount = $rowGetTabs['products'];
+	
+	$companyProducts = getcompanyProducts($CompanyId);
+	$productIds = array_keys($companyProducts);
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($CompanyName) ? $CompanyName. ' - '.$meta_title : $meta_title;	
@@ -392,8 +377,8 @@
 						chdir ("$cwd");
 					}
 					else {
-						$data_matrix = dataGeneratorForCPT($CompanyId, $CompanyName, $dwcount, 'CPT', $page, $OptionArray);
-						print '<div id="diseaseTab_content" align="center">'.showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray, $data_matrix );	//CPT = COMPANY PRODUCT TRACKER 
+						//$data_matrix = dataGeneratorForCPT($CompanyId, $CompanyName, $dwcount, 'CPT', $page, $OptionArray);
+						print '<div id="diseaseTab_content" align="center">'.showProductTracker($CompanyId, $dwcount, 'CPT', $page, $OptionArray);	//CPT = COMPANY PRODUCT TRACKER 
 					}
 						
 					print '</div>';
