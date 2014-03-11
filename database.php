@@ -633,6 +633,11 @@ if (isset($_POST['news_days']))
 if(isset($_POST['updateEntityabCount']))
 {
 	$entityType = $_POST['updateEntityabCount'];
+	
+	if(isset($_POST['updateEntitytId']) && trim($_POST['updateEntitytId']) != '' && $_POST['updateEntitytId'] > 0) {
+		$entityId = $_POST['updateEntitytId'];
+	}
+	
 	include_once('count_entities_tabs.php');
 }
 
@@ -1065,7 +1070,7 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> TAB COUNT UPDATE </b></legend>'
 			. '<formset><form action="database.php" method="post">'
 			. '
-			<select name="updateEntityabCount" id="updateEntityabCount" >
+			Select a Entity Type: <select name="updateEntityabCount" id="updateEntityabCount" >
 			<option value="">All</option>
 			<option value="Institution">Institution</option>
 			<option value="Product">Product</option>
@@ -1075,7 +1080,8 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			<option value="MOA_Category">MOA Category</option>
 			<option value="Investigator">Investigator</option>
 			</select>'
-			. '&nbsp;&nbsp;<input type="submit" value="Update" />'
+			.'<br/><br/>OR Enter Larvol Id : <input type="text" name="updateEntitytId" id="updateEntitytId" />'
+			. '<br/><br/>&nbsp;&nbsp;<input type="submit" value="Update" />'
 			. '</form></formset></fieldset></div>';
 
 	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';

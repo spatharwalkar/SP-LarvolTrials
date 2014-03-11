@@ -9,6 +9,11 @@ if(isset($entityType) && trim($entityType) != '') {
 	$cond = "AND class='$entityType'";
 }
 
+if(isset($entityId) && trim($entityId) != '' && $entityId > 0) {
+	$cond = "AND id ='$entityId'";
+}
+
+
 $getEntitySql = "SELECT id, class FROM entities WHERE (is_active <> '0' OR is_active IS NULL) ";
 $getEntitySql .= $cond;
 
@@ -1136,7 +1141,7 @@ function updateDisCatTabCount($disCatId) {
 	
 	//Diaease category product count
 	$disCatProductsCount = 0;
-	
+	$disCatProducts = array();
 	$sqlGetProductForDisCat = "SELECT DISTINCT e.`id` FROM `entity_relations` er 
 							JOIN `entities` e ON(e.`id` = er.`child`) 
 							WHERE e.`class`='Product' 
