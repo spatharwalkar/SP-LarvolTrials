@@ -51,7 +51,7 @@
 <ul class="mainmenu">
 	<li><a href="index.php?class=Institution">Companies</a></li>
 	<li class="lists"><a href="index.php?class=Product">Products</a></li>
-	<li class="lists"><a href="index.php?class=MOA">Mechanismss of Action</a></li>
+	<li class="lists"><a href="index.php?class=MOA">Mechanisms of Action</a></li>
 	<li class="lists"><a href="index.php?class=Disease">Diseases</a></li>
 	<li class="lists"><a href="index.php?class=Investigator">Investigators</a></li>
 </ul>
