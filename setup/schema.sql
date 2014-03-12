@@ -1472,6 +1472,53 @@ CREATE TABLE IF NOT exists `tis_scores`  (
 	)
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE IF NOT exists `pubmed_abstracts` (
+  `medlinecitation_owner` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `medlinecitation_status` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `pm_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `source_id` int(15) unsigned NOT NULL,
+  `creation_year` int(4) unsigned DEFAULT NULL,
+  `creation_month` int(4) unsigned DEFAULT NULL,
+  `creation_day` int(4) unsigned DEFAULT NULL,
+  `article_pubmodel` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `journal_issntype` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `journal_issn` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `journalissue_citedmedium` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `journalissue_volume` varchar(5) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `journalissue_issue` varchar(5) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `journalissue_pubdate_medlinedate` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `journal_title` text COLLATE utf8_unicode_ci,
+  `journal_isoabbreviation` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `article_title` text COLLATE utf8_unicode_ci,
+  `medline_pagination` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `abstract_text` text COLLATE utf8_unicode_ci,
+  `authorlist_complete` tinyint(1) DEFAULT NULL,
+  `author_valid` tinyint(1) DEFAULT NULL,
+  `author_lastname` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `author_forename` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `author_initials` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `author_affiliation` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `language` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `publicationtype` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `medlinejournal_country` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `medlinejournal_ta` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `medlinejournal_nlmuniqueid` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `medlinejournal_issn_linking` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `citationsubset` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `pubmeddata_date_pubstatus` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `pubmeddata_date_year` varchar(4) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `pubmeddata_date_month` varchar(2) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `pubmeddata_date_day` varchar(2) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `pubmeddata_date_hour` varchar(2) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `pubmeddata_date_minute` varchar(2) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `publication_status` varchar(30) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `articleid_type` varchar(30) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `articleid` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`pm_id`),
+  UNIQUE KEY `source_id` (`source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  
+
 ALTER TABLE `products_moas`
   ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `products_moas_ibfk_2` FOREIGN KEY (`moa`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
