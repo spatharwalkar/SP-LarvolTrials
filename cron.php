@@ -264,7 +264,9 @@ foreach($tasks as $row)
 		{
 			//Max number of previous days to check for new records for 
 			// nct and pubmed database separately
-			if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
+			if($row['fetch'] == 'nct_new') $scrapercode=3; 
+			elseif($row['fetch'] == 'pubmed') $scrapercode=9;
+			else $scrapercode=0;
 			if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
 				$fetch[$row['fetch']] = $lastrun;
 		}
@@ -482,6 +484,9 @@ if($current_tasks_count==0)
 						case 3:
 						$updtname='nct_new';
 						break;
+						case 9:
+						$updtname='pubmed';
+						break;
 					}
 					//Update status set to 'error'
 					echo($updtname  .' database updation error. Requeueing it.' . $nl);
@@ -545,7 +550,9 @@ if($current_tasks_count==0)
 					{
 						//Max number of previous days to check for new records for 
 						// nct and pubmed database separately
-						if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
+						if($row['fetch'] == 'nct_new') $scrapercode=3;
+						elseif($row['fetch'] == 'pubmed') $scrapercode=9;
+						else $scrapercode=0;
 						if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
 							$fetch[$row['fetch']] = $lastrun;
 					}
@@ -582,6 +589,9 @@ if($current_tasks_count==0)
 						break;
 						case 'nct_new':
 						$updtid=3;
+						break;
+						case 'pubmed':
+						$updtid=9;
 						break;
 					}
 					if($update_status[$count]==COMPLETED and $scrapercode==$updtid )
@@ -721,9 +731,14 @@ if($current_tasks_count==0)
 						case 3:
 						$updtname='nct_new';
 						break;
+						case 9:
+						$updtname='pubmed';
+						break;
 					}
 
 						//Start the update execution
+						if($updtname=='pubmed') $updtname='pm';
+						if($updtname=='nct_new') $updtname='nct';
 						$filename = 'fetch_' . $updtname . '.php';
 						echo('Invoking: ' . $filename . '...</pre>' . $nl);
 						$days_to_fetch=$run_updates[$i]['updated_days'];
@@ -850,6 +865,9 @@ elseif($current_tasks_count==1)
 						case 3:
 						$updtname='nct_new';
 						break;
+						case 9:
+						$updtname='pubmed';
+						break;
 					}
 					echo($updtname.' database updation error. Requeueing it.' . $nl);
 					$query = 'UPDATE update_status SET status="'.ERROR.'",process_id="0" WHERE update_id="' . $update_ids[$i].'"';
@@ -910,7 +928,9 @@ elseif($current_tasks_count==1)
 					{
 						//Max number of previous days to check for new records for 
 						// nct and pubmed database separately
-						if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
+						if($row['fetch'] == 'nct_new') $scrapercode=3; 
+						elseif($row['fetch'] == 'pubmed') $scrapercode=9; 			
+						else $scrapercode=0;
 						if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
 							$fetch[$row['fetch']] = $lastrun;
 					}
@@ -950,7 +970,9 @@ elseif($current_tasks_count==1)
 						case 'nct_new':
 						$updtid=3;
 						break;
-					
+						case 'pubmed':
+						$updtid=9;
+						break;
 					}
 					
 					if($update_status[$count]==COMPLETED and $scrapercode==$updtid )
@@ -1090,9 +1112,14 @@ elseif($current_tasks_count==1)
 						case 3:
 						$updtname='nct_new';
 						break;
+						case 9:
+						$updtname='pubmed';
+						break;
 					}
 
 					//Start the update execution
+					if($updtname=='pubmed') $updtname='pm';
+					if($updtname=='nct_new') $updtname='nct';
 					$filename = 'fetch_' . $updtname . '.php';
 					echo('Invoking ' . $filename . '...</pre>' . $nl);
 					$days_to_fetch=$run_updates[$i]['updated_days'];
@@ -1228,6 +1255,9 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
+									case 9:
+									$updtname='pubmed';
+									break;
 								
 								}
 								//Update status set to 'error'
@@ -1289,7 +1319,10 @@ elseif($current_tasks_count>1)
 								$schedule[] = $row;
 								if($row['fetch'] != 'none')
 								{
-								if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
+								if($row['fetch'] == 'nct_new') $scrapercode=3; 
+								elseif($row['fetch'] == 'pubmed') $scrapercode=9; 
+								
+								else $scrapercode=0;
 									//Max number of previous days to check for new records for 
 									// nct and pubmed database separately
 									if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
@@ -1329,7 +1362,9 @@ elseif($current_tasks_count>1)
 									case 'nct_new':
 									$updtid=3;
 									break;
-								
+									case 'pubmed':
+									$updtid=9;
+									break;
 								}
 								if($update_status[$count]==COMPLETED and $scrapercode==$update_status['id'.$count] )
 								{
@@ -1470,9 +1505,12 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
-								
+									case 9:
+									$updtname='pubmed';
+									break;
 								}
-
+								if($updtname=='pubmed') $updtname='pm';
+								if($updtname=='nct_new') $updtname='nct';
 								$filename = 'fetch_' . $updtname . '.php';
 								echo('Invoking:- ' . $filename . '...</pre>' . $nl);
 								$days_to_fetch=$run_updates[$i]['updated_days'];
@@ -1601,6 +1639,9 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
+									case 9:
+									$updtname='pubmed';
+									break;
 									
 								}
 								//Update status set to 'error'
@@ -1660,7 +1701,9 @@ elseif($current_tasks_count>1)
 								$schedule[] = $row;
 								if($row['fetch'] != 'none')
 								{
-								if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
+								if($row['fetch'] == 'nct_new') $scrapercode=3; 
+								elseif($row['fetch'] == 'pubmed') $scrapercode=9;
+								else $scrapercode=0;
 									//Max number of previous days to check for new records for 
 									// nct and pubmed database separately
 									if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
@@ -1699,6 +1742,9 @@ elseif($current_tasks_count>1)
 									break;
 									case 'nct_new':
 									$updtid=3;
+									break;
+									case 'pubmed':
+									$updtid=9;
 									break;
 									
 								}
@@ -1842,10 +1888,15 @@ elseif($current_tasks_count>1)
 									case 3:
 									$updtname='nct_new';
 									break;
+									case 9:
+									$updtname='pubmed';
+									break;
 								
 								}
 
 									//Start the update execution
+									if($updtname=='pubmed') $updtname='pm';
+									if($updtname=='nct_new') $updtname='nct';
 									$filename = 'fetch_' . $updtname . '.php';
 									echo('Invoking.- ' . $filename . '...</pre>' . $nl);
 									$days_to_fetch=$run_updates[$i]['updated_days'];
@@ -1975,6 +2026,9 @@ elseif($current_tasks_count>1)
 								case 3:
 								$updtname='nct_new';
 								break;
+								case 9:
+								$updtname='pubmed';
+								break;
 								
 							}
 							//Update status set to 'error'
@@ -2035,7 +2089,9 @@ elseif($current_tasks_count>1)
 							$schedule[] = $row;
 							if($row['fetch'] != 'none')
 							{
-							if($row['fetch'] == 'nct_new') $scrapercode=3; else $scrapercode=0;
+							if($row['fetch'] == 'nct_new') $scrapercode=3; 
+							elseif($row['fetch'] == 'pubmed') $scrapercode=9;
+							else $scrapercode=0;
 								//Max number of previous days to check for new records for 
 								// nct and pubmed database separately
 								if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
@@ -2074,6 +2130,9 @@ elseif($current_tasks_count>1)
 								break;
 								case 'nct_new':
 								$updtid=3;
+								break;
+								case 'pubmed':
+								$updtid=9;
 								break;
 							}
 							if($update_status[$count]==COMPLETED and $scrapercode==$update_status['id'.$count] )
@@ -2215,8 +2274,13 @@ elseif($current_tasks_count>1)
 								case 3:
 								$updtname='nct_new';
 								break;
+								case 9:
+								$updtname='pubmed';
+								break;
 								
 							}
+							if($updtname=='pubmed') $updtname='pm';
+							if($updtname=='nct_new') $updtname='nct';
 							$filename = 'fetch_' . $updtname . '.php';
 							echo('Invoking-: ' . $filename . '...</pre>' . $nl);
 							$days_to_fetch=$run_updates[$i]['updated_days'];
@@ -2345,6 +2409,9 @@ elseif($current_tasks_count>1)
 							case 3:
 							$updtname='nct_new';
 							break;
+							case 9:
+							$updtname='pubmed';
+							break;
 						}
 						//Update status set to 'error'
 						echo($updtname.' database updation error. Requeueing it.' . $nl);
@@ -2406,7 +2473,9 @@ elseif($current_tasks_count>1)
 						if($row['fetch'] != 'none')
 						{
 						
-						if($row['fetch'] == 'nct_new') $scrapercode[]=3; else $scrapercode[]=0;
+						if($row['fetch'] == 'nct_new') $scrapercode[]=3; 
+						elseif($row['fetch'] == 'pubmed') $scrapercode[]=9; 
+						else $scrapercode[]=0;
 							//Max number of previous days to check for new records for 
 							// nct and pubmed database separately
 							if(!isset($fetch[$row['fetch']]) || $fetch[$row['fetch']] < $lastrun)
@@ -2446,6 +2515,10 @@ elseif($current_tasks_count>1)
 							case 'nct_new':
 							$updtid=3;
 							break;
+							case 'pubmed':
+							$updtid=9;
+							break;
+							
 							
 						}
 					//	echo '<br>scf code=' . $scrapercode .  'updtid' . $updtid . 'updt st id' . $update_status['id'.$count] .'<br>';
@@ -2593,10 +2666,14 @@ elseif($current_tasks_count>1)
 							case 3:
 							$updtname='nct_new';
 							break;
-							
+							case 9:
+							$updtname='pubmed';
+							break;
 						}
 
 							//Start the update execution
+							if($updtname=='pubmed') $updtname='pm';
+							if($updtname=='nct_new') $updtname='nct';
 							$filename = 'fetch_' . $updtname . '.php';
 							echo('Invoking:: ' . $filename . '...</pre>' . $nl);
 							$days_to_fetch=$run_updates[$i]['updated_days'];

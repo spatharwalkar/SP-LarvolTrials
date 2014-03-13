@@ -2,12 +2,14 @@
 //connect to Sphinx
 if(!isset($sphinx) or empty($sphinx)) $sphinx = @mysql_connect("127.0.0.1:9306") or $sphinx=false;
 require_once('db.php');
+require_once('include.util.php');
 if(!$db->loggedIn() || ($db->user->userlevel!='root' && $db->user->userlevel!='admin'))
 {
 	header('Location: ' . urlPath() . 'index.php');
 	exit;
 }
 require('header.php');
+ini_set('error_reporting', E_ALL );
 /**************/
 ignore_user_abort(true);
 // single trial refresh new schema
@@ -45,6 +47,29 @@ if (isset($_POST['scraper_n']) and isset($_POST['days_n']))
 	run_incremental_scraper($_POST['days_n']);
 	return ;
 }
+
+//fetch pubmed abstracts
+
+if (isset($_POST['p_scraper_n']) and isset($_POST['days_pm'])) 
+{
+	require_once('pm_common.php');
+	require_once('include.import_pm.php');
+	require_once($_POST['p_scraper_n']);
+	$update_id = 9;
+	
+	run_incremental_scraper($_POST['days_pm']);
+	return ;
+}
+
+if (isset($_POST['pubmed_id'])) 
+{
+	require_once('pm_common.php');
+	require_once('include.import_pm.php');
+	$update_id = 9;
+	ProcessNew($_POST['pubmed_id']) ;
+	return ;
+}
+
 
 //fetch Eudract from source 
 if (isset($_POST['e_scraper_n']) and isset($_POST['days_n'])) 
@@ -1100,9 +1125,32 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			. '<br><input type="submit" value="Import" />'
 			. '</form></formset></fieldset></div>';
 				
-	$out .= '</fieldset></div><br /><br /><br />';
-
 	
+	
+	
+	
+	
+	
+	
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(PUBMED) </font> </b></legend>'
+			. '<form action="database.php" method="post">'
+			. 'Enter Pubmed Id to refresh :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" name="pubmed_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
+			. ''
+			. '<input type="submit" name="singleabstract" value="Refresh Abstract" />'
+			. '</form>'
+			
+			. '<form action="database.php" method="post">'
+			. 'Enter no. of days (look back period) : <input type="text" name="days_pm" value=""/>&nbsp;&nbsp;&nbsp;
+				<input type="hidden" name="p_scraper_n" value="fetch_pm.php"/>
+				'
+			. ''
+			. '<input type="submit" value="Fetch from source" />'
+			. '</form>'
+			. '</fieldset></div>';
+			
+			$out .= '</fieldset></div><br /><br /><br />';
+			
+		$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
 
