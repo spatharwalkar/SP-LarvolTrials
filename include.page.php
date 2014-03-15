@@ -1181,6 +1181,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 			ob_start();
 			while($row = mysql_fetch_assoc($result))
 			{
+			
 				$update = true;
 				$id = $row['id'];
 				$searchData = $row['searchdata'];
@@ -1200,7 +1201,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 						return 4;
 					}
 				}			
-				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$importVal = array_map("am1",$importKeys,array_values($importVal));
 				$query = "update $actual_table set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
@@ -1313,13 +1314,17 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 							//first remove existing institution associations for this product
 							$qry=" DELETE FROM entity_relations where parent = '". $ProdID ."' and child in 
 								( select id from entities where class=\"Institution\") limit 10 ";
-							$delok = mysql_query($qry);
-							if(!$delok)
+							if( empty($last_prodid) or $last_prodid<>$ProdID )
 							{
-								pr('Cannot remove old entity relations  <br> Query='.$qry.'<br>');
-								pr(mysql_errno());
-								pr(mysql_error());
-								return false;
+								$delok = mysql_query($qry);
+								if(!$delok)
+								{
+									pr('Cannot remove old entity relations  <br> Query='.$qry.'<br>');
+									pr(mysql_errno());
+									pr(mysql_error());
+									return false;
+								}
+								$last_prodid=$ProdID;
 							}
 							
 							$InstAssocInsertquery = "INSERT INTO entity_relations values ('" .  $ProdID  . "', '" . $InstIdLocal . "')";
@@ -1341,8 +1346,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 									echo $log;
 									return false;
 								}
+								}
 							}
-						}
 						else  // delete the institution assocition if no institution id is given in the xml
 						{
 							$qry=" DELETE FROM entity_relations where parent = '". $ProdID ."' and child in 
@@ -1474,7 +1479,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					deleteData($id, $actual_table);
 					return 4;
 				}			
-				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$importVal = array_map("am1",$importKeys,array_values($importVal));
 				$query = "update $actual_table set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
@@ -1573,7 +1578,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					deleteData($id, 'entities');
 					return 4;
 				}			
-				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$importVal = array_map("am1",$importKeys,array_values($importVal));
 				$query = "update `entities` set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
@@ -1733,7 +1738,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					deleteData($id, 'entities');
 					return 4;
 				}			
-				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$importVal = array_map("am1",$importKeys,array_values($importVal));
 				$query = "update `entities` set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
@@ -1833,7 +1838,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					deleteData($id, 'entities');
 					return 4;
 				}			
-				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$importVal = array_map("am1",$importKeys,array_values($importVal));
 				$query = "update `entities` set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
@@ -1932,7 +1937,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 					deleteData($id, 'entities');
 					return 4;
 				}			
-				$importVal = array_map(am1,$importKeys,array_values($importVal));
+				$importVal = array_map("am1",$importKeys,array_values($importVal));
 				$query = "update `entities` set ".implode(',',$importVal)." where id=".$id;
 			}
 			else 
@@ -2287,8 +2292,8 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				unset($newpost[$LarvolIdKey]);
 			}			
 
-			$postnew = array_map(am1,$newpostKeys,$newpost);
-			$post = array_map(am1,array_keys($post),array_values($post));
+			$postnew = array_map("am1",$newpostKeys,$newpost);
+			$post = array_map("am1",array_keys($post),array_values($post));
 		}
 		else
 		{
@@ -2299,7 +2304,7 @@ function saveData($post,$table,$import=0,$importKeys=array(),$importVal=array(),
 				softDieSession('Cannot update '.$table.' entry. Product name cannot empty.');
 				return 0;
 			}			
-			$post = array_map(am1,array_keys($post),array_values($post));
+			$post = array_map("am1",array_keys($post),array_values($post));
 			//pr($post);//die;
 		}
 		if($table<>'upm') $postnew = $post;
