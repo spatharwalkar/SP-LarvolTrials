@@ -67,6 +67,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 	$TrackerType = $Return['TrackerType'];
 	$TotalPages = $Return['TotalPages'];
 	$TotalRecords = $Return['TotalRecords'];
+	$page = $Return['CurrentPage'];
 	
 	$MainPageURL = 'product_tracker.php';	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	
@@ -633,17 +634,34 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
 	$TotalRecords = count($data_matrix);
+	$page=!empty($_REQUEST['page'])?$_REQUEST['page']:1;
 	if(!isset($_POST['download']))
 	{
-		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
+		
 		
 		//Get only those product Ids which we are planning to display on current page to avoid unnecessary queries
-		$StartSlice = ($page - 1) * $RecordsPerPage;
-		$EndSlice = $StartSlice + $RecordsPerPage;
+		
 		if(!empty($data_matrix))
 		{
-			$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-			$rows = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
+			$StartSlice = ($page - 1) * $RecordsPerPage;
+			$EndSlice = $StartSlice + $RecordsPerPage;
+			$data_matrix_temp = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$rowsTemp = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			
+			if (($TotalPages > 0 ) && (count($data_matrix_temp) == 0)){
+					
+				$StartSlice = ($TotalPages - 1) * $RecordsPerPage;
+				$EndSlice = $StartSlice + $RecordsPerPage;
+				$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+				$rows = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+				$page=$TotalPages;
+					
+			} else {
+				$data_matrix = $data_matrix_temp;
+				$rows        = $rowsTemp ;
+			}
+			
 		}
 		else
 		{
@@ -679,6 +697,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	$Return['TrackerType'] = $TrackerType;
 	$Return['TotalPages'] = $TotalPages;
 	$Return['TotalRecords'] = $TotalRecords;
+	$Return['CurrentPage'] = $page;
 	
 	return $Return;
 }
