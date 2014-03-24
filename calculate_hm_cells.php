@@ -433,7 +433,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			$overall_statuses['prohibited_active_owner_sponsored']=0;
 			$overall_statuses['new_trials_active_owner_sponsored']=0;
 			$suspended_or_terminated=0;
-			
+			$phasez2=array();
 			while ($row = mysql_fetch_assoc($res))
 			{	
 				
@@ -450,7 +450,13 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 					$instype2[] = $row["relation_type"];
 					$ldate[] = $row["lastchanged_date"];
 					$phases[] = $row["phase"];
-					if($row["phase"]<>'N/A') $phasez[] = $row["phase"];
+					if($row["phase"]<>'N/A') 
+					{
+						$phasez[]  = $row["phase"];
+						$phasez2[] = str_replace("/","z",$row["phase"]);
+					}
+					
+					
 					$ostatus[] = $row["overall_status"];
 					$cnt_total++;
 
@@ -680,7 +686,9 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 			
 			if(!empty($phasez))
 			{
-				$max_phase = max($phasez);
+				$tt=str_replace("z","/",max($phasez2));
+				$ph_key = array_search($tt, $phasez);
+				$max_phase = $phasez[$ph_key];
 			}
 			else
 			{
