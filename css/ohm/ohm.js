@@ -126,4 +126,19 @@ function updateviewmode()
 				hm.rows[row+2].cells[cell+1].children[0].innerHTML = value;
 		}
 	}
+	
+	var itype = "";
+	var list = "";
+	switch(mode)
+	{
+		case 'ai':  list = "list=1&";	itype = 'itype=1&';	break;
+		case 'aos': list = "list=1&";	itype = 'itype=0&';	break;
+		case 'act': list = "list=1&";	itype = 'itype=&';	break;
+		case 'all': list = "list=2&";	itype = 'itype=&';	break;
+	}
+	
+	var links = document.getElementById('mainhm').getElementsByTagName('a');
+	$.each(links, function(){
+		this.href = this.href.replace(/list=\d*&/,list).replace(/itype=\d*&/,itype);
+	});
 }

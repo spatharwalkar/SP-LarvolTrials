@@ -312,7 +312,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 	//output column headers
 	foreach($cols as $col)
 	{
-		$url = 'intermediary.php?e2=' . $col['ent_id'] . '&list=1&itype=0&hm='.$id;
+		$url = 'intermediary.php?e2=' . $col['ent_id'] . '&list=1&itype=1&hm='.$id;
 		$colHeader = $col['display_name'];
 		if(empty($colHeader))
 		{
@@ -353,7 +353,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 		if($row['category'] != $lastsect)	//add row category header if new row category encoutered
 		{
 			$lastsect = $row['category'];
-			$url = 'intermediary.php?e1=' . implode(',',$sectionIDs[$row['category']]) . '&e2=' . $DTT . '&list=1&itype=0&hm=' . $id;
+			$url = 'intermediary.php?e1=' . implode(',',$sectionIDs[$row['category']]) . '&e2=' . $DTT . '&list=1&itype=1&hm=' . $id;
 			echo('<tr><td class="sect" colspan="' . $numcols . '"><div><a href="' . htmlspecialchars($url) . '">' . htmlspecialchars($row['category']) . '</a></div></td></tr>');
 		}
 		$rowHeader = $row['display_name'];
@@ -376,7 +376,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 			while($companyRow = mysql_fetch_assoc($res)) $prodCompanies[] = $companyRow['name'];
 			$rowHeader = productFormatLI($rowHeader, $prodCompanies, $row['tag']);
 		}
-		$url = 'intermediary.php?e1=' . $row['ent_id'] . '&list=1&itype=0&hm=' . $id;
+		$url = 'intermediary.php?e1=' . $row['ent_id'] . '&list=1&itype=1&hm=' . $id;
 		echo('<tr><th class="row"><div><a href="' . htmlspecialchars($url) . '">' . $rowHeader . '</a></div></th>');
 		foreach($cols as $columnIndex => $col)
 		{
@@ -471,7 +471,7 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 							. strip_tags($cellInfo['phase_explain']) . '</a>';
 				}
 			}
-			$url = 'intermediary.php?e1=' . $row['ent_id'] . '&e2=' . $col['ent_id'] . '&list=1&itype=0&hm=' . $id;
+			$url = 'intermediary.php?e1=' . $row['ent_id'] . '&e2=' . $col['ent_id'] . '&list=1&itype=1&hm=' . $id;
 			$cellnum = $forward ? $cells[$defVM][$row['ent_id']][$col['ent_id']] : $cells[$defVM][$col['ent_id']][$row['ent_id']];
 			if(strlen($mouseover))
 			{
