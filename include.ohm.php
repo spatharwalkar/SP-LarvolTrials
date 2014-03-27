@@ -37,8 +37,8 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 <title>Online Heatmap</title>
 <base target="_blank"/>
 <script type="text/javascript" src="scripts/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="scripts/jquery-migrate-1.2.1.js"></script>
 <script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.min.js"></script>
-<script type="text/javascript" src="date/jquery.date_input.js"></script>
 <script type="text/javascript" src="scripts/date/jquery.jdpicker.js"></script>
 <script type="text/javascript" src="date/init.js"></script>
 <script type="text/javascript" src="css/getcssrule.js"></script>
