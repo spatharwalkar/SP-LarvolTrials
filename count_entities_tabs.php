@@ -339,24 +339,12 @@ function updateProductTabCount($productId) {
 	
 	// product investigator count
 	$productInvestigatorCount = 0;
-	
-	$query = "SELECT DISTINCT trial FROM entity_trials WHERE  entity= '" . mysql_real_escape_string($productId) . "' ";
-
-	$res = mysql_query($query) or die('Bad SQL query getting trials from entity trials in IT');
-
-	if($res) {
-		while($row = mysql_fetch_array($res)) {
-			$trials[] = $row['trial'];
-		}
-	}
-	if(count($trials) > 0) {
-		$trials = implode("','", $trials);
-	} else {
-		$trials = '';
-	}
-	
+		
 	$query = "SELECT DISTINCT entity FROM entity_trials et
-			JOIN entities e on et.entity=e.id AND e.class='Investigator' AND et.trial IN ('$trials')";
+			JOIN entities e on et.entity=e.id AND e.class='Investigator' 
+			AND et.trial IN (SELECT DISTINCT trial FROM entity_trials WHERE  entity= '" . mysql_real_escape_string($productId) . "')";
+	
+
 	$res = mysql_query($query) or die('Bad SQL query getting investigators for product.');
 	$Investigators = array();
 	if($res) {
