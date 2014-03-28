@@ -11509,30 +11509,12 @@ $(document).ready(function(){
 			$attr = ' ';
 			if(isset($tvalue['manual_is_sourceless']))
 			{	
-				if(isset($tvalue['edited']) && array_key_exists('brief_title', $tvalue['edited']) && str_replace('Previous value: ', '', $tvalue['edited']['brief_title']) <> $tvalue['brief_title']) 
+				if($tvalue['brief_title'] != '')
 				{
-					$attr = ' highlight" title="' . $tvalue['edited']['brief_title'];
-					$titleLinkColor = '#FF0000;';
-				} 
-				elseif($tvalue['new'] == 'y') 
-				{
-					$attr = '" title="New record';
-					$titleLinkColor = '#FF0000;';
+					$attr = ' manual" title="Manually entered trial.';
+					$titleLinkColor = '#FF7700';
 				}
-				elseif($tvalue['manual_brief_title'] != '' && $tvalue['manual_brief_title'] !== NULL)
-				{
-					if($tvalue['brief_title_prev'] == $tvalue['brief_title'])
-					{
-						$attr = ' manual" title="Manual curation.';
-						$titleLinkColor = '#FF7700';
-					}
-					elseif($tvalue['brief_title_prev'] != '' && $tvalue['brief_title_prev'] !== NULL)
-					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['brief_title_prev'];
-						$titleLinkColor = '#FF7700';
-					}
 					
-				}
 			}
 			else
 			{ 	
@@ -11608,25 +11590,11 @@ $(document).ready(function(){
 				$highlightFlag = getDifference($prevValue, $tvalue['NCT/enrollment']);
 			}
 			if(isset($tvalue['manual_is_sourceless']))
-			{
-				if(!empty($tvalue['edited']) && array_key_exists('enrollment', $tvalue['edited']) && $highlightFlag) 
+			{				
+				if($tvalue['enrollment'] != '')
 				{
-					$attr = ' highlight" title="' . $tvalue['edited']['enrollment'];
-				}
-				else if($tvalue['new'] == 'y') 
-				{
-					$attr = '" title="New record';
-				}
-				elseif($tvalue['manual_enrollment'] != '' && $tvalue['manual_enrollment'] !== NULL)
-				{
-					if($tvalue['enrollment_prev'] == $tvalue['enrollment'])
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-					elseif($tvalue['enrollment_prev'] != '' && $tvalue['enrollment_prev'] !== NULL)
-					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['enrollment_prev'];
-					}
+					$attr = ' manual" title="Manually entered trial.';
+					$titleLinkColor = '#FF7700';
 				}
 			}
 			else
@@ -11660,20 +11628,10 @@ $(document).ready(function(){
 			$attr = ' ';
 			if(isset($tvalue['manual_is_sourceless']))
 			{
-				if($tvalue['new'] == 'y')
+				if($tvalue['region'] != '')
 				{
-					$attr = '" title="New record';
-				}
-				elseif($tvalue['manual_region'] != '' && $tvalue['manual_region'] !== NULL)
-				{
-					if($tvalue['region_prev'] == $tvalue['region'])
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-					elseif($tvalue['region_prev'] != '' && $tvalue['region_prev'] !== NULL)
-					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['region_prev'];
-					}
+					$attr = ' manual" title="Manually entered trial.';
+					$titleLinkColor = '#FF7700';
 				}
 			}
 			else
@@ -11703,24 +11661,10 @@ $(document).ready(function(){
 			$attr = ' ';
 			if(isset($tvalue['manual_is_sourceless']))
 			{
-				if(!empty($tvalue['edited']) && array_key_exists('intervention_name', $tvalue['edited']))
+				if($tvalue['intervention_name'] != '')
 				{
-					$attr = ' highlight" title="' . $tvalue['edited']['intervention_name'];
-				} 
-				else if($tvalue['new'] == 'y')
-				{
-					$attr = '" title="New record';
-				}
-				elseif($tvalue['manual_intervention_name'] != '' && $tvalue['manual_intervention_name'] !== NULL)
-				{
-					if($tvalue['intervention_name_prev'] == $tvalue['intervention_name'])
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-					elseif($tvalue['intervention_name_prev'] != '' && $tvalue['intervention_name_prev'] !== NULL)
-					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['intervention_name_prev'];
-					}
+					$attr = ' manual" title="Manually entered trial.';
+					$titleLinkColor = '#FF7700';
 				}
 			}
 			else
@@ -11754,53 +11698,10 @@ $(document).ready(function(){
 			$attr = ' ';
 			if(isset($tvalue['manual_is_sourceless']))
 			{
-				if(!empty($tvalue['edited']) && (array_key_exists('collaborator', $tvalue['edited']) 
-				|| array_key_exists('lead_sponsor', $tvalue['edited']))) 
+				if($tvalue['collaborator'] != '')
 				{
-					$attr = ' highlight" title="';
-					if(array_key_exists('lead_sponsor', $tvalue['edited']))
-					{
-						$attr .= $tvalue['edited']['lead_sponsor'];
-					}
-					if(array_key_exists('lead_sponsor', $tvalue['edited']) && array_key_exists('collaborator', $tvalue['edited']))
-					{
-						$attr .=  ', ';
-					}
-					if(array_key_exists('collaborator', $tvalue['edited'])) 
-					{
-						$attr .= $tvalue['edited']['collaborator'];
-					}
-					$attr .= '';
-				} 
-				else if($tvalue['new'] == 'y') 
-				{
-					$attr = '" title="New record';
-				}
-				elseif(($tvalue['manual_lead_sponsor'] != '' && $tvalue['manual_lead_sponsor'] !== NULL) 
-				|| ($tvalue['manual_collaborator'] != '' && $tvalue['manual_collaborator'] !== NULL))
-				{
-					if($tvalue['manual_lead_sponsor'] != '' && $tvalue['manual_lead_sponsor'] !== NULL)
-					{
-						if($tvalue['lead_sponsor_prev'] == $tvalue['lead_sponsor'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						elseif($tvalue['lead_sponsor_prev'] != '' && $tvalue['lead_sponsor_prev'] !== NULL)
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['lead_sponsor_prev'];
-						}
-					}
-					else
-					{
-						if($tvalue['collaborator_prev'] == $tvalue['collaborator'])
-						{
-							$attr = ' manual" title="Manual curation.';
-						}
-						elseif($tvalue['collaborator_prev'] != '' && $tvalue['collaborator_prev'] !== NULL)
-						{
-							$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['collaborator_prev'];
-						}
-					}
+					$attr = ' manual" title="Manually entered trial.';
+					$titleLinkColor = '#FF7700';
 				}
 			}
 			else
@@ -11868,24 +11769,10 @@ $(document).ready(function(){
 			$attr = ' ';
 			if(isset($tvalue['manual_is_sourceless']))
 			{
-				if(!empty($tvalue['edited']) && array_key_exists('overall_status', $tvalue['edited'])) 
+				if($tvalue['overall_status'] != '')
 				{
-					$attr = ' highlight" title="' . $tvalue['edited']['overall_status'];
-				} 
-				else if($tvalue['new'] == 'y') 
-				{
-					$attr = '" title="New record' ;
-				} 
-				elseif($tvalue['manual_overall_status'] != '' && $tvalue['manual_overall_status'] !== NULL)
-				{
-					if($tvalue['overall_status_prev'] == $tvalue['overall_status'])
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-					elseif($tvalue['overall_status_prev'] != '' && $tvalue['overall_status_prev'] !== NULL)
-					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['overall_status_prev'];
-					}
+					$attr = ' manual" title="Manually entered trial.';
+					$titleLinkColor = '#FF7700';
 				}
 			}
 			else
@@ -11919,24 +11806,10 @@ $(document).ready(function(){
 			$attr = ' ';
 			if(isset($tvalue['manual_is_sourceless']))
 			{
-				if(!empty($tvalue['edited']) && array_key_exists('condition', $tvalue['edited'])) 
+				if($tvalue['condition'] != '')
 				{
-					$attr = ' highlight" title="' . $tvalue['edited']['condition'];
-				} 
-				else if($tvalue['new'] == 'y') 
-				{
-					$attr = '" title="New record';
-				}
-				elseif($tvalue['manual_condition'] != '' && $tvalue['manual_condition'] !== NULL)
-				{
-					if($tvalue['condition_prev'] == $tvalue['condition'])
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-					elseif($tvalue['condition_prev'] != '' && $tvalue['condition_prev'] !== NULL)
-					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['condition_prev'];
-					}
+					$attr = ' manual" title="Manually entered trial.';
+					$titleLinkColor = '#FF7700';
 				}
 			}
 			else
@@ -11976,25 +11849,10 @@ $(document).ready(function(){
 			$borderRight = '';
 			if(isset($tvalue['manual_is_sourceless']))
 			{
-				if(!empty($tvalue['edited']) && array_key_exists('end_date', $tvalue['edited'])) 
+				if($tvalue['end_date'] != '')
 				{
-					$attr = ' highlight" title="' . $tvalue['edited']['end_date'];
-					$borderRight = 'border-right-color:red;';
-				} 
-				elseif($tvalue['new'] == 'y') 
-				{
-					$attr = '" title="New record';
-				}	
-				elseif($tvalue['manual_end_date'] != '' && $tvalue['manual_end_date'] !== NULL)
-				{
-					if($tvalue['end_date_prev'] == $tvalue['end_date'])
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-					elseif($tvalue['end_date_prev'] != '' && $tvalue['end_date_prev'] !== NULL)
-					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['end_date_prev'];
-					}
+					$attr = ' manual" title="Manually entered trial.';
+					$titleLinkColor = '#FF7700';
 				}
 			}
 			else
@@ -12037,25 +11895,8 @@ $(document).ready(function(){
 			$attr = ' ';
 			if(isset($tvalue['manual_is_sourceless']))
 			{
-				if(!empty($tvalue['edited']) && array_key_exists('phase', $tvalue['edited'])) 
-				{
-					$attr = ' highlight" title="' . $tvalue['edited']['phase'];
-				} 
-				elseif($tvalue['new'] == 'y') 
-				{
-					$attr = '" title="New record';
-				}
-				elseif($tvalue['manual_phase'] != '' && $tvalue['manual_phase'] !== NULL)
-				{
-					if($tvalue['phase_prev'] == $tvalue['phase'])
-					{
-						$attr = ' manual" title="Manual curation.';
-					}
-					elseif($tvalue['phase_prev'] != '' && $tvalue['phase_prev'] !== NULL)
-					{
-						$attr = ' manual" title="Manual curation. Original value: ' . $tvalue['phase_prev'];
-					}
-				}
+				$attr = ' manual" title="Manually entered trial.';
+				$titleLinkColor = '#FF7700';
 			}
 			else
 			{
