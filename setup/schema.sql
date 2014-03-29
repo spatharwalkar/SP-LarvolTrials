@@ -176,6 +176,7 @@ CREATE TABLE IF NOT EXISTS `schedule` (
 
 
 CREATE TABLE IF NOT EXISTS `tabs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `entity_id` int(11) NOT NULL,
   `table_name` varchar(100) NOT NULL,
   `companies` int(11) NOT NULL,

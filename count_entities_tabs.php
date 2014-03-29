@@ -3,14 +3,13 @@ require_once('db.php');
 
 $cond = '';
 
-
 //'Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area','Disease_Category','Investigator'
 if(isset($entityType) && trim($entityType) != '') {
 	$cond = "AND class='$entityType'";
 }
 
 if(isset($entityId) && trim($entityId) != '' && $entityId > 0) {
-	$cond = "AND id ='$entityId'";
+	$cond = "AND id ='".mysql_real_escape_string($entityId)."'";
 }
 
 
@@ -261,127 +260,54 @@ function updateProductTabCount($productId) {
 	global $now;
 	
 	$productDiseasesCount = 0;
-	$sqlProductDiseasesCount = "SELECT DISTINCT e.`id` FROM `entities` e JOIN `entity_relations` er ON(er.`parent` = e.`id`) 
-								WHERE e.`class` = 'Disease' 
-								AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) 
-								AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '') 
-								AND er.`child`='" . mysql_real_escape_string($productId) . "'";
-	
+	$sqlProductDiseasesCount = "SELECT dt.`larvol_id`
+								FROM data_trials dt 
+								JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) 
+								JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) 
+								JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') 
+								JOIN `entity_relations` er ON(er.`parent` = e.`id` AND e.`class` = 'Disease' and er.child = '$productId' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)
+								AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')) 
+								WHERE  et2.`entity`='$productId'
+								GROUP BY e.`id`";
+
 	$resProductDiseasesCount = mysql_query($sqlProductDiseasesCount) or die('Bad SQL query getting Diseases for product'.$sqlProductDiseasesCount);
-	$Diseases = array();
-	if($resProductDiseasesCount) {
-		while($rowProductDiseasesCount = mysql_fetch_array($resProductDiseasesCount)) {
-			$Diseases[] = $rowProductDiseasesCount['id'];
-		}
-	}
 	
-	$productDiseases =  array_filter(array_unique($Diseases));
-	
-	if(count($productDiseases) > 0) {
-		$productDiseases = implode("','", $productDiseases);
-	} else {
-		$productDiseases = '';
-	}
-	
-	$DiseaseIds =  $Ids;
-	$sqlProductDiseasecount = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  
-					e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname 
-					FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) 
-					JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) 
-					JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Disease') 
-					WHERE et.`entity` IN ('$productDiseases') AND et2.`entity`='" . $productId ."'
-					GROUP BY e.`id`";
-					
-	$resProductDiseasecount = mysql_query($sqlProductDiseasecount) or die($sqlProductDiseasecount.'- '.mysql_error());
-	$diseaseCount = array();
-	if($resProductDiseasecount) {
-		while($rowProductDiseasecount = mysql_fetch_array($resProductDiseasecount)) { 
-			$diseaseCount[$rowProductDiseasecount['id']] = $rowProductDiseasecount['id'];
-		}
-	}
-	
-	//diseases count for product
-	$productDiseasesCount = count(array_filter(array_unique($diseaseCount)));
+	$productDiseasesCount = mysql_num_rows($resProductDiseasesCount);
 	
 	// product disease category count
 	$productDisCatCount = 0;
 	
-	$sqlGetDisCatForProduct = "SELECT DISTINCT e.`id` FROM `entities` e 
-							JOIN `entity_relations` er ON(er.`parent` = e.`id`) 
-							WHERE e.`class` = 'Disease' 
-							AND er.`child`='$productId'";
+	$sqlGetDisCatForProduct = "SELECT DISTINCT e.`id` 
+								FROM `entities` e 
+								JOIN `entity_relations` er ON(er.`parent` = e.`id` AND e.`class` = 'Disease_Category') 
+								WHERE  er.`child` IN (SELECT DISTINCT e.`id` FROM `entities` e 
+									JOIN `entity_relations` er ON(er.`parent` = e.`id`) 
+									WHERE e.`class` = 'Disease' 
+									AND er.`child`='$productId')  
+								AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
 	$resGetDisCatForProduct = mysql_query($sqlGetDisCatForProduct) or die('Bad SQL query  . '.$sqlGetDisCatForProduct);
 	
-	$ProductDiseasesCat = array();
-	if($resGetDisCatForProduct) {
-		while($rowGetDisCatForProduct = mysql_fetch_array($resGetDisCatForProduct)) {
-			$ProductDiseasesCat[] = $rowGetDisCatForProduct['id'];
-		}
-	}
-	$ProductDiseasesCat = array_filter(array_unique($ProductDiseasesCat));
-	if(count($ProductDiseasesCat) > 0) {
-		$ImplodeDiseaseCatIds = implode("','", $ProductDiseasesCat);
-	} else {
-		$ImplodeDiseaseCatIds = '';
-	}	
-	
-	$rowGetDiseaseCat = array();
-	$sqlGetDiseaseCat = "SELECT DISTINCT e.`id` FROM `entities` e 
-						JOIN `entity_relations` er ON(er.`parent` = e.`id`) 
-						WHERE e.`class` = 'Disease_Category' 
-						AND er.`child` IN ('$ImplodeDiseaseCatIds')  
-						AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
-						
-	$resGetDiseaseCat = mysql_query($sqlGetDiseaseCat) or die($sqlGetDiseaseCat.' '.mysql_error());
-	if($resGetDiseaseCat)
-	$productDisCatCount = mysql_num_rows($resGetDiseaseCat);
-	
-	
+	$productDisCatCount = mysql_num_rows($resGetDisCatForProduct);
+
 	// product investigator count
 	$productInvestigatorCount = 0;
 		
-	$query = "SELECT DISTINCT entity FROM entity_trials et
+	$query = "SELECT DISTINCT entity 
+			FROM entity_trials et
 			JOIN entities e on et.entity=e.id AND e.class='Investigator' 
 			AND et.trial IN (SELECT DISTINCT trial FROM entity_trials WHERE  entity= '" . mysql_real_escape_string($productId) . "')";
 	
 
 	$res = mysql_query($query) or die('Bad SQL query getting investigators for product.');
-	$Investigators = array();
-	if($res) {
-		while($row = mysql_fetch_array($res)) {
-			$Investigators[] = $row['entity'];
-		}
-	}
-	$Investigators = array_filter(array_unique($Investigators));
 	
-	if(count($Investigators) > 0) {
-		$Investigators = implode("','", $Investigators);
-	} else {
-		$Investigators = '';
-	}
-	
-	$sqlProductInvestigator = "SELECT DISTINCT dt.`larvol_id`, dt.`is_active`, dt.`phase` AS phase, dt.`institution_type`,et2.relation_type as relation_type,  
-						e.`id` AS id, e.`name` AS name, e.`display_name` AS dispname, e.`affiliation` 
-						FROM data_trials dt JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) 
-						JOIN entity_trials et2 ON (dt.`larvol_id` = et2.`trial`) 
-						JOIN entities e ON (e.id = et.`entity` AND e.`class` = 'Investigator') 
-						WHERE et.`entity` IN ('$Investigators') 
-						AND et2.`entity`='$productId'";
-						
-	$resProductInvestigator = mysql_query($sqlProductInvestigator) or die($sqlProductInvestigator.' ' .mysql_error());	
-	
-	if($resProductInvestigator)
-		while($rowProductInvestigator[] = mysql_fetch_array($resProductInvestigator));
-	
-	//Investigator count for product
-	$productInvestigatorCount = count(array_filter(array_unique($rowProductInvestigator)));
-	
-	
+	$productInvestigatorCount = mysql_num_rows($res);
+
+	// product trials count
 	$productTrialsCount = 0;
 	
 	$sqlProductTrialsCount = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount 
-			FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  
-			WHERE et.`entity`='" . mysql_real_escape_string($productId) . "'";
+							FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  
+							WHERE et.`entity`='$productId)'";
 	$resProductTrialsCount = mysql_query($sqlProductTrialsCount) or die('Bad SQL query getting trials count from Product '.$sqlProductTrialsCount);
 	
 	if($resProductTrialsCount) {
