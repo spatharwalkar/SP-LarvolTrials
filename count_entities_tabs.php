@@ -1,6 +1,6 @@
 <?php
 require_once('db.php');
-
+set_time_limit(0);
 $cond = '';
 
 //'Product','Area','Disease','Institution','MOA','Biomarker','MOA_Category','Therapeutic_Area','Disease_Category','Investigator'
@@ -841,17 +841,9 @@ function updateInvestigatorTabCount($investigatorId) {
 				JOIN entities e2 ON (er.child = e2.id and e2.class='Institution')";
 				
 	$resGetCompaniesForInvestogator = mysql_query($sqlGetCompaniesForInvestogator) or die('Bad SQL query getting companies from Investigator id'.$sqlGetCompaniesForInvestogator);
-	$companies = array();
-	if($resGetCompaniesForInvestogator)
-	{
-		while($rowGetCompaniesForInvestogator = mysql_fetch_array($resGetCompaniesForInvestogator))
-		{
-			$companies[] = $rowGetCompaniesForInvestogator['CompId'];
-		}
-	}
-	$investigatorCompanyCount = count(array_filter(array_unique($companies)));
+	$investigatorCompanyCount = mysql_num_rows($resGetCompaniesForInvestogator);
 	
-	//investigator company count
+	//investigator product count
 	$investigatorProductCount = 0;	
 	
 	$sqlGetInvestigatorProduct = "SELECT  DISTINCT et2.entity from entity_trials et
@@ -859,60 +851,21 @@ function updateInvestigatorTabCount($investigatorId) {
 				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))";
 				
 	$resGetInvestigatorProduct = mysql_query($sqlGetInvestigatorProduct) or die(' - Bad SQL query getting products from Investigator id in PT  '.$sqlGetInvestigatorProduct);
-	$investigatorProducts = array();
-	if($resGetInvestigatorProduct)
-	{
-		while($rowGetInvestigatorProduct = mysql_fetch_array($resGetInvestigatorProduct))
-		{
-			$investigatorProducts[] = $rowGetInvestigatorProduct['entity'];
-		}
-	}
-	$investigatorProducts = array_filter(array_unique($investigatorProducts));
+	$investigatorProductCount = mysql_num_rows($resGetInvestigatorProduct);
 	
-	if(count($investigatorProducts) > 0)
-	$implodeProducts = implode("','", $investigatorProducts);
-	else
-	$implodeProducts = '';
-	
-	$sqlGetInvestigatorProductTrials = "SELECT  et.`entity` FROM data_trials dt 
-									JOIN entity_trials et ON (dt.`larvol_id` = et.`trial`) 
-									WHERE et.`entity` IN ('$implodeProducts')
-									AND dt.larvol_id IN (select trial from entity_trials where entity='$investigatorId')
-									GROUP BY et.`entity`";
-									
-	$resGetInvestigatorProductTrials = mysql_query($sqlGetInvestigatorProductTrials) or die($sqlGetInvestigatorProductTrials.' - '.mysql_error());
-	$entityTrials = array();
-	if($resGetInvestigatorProductTrials)
-	{
-		while($rowGetInvestigatorProductTrials = mysql_fetch_array($resGetInvestigatorProductTrials)) {
-			//$allTrials[$rowGetInvestigatorProductTrials['larvol_id']] = $rowGetInvestigatorProductTrials['larvol_id'];
-			$entityTrials[$rowGetInvestigatorProductTrials['entity']] = $rowGetInvestigatorProductTrials['entity'];
-		}
-	}
-	
-	$investigatorProductCount = count(array_filter(array_unique($entityTrials)));
-	
-	//investigator company count
+	//investigator MOA count
 	$investigatorMoaCount = 0;	
 	
-	$sqlGetMoaForInvestigator = "	SELECT er.child AS CompId, e.`name` AS CompName, e.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
+	$sqlGetMoaForInvestigator = "SELECT er.child AS CompId
 				FROM entity_relations er 
 				JOIN entities e ON (er.child = e.id and e.class='MOA')
 				JOIN entity_trials et ON(er.parent = et.entity) 
 				JOIN entity_trials et2 ON(et.trial = et2.trial and et2.entity =" . $investigatorId . " ) 
 				JOIN data_trials dt on (et2.trial = dt.larvol_id )
-				group by CompId,ProdId";	
-						
+				group by CompId";
 			  
 	$resGetMoaForInvestigator = mysql_query($sqlGetMoaForInvestigator) or die('Bad SQL query getting MOAs '.$sqlGetMoaForInvestigator);
-	$MOAs = array();
-	if($resGetMoaForInvestigator) {
-		while($rowGetMoaForInvestigator = mysql_fetch_array($resGetMoaForInvestigator)) {
-			$MOAs[] = $rowGetMoaForInvestigator['CompId'];
-		}
-	}
-	
-	$investigatorMoaCount = count(array_filter(array_unique($MOAs)));
+	$investigatorMoaCount = mysql_num_rows($resGetMoaForInvestigator);
 	
 	//investigator Disease count
 	$investigatorDiseaseCount = 0;
@@ -926,37 +879,7 @@ function updateInvestigatorTabCount($investigatorId) {
 					where (e.`is_active` <> '0' OR e.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')";
 					
 	$resGetDiseaseForinvestigator = mysql_query($sqlGetDiseaseForinvestigator) or die('Bad SQL query getting Diseases from Investigator id'.$sqlGetDiseaseForinvestigator);
-	$diseases = array();
-	if($resGetDiseaseForinvestigator) {
-		while($rowGetDiseaseForinvestigator = mysql_fetch_array($resGetDiseaseForinvestigator)) {
-			$diseases[] = $rowGetDiseaseForinvestigator['id'];
-		}
-	}
-	
-	$diseases = array_filter(array_unique($diseases));
-	
-	if(count($diseases) > 0)
-	$implodeDiseases = implode("','", $diseases);
-	else
-	$implodeDiseases = '';
-						
-	$sqlGetDiseaseTrials = "SELECT DISTINCT er.child, er.parent as id FROM entity_trials et
-					JOIN data_trials dt ON ( et.trial=dt.larvol_id  and et.entity = '$investigatorId' )
-					JOIN entity_trials et2 ON (dt.larvol_id = et2.trial )
-					JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
-					JOIN entity_relations er ON (e.id = er.child and er.parent IN ('$implodeDiseases')   )
-					JOIN entities e1 ON (er.parent=e1.id)
-					group by er.parent";
-					
-	$resGetDiseaseTrials = mysql_query($sqlGetDiseaseTrials) or die($sqlGetDiseaseTrials.' '.mysql_error());
-	$diseasesTrials = array();
-	if($resGetDiseaseTrials) {
-		while($rowGetDiseaseTrials = mysql_fetch_array($resGetDiseaseTrials)) {
-			$diseasesTrials[] = $rowGetDiseaseTrials['id'];
-		}
-	}
-	
-	$investigatorDiseaseCount = count(array_filter(array_unique($diseasesTrials)));
+	$investigatorDiseaseCount = mysql_num_rows($resGetDiseaseForinvestigator);
 	
 	//investigator Disease count
 	$investigatorTrialCount = 0;
