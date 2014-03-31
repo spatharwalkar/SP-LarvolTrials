@@ -10641,9 +10641,7 @@ class TrialTracker
 			echo '<input type="hidden" name="sphinx_s" value="' . $globalOptions['sphinx_s'] . '" />';
 		}
 
-		if($count > 0)
-		{
-			$u_agent = $_SERVER['HTTP_USER_AGENT'];
+		$u_agent = $_SERVER['HTTP_USER_AGENT'];
 ?>
 <style>
 .manage thead{
@@ -10717,50 +10715,53 @@ $(document).ready(function(){
 });
 </script>
 <?php		 
-			echo '<div class="container"><table cellpadding="0" cellspacing="0" class="manage"><thead>'
-						 . '<tr>' . (($loggedIn) ? '<th style="width:7%;">ID</th>' : '' )
-						 . '<th style="width:27%;">Title</th>'
-						 . '<th style="width:3%;" title="Red: Change greater than 20%">N</th>'
-						 . '<th style="width:6.4%;" title="&quot;RoW&quot; = Rest of World">Region</th>'
-						 . '<th style="width:10%;">Interventions</th>'
-						 . '<th style="width:7%;">Sponsor</th>'
-						 . '<th style="width:8.5%;">Status</th>'
-						 . '<th style="width:10%;">Conditions</th>'
-						 . '<th title="MM/YY" style="width:3.3%;">End</th>'
-						 . '<th style="width:2.5%;">Ph</th>'
-						 . '<th style="width:2.5%;">Data</th>'
-						 . '<th colspan="3" style="width:1.2%;">-</th>'
-						 . '<th colspan="12" style="width:3.2%;">' . (date('Y')) . '</th>'
-						 . '<th colspan="12" style="width:3.2%;">' . (date('Y')+1) . '</th>'
-						 . '<th colspan="12" style="width:3.2%;">' . (date('Y')+2) . '</th>'
-						 . '<th colspan="3" style="width:1.2%;">+</th></tr></thead><tbody>';
-					
+		echo '<div class="container"><table cellpadding="0" cellspacing="0" class="manage"><thead>'
+					 . '<tr>' . (($loggedIn) ? '<th style="width:7%;">ID</th>' : '' )
+					 . '<th style="width:27%;">Title</th>'
+					 . '<th style="width:3%;" title="Red: Change greater than 20%">N</th>'
+					 . '<th style="width:6.4%;" title="&quot;RoW&quot; = Rest of World">Region</th>'
+					 . '<th style="width:10%;">Interventions</th>'
+					 . '<th style="width:7%;">Sponsor</th>'
+					 . '<th style="width:8.5%;">Status</th>'
+					 . '<th style="width:10%;">Conditions</th>'
+					 . '<th title="MM/YY" style="width:3.3%;">End</th>'
+					 . '<th style="width:2.5%;">Ph</th>'
+					 . '<th style="width:2.5%;">Data</th>'
+					 . '<th colspan="3" style="width:1.2%;">-</th>'
+					 . '<th colspan="12" style="width:3.2%;">' . (date('Y')) . '</th>'
+					 . '<th colspan="12" style="width:3.2%;">' . (date('Y')+1) . '</th>'
+					 . '<th colspan="12" style="width:3.2%;">' . (date('Y')+2) . '</th>'
+					 . '<th colspan="3" style="width:1.2%;">+</th></tr></thead><tbody>';
+
+		if($count > 0)
+		{			
 			echo $this->displayTrials($globalOptions, $loggedIn, $Values, $ottType, $totalPages);	
-			echo '</tbody></table></div>';			
 		}
 		else
 		{
-			echo '<script>$("#outercontainer").css("width", "55%");</script>';
-			$outputStr = '<div align="center" style="clear:both;">No trials found</div>';
-			foreach($Values['Data'] as $dkey => $dvalue)
+			if(count($Values['Data']) > 0)
 			{
-				$sectionHeader = $dvalue['sectionHeader'];
-				if($ottType == 'rowstacked')
+				foreach($Values['Data'] as $dkey => $dvalue)
 				{
-					$naUpms = $Values['Data'][0]['naUpms'];
-					unset($Values['Data'][0]['naUpms']);
+					$sectionHeader = $dvalue['sectionHeader'];
+					if($ottType == 'rowstacked')
+					{
+						$naUpms = $Values['Data'][0]['naUpms'];
+						unset($Values['Data'][0]['naUpms']);
+					}
+					else
+					{
+						$naUpms = $dvalue['naUpms'];
+					}
+					
+					echo $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms);
 				}
-				else
-				{
-					$naUpms = $dvalue['naUpms'];
-				}
-				
-				//$outputStr .= $this->dUnmatchedUpms($globalOptions, $ottType, $sectionHeader, $naUpms);
-			}
-			
-			echo $outputStr;
+			}else			
+				echo '<td class="norecord" colspan="53">No trials found</td>';	
 		}
 		
+		echo '</tbody></table></div>';		
+
 		echo '<input type="hidden" name="enroll" value="' . $globalOptions['enroll'] . '" />';	
 		
 		if($totalPages > 1)
@@ -11360,7 +11361,7 @@ $(document).ready(function(){
 	}
 	
 	function displayTrials($globalOptions = array(), $loggedIn, $Values, $ottType, $totalPages)
-	{
+	{ 
 		$currentYear = date('Y');
 		$secondYear = (date('Y')+1);
 		$thirdYear = (date('Y')+2);
