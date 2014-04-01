@@ -70,6 +70,25 @@ if (isset($_POST['pubmed_id']))
 	return ;
 }
 
+// PREINDEX an abstract
+if (isset($_POST['pm_id']))
+{
+	require_once('preindex_pmabstract.php');
+	pmtindex(false,NULL,NULL,NULL,NULL,array($_POST['pm_id']));
+	return;
+}
+
+// PREINDEX ALL ABSTRACTS
+if (isset($_POST['index_all_abs']) and $_POST['index_all_abs']=='ALLABS')
+{
+	require_once('preindex_pmabstract.php');
+	
+	//index all abstracts
+	echo '<br><b>Indexing ALL abstracts...</b><br>';
+	pmtindex(false,NULL,NULL,NULL,NULL,NULL);
+	echo '<br>Indexed all abstracts. <br>';
+	return;
+}
 
 //fetch Eudract from source 
 if (isset($_POST['e_scraper_n']) and isset($_POST['days_n'])) 
@@ -1125,11 +1144,7 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			. '<br><input type="submit" value="Import" />'
 			. '</form></formset></fieldset></div>';
 				
-	
-	
-	
-	
-	
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
 	
 	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> SCRAPERS <font color="red">(PUBMED) </font> </b></legend>'
@@ -1148,12 +1163,26 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			. '</form>'
 			. '</fieldset></div>';
 			
-			$out .= '</fieldset></div><br /><br /><br />';
+			$out .= '</fieldset></div>';
 			
-		$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
-	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
-	
 
+
+	// PREINDEXING PUBMED
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> PREINDEXING <font color="red">(PUBMED) </font></b></legend>'
+			. '<form action="database.php" method="post">'
+			. 'Enter Pubmed Id to preindex : <input type="text" name="pm_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+			. ''
+			. '<input type="submit" name="singleabstract" value="Index Abstract" />'
+			. '</form>'
+	
+	
+			. '<form action="database.php" method="post">'
+			. 'Click <b>Index ALL </b> button to index all abstracts in the database &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+			. '<input type="hidden" name="index_all_abs" value="ALLABS"/>'
+			. '<input type="submit" name="ind_all_abs" value="    Index All    " />'
+			. '</form></fieldset></div>';
+	
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
 	
 	return $out;

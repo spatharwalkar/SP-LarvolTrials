@@ -1522,6 +1522,13 @@ CREATE TABLE IF NOT exists `pubmed_abstracts` (
   UNIQUE KEY `source_id` (`source_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
   
+CREATE TABLE IF NOT EXISTS `entity_abstracts` (
+  `entity` int(10) unsigned NOT NULL,
+  `abstract` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`entity`,`abstract`),
+  CONSTRAINT `entity_abstracts_fk1` FOREIGN KEY (`entity`) REFERENCES `entities` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `entity_abstracts_fk2` FOREIGN KEY (`abstract`) REFERENCES `pubmed_abstracts` (`pm_id`) ON DELETE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 ALTER TABLE `products_moas`
   ADD CONSTRAINT `products_moas_ibfk_1` FOREIGN KEY (`product`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

@@ -684,6 +684,117 @@ function buildQuery($data, $isCount=false)
 	return $actual_query;
 }
 
+
+function buildPubmedQuery($data, $pm_ids,$isCount=false)
+{
+	if(isset($pm_ids) and !is_array($pm_ids)) {
+		$log = "pubmed ids need to passed as a array <br />\n";
+		global $logger;
+		$logger->fatal($log);
+		return softDie($log);
+	}
+	
+	$actual_query = "";
+	try {
+
+		$jsonData=$data;
+		$filterData = json_decode($jsonData, true, 10);
+
+		if(is_array($filterData))
+			array_walk_recursive($filterData, 'searchHandlerBackTicker','columnname');
+		if(is_array($filterData))
+			array_walk_recursive($filterData['columndata'], 'searchHandlerBackTicker','columnas');
+		$alias= " pm"; //pubmd_abstracts table alias
+		$pd_alias= " pd"; //Products table alias
+		$ar_alias= " ar"; //Areas table alias
+
+		$where_datas = $filterData["wheredata"];
+		$select_columns=$filterData["columndata"];
+		//$override_vals = trim($filterData["override"]);
+		$sort_datas = $filterData["sortdata"];
+		//$isOverride = !empty($override_vals);
+
+		$prod_flag=0; $area_flag=0; $prod_col=0; $area_col=0;
+		if(is_array($where_datas) && !empty($where_datas))
+		{
+			foreach($where_datas as $where_data)
+			{
+				if($where_data["columnname"] == '`product`')
+					$prod_flag=1;
+				if($where_data["columnname"] == '`area`')
+					$area_flag=1;
+			}
+		}
+
+		if(is_array($select_columns) && !empty($select_columns))
+		{
+			foreach($select_columns as $selectcolumn)
+			{
+				if($selectcolumn["columnname"] == '`product`')
+				{
+					$prod_flag=1;
+					$prod_col=1;	//This will need in overrriding Query
+				}
+				if($selectcolumn["columnname"] == '`area`')
+				{
+					$area_flag=1;
+					$area_col=1;	//This will need in overrriding Query
+				}
+			}
+		}
+
+		if(is_array($sort_datas) && !empty($sort_datas) && (!$prod_flag || !$area_flag))
+		{
+			foreach($sort_datas as $ky => $sort_column)
+			{
+				if($sort_column["columnas"] == '`product`')
+				$prod_flag=1;
+				elseif($sort_column["columnas"] == '`area`')
+				$area_flag=1;
+			}
+		}
+		$select_str = getPubmedSelectString($select_columns, $alias, $pd_alias, $ar_alias);
+		$where_str = getPubmedWhereString($where_datas, $alias, $pd_alias, $ar_alias,$pm_ids);
+		$sort_str = getSortString($sort_datas, $alias, $pd_alias, $ar_alias);
+
+
+		$actual_query .= "SELECT ";
+
+		if($isCount)
+		{
+			$actual_query .= 	"COUNT(*) AS count";
+		}
+		else
+		{
+			$actual_query .= 	$select_str;
+		}
+
+		$actual_query .= " FROM pubmed_abstracts " . $alias;
+
+		if($prod_flag)
+			$actual_query .= " JOIN products ". $pd_alias ." ON (". $pd_alias .".`id`=".$alias.".`larvol_id`)";
+
+		if($area_flag)
+			$actual_query .= " JOIN areas ". $ar_alias ." ON (". $ar_alias .".`id`=".$alias.".`larvol_id`)";
+
+		if(strlen(trim($where_str)) != 0)
+		{
+			$actual_query .= " WHERE " .$where_str;
+		}
+
+		if((!$isCount) && (strlen(trim($sort_str)) != 0))//Sort
+		{
+			$actual_query .= " ORDER BY " . $sort_str;
+		}
+	}
+	catch(Exception $e)
+	{
+		throw $e;
+	}
+	return $actual_query;
+}
+
+
 function getNCTOverrideString($data, $alias, $pd_alias, $ar_alias, $select_str, $isCount, $prod_col, $area_col)
 {
 	$override_str = $data;
@@ -742,6 +853,31 @@ function getSelectString($data, $alias, $pd_alias, $ar_alias)
 
 }
 
+function getPubmedSelectString($data, $alias, $pd_alias, $ar_alias)
+{
+	$query = $alias . "." . "pm_id, " . $alias . "." . "articleid, ";
+	$select_columns = $data;
+	if(!empty($select_columns))
+	{
+		foreach($select_columns as $selectcolumn)
+		{
+			if($selectcolumn['columnname']=='All')
+			{
+				continue;
+			}
+			elseif($selectcolumn["columnname"] == '`product`')
+			$query .="" . $pd_alias . ".`name` AS " . $selectcolumn["columnas"] . ", ";
+			elseif($selectcolumn["columnname"] == '`area`')
+			$query .= "" . $ar_alias . ".`name` AS " . $selectcolumn["columnas"] . ", ";
+			else
+				$query .= $alias . "." . article_title . " AS " . article_title . ", ";
+		}
+	}
+	$query = substr($query, 0, -2); //strip last comma
+	return $query;
+
+}
+
 function getSortString($data, $alias, $pd_alias, $ar_alias)
 {
 	$query = '';
@@ -789,6 +925,7 @@ function getWhereString($data, $alias, $pd_alias, $ar_alias)
 			$column_name = $where_data["columnname"];
 			$column_value = $where_data["columnvalue"];
 			$chain_name = $where_data["chainname"];
+			
 			if($column_name == '`product`' || $column_name == '`area`')
 				$column_name='`name`';
 				
@@ -834,6 +971,95 @@ function getWhereString($data, $alias, $pd_alias, $ar_alias)
 	}
 	return $wherestr;
 	
+
+}
+
+
+function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
+{	
+	$wheredatas = $data;
+	if(empty($wheredatas))
+	{
+		return '';
+	}
+	$wheres = array();
+	$wcount = 0;
+	try {
+		
+		//$wheres[$wcount++] = " ( ";
+		$unique_searchwords = array();
+		$pubmed_fields = array('abstract_text','article_title');
+		foreach ($pubmed_fields as $pm_field) {
+			$prevchain = ' ';
+						
+			$numOpenParens   = substr_count(implode('',$wheres),'(');
+			$numClosedParens = substr_count(implode('',$wheres),')');
+			if($wcount > 0) {
+				$wheres[$wcount++]=str_repeat(')', $numOpenParens - $numClosedParens);
+				$wheres[$wcount++] = " OR ";
+			}				
+			foreach($wheredatas as $where_data)
+			{
+				$op_name = $where_data["opname"];
+				$column_name = $where_data["columnname"];
+				$column_value = $where_data["columnvalue"];
+				$chain_name = $where_data["chainname"];
+	
+								
+				if($column_name == '`product`' || $column_name == '`area`')
+					$column_name='`name`';
+	
+				$op_string = getOperator($op_name, $column_name, $column_value);				
+				$wstr = " " . $prevchain . " " . $op_string;				
+				if($where_data["columnname"] == '`product`')
+					$wstr = str_replace('%f', $pd_alias . "." . $column_name,$wstr);
+				elseif($where_data["columnname"] == '`area`')
+					$wstr = str_replace('%f', $ar_alias . "." . $column_name,$wstr);
+				else {
+					$wstr = str_replace('%f', $alias . "." . $pm_field." ",$wstr);
+				}
+				$pos = strpos($op_string,'%s1');
+	
+				if($pos === false) {
+					$wstr = str_replace('%s', $column_value, $wstr);
+				}
+				else {
+					$xx = explode('and;endl', $column_value);//and;endl
+					$wstr = str_replace('%s1', $xx[0],$wstr);
+					$wstr = str_replace('%s2', $xx[1],$wstr);
+				}
+				$prevchain = $chain_name;
+				if(array_key_exists($pm_field.$wstr,$unique_searchwords))
+					continue;
+				$unique_searchwords[$pm_field.$wstr]++;
+				
+				//echo $wcount ." " . $wstr . "\n";
+				$wheres[$wcount++] = $wstr;
+							
+			}
+		}
+		//$wheres[$wcount++] = " ) ";
+		$wherestr = implode(' ', $wheres);
+		$pos = strpos($prevchain,'.');
+		if($pos === false)
+		{
+			//do nothing
+		}
+		else
+		{
+			$wherestr .= str_replace('.', '', $prevchain);//if . is present remove it and empty
+		}
+		//                if($pos == true)
+		//                    $wherestr .= $prevchain;
+		if( count($pm_ids) > 0)
+			$wherestr = '('. $wherestr . ") AND ". $alias .'.pm_id IN ('. implode(',',$pm_ids). ')';
+	}
+	catch(Exception $e)
+	{
+		throw $e;
+	}
+	return $wherestr;
+
 
 }
 
