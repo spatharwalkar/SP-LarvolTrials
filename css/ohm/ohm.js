@@ -129,16 +129,18 @@ function updateviewmode()
 	
 	var itype = "";
 	var list = "";
+	var osflt = "";
 	switch(mode)
 	{
-		case 'ai':  list = "list=1&";	itype = 'itype=1&';	break;
-		case 'aos': list = "list=1&";	itype = 'itype=0&';	break;
-		case 'act': list = "list=1&";	itype = 'itype=&';	break;
-		case 'all': list = "list=2&";	itype = 'itype=&';	break;
+		case 'ai':  list = "list=1&";	itype = 'itype=1&';	osflt='osflt=&'; break;
+		case 'aos': list = "list=1&";	itype = 'itype=&';	osflt='osflt=on&'; break;
+		case 'act': list = "list=1&";	itype = 'itype=&';	osflt='osflt=&'; break;
+		case 'all': list = "list=2&";	itype = 'itype=&';	osflt='osflt=&'; break;
 	}
 	
 	var links = document.getElementById('mainhm').getElementsByTagName('a');
 	$.each(links, function(){
-		this.href = this.href.replace(/list=\d*&/,list).replace(/itype=\d*&/,itype);
+		this.href = this.href.replace(/list=\d*&/,list).replace(/itype=\d*&/,itype).replace(/osflt=[a-z]*&/,osflt);
+		
 	});
 }
