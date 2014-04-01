@@ -9,12 +9,12 @@ ini_set('error_reporting', E_ALL ^E_NOTICE );
 
 function pmtindex() - to preindex a combination of one abstract+one product, or  one abstract+one area.  
 parameters : 
-		1.	NCTID (if a single abstract is to be indexed)
-		2.	either "products" or "areas" as appropriate.
-		3.	Array of product ids or array of area ids as appropriate.
-		4.	update id - supplied by viewstatus.php when a task is resumed / requed etc.
-		5.	current product id - supplied by viewstatus.php when a task is resumed / requed etc.
-		6.	product id / area id when a single product or area is to beindexed.
+		1.	scrapper_run boolean
+		2.	Array of product ids or array of area ids as appropriate.either "products" or "areas" as appropriate.
+		3.	update id - supplied by viewstatus.php when a task is resumed / requed etc.
+		4.	current product id - supplied by viewstatus.php when a task is resumed / requed etc.
+		5.	product id / area id when a single product or area is to beindexed.
+		6.	Array of pubmed abstract IDs
 
 */
 function pmtindex($scraper_run=false,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=NULL,$pmIDs)
