@@ -10,7 +10,7 @@ ini_set('error_reporting', E_ALL ^E_NOTICE );
 function pmtindex() - to preindex a combination of one abstract+one product, or  one abstract+one area.  
 parameters : 
 		1.	scrapper_run boolean
-		2.	Array of product ids or array of area ids as appropriate.either "products" or "areas" as appropriate.
+		2.	Array of entities
 		3.	update id - supplied by viewstatus.php when a task is resumed / requed etc.
 		4.	current product id - supplied by viewstatus.php when a task is resumed / requed etc.
 		5.	product id / area id when a single product or area is to beindexed.
@@ -32,12 +32,12 @@ function pmtindex($scraper_run=false,$productz=NULL,$up_id=NULL,$cid=NULL,$produ
 		if(is_null($productID))
 		{
 			
-			$query = 'SELECT `id`,`name`,`searchdata`' . ' from '. 'entities' .' where class IN ("Product","Disease","Institution") ';
+			$query = 'SELECT `id`,`name`,`searchdata`,`search_name`' . ' from '. 'entities' .' where class IN ("Product","Disease","Institution") ';
 			$ttype='ENTITY';
 		}
 		else 
 		{
-			$query = 'SELECT `id`,`name`,`searchdata`' . ' from '. 'entities' .' where `id`="' . $productID .'"' ;
+			$query = 'SELECT `id`,`name`,`searchdata`,`search_name`' . ' from '. 'entities' .' where `id`="' . $productID .'"' ;
 			$ttype='ENTITY';
 		}
 		
@@ -171,11 +171,12 @@ function pmtindex($scraper_run=false,$productz=NULL,$up_id=NULL,$cid=NULL,$produ
 				if ($pos === false) 
 				{
 					$log='Error in MySql Query (no "where" clause is used in the query)  :' . $query;
-					$logger->fatal($log);
+					$logger->error($log);
 					mysql_query('ROLLBACK');
 					echo $log;
-					return false;
+					//return false;
 				//	exit;
+					continue;
 				} 
 				else 
 				{					
