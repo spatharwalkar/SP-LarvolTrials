@@ -2,13 +2,13 @@
 define("SIGMA","1");
 $cwd = getcwd();
 chdir ("..");
-require_once('db.php');
+require_once('sigma_user.php');
 chdir ($cwd);
-$user = $db->user->id;
-if(isset($_GET['user']))
-{
-	$user = (int)$_GET['user'];
-}
+$objSigmaUser = new sigmaUser();
+if(true === $objSigmaUser->sigmaLoggedIn())
+	$user = $objSigmaUser->sigmaUser->id;
+elseif(isset($_GET['user']))
+ 	$user = (int)$_GET['user'];
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -247,9 +247,9 @@ a:visited {color:#6600bc;}  /* visited link */
         </td>
 		<td>
 		<?php
-		if($db->loggedIn()) {
+		if($objSigmaUser->sigmaLoggedIn() === true) {
 			echo('<div style="padding-left:10px;float:right;font-weight: bold;">Welcome, <a href="profile.php">'
-				. htmlspecialchars($db->user->username) . '</a> :: <a href="login.php?logout=true">Logout</a> &nbsp; </div>');
+				. htmlspecialchars($objSigmaUser->sigmaUser->username) . '</a> :: <a href="login.php?logout=true">Logout</a> &nbsp; </div>');
 		} else {
 			echo ('<div style="padding-left:10px;float:right;font-weight: bold;"><a href="login.php">login</a></div>');
 		}
