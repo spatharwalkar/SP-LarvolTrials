@@ -1024,7 +1024,7 @@ function TrackerCommonJScript($id, $TrackerType, $uniqueId, $page, $MainPageURL,
 	$url = 'id=' . $id .'&page=' . $page;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	$phase = $OptionArray['Phase'];	
 	if($TrackerType=='DISCATPT')	//DISCATPT=DISEASE CATEGORY COMPANY PRODUCT TRACKER
-		$url = 'DiseaseCatId=' . $id .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;	
+		$url = 'DiseaseCatId=' . $id .'&page=' . $page .'&tab=Products';
 	else if($TrackerType=='DISCATCPT')	//CPT=DISEASE Category COMPANY PRODUCT TRACKER
 		$url = 'CompanyId=' . $id .'&DiseaseCatId='. $OptionArray['DiseaseCatId'] .'&TrackerType='.$TrackerType. ((isset($phase) && $phase != NULL && $phase != '') ? '&phase='. $phase :'') .'&page=' . $page;
 	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER
@@ -1775,7 +1775,7 @@ function pagination($TrackerType, $totalPages, $id, $dwcount, $CurrentPage, $Mai
 	$phase = $OptionArray['Phase'];		
 	$url = 'id=' . $id .'&amp;dwcount=' . $dwcount;	//PT=PRODUCT TRACKER (MAIN PT PAGE)
 	if($TrackerType == 'DISCATPT')	//DISCATPT=DISEASE CATEGORY COMPANY PRODUCT TRACKER
-		$url = 'DiseaseCatId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType . ((isset($phase) && $phase != NULL && $phase != '') ? '&amp;phase=' . $phase:'' );
+		$url = 'DiseaseCatId=' . $id .'&amp;dwcount=' . $dwcount .'&amp;tab=Products';
 	else if($TrackerType == 'DCPT')	//DCPT=DISEASE COMPANY PRODUCT TRACKER
 		$url = 'CompanyId=' . $id .'&amp;DiseaseId=' . $OptionArray['DiseaseId'] .'&amp;dwcount=' . $dwcount .'&amp;TrackerType='.$TrackerType . ((isset($phase) && $phase != NULL && $phase != '') ? '&amp;phase=' . $phase:'' );
 	else if($TrackerType == 'CPT')	//CPT=COMPANY PRODUCT TRACKER 
