@@ -12,9 +12,19 @@ function generateNewsIDs($days) {
 }
 
 function generateNewsEntities($id) {
-	$query ='SELECT CONCAT("[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",p.LI_id),concat("\",\"name\":\"",p.name,"\"}")),"]") as product,
-					CONCAT("[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE("N/A",d.LI_id)),concat("\",\"name\":\"",d.name,"\"}")),"]") as disease,		
-					CONCAT("[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE("N/A",i.LI_id)),concat("\",\"name\":\"",i.name,"\"}")),"]") as investigator,
+	$query ='SELECT 
+					CONCAT	(
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",p.LI_id),concat("\",\"name\":\"",p.name,"\"}")),"]"
+							) 	
+							as product,
+					CONCAT	(
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(d.LI_id,"N/A")),concat("\",\"name\":\"",d.name,"\"}")),"]"
+							) 	
+							as disease,		
+					CONCAT	(
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(i.LI_id,"N/A")),concat("\",\"name\":\"",i.name,"\"}")),"]"
+							) 	
+							as investigator,
 					t.source_id,n.larvol_id,n.brief_title,n.phase,rt.LI_id as redtag_id,n.sponsor,n.summary,n.enrollment,n.added 
 					FROM news n 
 					JOIN data_trials t using(larvol_id)
