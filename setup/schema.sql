@@ -1236,6 +1236,7 @@ CREATE TABLE IF NOT EXISTS `redtags` (
  `rUIS` tinyint(1) NOT NULL DEFAULT '0',
   `formula`  	varchar(150) NULL,
   `statement`	varchar(500) NOT NULL,
+  `abstract_query` varchar(500) NULL,
   `LI_id` VARCHAR(63) NULL DEFAULT NULL ,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
