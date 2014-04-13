@@ -26,13 +26,16 @@ class DatabaseManager
 		if(SIGMA == 1 && defined('DB_USER_SIGMA'))
 		{
 			$this->db_link = mysql_connect(DB_SERVER, DB_USER_SIGMA, DB_PASS_SIGMA) or die("Error connecting to database server!");
+			mysql_set_charset("utf8");
 			mysql_select_db(DB_NAME) or die(mysql_error());
 		}
 		else
 		{
 			$this->db_link = mysql_connect(DB_SERVER, DB_USER, DB_PASS) or die("Error connecting to database server!");
+			mysql_set_charset("utf8");
 			mysql_select_db(DB_NAME) or die(mysql_error());
 		}
+
 		mysql_query('SET SESSION group_concat_max_len = 1000000') or die("Couldn't set group_concat_max_len");
 		oldurlPath();	//update cache if necessary
 		$this->reloadSettings();
