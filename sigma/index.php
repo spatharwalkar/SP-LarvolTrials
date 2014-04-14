@@ -6,7 +6,6 @@
 	require_once('db.php');
 	include('ss_entity.php');
 	include('disease_product_tracker.php');
-	require_once('sigma_user.php');
 	chdir ($cwd);
 	$RecordsPerPage = 50;
 	$SearchFlg = false;
@@ -15,7 +14,6 @@
 	$DataArray = $CurrentPageResultArr = array();
 	$totalPages = $FoundRecords = 0;
 	$ResultArr = array();
-	$objSigmaUser = new sigmaUser();
 	
 	if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 	{
@@ -519,9 +517,9 @@ define('IN_COMMENTICS', 'true'); //no need to edit this line
 					
 					print $showResult;
 				}
-				if($objSigmaUser->sigmaLoggedIn() !== false) {
+				if($db->loggedIn()) {
 					echo('<div style="padding-left:10px;float:right;">Welcome, <a href="profile.php">'
-						. htmlspecialchars($objSigmaUser->sigmaUser->username) . '</a> :: <a href="login.php?logout=true">Logout</a> &nbsp; </div>');
+						. htmlspecialchars($db->user->username) . '</a> :: <a href="login.php?logout=true">Logout</a> &nbsp; </div>');
 				} else {
 					echo ('<div style="padding-left:10px;float:right;"><a href="login.php">login</a></div>');
 				}

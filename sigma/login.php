@@ -3,16 +3,14 @@ define("SIGMA","1");
 $cwd = getcwd();
 chdir ("..");
 require_once('db.php');
-require_once('sigma_user.php');
 chdir ($cwd);
 
 $config = '../hybridauth/config.php';
-$objSigmaUser = new sigmaUser();
 require_once( "../hybridauth/Hybrid/Auth.php" );
 
 if(isset($_GET['logout']))
 {
-	$objSigmaUser->sigmaLogout();
+	$db->logout();
 	$hybridauth = new Hybrid_Auth( $config );
 	$hybridauth->storage()->clear();
 	header('Location: index.php');
@@ -20,7 +18,7 @@ if(isset($_GET['logout']))
 }
 
 
-if(!$objSigmaUser->sigmaLoggedIn())
+if(!$db->loggedIn())
 {	
 	$reffererUrl = $_SERVER['HTTP_REFERER'];
 	
@@ -39,7 +37,7 @@ if(!$objSigmaUser->sigmaLoggedIn())
 		}else{
 		
 			$user_profile = $linkedin->getUserProfile();
-			$linkedinlogin = $objSigmaUser->sigmaLinkedInLogin($user_profile->email);
+			$linkedinlogin = $db->linkedInLogin($user_profile->email);
 			if(!$linkedinlogin)
 			{
 				$query = 'SELECT id FROM `users` WHERE`linkedin_id`="' . mysql_real_escape_string($user_profile->email) . '"';
