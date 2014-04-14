@@ -72,6 +72,7 @@ function showInvestigatorTracker($id, $dwIcount, $TrackerType, $page=1, $OptionA
 	$TrackerType = $Return['TrackerType'];
 	$TotalPages = $Return['TotalPages'];
 	$TotalRecords = $Return['TotalRecords'];
+	$page = $Return['CurrentPage'];
 	
 	$MainPageURL = 'investigator_tracker.php';	
 	
@@ -337,14 +338,28 @@ function InvDataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwIcount='t
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
 	$TotalRecords = count($data_matrix);
+	$page=!empty($_REQUEST['page'])?$_REQUEST['page']:1;
 	if(!isset($_POST['Idownload']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
 		
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$rows = array_slice($rows, $StartSlice, $RecordsPerPage);
+		$data_matrix_temp = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$rowsTemp = array_slice($rows, $StartSlice, $RecordsPerPage);
+		
+		if (($TotalPages > 0 ) && (count($data_matrix_temp) == 0)){
+				
+			$StartSlice = ($TotalPages - 1) * $RecordsPerPage;
+			$EndSlice = $StartSlice + $RecordsPerPage;
+			$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$rows = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$page=$TotalPages;
+				
+		} else {
+			$data_matrix = $data_matrix_temp;
+			$rows        = $rowsTemp ;
+		}
 	}
 	
 	$original_max_count = $max_count;
@@ -371,6 +386,7 @@ function InvDataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwIcount='t
 	$Return['TrackerType'] = $TrackerType;
 	$Return['TotalPages'] = $TotalPages;
 	$Return['TotalRecords'] = $TotalRecords;
+	$Return['CurrentPage'] = $page;
 	
 	return $Return;
 }

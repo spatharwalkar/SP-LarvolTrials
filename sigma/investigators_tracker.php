@@ -73,6 +73,7 @@ function showInvestigatorTracker($id, $TrackerType, $page=1)
 	$TotalPages = $Return['TotalPages'];
 	$TotalRecords = $Return['TotalRecords'];
 	$GobalEntityType = $Return['GobalEntityType'];
+	$page = $Return['CurrentPage'];
 	
 	$MainPageURL = 'investigators_tracker.php';
 	if($TrackerType == 'PIT')	//PIT=Product Investigator TRACKER
@@ -436,14 +437,30 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
 	$TotalRecords = count($data_matrix);
+	$page=!empty($page)?$page:(!empty($_REQUEST['page'])?$_REQUEST['page']:1);
 	if(!isset($_REQUEST['download']))
 	{
 		$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
 		
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
-		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewInvestigatorIds = @array_slice($NewInvestigatorIds, $StartSlice, $RecordsPerPage);
+		$data_matrix_temp = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$NewInvestigatorIdsTemp = @array_slice($NewInvestigatorIds, $StartSlice, $RecordsPerPage);
+		
+		
+		if (($TotalPages > 0 ) && (count($data_matrix_temp) == 0)){
+				
+			$StartSlice = ($TotalPages - 1) * $RecordsPerPage;
+			$EndSlice = $StartSlice + $RecordsPerPage;
+			$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$NewInvestigatorIds = @array_slice($NewInvestigatorIds, $StartSlice, $RecordsPerPage);			
+			$page=$TotalPages;
+				
+		} else {
+			$data_matrix = $data_matrix_temp;
+			$rows        = $rowsTemp ;
+		}
+
 	}
 	/////////PAGING DATA ENDS
 	
@@ -470,6 +487,7 @@ function DataGeneratorForInvestigatorTracker($id, $TrackerType, $page=1, $CountT
 	$Return['TotalPages'] = $TotalPages;
 	$Return['TotalRecords'] = $TotalRecords;
 	$Return['GobalEntityType'] = $GobalEntityType;
+	$Return['CurrentPage'] = $page;
 	
 	return $Return;
 }
