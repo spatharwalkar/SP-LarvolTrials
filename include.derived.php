@@ -555,7 +555,8 @@ function institutionMapping()
 	            $institutionFile = file('derived/institution_type/'.$file,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
 	        	foreach($institutionFile as $institutionList)
 				{
-					$institutionList = iconv('UTF-8', 'UTF-8//IGNORE', $institutionList);
+					//$institutionList = iconv('UTF-8', 'ASCII//TRANSLIT', $institutionList);
+					 $institutionList = preg_replace('/[^(\x20-\x7F)]*/','', $institutionList);
 					$out[trim($institutionList)] = trim($institutionEntry);
 				}	            
 	        }
@@ -566,8 +567,6 @@ function institutionMapping()
 	{
 		die('Cannot open directory derived/institution_type.');
 	}
-	
-	
 	//All available names of companies in entity table are now considered to determine if institution_type is industry
 
 	$query = 'select name from entities where class="institution" and category="Industry" ';
@@ -788,9 +787,11 @@ function getInstitutionType($collaborator,$lead_sponsor,$larvol_id)
 		}
 		
 	}
+		
 	foreach($lead_sponsors as $a_sponsor)
 	{
 		$a_sponsor=trim($a_sponsor);
+		
 		if( strlen($a_sponsor) && isset($instMap[$a_sponsor]) )
 		{
 			$institution_type = $instMap[$a_sponsor];

@@ -76,10 +76,11 @@ function run_incremental_scraper($days=NULL)
 	$totcnt=count($ids);
 	while ($row = mysql_fetch_assoc($res)) 
 	{
-		if($row['lastchanged_date'] >= $ids[$row['source_id']])
+		if($row['lastchanged_date'] >= substr($ids[$row['source_id']],0,11))
 		{
 	//		pr($row['source_id']);
 			unset($ids[$row['source_id']]);
+			unset($ids[substr($row['source_id'],0,11)]  );
 		}
 					
 	}
