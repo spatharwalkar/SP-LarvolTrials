@@ -41,9 +41,7 @@ function NewsTrackerHTMLContent($res) {
 		//set summary in the database during news generation
 		if($result['summary'] == 'NA')
 			$result['summary'] = $result['name'];
-		else if(!preg_match('/New/',$result['summary']) && !preg_match('/Trial/',$result['summary']))
-			$result['summary'] = preg_replace(array('/N\/A/','/(\d+)/'),array('P=N/A','P$1'), $result['summary']);
-			
+		
 		$formattedNews=formatNews($result);
 		$htmlContent .= '<tr><td>' . $formattedNews .'</td></tr>';
 	}
@@ -110,9 +108,11 @@ function formatNews($result) {
 	$phase = $result['phase'];
 	if($phase != 'N/A') { 
 		$phase = 'P'. $phase;
-	}else
-		$phase = 'P='. $phase;
-		
+	}
+	
+	if(preg_match('/Phase\sshift/',$result['name']) || preg_match('/Phase\sclassification/',$result['name']))
+			$result['summary'] = preg_replace(array('/N\/A/','/(\d+)/'),array('P=N/A','P$1'), $result['summary']);	
+			
 	$returnStr = '';
 	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['score']).'</span>'.str_repeat('|',10-$result['score']).'&nbsp;&nbsp;</span><span class="product_name">'.$result['product'].'</span><br>';
 	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span><span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
