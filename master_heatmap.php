@@ -1726,7 +1726,13 @@ function Download_reports()
 					$type = ''; $type = $result['class']; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
 					
 					if($type == 'Product')
-						$result['company'] = GetCompanyNames($result['id']);
+					{
+					//	$result['company'] = GetCompanyNames($result['id']);
+						$query = 'SELECT company AS name FROM entities WHERE id=' . $result['id']. ' limit 1 ';
+						$res1 = mysql_query($query);
+						$cRow = mysql_fetch_assoc($res1);
+						$result['company'] = $cRow['name'];	
+					}
 					else 
 						$result['company'] = '';
 					if($result['company'] != NULL && trim($result['company']) != '')
@@ -1805,7 +1811,16 @@ function Download_reports()
 					$type = ''; $type = $result['class']; if($type == 'Institution') $type = 'Company'; else if($type == 'MOA_Category') $type = 'MOA Category'; else $type = $result['class'];
 					
 					if($type == 'Product')
-						$result['company'] = GetCompanyNames($result['id']);
+					{
+					//	$result['company'] = GetCompanyNames($result['id']);
+						$query = 'SELECT company AS name FROM entities WHERE id=' . $result['id']. ' limit 1 ';
+						$res1 = mysql_query($query);
+						$cRow = mysql_fetch_assoc($res1);
+						$result['company'] = $cRow['name'];	
+
+					
+					}
+					
 					else 
 						$result['company'] = '';
 						
@@ -1875,7 +1890,12 @@ function Download_reports()
 			$rows[$counter] = $result['id'];
 			$rowsEntityType[$counter] = $result['class'];
 					
-			$result['company'] = GetCompanyNames($result['id']);
+			//$result['company'] = GetCompanyNames($result['id']);
+			$query = 'SELECT company AS name FROM entities WHERE id=' . $result['id']. ' limit 1 ';
+			$res1 = mysql_query($query);
+			$cRow = mysql_fetch_assoc($res1);
+			$result['company'] = $cRow['name'];	
+
 			if($result['company'] != NULL && trim($result['company']) != '')
 			$rowsCompanyName[$counter] = ' / '.$result['company'];
 					
