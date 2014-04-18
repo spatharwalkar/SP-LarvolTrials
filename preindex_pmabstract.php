@@ -171,9 +171,9 @@ function pmtindex($scraper_run=false,$productz=NULL,$up_id=NULL,$cid=NULL,$produ
 				if ($pos === false) 
 				{
 					$log='Error in MySql Query (no "where" clause is used in the query)  :' . $query;
-					$logger->error($log);
+					$logger->warn($log);
 					mysql_query('ROLLBACK');
-					echo $log;
+//					echo $log;
 					//return false;
 				//	exit;
 					continue;

@@ -988,7 +988,7 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 		
 		//$wheres[$wcount++] = " ( ";
 		$unique_searchwords = array();
-		$pubmed_fields = array('abstract_text','article_title');
+		$pubmed_fields = array('abstract_text','article_title','journal_title');
 		foreach ($pubmed_fields as $pm_field) {
 			$prevchain = ' ';
 						
