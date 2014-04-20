@@ -14,18 +14,19 @@ function generateNewsIDs($days) {
 function generateNewsEntities($id) {
 	$query ='SELECT 
 					CONCAT	(
-								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",p.LI_id),concat("\",\"name\":\"",p.name,"\"}")),"]"
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",p.LI_id),concat("\",\"name\":\"",REPLACE(p.name,\'"\',\'&quot\'),"\"}")),"]"
 							) 	
 							as product,
 					CONCAT	(
-								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(d.LI_id,"N/A")),concat("\",\"name\":\"",d.name,"\"}")),"]"
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(d.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(d.name,\'"\',\'&quot\'),"\"}")),"]"
 							) 	
 							as disease,		
 					CONCAT	(
-								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(i.LI_id,"N/A")),concat("\",\"name\":\"",i.name,"\"}")),"]"
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(i.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(i.name,\'"\',\'&quot\'),"\"}")),"]"
 							) 	
 							as investigator,
-					t.source_id,n.larvol_id,REPLACE(n.brief_title,\'"\',\'&quot\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,n.sponsor,n.summary,n.enrollment,n.added 
+					t.source_id,n.larvol_id,REPLACE(n.brief_title,\'"\',\'&quot\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
+					REPLACE(n.sponsor,\'"\',\'&quot\') AS sponsor,n.summary,n.enrollment,n.added 
 					FROM news n 
 					JOIN data_trials t using(larvol_id)
 					LEFT JOIN entity_trials pt on n.larvol_id=pt.trial 
@@ -52,7 +53,7 @@ function runNewsQuery($query) {
 	}
 	if (!mysql_num_rows($res)) {
 		http_response_code(404);
-		$msg = "cannot find data with with your input params";
+		$msg = "cannot find data with your input params";
 		jsonMessg($msg);
 	}
 	$res = mysql_fetch_assoc($res) or die('cannot fetch with id=$id' . mysql_error());
