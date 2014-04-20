@@ -37,6 +37,16 @@ function NewsTrackerHTMLContent($res) {
 
 	while($result = mysql_fetch_array($res))
 	{
+		if($result['name'] == 'Enrollment open' && ($result['summary'] == 'NA' || $result['summary'] == ''))
+		{
+			$query_s="select dh.overall_status_prev from data_history dh join data_trials dt ON(dt.larvol_id = dh.larvol_id) where overall_status_prev != 'Recruiting' and dt.overall_status='Recruiting' and dt.source_id = '".$result['source_id']."' LIMIT 1";
+			if($res_s = mysql_query($query_s))
+			{
+				$result_s = mysql_fetch_array($res_s);
+				if(count($result_s) && $result_s['overall_status_prev'] !='' && $result_s['overall_status_prev'] != NULL)
+					$result['summary'] = $result_s['overall_status_prev'].' -> Recruiting';
+			}
+		}	
 		//this assignment should not happen here, 
 		//set summary in the database during news generation
 		if($result['summary'] == 'NA')
