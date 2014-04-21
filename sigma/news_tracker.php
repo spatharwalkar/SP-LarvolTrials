@@ -37,16 +37,6 @@ function NewsTrackerHTMLContent($res) {
 
 	while($result = mysql_fetch_array($res))
 	{
-		if($result['name'] == 'Enrollment open' && ($result['summary'] == 'NA' || $result['summary'] == ''))
-		{
-			$query_s="select dh.overall_status_prev from data_history dh join data_trials dt ON(dt.larvol_id = dh.larvol_id) where overall_status_prev != 'Recruiting' and dt.overall_status='Recruiting' and dt.source_id = '".$result['source_id']."' LIMIT 1";
-			if($res_s = mysql_query($query_s))
-			{
-				$result_s = mysql_fetch_array($res_s);
-				if(count($result_s) && $result_s['overall_status_prev'] !='' && $result_s['overall_status_prev'] != NULL)
-					$result['summary'] = $result_s['overall_status_prev'].' -> Recruiting';
-			}
-		}	
 		//this assignment should not happen here, 
 		//set summary in the database during news generation
 		if($result['summary'] == 'NA')
@@ -123,7 +113,7 @@ function formatNews($result) {
 			
 	$returnStr = '';
 	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['score']).'</span>'.str_repeat('|',10-$result['score']).'&nbsp;&nbsp;</span><span class="product_name">'.$result['product'].'</span><br>';
-	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span><span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
+	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span><span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',&nbsp;'.$result['overall_status'].',&nbsp;</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
 	$returnStr .= '<a class="title" href="'.$ctLink.'" target="_blank">'.$result['brief_title'].'</a>&nbsp;-&nbsp;&nbsp;'.date('M jS, Y', strtotime($result['added'])) .'<br>';
 	$returnStr .= '<span class="summary">'.$result['summary'].'</span>';
 	return $returnStr;

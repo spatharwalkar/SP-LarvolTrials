@@ -26,7 +26,7 @@ function generateNewsEntities($id) {
 							) 	
 							as investigator,
 					t.source_id,n.larvol_id,REPLACE(n.brief_title,\'"\',\'&quot\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
-					REPLACE(n.sponsor,\'"\',\'&quot\') AS sponsor,n.summary,n.enrollment,n.added 
+					REPLACE(n.sponsor,\'"\',\'&quot\') AS sponsor,n.summary,n.enrollment,n.overall_status as status,n.added 
 					FROM news n 
 					JOIN data_trials t using(larvol_id)
 					LEFT JOIN entity_trials pt on n.larvol_id=pt.trial 
