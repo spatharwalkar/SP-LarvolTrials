@@ -1632,7 +1632,7 @@ BEGIN
 	DECLARE stmt VARCHAR(500);
 	DECLARE done INT DEFAULT FALSE;
 
-	DECLARE dynamicCursor CURSOR FOR SELECT id,rUIS,formula,statement from redtags;
+	DECLARE dynamicCursor CURSOR FOR SELECT id,`name`,rUIS,formula,statement from redtags;
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
 	#cleanup temporary table (if left over from a previous failure)
@@ -1675,7 +1675,7 @@ BEGIN
 			EXECUTE tmp_stmt2;
 
 			#populate the news table
-			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (',@rname,' = "Phase classification" || ',@rname,' = "Phase shift"),PREG_REPLACE("/N\\/A/","P=N/A",PREG_REPLACE("/(\\d+)/","P$1", ',@comp_formula,')),',@comp_formula,') as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (',@rname,' = "Phase classification" || ',@rname,' = "Phase shift"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			PREPARE news_stmt FROM @insert_news;
 			EXECUTE news_stmt;						
 
