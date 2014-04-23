@@ -99,11 +99,11 @@ VALUES(1, 'New trial', 'New Trial', 6, NULL, "select larvol_id, cast(coalesce( f
 	(20, 'Target Enrollment', 'Enrollment status', 5, 'N=[enrollment_prev] -> [enrollment]', "select larvol_id, cast(coalesce( enrollment_lastchanged,current_date())as date) as added from data_history join data_trials dt using (larvol_id) where adddate(enrollment_lastchanged,%d)>= current_date() and abs(enrollment_prev-dt.enrollment)/enrollment_prev >= 0.2 and enrollment_prev >= 10",'3DAE8220-BDF9-46A8-9E51-92DE85DE8161',NULL),
 	(21, 'Phase Classification', 'Clinical Trial status', 2, 'Phase classification: N/A ->[phase]', "select larvol_id, cast(coalesce( phase_lastchanged,current_date())as date) as added from data_history join data_trials dt using (larvol_id) where adddate(phase_lastchanged,%d)>= current_date() and phase_prev = 'N/A' and dt.phase != 'N/A'  ",'51BCAC2B-6EB7-42F8-850B-C03E9DA0A287',NULL),
 	(22, 'Phase Shift', 'Clinical Trial status', 10, '[phase_prev] -> [phase]', "select larvol_id, cast(coalesce( phase_lastchanged,current_date())as date) as added from data_history join data_trials dt using (larvol_id) where adddate(phase_lastchanged,%d)>= current_date() and phase_prev != dt.phase",'7A4EB458-CD4B-45F0-84A9-D887893215A0',NULL),
-	(23,'Clinical Trial,Phase I','Other',4,'Phase 1 Data','SKIP',"select pm_id from pubmed_abstracts where publication_type = 'Clinical Trial,Phase I',NULL"),
-	(24,'Clinical Trial,Phase II','Other',7,'Phase 2 Data','SKIP',"select pm_id from pubmed_abstracts where publication_type = 'Clinical Trial,Phase II',NULL"),
-	(25,'Clinical Trial,Phase III','Other',8,'Phase 3 Data','SKIP',"select pm_id from pubmed_abstracts where publication_type = 'Clinical Trial,Phase III',NULL"),
-	(26,'Clinical Trial,Phase IV','Other',7,'Phase 4 Data','SKIP',"select pm_id from pubmed_abstracts where publication_type = 'Clinical Trial,Phase IV',NULL"),
-	(27,'Review','Other',5,'Review','SKIP',"select pm_id from pubmed_abstracts where publication_type = 'Review',NULL");
+	(23,'Clinical Trial,Phase I','Other',4,'Phase 1 Data','SKIP',NULL,"select pm_id from pubmed_abstracts where publicationtype = 'Clinical Trial,Phase I'"),
+	(24,'Clinical Trial,Phase II','Other',7,'Phase 2 Data','SKIP',NULL,"select pm_id from pubmed_abstracts where publicationtype = 'Clinical Trial,Phase II'"),
+	(25,'Clinical Trial,Phase III','Other',8,'Phase 3 Data','SKIP',NULL,"select pm_id from pubmed_abstracts where publicationtype = 'Clinical Trial,Phase III'"),
+	(26,'Clinical Trial,Phase IV','Other',7,'Phase 4 Data','SKIP',NULL,"select pm_id from pubmed_abstracts where publicationtype = 'Clinical Trial,Phase IV'"),
+	(27,'Review','Other',5,'Review','SKIP',NULL,"select pm_id from pubmed_abstracts where publicationtype = 'Review',NULL");
 
 INSERT INTO tis_scores(phase, score, category, input)
 VALUES('N/A', 0.5, 1, 1),
