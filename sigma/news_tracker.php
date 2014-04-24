@@ -99,6 +99,10 @@ function formatNews($result) {
 	}
 	else if(isset($nctid) && strpos($nctid, 'NCT') !== FALSE)
 	{
+		$matches = array();
+		if(preg_match('/(NCT[0-9]+).*?/', $nctid,$matches))
+			$nctid = $matches[1];
+			
 		$ctLink = 'http://clinicaltrials.gov/ct2/show/' . $nctid;
 	}
 	else
