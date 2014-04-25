@@ -1675,7 +1675,7 @@ BEGIN
 
 			#populate the news table
 			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
-			SET @insert_news := CONCAT('insert into news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification" || rt.`name` = "Phase shift"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+			SET @insert_news := CONCAT('insert into news select t.larvol_id,"',rtag_id,'" as redtag,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification" || rt.`name` = "Phase shift"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			PREPARE news_stmt FROM @insert_news;
 			EXECUTE news_stmt;						
 
