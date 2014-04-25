@@ -1457,7 +1457,7 @@ CREATE TABLE IF NOT EXISTS `news`  (
 	`larvol_id`  	int(10) UNSIGNED NOT NULL,
 	`redtag_id`  	int(10) UNSIGNED NOT NULL,
 	`brief_title`	text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
-	`phase`      	enum('N/A','0','0/1','1','1a','1b','1a/1b','1c','1/2','1b/2','1b/2a','2','2a','2a/2b','2b','2/3','2b/3','3','3a','3b','3/4','3b/4','4') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N/A',
+	`phase`      	VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NOT NULL DEFAULT 'P=N/A'
 	`enrollment` 	int(10) UNSIGNED NULL,
   `overall_status` enum('Not yet recruiting','Recruiting','Enrolling by invitation','Active, not recruiting','Completed','Suspended','Terminated','Withdrawn','Available','No Longer Available','Approved for marketing','No longer recruiting','Withheld','Temporarily Not Available','Ongoing','Not Authorized','Prohibited') COLLATE utf8_unicode_ci NOT NULL,
 	`sponsor`    	varchar(150) NULL,
@@ -1624,8 +1624,7 @@ ALTER TABLE `news`
 DELIMITER $$
 
 CREATE PROCEDURE `generateTrialNews`( IN days int)
-BEGIN
-	
+BEGIN	
 	DECLARE rtag_id INT;
 	DECLARE frml VARCHAR(150);
 	DECLARE score INT;
@@ -1647,7 +1646,7 @@ BEGIN
 		IF (done) THEN LEAVE dynamicCursorLoop;
 		END IF;
 
-		
+		 
 		IF (stmt LIKE 'select %') THEN
 			IF (frml IS NULL) THEN
 				SET @frml_quoted := '"NA"';
@@ -1675,7 +1674,8 @@ BEGIN
 			EXECUTE tmp_stmt2;
 
 			#populate the news table
-			SET @insert_news := CONCAT('insert into lt.news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification" || rt.`name` = "Phase shift"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
+			SET @insert_news := CONCAT('insert into news select t.larvol_id,"',rtag_id,'" as redtag,brief_title,phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification" || rt.`name` = "Phase shift"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			PREPARE news_stmt FROM @insert_news;
 			EXECUTE news_stmt;						
 
