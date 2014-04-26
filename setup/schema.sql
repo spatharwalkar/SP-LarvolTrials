@@ -1457,7 +1457,7 @@ CREATE TABLE IF NOT EXISTS `news`  (
 	`larvol_id`  	int(10) UNSIGNED NOT NULL,
 	`redtag_id`  	int(10) UNSIGNED NOT NULL,
 	`brief_title`	text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
-	`phase`      	VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NOT NULL DEFAULT 'P=N/A'
+	`phase`      	VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NOT NULL DEFAULT 'P=N/A',
 	`enrollment` 	int(10) UNSIGNED NULL,
   `overall_status` enum('Not yet recruiting','Recruiting','Enrolling by invitation','Active, not recruiting','Completed','Suspended','Terminated','Withdrawn','Available','No Longer Available','Approved for marketing','No longer recruiting','Withheld','Temporarily Not Available','Ongoing','Not Authorized','Prohibited') COLLATE utf8_unicode_ci NOT NULL,
 	`sponsor`    	varchar(150) NULL,
