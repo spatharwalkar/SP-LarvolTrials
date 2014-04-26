@@ -297,7 +297,10 @@ function get_SearchData()
 	$owner_type="mine";
 	else if($row['user'] === NULL)
 	$owner_type="global";
-	
+
+	if (!isset($res_ret))
+		$res_ret = new stdClass();
+		
 	$res_ret->searchdata=$data;
 	$res_ret->name= $row['name'];
 	$res_ret->id= $row['id'];
