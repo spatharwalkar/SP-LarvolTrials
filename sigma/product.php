@@ -37,6 +37,7 @@
 	}
 	
 	$tab = 'diseasetrac';
+	$TabDiseaseCount = $TabTrialsCount = $TabNewsCount = $TabInvestigatorCount = 0;
 	if(isset($_REQUEST['tab']))
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
@@ -49,22 +50,23 @@
 	$dwcount = $_REQUEST['dwcount'];
 	else
 	$dwcount = 'total';
-	
-	$disTrackerData = showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
+	if($e1 !=NULL)
+	{	
+		$disTrackerData = showDiseaseTracker($e1, 'PDT', $page, $categoryFlag);		//PDT = PRODUCT DISEASE TRACKER
 
-	$sqlGetTabs = "SELECT * from tabs where entity_id = $e1 AND  table_name = 'entities'";
-	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
-	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
-	if($categoryFlag == 1){
-		$TabDiseaseCount = $rowGetTabs['diseases_categories'];
-	}	
-	else{
-		$TabDiseaseCount = $rowGetTabs['diseases'];
+		$sqlGetTabs = "SELECT * from tabs where entity_id = $e1 AND  table_name = 'entities'";
+		$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+		$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+		if($categoryFlag == 1){
+			$TabDiseaseCount = $rowGetTabs['diseases_categories'];
+		}	
+		else{
+			$TabDiseaseCount = $rowGetTabs['diseases'];
+		}
+		$TabTrialsCount = $rowGetTabs['trials'];
+		$TabNewsCount = $rowGetTabs['news'];
+		$TabInvestigatorCount = $rowGetTabs['investigators'];
 	}
-	$TabTrialsCount = $rowGetTabs['trials'];
-	$TabNewsCount = $rowGetTabs['news'];
-	$TabInvestigatorCount = $rowGetTabs['investigators'];
-	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($ProductName) ? $ProductName. ' - '.$meta_title : $meta_title;
 ?>

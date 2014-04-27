@@ -10,6 +10,8 @@
 	require_once('investigators_tracker.php');
 	require_once('news_tracker.php');
 	$page = 1;
+	$CompanyId = NULL;
+	
 	if($_REQUEST['CompanyId'] != NULL && $_REQUEST['CompanyId'] != '' && isset($_REQUEST['CompanyId']))
 	{
 		$CompanyId = $_REQUEST['CompanyId'];
@@ -83,28 +85,32 @@
 	{
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
-	
+
+	$TabTrialCount = $TabNewsCount = $TabInvestigatorCount = $TabProductCount = 0;
+	$productIds = array();	
 	$categoryFlag = (isset($_REQUEST['category']) ? $_REQUEST['category'] : 0);
 	$tabCommonUrl = 'company.php?CompanyId='.$CompanyId;
 	$tabOTTUrl    = 'company.php?e1='.$CompanyId;
-	
-	$sqlGetTabs = "SELECT * from tabs where entity_id = $CompanyId AND  table_name = 'entities'";
-	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
-	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
-	
-	if($categoryFlag == 1){
-		$TabDiseaseCount = $rowGetTabs['diseases_categories'];
+	if($CompanyId !=NULL)
+	{	
+		$sqlGetTabs = "SELECT * from tabs where entity_id = $CompanyId AND  table_name = 'entities'";
+		$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+		$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+		
+		if($categoryFlag == 1){
+			$TabDiseaseCount = $rowGetTabs['diseases_categories'];
+		}
+		else{
+			$TabDiseaseCount = $rowGetTabs['diseases'];
+		}
+		$TabTrialCount = $rowGetTabs['trials'];
+		$TabNewsCount = $rowGetTabs['news'];
+		$TabInvestigatorCount = $rowGetTabs['investigators'];
+		$TabProductCount = $rowGetTabs['products'];
+		
+		$companyProducts = getcompanyProducts($CompanyId);
+		$productIds = array_keys($companyProducts);
 	}
-	else{
-		$TabDiseaseCount = $rowGetTabs['diseases'];
-	}
-	$TabTrialCount = $rowGetTabs['trials'];
-	$TabNewsCount = $rowGetTabs['news'];
-	$TabInvestigatorCount = $rowGetTabs['investigators'];
-	$TabProductCount = $rowGetTabs['products'];
-	
-	$companyProducts = getcompanyProducts($CompanyId);
-	$productIds = array_keys($companyProducts);
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($CompanyName) ? $CompanyName. ' - '.$meta_title : $meta_title;	

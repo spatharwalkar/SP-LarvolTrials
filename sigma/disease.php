@@ -18,6 +18,8 @@
 	require_once('moa_tracker.php');
 	require_once('news_tracker.php');
 	$page = 1;
+	$DiseaseId = NULL;
+	$TabCompanyCount = $TabProductCount = $TabMOACount = $TabTrialCount = $TabNewsCount = $TabInvCount = 0;	
 	
 	if($_REQUEST['DiseaseId'] != NULL && $_REQUEST['DiseaseId'] != '' && isset($_REQUEST['DiseaseId']))
 	{
@@ -50,16 +52,18 @@
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
 	$tabCommonUrl = 'disease.php?DiseaseId='.$DiseaseId;
-	
-	$sqlGetTabs = "SELECT * from tabs where entity_id = $DiseaseId AND  table_name = 'entities'";
-	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
-	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
-	$TabCompanyCount = $rowGetTabs['companies'];
-	$TabProductCount = $rowGetTabs['products'];
-	$TabMOACount = $rowGetTabs['moas'];
-	$TabTrialCount = $rowGetTabs['trials'];
-	$TabNewsCount = $rowGetTabs['news'];
-	$TabInvCount = $rowGetTabs['investigators'];
+	if($DiseaseId !=NULL)
+	{	
+		$sqlGetTabs = "SELECT * from tabs where entity_id = $DiseaseId AND  table_name = 'entities'";
+		$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+		$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+		$TabCompanyCount = $rowGetTabs['companies'];
+		$TabProductCount = $rowGetTabs['products'];
+		$TabMOACount = $rowGetTabs['moas'];
+		$TabTrialCount = $rowGetTabs['trials'];
+		$TabNewsCount = $rowGetTabs['news'];
+		$TabInvCount = $rowGetTabs['investigators'];
+	}
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($DiseaseName) ? $DiseaseName. ' - '.$meta_title : $meta_title;	

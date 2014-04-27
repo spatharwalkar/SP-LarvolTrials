@@ -679,18 +679,21 @@ function GetCompanyNames($productID)
 }
 
 //Formats a product name with company per standard from LI
-function productFormatLI($name, $companies, $tag='')
+function productFormatLI($name='', $companies='', $tag='')
 {
-	$name = htmlspecialchars($name);
-	$paren = strpos($name, '(');
-	if($paren === false)
+	if($name != NULL && $name != '')
 	{
-		$name = '<b>' . $name . '</b>';
-	}else{
-		$name = '<b>' . substr($name,0,$paren) . '</b>' . substr($name,$paren);
+		$name = htmlspecialchars($name);
+		$paren = strpos($name, '(');
+		if($paren === false)
+		{
+			$name = '<b>' . $name . '</b>';
+		}else{
+			$name = '<b>' . substr($name,0,$paren) . '</b>' . substr($name,$paren);
+		}
 	}
 	if(strlen($tag)) $tag = ' <span class="gray">[' . htmlspecialchars($tag) . ']</span>';
-	return $name . ' / <i>' . htmlspecialchars(implode(', ', $companies)) . '</i>' . $tag;
+	return $name . ($companies != '' && $companies != NULL ? ' / <i>' .htmlspecialchars(implode(', ', $companies)). '</i>':'') . $tag;
 }
 
 //Generates the pagination links

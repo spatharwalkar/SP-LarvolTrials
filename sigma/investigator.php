@@ -14,6 +14,7 @@
 	require_once('moa_tracker.php');
 	require_once('disease_tracker.php');
 	$page = 1;
+	$InvestigatorId = NULL;
 	if($_REQUEST['TrackerType'] == 'INVESTDT' && $_REQUEST['DiseaseId'] && $_REQUEST['InvestigatorId'] )
 	{
 		include "searchbox.php";
@@ -50,24 +51,26 @@
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
 	$tabCommonUrl		= 'investigator.php?InvestigatorId='.$InvestigatorId;
-	
-	$CompanyIds			= GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId);
-	$CompanyIds = array_filter(array_unique($CompanyIds));
-	
-	$MOAIds				= GetMOAsFromInvestigator($InvestigatorId);
-	if(empty($MOAIds))
-		$MOAIds = array();
-	else
-		$MOAIds = array_filter(array_unique($MOAIds));
-	
-	$sqlGetTabs = "SELECT * from tabs where entity_id = $InvestigatorId AND  table_name = 'entities'";
-	$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
-	$rowGetTabs = mysql_fetch_assoc($resGetTabs);
-	$TabCompanyCount = $rowGetTabs['companies'];
-	$TabProductCount = $rowGetTabs['products'];
-	$TabDiseaseCount = $rowGetTabs['diseases'];
-	$TabMOACount = $rowGetTabs['moas'];
-	$TabTrialCount = $rowGetTabs['trials'];
+	$TabCompanyCount = $TabProductCount = $TabDiseaseCount = $TabMOACount = $TabTrialCount = 0;
+	$MOAIds = array();	
+	if($InvestigatorId !=NULL)
+	{	
+		$CompanyIds			= GetCompaniesFromInvestigator_CompanyTracker($InvestigatorId);
+		$CompanyIds = array_filter(array_unique($CompanyIds));
+		
+		$MOAIds				= GetMOAsFromInvestigator($InvestigatorId);
+		if(!empty($MOAIds))
+			$MOAIds = array_filter(array_unique($MOAIds));
+		
+		$sqlGetTabs = "SELECT * from tabs where entity_id = $InvestigatorId AND  table_name = 'entities'";
+		$resGetTabs = mysql_query($sqlGetTabs) or die($sqlGetTabs.'- Bad SQL query');
+		$rowGetTabs = mysql_fetch_assoc($resGetTabs);
+		$TabCompanyCount = $rowGetTabs['companies'];
+		$TabProductCount = $rowGetTabs['products'];
+		$TabDiseaseCount = $rowGetTabs['diseases'];
+		$TabMOACount = $rowGetTabs['moas'];
+		$TabTrialCount = $rowGetTabs['trials'];
+	}	
 	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($InvestigatorName) ? $InvestigatorName. ' - '.$meta_title : $meta_title;	
