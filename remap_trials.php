@@ -19,7 +19,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storecha
 			$trial=padnct($source_id);
 		else 
 			$trial = $source_id;
-		$query = 'SELECT `larvol_id` FROM data_trials where `source_id`="' . $trial . '"  LIMIT 1';
+		$query = 'SELECT `larvol_id` FROM data_trials where `source_id` like "' . $trial . '%"  LIMIT 1';
 		if(!$res = mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();

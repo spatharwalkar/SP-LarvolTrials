@@ -821,7 +821,11 @@ function deleteData($id,$table)
 			case 'diseases': $actual_table = "entities"; break;
 		}
 		if($table=='investigator') return false;
-	$query = "delete from $actual_table where id=$id";
+		
+	if( $actual_table == "entities" )
+		$query = "update `entities` set is_active = 0 where id=".$id." limit 1";
+	else
+		$query = "delete from $actual_table where id=$id";
 	mysql_query($query) or softDieSession('Cannot delete '.$table.'. '.$query);
 	echo 'Successfully deleted '.$table.'.';
 	
