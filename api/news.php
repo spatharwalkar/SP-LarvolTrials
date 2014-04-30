@@ -14,19 +14,19 @@ function generateNewsIDs($days) {
 function generateNewsEntities($id) {
 	$query ='SELECT 
 					CONCAT	(
-								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",p.LI_id),concat("\",\"name\":\"",REPLACE(p.name,\'"\',\'&quot\'),"\"}")),"]"
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",p.LI_id),concat("\",\"name\":\"",REPLACE(p.name,\'"\',\'&quot;\'),"\"}")),"]"
 							) 	
 							as product,
 					CONCAT	(
-								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(d.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(d.name,\'"\',\'&quot\'),"\"}")),"]"
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(d.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(d.name,\'"\',\'&quot;\'),"\"}")),"]"
 							) 	
 							as disease,		
 					CONCAT	(
-								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(i.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(i.name,\'"\',\'&quot\'),"\"}")),"]"
+								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(i.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(i.name,\'"\',\'&quot;\'),"\"}")),"]"
 							) 	
 							as investigator,
-					t.source_id,n.larvol_id,REPLACE(n.brief_title,\'"\',\'&quot\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
-					REPLACE(n.sponsor,\'"\',\'&quot\') AS sponsor,n.summary,n.enrollment,n.overall_status as status,n.added 
+					t.source_id,n.larvol_id,REPLACE(n.brief_title,\'"\',\'&quot;\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
+					REPLACE(n.sponsor,\'"\',\'&quot;\') AS sponsor,n.summary,n.enrollment,n.overall_status as status,n.added 
 					FROM news n 
 					JOIN data_trials t using(larvol_id)
 					LEFT JOIN entity_trials pt on n.larvol_id=pt.trial 
