@@ -615,6 +615,19 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 	$DTnow = date("Y-m-d H:i:s", strtotime('now'));
 	
 	require_once('field_mappings.php');
+	if( ($fieldname=='source_id' and substr($value,0,3)<>'NCT') or $fieldname=='eudract_id' ) //Eudract trial. Set its completion date using global end date
+	{
+		$fieldvalue=get_field_value($larvol_id,  'end_date_global', 'EUDRACT');
+		update_history($larvol_id,'completion_date',$fieldvalue,$lastchanged_date);
+	}
+	elseif( ($fieldname=='source_id' and substr($value,0,3)=='NCT')  or $fieldname=='nct_id'  ) //NCT trial. 
+	{
+				$fieldvalue=get_field_value($larvol_id,  'completion_date', 'NCT');
+				update_history($larvol_id,'completion_date',$fieldvalue,$lastchanged_date);
+				$fieldvalue=get_field_value($larvol_id,  'primary_completion_date', 'NCT');
+				update_history($larvol_id,'primary_completion_date',$fieldvalue,$lastchanged_date);
+			
+	}
 	$fieldvalue=get_field_value($larvol_id,  $fieldname, $sourcedb);
 	update_history($larvol_id,$fieldname,$fieldvalue,$lastchanged_date);
 
@@ -778,16 +791,12 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 		if( !is_null($cdate) and  $cdate <>'0000-00-00' )	// completion date
 		{
 			$cdate=normalize('date',$cdate);
-			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 		}
 		
 		elseif( !is_null($pcdate) and  $pcdate <>'0000-00-00') 	// primary completion date
 		{
 		
 			$pcdate=normalize('date',$pcdate);
-			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 				
 		}
 
@@ -814,36 +823,24 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 			{
 				
 				$cdate=normalize('date',$cdate);
-				update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-				update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 			
 			}
 
-			else	// replace with null
-			{
-				
-				update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-				update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date)	;			
-				
-			}
 		}
 		
 		/*************/
+		
 				
 		if( !is_null($pcdate) and  $pcdate <>'0000-00-00' and $fieldname=='end_date') 	// primary completion date
 		{
 		
 			$pcdate=normalize('date',$pcdate);
 			update_history($larvol_id,'end_date',$pcdate,$lastchanged_date);
-			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 		}
 		elseif( !is_null($cdate) and  $cdate <>'0000-00-00' and $fieldname=='end_date')	// completion date
 		{
 			$cdate=normalize('date',$cdate);
 			update_history($larvol_id,'end_date',$cdate,$lastchanged_date);
-			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 					
 		}
 	
@@ -869,22 +866,25 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 			{
 				$cdate=normalize('date',$cdate);
 				update_history($larvol_id,'end_date',$cdate,$lastchanged_date);
-				update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-				update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 					
 			}
 			
 			elseif($fieldname=='end_date')	// replace with null
 			{
 				update_history($larvol_id,'end_date',null,$lastchanged_date);
-				update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
-				update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
 			}
 				
 			
 		}
 		//
-		
+		if($fieldname=='primary_completion_date')  // can use any fieldname here, this to ensure that the updation is done only once.
+		{
+
+			update_history($larvol_id,'inclusion_criteria',$str['inclusion'],$lastchanged_date);
+			update_history($larvol_id,'exclusion_criteria',$str['exclusion'],$lastchanged_date);
+		}
+
+
 		// get value using the new centralized function
 
 		return true;

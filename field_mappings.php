@@ -12,7 +12,6 @@ if($_GET['l']&&$_GET['f']&&$_GET['s'])
 }
 function get_field_value($larvol_id,  $field_name, $source)
 {
-
 	if( empty($larvol_id) or empty($field_name) or empty($source) )
 		return false;
 	global $logger;
@@ -84,6 +83,8 @@ function get_field_value($larvol_id,  $field_name, $source)
 		$dm_mappings['secondary_outcome_timeframe']=$res['secondary_outcome_timeframe'];
 		$dm_mappings['source']=$res['source'];
 		$dm_mappings['source_id']=$res['source_id'];
+		$dm_mappings['completion_date']=$res['completion_date'];
+		$dm_mappings['primary_completion_date']=$res['primary_completion_date'];
 		$dm_mappings['start_date']=$res['start_date'];
 		$dm_mappings['study_design']=$res['study_design'];
 		$dm_mappings['study_pop']=$res['study_pop'];
@@ -128,7 +129,7 @@ function get_field_value($larvol_id,  $field_name, $source)
 			$mappings['start_date']=$res['start_date'];
 			$mappings['institution_type']=getInstitutionType($res['support_org_name'],$res['sponsor_name'],$res['larvol_id']);
 			$mappings['end_date']=$res['end_date_global'];
-			
+			$mappings['end_date_global']=$res['end_date_global'];
 			
 			$mappings['inclusion_criteria']=$res['inclusion_criteria'];
 			$mappings['exclusion_criteria']=$res['exclusion_criteria'];
