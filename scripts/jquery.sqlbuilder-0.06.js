@@ -1846,7 +1846,7 @@
             	    var counter_id = opts.counters[3];
             	    var col_slot = action;
             	    var op_slot = (defval ? defval.opslot : 0);
-            	    var column_value = (defval ? defval.columnvalue : opts.fields[action].defaultval);
+            	    var column_value = (defval ? defval.columnvalue : opts.fields[action].defaultval).replace('"','&quot;');
             	    var col_type = opts.fields[col_slot].type;
                     var chain_slot = (defval ? defval.chainslot : '0') ;
                     var sqlline = getSQLWhereLine(col_slot, op_slot, chain_slot, column_value, counter_id, counter_id);
