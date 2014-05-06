@@ -434,7 +434,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storecha
 						if(is_null($value3)) $str3="  "; elseif($value3==1 or $value3==0) $str3=', is_active = "' . $value3 .'"';
 						
 						
-					$query = 'update data_trials set '. $str1 . $str2 . $str3  .'  , lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
+					$query = 'update data_trials set '. $str1 . $str2 . $str3  .'  , lastchanged_date = "' . $record_data['lastchanged_date'] .'" where larvol_id="' .$larvol_id . '"  limit 1' ;
 					if(!mysql_query($query))
 					{
 						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();

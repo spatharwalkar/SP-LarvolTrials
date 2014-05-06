@@ -5,6 +5,7 @@ require_once('include.util.php');
 require_once('searchhandler.php');
 ini_set('memory_limit','-1');
 ini_set('error_reporting', E_ALL ^E_NOTICE );
+ini_set('max_execution_time', '600'); //10 mins
 /*	
 
 function tindex() - to preindex a combination of one trial+one product, or  one trial+one area.  
