@@ -581,8 +581,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 					}	
 				}
 			}	//// End of while
-			if($data_matrix[$row]['total'] > $max_count)
-			$max_count = $data_matrix[$row]['total'];
+			if($data_matrix[$row][$dwcount] > $max_count)
+			$max_count = $data_matrix[$row][$dwcount];
 		}
 		else
 		{
@@ -617,8 +617,8 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 			$data_matrix[$row]['owner_sponsored_phase_3']=0;
 			$data_matrix[$row]['owner_sponsored_phase_4']=0;
 			
-			if($data_matrix[$row]['total'] < $max_count)
-			$max_count = $data_matrix[$row]['total'];
+			if($data_matrix[$row][$dwcount] < $max_count)
+			$max_count = $data_matrix[$row][$dwcount];	
 		}
 	}
 	
