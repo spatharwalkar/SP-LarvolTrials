@@ -92,10 +92,10 @@ function insertSearch()
 {
 	$querytosave=stripslashes($_REQUEST['querytosave']);
 	global $db;
-
 	$querytosave = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($querytosave) {
-    return str_replace($querytosave[1], mysql_real_escape_string($querytosave[1]), $querytosave[0]);
-},$querytosave);		
+		return str_replace($querytosave[1], mysql_real_escape_string($querytosave[1]), $querytosave[0]);
+	},$querytosave);	
+	
 	/***Part to Replace product/Area name by product/Area id when storing******/
 	$jsonData=$querytosave; 
 	$filterData = json_decode($jsonData, true, 10);
@@ -162,10 +162,10 @@ function updateSearch()
 {
 	$querytosave=stripslashes($_REQUEST['querytosave']);
 	global $db;
-
 	$querytosave = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($querytosave) {
-    return str_replace($querytosave[1], mysql_real_escape_string($querytosave[1]), $querytosave[0]);
-},$querytosave);	
+		return str_replace($querytosave[1], mysql_real_escape_string($querytosave[1]), $querytosave[0]);
+	},$querytosave);
+	
 	/***Part to Replace product/Area name by product/Area id when storing******/
 	$jsonData=$querytosave; 
 	$filterData = json_decode($jsonData, true, 10);

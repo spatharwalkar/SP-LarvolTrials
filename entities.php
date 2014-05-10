@@ -103,6 +103,9 @@ $('#product_update').progressBar({
 		{
 			$id = ($_REQUEST['id'])?$_REQUEST['id']:null;
 			$searchDbData = getSearchData($table, 'searchdata', $id);
+			$searchDbData = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($searchDbData) {
+				return str_replace($searchDbData[1], str_replace('"', '&quot;', $searchDbData[1]), $searchDbData[0]);
+			},$searchDbData);			
 			$show_value = "searchDbData = '" . $searchDbData . "';";
 			echo($show_value);
 		}
@@ -125,7 +128,7 @@ $(document).ready(function(){
 	  b = $('#search_name').autocomplete(options);
 	});
 	$(".ajax").colorbox({
-		onComplete:function(){ loadQueryData($('#searchdata').val());},
+		onComplete:function(){ loadQueryData(searchDbData);},
 		onClosed:function(){ newSearch(); },
 		inline:true, 
 		width:"100%",
@@ -375,14 +378,13 @@ $(document).ready(function () {
     	var jsonData = getQueryData(); 
     	
     	var ermsg = 'Null search data not allowed. If search data is already there & you are trying to remove it, please delete search data using the delete checkbox';
-    	if(jsonData !='') 
-    	var jsonDataArr = eval('('+jsonData+')');
+
     	if(jsonData =='')
     	{
 			alert(ermsg);
 			return false;        	
     	}
-    	if(jsonDataArr.wheredata == '')
+    	if(jsonData.indexOf("columnname") == '-1' || jsonData.indexOf("columnvalue") == '-1')
     	{
 			alert(ermsg);
 			return false;
