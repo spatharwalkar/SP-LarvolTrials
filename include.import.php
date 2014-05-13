@@ -1384,16 +1384,14 @@ else $ddesc=$rec->detailed_descr->textblock;
 	
 	if(!count($matches[0]) >0 )
 	{
-	preg_match_all($phases_regex, $record_data['official_title'], $matches);
+		preg_match_all($phases_regex, $record_data['official_title'], $matches);
 	}
 
-	//commented below code so that it does not look in brief_summary for alternate phase values.
-	/*
 	if(!count($matches[0]) >0 )
 	{
-	preg_match_all($phases_regex, $record_data['brief_summary'], $matches);
+		preg_match_all($phases_regex, $record_data['brief_summary'], $matches);
 	}
-	*/
+
 	if(count($matches[0]) >0 )
 	{
 
