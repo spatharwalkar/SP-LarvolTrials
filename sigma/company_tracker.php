@@ -113,7 +113,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 						WHERE (rpt.`count_total` > 0) AND ( ".$id. " in (rpt.`entity1`, rpt.`entity2` )) AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 		*/
 		//changed query for performance improvement
-		$CompanyQuery=	"
+		/*$CompanyQuery=	"
 						SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, 
 						rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` 
 						FROM `entities` e 
@@ -126,11 +126,19 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 						) 
 						JOIN `entity_relations` er ON	(e.`id` = er.`parent` AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)) 
 						JOIN `entities` e2 ON	(e2.`id` = er.`child` AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution') 
-						";
-		if($CompanyIds)
-			$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
-		else
-			$CompanyQueryResult = null;
+						";*/
+		$CompanyQuery=	"SELECT DISTINCT er.child AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
+						from entity_trials et
+						JOIN data_trials dt on (et.trial = dt.larvol_id)
+						JOIN entity_trials et2 ON (dt.larvol_id = et2.trial and et.entity = " . $id . ")
+						JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
+						JOIN entity_relations er ON (e.id = er.parent )
+						JOIN entities e2 ON (er.child = e2.id and e2.class='Institution' )
+						WHERE e2.`id` IN ('" . implode("','",$CompanyIds) . "')
+						group by CompId,ProdId";
+						
+		$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
+		
 		$key = 0;
 		while($result = @mysql_fetch_array($CompanyQueryResult))
 		{
@@ -166,12 +174,9 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 				}
 					
 		
-				if((( !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || (!in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+				if(!in_array($result['ProdId'],$data_matrix[$key]['ProdExistance']))	//Avoid duplicates like (1,2) and (2,1) type
 				{
-					if($result['entity1'] == $id ) //Last if($result['entity1'] == $id)
-						$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-					else
-						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+					$data_matrix[$key]['ProdExistance'][] = $result['ProdId'];
 						
 					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
 					{
@@ -335,8 +340,18 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$Report_DisplayName = $header['name'];
 		$CompanyIds = array_filter(array_unique(GetCompaniesFromDisease_CompanyTracker($header['id'])));
 		$id=$header['id'];
-		$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+		/*$CompanyQuery = "SELECT e2.`id` AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,e.`id` AS ProdId, rpt.`highest_phase` AS phase, rpt.`entity1`, rpt.`entity2`, rpt.`count_total` FROM `rpt_masterhm_cells` rpt JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) JOIN `entity_relations` er ON(e.`id` = er.`parent`) JOIN `entities` e2 ON(e2.`id` = er.`child`) WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '". $id ."' OR rpt.`entity2` = '". $id ."') AND e2.`id` IN ('" . implode("','",$CompanyIds) . "') AND e2.`class`='Institution' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";*/	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
 
+		$CompanyQuery = "SELECT DISTINCT er.child AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase
+				from entity_trials et
+				JOIN data_trials dt on (et.trial = dt.larvol_id)
+				JOIN entity_trials et2 ON (dt.larvol_id = et2.trial and et.entity = " . $id . ")
+				JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
+				JOIN entity_relations er ON (e.id = er.parent )
+				JOIN entities e2 ON (er.child = e2.id and e2.class='Institution' )
+				WHERE e2.`id` IN ('" . implode("','",$CompanyIds) . "')
+				group by CompId,ProdId";
+				
 		$CompanyQueryResult = mysql_query($CompanyQuery) or die(mysql_error());
 		
 		$key = 0;
@@ -374,12 +389,9 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 				}
 					
 		
-				if((($result['entity1'] == $id && !in_array($result['entity2'],$data_matrix[$key]['ProdExistance'])) || ($result['entity2'] == $id && !in_array($result['entity1'],$data_matrix[$key]['ProdExistance']))))	//Avoid duplicates like (1,2) and (2,1) type
+				if($result['ProdId'] != $id && !in_array($result['ProdId'],$data_matrix[$key]['ProdExistance']))	//Avoid duplicates like (1,2) and (2,1) type
 				{
-					if($result['entity1'] == $id)
-						$data_matrix[$key]['ProdExistance'][] = $result['entity2'];
-					else
-						$data_matrix[$key]['ProdExistance'][] = $result['entity1'];
+					$data_matrix[$key]['ProdExistance'][] = $result['ProdId'];
 						
 					if($result['phase'] == 'N/A' || $result['phase'] == '' || $result['phase'] === NULL)
 					{
