@@ -1387,11 +1387,11 @@ else $ddesc=$rec->detailed_descr->textblock;
 		preg_match_all($phases_regex, $record_data['official_title'], $matches);
 	}
 
-	if(!count($matches[0]) >0 )
+/*	if(!count($matches[0]) >0 )
 	{
 		preg_match_all($phases_regex, $record_data['brief_summary'], $matches);
 	}
-
+*/
 	if(count($matches[0]) >0 )
 	{
 
