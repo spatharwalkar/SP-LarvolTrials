@@ -8552,8 +8552,9 @@ class TrialTracker
 			$prod_flag=0; $area_flag=0; $prod_col=0; $area_col=0;
 			if(is_array($where_datas) && !empty($where_datas))
 			{
-				foreach($where_datas as $where_data)
+				foreach($where_datas as $ky => $where_data)
 				{
+					$where_datas[$ky]["columnvalue"]=mysql_real_escape_string($where_data["columnvalue"]);
 					if($where_data["columnname"] == '`product`')
 					$prod_flag=1;
 					if($where_data["columnname"] == '`area`')

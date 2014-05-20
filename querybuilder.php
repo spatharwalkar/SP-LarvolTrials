@@ -162,6 +162,7 @@ if(isset($_POST['delsch']) && is_array($_POST['delsch']))
             	$('ul.treeview li.list').addClass('expanded').find('>ul').append(newItem);
                 $('#3009').show();
 				$("#copy_bttn").html('<input type="submit" style="width: 100px" onclick="copySearch();return false" value="Copy Search" id="btncopy" />');
+				$("label[for=" + "lblId" + "]").html(data);
             	}
         });
 

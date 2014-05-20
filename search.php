@@ -83,12 +83,17 @@ $(document).ready(function () {
 			alert(ermsg);
 			return false;        	
     	}
-    	var jsonDataArr = eval('('+jsonData+')');
+    	if(jsonData.indexOf("columnname") == '-1' || jsonData.indexOf("columnvalue") == '-1')
+    	{
+			alert(ermsg);
+			return false;
+    	}		
+    	/*var jsonDataArr = eval('('+jsonData+')');
     	if(jsonDataArr.wheredata == '')
     	{
 			alert(ermsg);
 			return false;
-    	}        
+    	}*/        
 		if(jsonData.length > 500)
 		{
 			requestType = 'POST';

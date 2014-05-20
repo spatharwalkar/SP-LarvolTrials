@@ -432,6 +432,9 @@ function runQuery($jsonData)
 	global $db;
 	global $Sphinx_search;
 	//$jsonData=$_REQUEST['data'];
+	$jsonData = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($jsonData) {
+		return str_replace($jsonData[1], mysql_real_escape_string($jsonData[1]), $jsonData[0]);
+	},$jsonData);	
 	$filterData = json_decode($jsonData, true, 10);
 	///// Part To replace Product/Area name by id as its faster to search
 	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
@@ -536,14 +539,19 @@ function runQuery($jsonData)
 function buildQuery($data, $isCount=false)
 {
 	$actual_query = "";
+	$data = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($data) {
+		return str_replace($data[1], mysql_real_escape_string($data[1]), $data[0]);
+	},$data);	
+	
 	try {
 	
 		$jsonData=$data;
 		$filterData = json_decode($jsonData, true, 10);
 		
 		if(is_array($filterData["wheredata"])) {
-			foreach($filterData["wheredata"] as $ky => $vl)
+			foreach($filterData["wheredata"] as $ky => &$vl)
 			{
+				$vl['columnvalue']=mysql_real_escape_string($vl['columnvalue']);
 				if($vl['columnname']=='All')
 				{
 					$Sphinx_search=$vl['columnvalue'];
