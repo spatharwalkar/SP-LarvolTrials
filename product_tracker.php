@@ -1670,10 +1670,12 @@ function TrackerHTMLContent($data_matrix, $id, $rows, $columns, $productIds, $in
 			$htmlContent .= '</th><th></th></tr><tr class="owner_sponsored_Graph" id="'.$uniqueId.'_owner_sponsored_Graph_Row_C_'.$row.'" >';
 			
 			$htmlContent .= '<th colspan="100" align="left" style="">'; // Modified By PK
+			/*
 			for($j=0; $j < $columns; $j++)
 			{
 				$htmlContent .= '<span style="display:block;left:right;width:10%;margin-right:-1px;height:'.$ExtraAdjusterHeight.'px"  class="graph_right"><font style="line-height:1px;">&nbsp;</font></span>';
 			}
+			*/
 			$htmlContent .= '</th><th></th></tr>';
 		}
 		////// End Of - Color Graph - Bar Starts
