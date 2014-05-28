@@ -489,7 +489,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewMOAOrMOACatIds = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		$NewMOAOrMOACatIds = array_slice($NewMOAOrMOACatIds, $StartSlice, $RecordsPerPage);
 	}
 	/////////PAGING DATA ENDS
 	
