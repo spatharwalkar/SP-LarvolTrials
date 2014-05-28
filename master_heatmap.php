@@ -2798,7 +2798,7 @@ function Download_reports()
 					$Min_entity1NumLines=0;
 					while($Min_entity1NumLines != 1)	///Check while we we dont get mimimum lines to display entity1 name
 					{
-						$current_NumLines=$pdf->getNumLines($rowsDisplayName[$row].$rowsCompanyName[$row].'  '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].'] ':''), $Current_entity1_Col_Width);	//get number of lines
+						echo $current_NumLines=$pdf->getNumLines($rowsDisplayName[$row].$rowsCompanyName[$row].'  '.((trim($rowsTagName[$row]) != '') ? ' ['.$rowsTagName[$row].'] ':''), $Current_entity1_Col_Width);	//get number of lines
 						if($current_NumLines == 1)	//if 1 line then stop processing, take next entity1
 						$Min_entity1NumLines = $current_NumLines;
 						else if($current_NumLines >= 1)	/// if more lines required to display text
@@ -4843,21 +4843,19 @@ function getNumLinesPDFExport($entity1Name, $OtherPart, $entity1_Col_Width, $Bol
 			$AvlblWidth = $AvlblWidth - 0; 
 			$ExtraSpFlg = true;
 		}
-		
+		if ($m != count($data)-1) $Minus = $pdf->GetStringWidth('x', 'freesans', ' ', 8); else $Minus = 0;
 		if($flgBold && !$bracketDetect)
 		{
 			$pdf->SetFont('freesansb', 'B', 8); // Bold Font
 			$current_Width = $pdf->GetStringWidth($data[$m], 'freesansb', 'B', 8);
-			$Minus = $pdf->GetStringWidth(' ', 'freesansb', ' ', 8);
 		}
 		else
 		{
 			$pdf->SetFont('freesans', ' ', 8, '', false); // Bold Font
 			$current_Width = $pdf->GetStringWidth($data[$m], 'freesans', ' ', 8);
-			$Minus = $pdf->GetStringWidth(' ', 'freesans', ' ', 8);
 		}
 		
-		if($current_Width < $AvlblWidth)
+		if($current_Width <= $AvlblWidth)
 		{
 			$line .= $data[$m].' ';
 			$AvlblWidth = $AvlblWidth - $current_Width - $Minus;
@@ -4882,10 +4880,10 @@ function getNumLinesPDFExport($entity1Name, $OtherPart, $entity1_Col_Width, $Bol
 	{
 		$pdf->SetFont('freesans', ' ', 8, '', false); // Bold Font
 		if(!$ExtraSpFlg) { $AvlblWidth = $AvlblWidth - 0; $ExtraSpFlg = true;}
-		$current_Width = $pdf->GetStringWidth((($m == count($data)-1) ? $data[$m] : $data[$m]), 'freesans', '', 8);
+		$current_Width = $pdf->GetStringWidth((($m == count($data)-1) ? $data[$m] : $data[$m]), 'freesans', ' ', 8);
 		if ($m != count($data)-1) $Minus = $pdf->GetStringWidth(' ', 'freesans', ' ', 8); else $Minus = 0;
 			
-		if($current_Width < $AvlblWidth)
+		if($current_Width <= $AvlblWidth)
 		{
 			$line .= $data[$m].' ';
 			$AvlblWidth = $AvlblWidth - $current_Width - $Minus;
