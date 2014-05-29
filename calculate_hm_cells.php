@@ -621,7 +621,7 @@ function calc_cells($parameters,$update_id=NULL,$ignore_changes=NULL)
 					sleep(1);
 				}
 				
-				add_data($av['id'],$pv['id'],0,0,0,'none','N/A',$overall_statuses,$ignore_changes);
+				add_data($av['id'],$pv['id'],0,0,0,0,'none','N/A',$overall_statuses,$ignore_changes);
 				$progress_count ++;
 				if($cron_run)
 				{
