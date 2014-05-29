@@ -1472,12 +1472,17 @@ CREATE TABLE IF NOT EXISTS `news`  (
 	`period`     	smallint(6) NOT NULL,
 	`id`         	int(11) AUTO_INCREMENT NOT NULL,
 	`score`      	decimal(5,2) NOT NULL DEFAULT '0.00',
-	`abstract_id` 	INT(10) NULL DEFAULT NULL ,
-	PRIMARY KEY(id),
-	UNIQUE KEY `abstract_id_UNIQUE` (`abstract_id`),
-	CONSTRAINT `news_ibfk_3` FOREIGN KEY (`abstract_id` ) REFERENCES `pubmed_abstracts` (`pm_id` ) ON DELETE CASCADE ON UPDATE CASCADE
+	`abstract_id` 	INT(10) UNSIGNED NULL DEFAULT NULL ,
+	PRIMARY KEY (`id`),
+  UNIQUE KEY `redtag_trial` (`redtag_id`,`larvol_id`),
+  UNIQUE KEY `abstract_id_UNIQUE` (`abstract_id`),
+  KEY `news_ibfk_2` (`larvol_id`),
+  CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `news_ibfk_1` FOREIGN KEY (`redtag_id`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `news_ibfk_3` FOREIGN KEY (`abstract_id`) REFERENCES `pubmed_abstracts` (`pm_id`) ON DELETE CASCADE ON UPDATE CASCADE
 	)
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 
 CREATE TABLE IF NOT exists `tis_scores`  ( 
 	`phase`   	varchar(10) NOT NULL,
