@@ -182,12 +182,31 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				*/
 				if ($pos === false) 
 				{
+					/*
 					$log='Error in MySql Query (no "where" clause is used in the query)  :' . $query;
 					$logger->fatal($log);
 					mysql_query('ROLLBACK');
 					echo $log;
 					return false;
 				//	exit;
+					*/
+					
+					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) )
+					{
+						if($sourceid<>$used_sourceid)
+						{
+							$new_lid=get_larvolid($sourceid);
+							if($new_lid === false or empty($new_lid) )
+								continue;
+						}
+						$used_sourceid=$sourceid;
+						if($new_lid !== false and !empty($new_lid) )
+							$limit_query=' where( larvol_id = ' .$new_lid .' ) ';
+						else
+							$limit_query='';
+						$query = $mystring . $limit_query ;
+					}
+					
 				} 
 				else 
 				{
