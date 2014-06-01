@@ -25,7 +25,7 @@ function generateNewsEntities($id) {
 								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(i.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(i.name,\'"\',\'&quot;\'),"\"}")),"]"
 							) 	
 							as investigator,
-					t.source_id,n.larvol_id,REPLACE(t.brief_title,\'"\',\'&quot;\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
+					t.source_id,REPLACE(t.brief_title,\'"\',\'&quot;\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
 					REPLACE(n.sponsor,\'"\',\'&quot;\') AS sponsor,n.summary,n.enrollment,n.overall_status as status,n.added 
 					FROM news n 
 					JOIN data_trials t using(larvol_id)
