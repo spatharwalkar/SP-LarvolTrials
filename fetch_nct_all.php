@@ -146,7 +146,7 @@ else
 		}
 	$res = mysql_fetch_array($res) ;
 	$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
-	$fid = getFieldId('NCT','nct_id');
+	//$fid = getFieldId('NCT','nct_id');
 	if(!isset($nct_ids))
 	{
 		$query = 'SELECT MAX(nct_id) AS maxid FROM data_nct';

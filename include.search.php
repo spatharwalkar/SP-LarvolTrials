@@ -1559,7 +1559,7 @@ while ($row = mysql_fetch_assoc($res)) $resid_set[] = $row['studycat'];
 
 function getField($params, $field)
 { 
-	$id = '_'.getFieldId('NCT', $field);
+	$id = '_'.$field;
 	foreach ($params as $param)
 	{
 		$fields = is_array($param->field) ? $param->field : array($param->field);

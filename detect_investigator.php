@@ -134,7 +134,7 @@ function detect_inv($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL )
 		else
 		{
 
-			$fid = getFieldId('NCT','nct_id');
+			//$fid = getFieldId('NCT','nct_id');
 			
 			$cid = 0; 
 			$cid_=$cid;

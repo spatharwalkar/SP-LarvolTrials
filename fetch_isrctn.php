@@ -246,7 +246,7 @@ while ($i < $link_count) {
 		$res = mysql_query($query) or die('Bad SQL query finding highest update id');
 		$res = mysql_fetch_array($res) ;
 		$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
-		$fid = getFieldId('isrctn','isrctn_id');
+		//$fid = getFieldId('isrctn','isrctn_id');
 		$pid = getmypid();
 	
 		$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,max_nctid,trial_type) 

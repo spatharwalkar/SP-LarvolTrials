@@ -147,7 +147,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storecha
 		else
 		{
 
-			$fid = getFieldId('NCT','nct_id');
+			//$fid = getFieldId('NCT','nct_id');
 			
 			$cid = 0; 
 			$cid_=$cid;

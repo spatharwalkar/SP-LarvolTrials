@@ -1095,7 +1095,7 @@ function runnewscraper($requeued,$current_nctid)
 
 	else
 	{
-		$fid = getFieldId('NCT','nct_id');
+		//$fid = getFieldId('NCT','nct_id');
 		if(!isset($nct_ids))
 		{
 			$query = 'SELECT MAX(nct_id) AS maxid FROM data_nct';

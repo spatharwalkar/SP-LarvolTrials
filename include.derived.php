@@ -40,7 +40,7 @@ function calculateDateFieldIds()
 	$fieldArr = array();
 	foreach($fieldnames as $name)
 	{
-		$fieldArr[$name] = getFieldId('NCT',$name);
+		$fieldArr[$name] = $name;
 	}
 	return $fieldArr;
 }
@@ -296,7 +296,7 @@ function calculateRegionFieldIds()
 	$fieldArr = array();
 	foreach($fieldnames as $name)
 	{
-		$fieldArr[$name] = getFieldId('NCT',$name);
+		$fieldArr[$name] = $name;
 	}
 	return $fieldArr;
 }
@@ -620,7 +620,7 @@ function calculateInstitutionTypeFieldIds()
 	$fieldArr = array();
 	foreach($fieldnames as $name)
 	{
-		$fieldArr[$name] = getFieldId('NCT',$name);
+		$fieldArr[$name] = $name;
 	}
 	return $fieldArr;
 }
@@ -859,7 +859,7 @@ function calculateCriteriaFieldIds()
 	$fieldArr = array();
 	foreach($fieldnames as $name)
 	{
-		$fieldArr[$name] = getFieldId('NCT',$name);
+		$fieldArr[$name] = $name;
 	}
 	return $fieldArr;
 }
