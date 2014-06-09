@@ -237,6 +237,16 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						$row=mysql_fetch_array($resu);
 						if(empty($row['mesh_name'])) //delete only if they are not mesh related indexes
 						{
+						
+						/***********/
+							$query = 'SELECT distinct trial from entity_trials where entity = "' . $productID .'" ' ;
+							$res2 = mysql_query($query);
+							$existing_ids=array();
+							while($row = mysql_fetch_assoc($res2))
+							{
+								$existing_ids[] = $row['trial'];
+							}
+						/************ we are no more deleting existing index.
 							$qry='DELETE from '. $table .' where `'. $field . '` = "'. $productID . '"';
 							if(!mysql_query($qry))
 							{
@@ -249,6 +259,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 								echo $log;
 								return false;
 							}
+						*/
 						}
 //						$query = substr($mystring,0,$pos+6). '  ( ' . substr($mystring,$pos+6) . ' ) ';
 						$query = $mystring ;
@@ -280,7 +291,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						}
 					}
 					if($scraper_run)
-					{
+					{	/*  disabled update status fullhistory updation
 						//insert new row in status
 						$query = 'SELECT MAX(update_id) AS maxid FROM update_status_fullhistory' ;
 						if(!$res = mysql_query($query))
@@ -294,14 +305,11 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						$res = mysql_fetch_array($res) ;
 						$up_id = (isset($res['maxid'])) ? ((int)$res['maxid'])+1 : 1;
 						$prid = getmypid();
-				
+						
 						$query = 'INSERT into update_status_fullhistory (update_id,process_id,status,update_items_total,start_time,trial_type,item_id) 
 						  VALUES ("'.$up_id.'","'. $prid .'","'. 2 .'",
 						  "' . $total . '","'. date("Y-m-d H:i:s", strtotime('now')) .'", "' . $ttype . '" , "' . $pid . '" ) ;';
-
-						//************/
-					
-				
+			
 						$query = '	update update_status_fullhistory set process_id="'. $prid . '",';
 						$query .= '	er_message="Invalid JSON. table:'. 'entities' .', id:'.$cid.'",status="2",';
 						$query .= '	update_items_total = "' . $total . '",trial_type="' . $ttype . '" ';
@@ -315,7 +323,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							echo $log;
 							return false;
 						}
-						
+						*/
 					}
 					continue;
 				}
@@ -342,7 +350,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 				//in case of a single product, the total column of status should show the total number of trials.
 				if( !is_null($productID) )
 					$total=count($nctidz);
-				
+				/*  disabled update status fullhistory updation
 				if( $up_id and !$scraper_run) // task already exists, just update it.
 				{	
 					if($current==0)
@@ -378,7 +386,8 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						mysql_query('ROLLBACK');
 						return false;
 					}
-					$up_id=mysql_insert_id();
+				*/
+				$up_id=mysql_insert_id();
 				$query="select er.child from entity_relations er,entities e 
 									where er.parent = " . $cid . "
 									and er.child=e.id and e.class = 'Institution'";
@@ -390,8 +399,13 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							}	
 							//get name,search_name of these companies 
 							$cids = implode(",", $companyids);
+							
 				foreach($nctidz as $key => $value)
 				{
+					if (in_array_r ($value['larvol_id'], $existing_ids)) 
+					{
+						continue;
+					}
 				
 					if( isset($sourceid) and !is_null($sourceid) and !empty($sourceid) and !empty($value) )
 					{
@@ -474,12 +488,13 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 							$res = mysql_query($query);
 							if($res === false)
 							{
+								
 								$log = 'Bad SQL query pre-indexing trial***. Query : ' . $query . '<br> MySql Error:'.mysql_error();
 								mysql_query('ROLLBACK');
-								$query = 'update update_status_fullhistory set 
+							/*	$query = 'update update_status_fullhistory set 
 								er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
 								mysql_query($query);
-								$logger->fatal($log);
+								$logger->fatal($log);*/
 								echo $log;
 								return false;
 							}
@@ -515,6 +530,32 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					
 				
 				}
+				$delids=array();
+				foreach($existing_ids as $lid)
+				{
+					if (in_array_r ($lid, $nctidz)) 
+					{
+					}
+					else
+					{
+						$delids[]=$lid;
+					}
+				}
+				
+				$delids = implode(",", $delids);
+				if(!empty($delids))
+				{
+					$qry2='DELETE from entity_trials  where entity = "'. $productID . '" and trial in
+							(' .  $delids . ')';
+								if(!mysql_query($qry2))
+								{
+									$log='Could not delete existing product indexes. Query='.$qry.' Error:' . mysql_error();
+									$logger->fatal($log);
+									mysql_query('ROLLBACK');
+									echo $log;
+									return false;
+								}
+				}
 				
 				if(!mysql_query('COMMIT'))
 				{
@@ -523,14 +564,15 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 					mysql_query('ROLLBACK');
 					$query = 'update update_status_fullhistory set 
 					er_message="' . $log . '" where update_id= "'. $up_id .'" limit 1' ; 
-					mysql_query($query);
-					echo $log;
+				//	mysql_query($query);
+				//	echo $log;
 					return false;
 				}
 				$proc_id = getmypid();
 				$i++;
 			//	$ttype=$cat=='products' ? 'ENTITY' : 'ENTITY';
 			//update status
+				/*
 				if( is_null($productID) and !$scraper_run )	
 				{
 					$query = 'update update_status_fullhistory set process_id="'. $prid . '",er_message="",status="'. 2 . '",
@@ -543,7 +585,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						return false;
 					}
 				}
-				/***************** 
+				 
 				$query = 'SELECT update_items_progress,update_items_total FROM update_status_fullhistory WHERE update_id="' . $up_id .'" and trial_type="' . $ttype . '" limit 1 ' ;
 				if(!$res = mysql_query($query))
 				{
@@ -631,7 +673,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 	}
 	
 	
-	
+	/*
 	elseif(isset($productID) and !empty($productID))
 	{
 	
@@ -654,6 +696,7 @@ function tindex($sourceid,$cat,$productz=NULL,$up_id=NULL,$cid=NULL,$productID=N
 						}
 					}
 	}
+	*/
 }
 
 /*
@@ -729,6 +772,19 @@ $query = "
 		}
 		$st=mysql_fetch_assoc($res1);
 		return $st['larvol_id'];
+}
+
+function in_array_r($needle, $haystack, $strict = false) 
+{
+    foreach ($haystack as $item) 
+	{
+        if (($strict ? $item === $needle : $item == $needle) || (is_array($item) && in_array_r($needle, $item, $strict))) 
+		{
+            return true;
+        }
+    }
+
+    return false;
 }
 
 ?>
