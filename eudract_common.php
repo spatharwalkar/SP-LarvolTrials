@@ -303,7 +303,9 @@ $ignore_fields = array(
 				foreach ($tds as $td) {
 					 
 					$number_pos = strpos($td->nodeValue,'EudraCT Number:');
-					$country_pos = strpos($td->nodeValue,'Country:');
+					//$country_pos = strpos($td->nodeValue,'Country:');
+					//node value changed
+					$country_pos = strpos($td->nodeValue,'Trial protocol:');
 					//start date
 					$startdate = strpos($td->nodeValue,'Start Date');
 					
