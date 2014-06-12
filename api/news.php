@@ -25,8 +25,8 @@ function generateNewsEntities($id) {
 								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(i.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(i.name,\'"\',\'&quot;\'),"\"}")),"]"
 							) 	
 							as investigator,
-					t.source_id,REPLACE(REPLACE(REPLACE(t.brief_title,\'"\',\'&quot;\'),"[",""),"]","") as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
-					REPLACE(REPLACE(REPLACE(n.sponsor,\'"\',\'&quot;\'),"[",""),"]","") AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added 
+					t.source_id,REPLACE(t.brief_title,\'"\',\'&quot;\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
+					REPLACE(n.sponsor,\'"\',\'&quot;\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added 
 					FROM news n 
 					JOIN data_trials t using(larvol_id)
 					LEFT JOIN entity_trials pt on n.larvol_id=pt.trial 
@@ -58,8 +58,8 @@ function runNewsQuery($query) {
 	}
 	$res = mysql_fetch_assoc($res) or die('cannot fetch with id=$id' . mysql_error());
 	$json = json_encode($res, JSON_UNESCAPED_UNICODE);
-	$json = str_replace('"[', '[', $json);
-	$json = str_replace(']"', ']', $json);
+	$json = str_replace('"[{', '[{', $json);
+	$json = str_replace('}]"', '}]', $json);
 	return $json;
 }
 
