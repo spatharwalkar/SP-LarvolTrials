@@ -64,6 +64,11 @@ function runNewsQuery($query) {
 		$json = str_replace('"[', '[', $json);
 		$json = str_replace(']"', ']', $json);
 	}
+	else
+	{
+		$json = str_replace('"[{', '[{', $json);
+		$json = str_replace('}]"', '}]', $json);
+	}
 	return $json;
 }
 
