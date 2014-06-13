@@ -58,8 +58,12 @@ function runNewsQuery($query) {
 	}
 	$res = mysql_fetch_assoc($res) or die('cannot fetch with id=$id' . mysql_error());
 	$json = json_encode($res, JSON_UNESCAPED_UNICODE);
-	$json = str_replace('"[{', '[{', $json);
-	$json = str_replace('}]"', '}]', $json);
+	global $days;
+	if( !empty($days) ) 
+	{
+		$json = str_replace('"[', '[', $json);
+		$json = str_replace(']"', ']', $json);
+	}
 	return $json;
 }
 
