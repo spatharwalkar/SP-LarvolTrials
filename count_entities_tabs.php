@@ -67,40 +67,202 @@ function updateCompanyTabCount($companyId) {
 	$companyNewsCount = 0;
 	
 	$products = array();
-	$sqlProductForCompany = "SELECT  id  FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) 
-							WHERE et.`class`='Product' 
-							AND er.`child`='" . mysql_real_escape_string($companyId) . "' AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+	$phases = array();
+	$sqlProductForCompany = " SELECT e.id, e.name, e.description, e.company, dt.`is_active` , count( dt.`phase`) AS phase_count, group_concat((dt.`phase`)) as phases ,  dt.`institution_type` , et.relation_type AS relation_type
+ FROM entities e
+ JOIN `entity_relations` er ON(e.`id` = er.`parent`)
+ JOIN entity_trials et ON (e.id = et.entity)
+ JOIN data_trials dt ON ( dt.`larvol_id` = et.`trial` )
+ WHERE e.`class`='Product'
+ AND er.`child`= '" . mysql_real_escape_string($companyId) . "'
+ AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) and e.id = 3216
+GROUP BY e.`id`,dt.`is_active`,dt.`institution_type` ,et.relation_type
+ having count( dt.`phase`) > 0
+ order by e.id desc";
 	
-	$resProductForCompany = mysql_query($sqlProductForCompany) or die($sqlProductForCompany.'- Bad SQL query');
-	
-	if($resProductForCompany)
-	{
-		while($rowProductForCompany = mysql_fetch_array($resProductForCompany)) {
+ $resProductForCompany = mysql_query($sqlProductForCompany) or die($sqlProductForCompany.'- Bad SQL query');
+ if($resProductForCompany)
+ {
+	/*$product_active = array();
+	$product_total = array();
+	$product_industry = array();
+	$product_owner_sponsored = array();
 			
-			$products[$rowProductForCompany['id']] = $rowProductForCompany['id'];			
-		}
-	}
-	
-	$companyProducts = implode("','", $products);
-	
-	$sqlGetCompanyProductsTrials = "SELECT dt.`larvol_id`,et.`entity`
-									FROM `data_trials` dt 
-									JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) 
-									WHERE et.`entity` in ('".$companyProducts."')";
-	
-	$resGetCompanyProductsTrials = mysql_query($sqlGetCompanyProductsTrials) or die($sqlGetCompanyProductsTrials.'- Bad SQL query');
+			
+			*/
+	//	$ph = array{'na','0','1','2','3','4'};
+	$i = 0;
+	$arr = array();
+	array_push($arr, 0);
+	while($row = mysql_fetch_array($resProductForCompany)) {
 		
-	if($resGetCompanyProductsTrials) {
-		while($rowGetCompanyProductsTrials = mysql_fetch_array($resGetCompanyProductsTrials)) {
-			$allTrials[$rowGetCompanyProductsTrials['larvol_id']] = $rowGetCompanyProductsTrials['larvol_id'];
-			$entityTrials[$rowGetCompanyProductsTrials['entity']] = $rowGetCompanyProductsTrials['entity'];
+			$product_total[$row['id']] += $row['phase_count'];
+			$phase = explode(',', $row['phases']);
+			$total_phase[$row['id']] = array_count_values($phase);
+
+			var_dump($total_phase[$row['id']]);
+			echo "<br/>";
+			foreach($total_phase as $res )
+			{
+				foreach($res as $phase=>$val)
+				{
+					
+					if($phase == 'N/A')
+						$total_phases[$row['id']]['total_phase_na'] += $val;
+					else if($phase == '0')
+						$total_phases[$row['id']]['total_phase_0'] += $val;
+					else if($phase == '1' || $phase == '0/1' || $phase == '1a' || $phase == '1b' || $phase == '1a/1b' || $phase == '1c')
+						$total_phases[$row['id']]['total_phase_1'] += $val;
+					else if($phase == '2' || $phase == '1/2' || $phase == '1b/2' || $phase == '1b/2a' || $phase == '2a' || $phase == '2a/2b' || $phase == '2a/b' || $phase == '2b' || $phase == '2')
+						$total_phases[$row['id']]['total_phase_2'] += $val;
+					else if($phase == '3' || $phase == '2/3' || $phase == '2b/3' || $phase == '3a' || $phase == '3b')
+						$total_phases[$row['id']]['total_phase_3'] += $val;
+					else if($phase == '4' || $phase == '3/4' || $phase == '3b/4')
+						$total_phases[$row['id']]['total_phase_4'] += $val;
+				}
+			}
+			
+			if($row['is_active'] == 1)
+			{
+				$product_active[$row['id']] +=$row['phase_count'];
+				$phase = explode(',', $row['phases']);
+				$active_phase[$row['id']] = array_count_values($phase);
+				foreach($active_phase as $res )
+				{
+					foreach($res as $phase=>$val)
+					{
+						if($phase == 'N/A')
+							$active_phases[$row['id']]['active_phase_na'] += $val;
+						else if($phase == '0')
+							$active_phases[$row['id']]['active_phase_0'] += $val;
+						else if($phase == '1' || $phase == '0/1' || $phase == '1a' || $phase == '1b' || $phase == '1a/1b' || $phase == '1c')
+							$active_phases[$row['id']]['active_phase_1'] += $val;
+						else if($phase == '2' || $phase == '1/2' || $phase == '1b/2' || $phase == '1b/2a' || $phase == '2a' || $phase == '2a/2b' || $phase == '2a/b' || $phase == '2b' || $phase == '2')
+							$active_phases[$row['id']]['active_phase_2'] += $val;
+						else if($phase == '3' || $phase == '2/3' || $phase == '2b/3' || $phase == '3a' || $phase == '3b')
+							$active_phases[$row['id']]['active_phase_3'] += $val;
+						else if($phase == '4' || $phase == '3/4' || $phase == '3b/4')
+							$active_phases[$row['id']]['active_phase_4'] += $val;
+					}
+				}
+			}
+			if($row['is_active'] == 1 && $row['institution_type'] == 'industry_lead_sponsor')
+			{
+				$product_industry[$row['id']] +=$row['phase_count'];
+				$phase = explode(',', $row['phases']);
+				$industry_phase[$row['id']] = array_count_values($phase);
+				foreach($industry_phase as $res )
+				{
+					foreach($res as $phase=>$val)
+					{
+						if($phase == 'N/A')
+							$industry_phases[$row['id']]['industry_phase_na'] += $val;
+						else if($phase == '0')
+							$industry_phases[$row['id']]['industry_phase_0'] += $val;
+						else if($phase == '1' || $phase == '0/1' || $phase == '1a' || $phase == '1b' || $phase == '1a/1b' || $phase == '1c')
+							$industry_phases[$row['id']]['industry_phase_1'] += $val;
+						else if($phase == '2' || $phase == '1/2' || $phase == '1b/2' || $phase == '1b/2a' || $phase == '2a' || $phase == '2a/2b' || $phase == '2a/b' || $phase == '2b' || $phase == '2')
+							$industry_phases[$row['id']]['industry_phase_2'] += $val;
+						else if($phase == '3' || $phase == '2/3' || $phase == '2b/3' || $phase == '3a' || $phase == '3b')
+							$industry_phases[$row['id']]['industry_phase_3'] += $val;
+						else if($phase == '4' || $phase == '3/4' || $phase == '3b/4')
+							$industry_phases[$row['id']]['industry_phase_4'] += $val;
+					}
+				}
+			}
+			if($row['is_active'] == 1 && $row['relation_type'] == 'ownersponsored')
+			{
+				$product_owner_sponsored[$row['id']] +=$row['phase_count'];
+				$phase = explode(',', $row['phases']);
+				$ownersponsor_phase[$row['id']] = array_count_values($phase);
+				foreach($ownersponsor_phase as $res )
+				{
+					foreach($res as $phase=>$val)
+					{
+						if($phase == 'N/A')
+							$ownersponsor_phases[$row['id']]['owner_sponsor_phase_na'] += $val;
+						else if($phase == '0')
+							$ownersponsor_phases[$row['id']]['owner_sponsor_phase_0'] += $val;
+						else if($phase == '1' || $phase == '0/1' || $phase == '1a' || $phase == '1b' || $phase == '1a/1b' || $phase == '1c')
+							$ownersponsor_phases[$row['id']]['owner_sponsor_phase_1'] += $val;
+						else if($phase == '2' || $phase == '1/2' || $phase == '1b/2' || $phase == '1b/2a' || $phase == '2a' || $phase == '2a/2b' || $phase == '2a/b' || $phase == '2b' || $phase == '2')
+							$ownersponsor_phases[$row['id']]['owner_sponsor_phase_2'] += $val;
+						else if($phase == '3' || $phase == '2/3' || $phase == '2b/3' || $phase == '3a' || $phase == '3b')
+							$ownersponsor_phases[$row['id']]['owner_sponsor_phase_3'] += $val;
+						else if($phase == '4' || $phase == '3/4' || $phase == '3b/4')
+							$ownersponsor_phases[$row['id']]['owner_sponsor_phase_4'] += $val;
+					}
+				}
+			}
 		}
-	}
 	
-	$companyTrialCount = count($allTrials);
-	$companyproductCount = count($entityTrials);
+ }
+ arsort($product_total);
+ arsort($product_active);
+ arsort($product_industry);
+ arsort($product_owner_sponsored);
+ /*echo '$productTotal<br/>';var_dump($product_total);
+ // echo '<br/>$productActive<br/>';var_dump($product_active);
+ // echo '<br/>$productIndustry<br/>';var_dump($product_industry);
+ // echo '<br/>$ownersponsor<br/>';var_dump($product_owner_sponsored);
+ echo 'TOTAL PHASE<br/><br/>';
+ // print_r($active_phases);
+ print_r($total_phases);
+ // print_r($industry_phases);
+ // print_r($ownersponsor_phases);
+ */
+ /*  // counts to be store in tab table */
+ $companyproductAllCount = count($product_total);
+ $companyproductActiveCount = count($product_active);
+ $companyproductIndustryCount = count($product_industry);
+ $companyproductOwnerCount = count($product_owner_sponsored);
+ 
+ /*// listing for gantt chart*/
+
+	print_r($total_phases[966]);
+	exit;
+
 	
-	$sqlCompanyNews = "SELECT count(dt.`larvol_id`) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity` in('" . $companyProducts . "')";
+// echo 'product_listing_total'; var_dump($product_listing_total);
+ foreach($product_total as $key=>$value) {
+
+   $totalTrialsIndivisualPhaseCount .= "{".$total_phases[$key]['total_phase_na'].",".$total_phases[$key]['total_phase_0'].",".
+           $total_phases[$key]['total_phase_1'].",".$total_phases[$key]['total_phase_2'].",".
+           $total_phases[$key]['total_phase_3'].",".$total_phases[$key]['total_phase_4']."}";
+  }
+  foreach($product_active as $key=>$value) {
+
+   $activeTrialsIndivisualPhaseCount .= "{".$active_phases[$key]['active_phase_na'].",".$active_phases[$key]['active_phase_0'].",".
+           $active_phases[$key]['active_phase_1'].",".$active_phases[$key]['active_phase_2'].",".
+           $active_phases[$key]['active_phase_3'].",".$active_phases[$key]['active_phase_4']."}";
+  }
+  foreach($product_industry as $key=>$value) {
+
+   $industryTrialsIndivisualPhaseCount .= "{".$industry_phases[$key]['industry_phase_na'].",".$industry_phases[$key]['industry_phase_0'].",".
+           $industry_phases[$key]['industry_phase_1'].",".$industry_phases[$key]['industry_phase_2'].",".
+           $industry_phases[$key]['industry_phase_3'].",".$industry_phases[$key]['industry_phase_4']."}";
+  }
+  foreach($product_owner_sponsored as $key=>$value) {
+
+   $ownerTrialsIndivisualPhaseCount .= "{".$ownersponsor_phases[$key]['owner_sponsor_phase_na'].",".$ownersponsor_phases[$key]['owner_sponsor_phase_0'].",".
+           $ownersponsor_phases[$key]['owner_sponsor_phase_1'].",".$ownersponsor_phases[$key]['owner_sponsor_phase_2'].",".
+           $ownersponsor_phases[$key]['owner_sponsor_phase_3'].",".$ownersponsor_phases[$key]['owner_sponsor_phase_4']."}";
+  }
+ 
+$product_listing_total = array_keys($product_total);
+	$product_listing_total = implode(",",$product_listing_total);
+	
+	$product_listing_active = array_keys($product_active);
+	$product_listing_active = implode(",",$product_listing_active);
+
+	$product_listing_industry = array_keys($product_industry);
+	$product_listing_industry = implode(",",$product_listing_industry);
+
+	$product_listing_owner_sponsored = array_keys($product_owner_sponsored);
+	$product_listing_owner_sponsored = implode(",",$product_listing_owner_sponsored);
+
+ /*******************************************/
+	/*$sqlCompanyNews = "SELECT count(dt.`larvol_id`) as newsCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) WHERE et.`entity` in('" . $companyProducts . "')";
 	$resCompanyNews = mysql_query($sqlCompanyNews) or die($sqlCompanyNews.'-> Bad SQL query ');
 	
 	if($resCompanyNews)
@@ -194,27 +356,65 @@ function updateCompanyTabCount($companyId) {
 	$resGetDiseaseCat = mysql_query($sqlGetDiseaseCat) or die($sqlGetDiseaseCat.' '.mysql_error());
 	if($resGetDiseaseCat)
 	$companyDisCatCount = mysql_num_rows($resGetDiseaseCat);
-		
+		*/
 	//Investigator count for company
 	$companyInvestigatorCount = 0;	
 	$Investigators = array();
 	
-	$sqlGetInvestigatorForCompany = "SELECT DISTINCT et.entity from entity_trials et
-									JOIN entity_trials et2 on (et.trial = et2.trial)
-									JOIN entity_relations er on (et2.entity=er.parent and er.child= " . mysql_real_escape_string($companyId) . ")
-									JOIN entities e2 on (er.parent = e2.id and e2.class='Product' and (e2.is_active<>0 or e2.is_active IS NULL) )
-									JOIN entities e on (et.entity = e.id and e.class='Investigator')";
+	 $sqlInvestigatorForCompany = "SELECT DISTINCT et.entity,dt.`larvol_id`, dt.`is_active`, count(dt.`phase`) AS phase_count,group_concat(dt.`phase`) as phases,e.id, e.name, e.display_name
+	from entity_trials et
+	JOIN data_trials dt on (et.`trial` = dt.`larvol_id`)
+	JOIN entity_trials et2 on (et.trial = et2.trial)
+	JOIN entity_relations er on (et2.entity=er.parent and er.child= " . mysql_real_escape_string($companyId) . ")
+	JOIN entities e2 on (er.parent = e2.id and e2.class='Product' and (e2.is_active<>0 or e2.is_active IS NULL) )
+	JOIN entities e on (et.entity = e.id and e.class='Investigator')
 	
-	$resGetInvestigatorForCompany = mysql_query($sqlGetInvestigatorForCompany) or die('Bad SQL query  . '.$sqlGetInvestigatorForCompany);
-	
-	if($resGetInvestigatorForCompany)
-	{
-		while($rowGetInvestigatorForCompany = mysql_fetch_array($resGetInvestigatorForCompany))
-		{
-			$Investigators[] = $rowGetInvestigatorForCompany['entity'];
-		}
+	GROUP BY et.`entity`
+having count( dt.`phase`) > 0
+order by phase_count desc";
+ 
+ $resInvestigatorForCompany = mysql_query($sqlInvestigatorForCompany) or die($sqlInvestigatorForCompany.'- Bad SQL query');
+ if($resInvestigatorForCompany)
+ {
+	while($row = mysql_fetch_array($resInvestigatorForCompany)) {
+		$investigator[$row['id']] = $row['phase_count'];
+		$phase = explode(',', $row['phases']);
+		$investigator_phase[$row['id']] = array_count_values($phase);
+		foreach($investigator_phase as $res )
+			{
+				foreach($res as $phase=>$val)
+				{
+					
+					if($phase == 'N/A')
+						$investigator_phases[$row['id']]['total_phase_na'] += $val;
+					else if($phase == '0')
+						$investigator_phases[$row['id']]['total_phase_0'] += $val;
+					else if($phase == '1' || $phase == '0/1' || $phase == '1a' || $phase == '1b' || $phase == '1a/1b' || $phase == '1c')
+						$investigator_phases[$row['id']]['total_phase_1'] += $val;
+					else if($phase == '2' || $phase == '1/2' || $phase == '1b/2' || $phase == '1b/2a' || $phase == '2a' || $phase == '2a/2b' || $phase == '2a/b' || $phase == '2b' || $phase == '2')
+						$investigator_phases[$row['id']]['total_phase_2'] += $val;
+					else if($phase == '3' || $phase == '2/3' || $phase == '2b/3' || $phase == '3a' || $phase == '3b')
+						$investigator_phases[$row['id']]['total_phase_3'] += $val;
+					else if($phase == '4' || $phase == '3/4' || $phase == '3b/4')
+						$investigator_phases[$row['id']]['total_phase_4'] += $val;
+				}
+			}
 	}
-	 $companyInvestigatorCount = count(array_filter(array_unique($Investigators)));	
+	
+	// echo '$investigator<br/>';var_dump($investigator);
+	// echo 'TOTAL PHASE<br/><br/>';
+	// print_r($investigator_phases);
+	$companyInvestigatorCount = count($investigator);
+		$investigator_listing_total = array_keys($investigator);
+	$investigator_listing_total = implode(",",$investigator_listing_total);
+	
+	 foreach($investigator as $key=>$value) {
+
+   $investigatorTrialsIndivisualPhaseCount = "{".$investigator_phases[$key]['total_phase_na'].",".$investigator_phases[$key]['total_phase_0'].",".
+           $investigator_phases[$key]['total_phase_1'].",".$investigator_phases[$key]['total_phase_2'].",".
+           $investigator_phases[$key]['total_phase_3'].",".$investigator_phases[$key]['total_phase_4']."}";
+  }
+ }
 	
 	// to check if tab for this enetity is already there in the tabs table
 	$sqlCheckTabsTable = "SELECT entity_id FROM tabs 
@@ -225,31 +425,102 @@ function updateCompanyTabCount($companyId) {
 	
 	if(mysql_num_rows($resCheckTabsTable) > 0) { // update tab count for this entity in tabs table 
 		
-		
 		$sqlUpdateTabsTable = "UPDATE tabs set entity_id = '$companyId',
-							table_name = 'entities',
-							products = '$companyproductCount',
-							diseases = '$companyDiseasesCount',
-							diseases_categories = '$companyDisCatCount',
-							investigators = '$companyInvestigatorCount',
-							news = '$companyNewsCount',
-							trials = '$companyTrialCount'
-							WHERE entity_id = '$companyId'
-							AND table_name = 'entities' LIMIT 1";
-		
+			table_name = 'entities',						products_all = '$companyproductAllCount',
+			products_active ='$companyproductActiveCount',
+			products_ownersponsered = '$companyproductIndustryCount',
+			products_industry = '$companyproductOwnerCount',
+			diseases = '$companyDiseasesCount',
+			diseases_categories = '$companyDisCatCount',
+			investigators = '$companyInvestigatorCount',
+			news = '$companyNewsCount',
+			trials = '$companyTrialCount'
+			WHERE entity_id = '$companyId'
+			AND table_name = 'entities' LIMIT 1";
+		echo $sqlUpdateTabsTable;
+		exit;
 		$resUpdateTabsTable = mysql_query($sqlUpdateTabsTable) or die('Bad SQL query  . '.$sqlUpdateTabsTable);
+		
+		$sqlUpdateInvestigatorGanttTable = "UPDATE gantt_listing set id_listing = '$investigator_listing_total',
+			phase_listing ='$investigatorTrialsIndivisualPhaseCount' 
+			where tab_type_id = 8 and
+			entity_id = '$companyId'";
+		$resUpdateInvestigatorGanttTable = mysql_query($sqlUpdateInvestigatorGanttTable) or die('Bad SQL query . '.$sqlUpdateInvestigatorGanttTable);
+		
+		$sqlUpdateProductTotalGanttTable = "UPDATE gantt_listing set 
+			id_listing = '$product_listing_total',
+			phase_listing ='$totalTrialsIndivisualPhaseCount' 
+			where tab_type_id = 1 and 
+			entity_id = '$companyId'";
+		$resUpdateProductTotalGanttTable = mysql_query($sqlUpdateProductTotalGanttTable) or die('Bad SQL query . '.$sqlUpdateProductTotalGanttTable);
+		
+		$sqlUpdateProductActiveGanttTable = "UPDATE gantt_listing set 
+			id_listing = '$product_listing_active',
+			phase_listing ='$activeTrialsIndivisualPhaseCount' 
+			where tab_type_id = 2 and 
+			entity_id = '$companyId'";
+		$resUpdateProductActiveGanttTable = mysql_query($sqlUpdateProductActiveGanttTable) or die('Bad SQL query . '.$sqlUpdateProductActiveGanttTable);
+		
+		$sqlUpdateProductIndustryGanttTable = "UPDATE gantt_listing set 
+			id_listing = '$product_listing_industry',
+			phase_listing ='$industryTrialsIndivisualPhaseCount' 
+			where tab_type_id = 3 and
+			entity_id = '$companyId'";
+		$resUpdateProductIndustryGanttTable = mysql_query($sqlUpdateProductIndustryGanttTable) or die('Bad SQL query . '.$sqlUpdateProductIndustryGanttTable);
+		
+		$sqlUpdateProductOwnerGanttTable = "UPDATE gantt_listing set 
+			id_listing = '$product_listing_owner_sponsored',
+			phase_listing ='$ownerTrialsIndivisualPhaseCount' 
+			where tab_type_id = 4 and
+			entity_id = '$companyId'";
+		$resUpdateProductOwnerGanttTable = mysql_query($sqlUpdateProductOwnerGanttTable) or die('Bad SQL query . '.$sqlUpdateProductOwnerGanttTable);
+		
+		
 		
 	} else { // insert the tab counts for this entity in tabs table 
 		
 		$sqlInsertTabsTable = "INSERT INTO tabs set entity_id = '$companyId',
-							table_name = 'entities',
-							products = '$companyproductCount',
-							diseases = '$companyDiseasesCount',
-							diseases_categories = '$companyDisCatCount',
-							investigators = '$companyInvestigatorCount',
-							news = '$companyNewsCount',
-							trials = '$companyTrialCount'";
-		$resInsertTabsTable = mysql_query($sqlInsertTabsTable) or die('Bad SQL query . '.$sqlInsertTabsTable);;
+			table_name = 'entities',
+			products_all = '$companyproductAllCount',
+			products_active ='$companyproductActiveCount',
+			products_ownersponsered = '$companyproductIndustryCount',
+			products_industry = '$companyproductOwnerCount',
+			diseases = '$companyDiseasesCount',
+			diseases_categories = '$companyDisCatCount',
+			investigators = '$companyInvestigatorCount',
+			news = '$companyNewsCount',
+			trials = '$companyTrialCount'";
+		$resInsertTabsTable = mysql_query($sqlInsertTabsTable) or die('Bad SQL query . '.$sqlInsertTabsTable);
+		
+		$sqlInsertInvestigatorGanttTable = "INSERT INTO gantt_listing set tab_type_id = 8,
+			entity_id = '$companyId',
+			id_listing = '$investigator_listing_total',
+			phase_listing ='$investigatorTrialsIndivisualPhaseCount'";
+		$resInsertInvestigatorGanttTable = mysql_query($sqlInsertInvestigatorGanttTable) or die('Bad SQL query . '.$sqlInsertInvestigatorGanttTable);
+		
+		$sqlInsertProductTotalGanttTable = "INSERT INTO gantt_listing set tab_type_id = 1,
+			entity_id = '$companyId',
+			id_listing = '$product_listing_total',
+			phase_listing ='$totalTrialsIndivisualPhaseCount'";
+		$resInsertProductTotalGanttTable = mysql_query($sqlInsertProductTotalGanttTable) or die('Bad SQL query . '.$sqlInsertProductTotalGanttTable);
+		
+		$sqlInsertProductActiveGanttTable = "INSERT INTO gantt_listing set tab_type_id = 2,
+			entity_id = '$companyId',
+			id_listing = '$product_listing_active',
+			phase_listing ='$activeTrialsIndivisualPhaseCount'";
+		$resInsertProductActiveGanttTable = mysql_query($sqlInsertProductActiveGanttTable) or die('Bad SQL query . '.$sqlInsertProductActiveGanttTable);
+		
+		$sqlInsertProductIndustryGanttTable = "INSERT INTO gantt_listing set tab_type_id = 3,
+			entity_id = '$companyId',
+			id_listing = '$product_listing_industry',
+			phase_listing ='$industryTrialsIndivisualPhaseCount'";
+		$resInsertProductIndustryGanttTable = mysql_query($sqlInsertProductIndustryGanttTable) or die('Bad SQL query . '.$sqlInsertProductIndustryGanttTable);
+		
+		$sqlInsertProductOwnerGanttTable = "INSERT INTO gantt_listing set tab_type_id = 4,
+			entity_id = '$companyId',
+			id_listing = '$product_listing_owner_sponsored',
+			phase_listing ='$ownerTrialsIndivisualPhaseCount'";
+		$resInsertProductOwnerGanttTable = mysql_query($sqlInsertProductOwnerGanttTable) or die('Bad SQL query . '.$sqlInsertProductOwnerGanttTable);
 	}	
 }
 
@@ -612,15 +883,14 @@ function updateDiseasesTabCount($diseaseId) {
 	else
 	$diseasesCompanies = '';
 	
-	$sqlGetCompaniesForDisease = "SELECT e2.`id` FROM `rpt_masterhm_cells` rpt 
-								JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) 
-								JOIN `entity_relations` er ON(e.`id` = er.`parent`) 
-								JOIN `entities` e2 ON(e2.`id` = er.`child`) 
-								WHERE (rpt.`count_total` > 0) AND (rpt.`entity1` = '$diseaseId' OR rpt.`entity2` = '$diseaseId') 
-								AND e2.`id` IN ('$diseasesCompanies') 
-								AND e2.`class`='Institution' 
-								AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)
-								group by e2.`id`";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
+	$sqlGetCompaniesForDisease = "SELECT DISTINCT er.child AS CompId
+									from entity_trials et
+									JOIN data_trials dt on (et.trial = dt.larvol_id)
+									JOIN entity_trials et2 ON (dt.larvol_id = et2.trial and et.entity = '". $diseaseId ."')
+									JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL))
+									JOIN entity_relations er ON (e.id = er.parent )
+									JOIN entities e2 ON (er.child = e2.id and e2.class='Institution' )
+									group by CompId";
 
 	$resGetCompaniesForDisease = mysql_query($sqlGetCompaniesForDisease) or die(mysql_error());
 	
