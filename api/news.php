@@ -26,7 +26,7 @@ function generateNewsEntities($id) {
 							) 	
 							as investigator,
 					t.source_id,REPLACE(t.brief_title,\'"\',\'&quot;\') as brief_title,n.phase,n.score,rt.LI_id as redtag_id,
-					REPLACE(n.sponsor,\'"\',\'&quot;\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added 
+					REPLACE(n.sponsor,\'"\',\'&quot;\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added,DATE(n.generation_date) as generation_date
 					FROM news n 
 					JOIN data_trials t using(larvol_id)
 					LEFT JOIN entity_trials pt on n.larvol_id=pt.trial 
