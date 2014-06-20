@@ -1477,10 +1477,8 @@ CREATE TABLE IF NOT EXISTS `news`  (
 	PRIMARY KEY (`id`),
   UNIQUE KEY `redtag_trial` (`redtag_id`,`larvol_id`),
   UNIQUE KEY `abstract_id_UNIQUE` (`abstract_id`),
-  KEY `news_ibfk_2` (`larvol_id`),
-  CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `news_ibfk_1` FOREIGN KEY (`redtag_id`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `news_ibfk_3` FOREIGN KEY (`abstract_id`) REFERENCES `pubmed_abstracts` (`pm_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `larvol_id_key` (`larvol_id`)
+
 	)
 ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -1628,13 +1626,10 @@ ALTER TABLE `upm_areas`
   ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_areas_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE `news`
+ ALTER TABLE `news`
+  ADD CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `news_ibfk_1` FOREIGN KEY (`redtag_id`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `news`
-	ADD CONSTRAINT `redtag_trial`
-	UNIQUE (redtag_id, larvol_id);
+  ADD CONSTRAINT `news_ibfk_3` FOREIGN KEY (`abstract_id`) REFERENCES `pubmed_abstracts` (`pm_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 DELIMITER $$
 
@@ -1708,7 +1703,7 @@ BEGIN
 	
 	CLOSE dynamicCursor;
 	
-END$$;
+END;$$
 DELIMITER ;
 
 DELIMITER $$
@@ -1781,7 +1776,7 @@ BEGIN
 	
 	CLOSE dynamicCursor;
 	
-END
+END; $$
 
 DELIMITER $$
 
@@ -1807,7 +1802,7 @@ IF( phase REGEXP '[0-4]') THEN
 	END IF;
 END IF;
 RETURN max_phase;
-END$$;
+END;$$
 DELIMITER ;
 DELIMITER $$
 
@@ -1867,6 +1862,7 @@ END LOOP;
 
 CLOSE dynamicCursor; 
 return tis_score;
-END $$;
+END; $$
 
 DELIMITER ;
+
