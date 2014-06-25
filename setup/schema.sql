@@ -1461,7 +1461,6 @@ CREATE TABLE `commentics_voters` (
 
 CREATE TABLE IF NOT EXISTS `news`  ( 
 	`larvol_id`  	int(10) UNSIGNED NULL,
-	`redtag_id`  	int(10) UNSIGNED NOT NULL,
 	`brief_title`	text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
 	`phase`      	VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NOT NULL DEFAULT 'P=N/A',
 	`enrollment` 	int(10) UNSIGNED NULL,
@@ -1475,13 +1474,20 @@ CREATE TABLE IF NOT EXISTS `news`  (
 	`abstract_id` 	INT(10) UNSIGNED NULL DEFAULT NULL ,
   `generation_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`),
-  UNIQUE KEY `redtag_trial` (`redtag_id`,`larvol_id`),
   UNIQUE KEY `abstract_id_UNIQUE` (`abstract_id`),
-  KEY `larvol_id_key` (`larvol_id`)
+  KEY `larvol_id_key` (`larvol_id`),
+  CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `news_ibfk_3` FOREIGN KEY (`abstract_id`) REFERENCES `pubmed_abstracts` (`pm_id`) ON DELETE CASCADE ON UPDATE CASCADE
+	) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-	)
-ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
+CREATE TABLE IF NOT EXISTS `news_redtag` (
+  `news` int(11) NOT NULL,
+  `redtag` int(10) unsigned NOT NULL,
+  UNIQUE KEY `news_redtag_unq` (`news`,`redtag`),
+  KEY `redtag_idx` (`redtag`),
+  CONSTRAINT `news_redtag_fk1` FOREIGN KEY (`news`) REFERENCES `news` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `news_redtag_fk2` FOREIGN KEY (`redtag`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT exists `tis_scores`  ( 
 	`phase`   	varchar(10) NOT NULL,
@@ -1626,15 +1632,9 @@ ALTER TABLE `upm_areas`
   ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_areas_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
- ALTER TABLE `news`
-  ADD CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `news_ibfk_1` FOREIGN KEY (`redtag_id`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `news_ibfk_3` FOREIGN KEY (`abstract_id`) REFERENCES `pubmed_abstracts` (`pm_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
 DELIMITER $$
-
 CREATE PROCEDURE `generateTrialNews`( IN days int)
-BEGIN	
+BLOCK1: BEGIN	
 	DECLARE rtag_id INT;
 	DECLARE frml VARCHAR(150);
 	DECLARE score INT;
@@ -1656,7 +1656,6 @@ BEGIN
 		IF (done) THEN LEAVE dynamicCursorLoop;
 		END IF;
 
-		 
 		IF (stmt LIKE 'select %') THEN
 			IF (frml IS NULL) THEN
 				SET @frml_quoted := '"NA"';
@@ -1683,28 +1682,94 @@ BEGIN
 			PREPARE tmp_stmt2 FROM @tmp_tbl;
 			EXECUTE tmp_stmt2;
 
+			BLOCK2: BEGIN
+			DECLARE tmp_larvol_id INT;
+			DECLARE date_added DATE;
+			DECLARE done2 INT DEFAULT FALSE;
+				
+			DECLARE innerDynamicCursor CURSOR FOR SELECT larvol_id,added FROM lttmp.t;	
+			DECLARE CONTINUE HANDLER FOR NOT FOUND SET done2 = TRUE;
+
+			OPEN innerDynamicCursor;
+			innerDynamicCursorLoop: LOOP
+				FETCH innerDynamicCursor INTO tmp_larvol_id, date_added;
+				IF (done2) THEN LEAVE innerDynamicCursorLoop;
+				END IF;
+			
+				SET @news_insert_id := 0;
+				SET @news_summary := '';
+				SET @news_added := '';
+				SET @news_score := 0.0;
+				SET @rt_name := '';
+			
+				SET @tmp_select_news := CONCAT('SELECT id,summary,added,score INTO @news_insert_id,@news_summary,@news_added,@news_score FROM news WHERE larvol_id=',tmp_larvol_id,' AND added="',date_added,'"');
+				PREPARE tmp_select_news_stmt FROM @tmp_select_news;
+				EXECUTE tmp_select_news_stmt;
+				
+				SET @select_rt_name := CONCAT('SELECT name INTO @rt_name FROM redtags WHERE id=',rtag_id);
+				PREPARE select_rt_name_stmt FROM @select_rt_name;
+				EXECUTE select_rt_name_stmt;
+
+				IF (@news_insert_id != 0) THEN
+					#update the news table if record already exists
+					SET @new_summary := '';
+					SET @summary_con := '';
+					SET @update_news := '';
+					SET @summary_con := if(@comp_formula !='' && @rt_name = 'Phase classification',REPLACE(@comp_formula,"PN/A","P=N/A"),@comp_formula);
+					IF(@summary_con != '') THEN
+						SET @select_summary := CONCAT('SELECT ',@summary_con,' as summary INTO @new_summary FROM data_trials dt, data_history dh where dt.larvol_id=dh.larvol_id AND dt.larvol_id=',tmp_larvol_id);
+						PREPARE select_summary_stmt FROM @select_summary;
+						EXECUTE select_summary_stmt;
+					END IF;
+
+					SET @delmtr := IF(@news_summary != '' && @new_summary != '',' | ','');
+					IF(CONVERT(@news_summary USING utf8)!=CONVERT(@new_summary USING utf8)) THEN
+						SET @new_summary := CONCAT(@news_summary,@delmtr,@new_summary);
+					ELSE
+						SET @new_summary :=@news_summary;
+					END IF;
+					IF(@new_summary IS NULL) THEN
+						SET @new_summary := '';
+					END IF;
+					SET @higher_score := if((TIS(tmp_larvol_id)*score)>@news_score,TIS(tmp_larvol_id)*score,@news_score);
+					
+					SET @update_news := CONCAT('UPDATE news SET summary="',@new_summary,'",score=',@higher_score,' WHERE id=',@news_insert_id);
+					PREPARE news_up_stmt FROM @update_news;
+					EXECUTE news_up_stmt;	
+				ELSE
 			#populate the news table
-			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
 			IF (frml IS NULL) THEN
-				SET @insert_news := CONCAT('insert into news select t.larvol_id,"',rtag_id,'" as redtag,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+						SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
 			ELSE
-				SET @insert_news := CONCAT('insert into news select t.larvol_id,"',rtag_id,'" as redtag,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,null as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+						SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
 			END IF;
+					PREPARE news_ins_stmt FROM @insert_news;
+					EXECUTE news_ins_stmt;
 			
+					#get last inserted news id
+					SET @select_news := 'SELECT id into @news_insert_id FROM news ORDER BY id DESC LIMIT 1';
+					PREPARE select_news_stmt FROM @select_news;
+					EXECUTE select_news_stmt;
+				END IF;
+				#pupulate news_redtag table
+				SET @insert_news_redtag := CONCAT('INSERT IGNORE INTO news_redtag(news,redtag) values(',@news_insert_id,',',rtag_id,')');
+				PREPARE news_redtag_stmt FROM @insert_news_redtag;
+				EXECUTE news_redtag_stmt;
 			
-			PREPARE news_stmt FROM @insert_news;
-			EXECUTE news_stmt;						
+			END LOOP innerDynamicCursorLoop;
+			CLOSE innerDynamicCursor;
+			END BLOCK2;
 
 			#cleanup temporary table
 			PREPARE tmp_stmt FROM @drop_tmp_tbl;
 			EXECUTE tmp_stmt;			
-		END IF;
-	END LOOP;
 	
+		END IF;
+	END LOOP dynamicCursorLoop;	
 	CLOSE dynamicCursor;
 	
-END;$$
-DELIMITER ;
+END BLOCK1
+#End of generateTrialNews procedure
 
 DELIMITER $$
 
@@ -1865,4 +1930,3 @@ return tis_score;
 END; $$
 
 DELIMITER ;
-

@@ -52,13 +52,13 @@ function NewsTrackerHTMLContent($res) {
 function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 
 	global $db;
-	$query = "SELECT n.*,p.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN products p ON(et.entity = p.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `redtags` r ON(r.id=n.redtag_id)";
+	$query = "SELECT n.*,p.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN products p ON(et.entity = p.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `news_redtag` nr ON(nr.news=n.id) JOIN `redtags` r ON(r.id=nr.redtag)";
 
 	if($TrackerType == 'PNT'){
 		$query .= "WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
 
 	} elseif($TrackerType == 'DNT' ) {
-	 	$query = "SELECT  n.*,en.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN entities en ON(et.entity = en.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `redtags` r ON(r.id=n.redtag_id) WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
+	 	$query = "SELECT  n.*,en.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN entities en ON(et.entity = en.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `news_redtag` nr ON(nr.news=n.id) JOIN `redtags` r ON(r.id=nr.redtag) WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
 	}
 	else {
 		switch($TrackerType) {
