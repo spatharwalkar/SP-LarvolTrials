@@ -1768,7 +1768,8 @@ BLOCK1: BEGIN
 	END LOOP dynamicCursorLoop;	
 	CLOSE dynamicCursor;
 	
-END BLOCK1
+END BLOCK1;$$
+DELIMITER ;
 #End of generateTrialNews procedure
 
 DELIMITER $$
