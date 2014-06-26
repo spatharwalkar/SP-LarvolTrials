@@ -1460,33 +1460,29 @@ CREATE TABLE `commentics_voters` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `news`  ( 
-	`larvol_id`  	int(10) UNSIGNED NULL,
-	`brief_title`	text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
-	`phase`      	VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NOT NULL DEFAULT 'P=N/A',
-	`enrollment` 	int(10) UNSIGNED NULL,
+  `larvol_id`  	int(10) UNSIGNED NULL,
+  `brief_title`	text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
+  `phase`      	VARCHAR(10) CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci' NOT NULL DEFAULT 'P=N/A',
+  `enrollment` 	int(10) UNSIGNED NULL,
   `overall_status` enum('Not yet recruiting','Recruiting','Enrolling by invitation','Active, not recruiting','Completed','Suspended','Terminated','Withdrawn','Available','No Longer Available','Approved for marketing','No longer recruiting','Withheld','Temporarily Not Available','Ongoing','Not Authorized','Prohibited') COLLATE utf8_unicode_ci NOT NULL,
-	`sponsor`    	varchar(150) NULL,
-	`summary`    	varchar(150) NULL,
-	`added`      	date NOT NULL,
-	`period`     	smallint(6) NOT NULL,
-	`id`         	int(11) AUTO_INCREMENT NOT NULL,
-	`score`      	decimal(5,2) NOT NULL DEFAULT '0.00',
-	`abstract_id` 	INT(10) UNSIGNED NULL DEFAULT NULL ,
+  `sponsor`    	varchar(150) NULL,
+  `summary`    	varchar(150) NULL,
+  `added`      	date NOT NULL,
+  `period`     	smallint(6) NOT NULL,
+  `id`         	int(11) AUTO_INCREMENT NOT NULL,
+  `score`      	decimal(5,2) NOT NULL DEFAULT '0.00',
+  `abstract_id` 	INT(10) UNSIGNED NULL DEFAULT NULL ,
   `generation_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`),
   UNIQUE KEY `abstract_id_UNIQUE` (`abstract_id`),
-  KEY `larvol_id_key` (`larvol_id`),
-  CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `news_ibfk_3` FOREIGN KEY (`abstract_id`) REFERENCES `pubmed_abstracts` (`pm_id`) ON DELETE CASCADE ON UPDATE CASCADE
-	) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  KEY `larvol_id_key` (`larvol_id`)
+) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `news_redtag` (
   `news` int(11) NOT NULL,
   `redtag` int(10) unsigned NOT NULL,
   UNIQUE KEY `news_redtag_unq` (`news`,`redtag`),
-  KEY `redtag_idx` (`redtag`),
-  CONSTRAINT `news_redtag_fk1` FOREIGN KEY (`news`) REFERENCES `news` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `news_redtag_fk2` FOREIGN KEY (`redtag`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `redtag_idx` (`redtag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE IF NOT exists `tis_scores`  ( 
@@ -1631,6 +1627,14 @@ ALTER TABLE `product_trials`
 ALTER TABLE `upm_areas`
   ADD CONSTRAINT `upm_areas_ibfk_2` FOREIGN KEY (`area_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `upm_areas_ibfk_1` FOREIGN KEY (`upm_id`) REFERENCES `upm` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `news`
+  ADD CONSTRAINT `news_ibfk_2` FOREIGN KEY (`larvol_id`) REFERENCES `data_trials` (`larvol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `news_ibfk_3` FOREIGN KEY (`abstract_id`) REFERENCES `pubmed_abstracts` (`pm_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `news_redtag`
+  ADD CONSTRAINT `news_redtag_fk1` FOREIGN KEY (`news`) REFERENCES `news` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `news_redtag_fk2` FOREIGN KEY (`redtag`) REFERENCES `redtags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 DELIMITER $$
 CREATE PROCEDURE `generateTrialNews`( IN days int)
