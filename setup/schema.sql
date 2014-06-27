@@ -1706,7 +1706,8 @@ BLOCK1: BEGIN
 				SET @news_score := 0.0;
 				SET @rt_name := '';
 			
-				SET @tmp_select_news := CONCAT('SELECT id,summary,added,score INTO @news_insert_id,@news_summary,@news_added,@news_score FROM news WHERE larvol_id=',tmp_larvol_id,' AND added="',date_added,'"');
+				#added LIMIT 1 in below query to avoid sql error if there are multiple records with same larvol_id and added
+				SET @tmp_select_news := CONCAT('SELECT id,summary,added,score INTO @news_insert_id,@news_summary,@news_added,@news_score FROM news WHERE larvol_id=',tmp_larvol_id,' AND added="',date_added,'" LIMIT 1');
 				PREPARE tmp_select_news_stmt FROM @tmp_select_news;
 				EXECUTE tmp_select_news_stmt;
 				
