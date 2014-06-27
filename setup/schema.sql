@@ -1680,7 +1680,8 @@ BLOCK1: BEGIN
 				SET @last_slot    := '"NA"';
 				SET @comp_formula := '""';
 			END IF;
-			
+
+			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
 			#run the redtag select statement
 			SET @tmp_tbl = CONCAT('create temporary table lttmp.t as ',REPLACE(stmt,"%d",days));
 			PREPARE tmp_stmt2 FROM @tmp_tbl;
