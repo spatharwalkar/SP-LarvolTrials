@@ -1727,7 +1727,7 @@ BLOCK1: BEGIN
 						PREPARE select_summary_stmt FROM @select_summary;
 						EXECUTE select_summary_stmt;
 					END IF;
-
+					
 					SET @delmtr := IF(@news_summary != '' && @new_summary != '',' | ','');
 					IF(CONVERT(@news_summary USING utf8)!=CONVERT(@new_summary USING utf8)) THEN
 						SET @new_summary := CONCAT(@news_summary,@delmtr,@new_summary);
@@ -1762,6 +1762,9 @@ BLOCK1: BEGIN
 				PREPARE news_redtag_stmt FROM @insert_news_redtag;
 				EXECUTE news_redtag_stmt;
 			
+			#changing done2 to false because it is setting to true if any statements got failed in inner cursor.
+			SET done2 = FALSE;
+
 			END LOOP innerDynamicCursorLoop;
 			CLOSE innerDynamicCursor;
 			END BLOCK2;
