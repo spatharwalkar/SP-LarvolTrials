@@ -1267,9 +1267,9 @@ function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, 
 					}
 					$htmlContent .= '</select></td>';
 	
-	$htmlContent .= '<td class="bottom right"><select style="width: 190px;" id="'.$uniqueId2.'_istate" name="istate" onchange="change_view_'.$uniqueId2.'_();">';
+	$htmlContent .= '<td class="bottom right"><select style="width: 220px;" id="'.$uniqueId2.'_istate" name="istate" onchange="change_view_'.$uniqueId2.'_();">';
 					$selected = stripos(urldecode($_SERVER['REQUEST_URI']),'istate');
-					$htmlContent .=  '<option value="All states" '. (!empty($selected) ?   '' : 'selected="selected"'  ).'>All states</option>';
+					$htmlContent .=  '<option value="All states" '. (!empty($selected) ?   '' : 'selected="selected"'  ).'>All States/Provinces/Divisions</option>';
 					foreach($testA2 as $dk => $dv)
 					{
 						$dv1='istate='.$dv;
