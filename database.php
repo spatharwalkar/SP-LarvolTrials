@@ -673,6 +673,17 @@ if (isset($_POST['news_days']))
 	return;
 }
 
+
+//Generate News
+if (isset($_POST['pubmed_source_id']))
+{
+	require_once('generateNews.php');
+	echo '<br><b>Generating news...<br></b>';
+	generatePubmedNewsUsingID($_POST['pubmed_source_id']);
+	echo '<br>Done. <br>';
+	return;
+}
+
 //Tab Count
 if(isset($_POST['updateEntityabCount']))
 {
@@ -1182,6 +1193,21 @@ $out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 			. '<input type="submit" name="ind_all_abs" value="    Index All    " />'
 			. '</form></fieldset></div>';
 	
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
+	
+	//pubmed news generation for single ID
+	$out .= '<div style="width:610px; padding:5px;float:left;"><fieldset class="schedule"><legend><b> GENERATE NEWS <font color="red">(PUBMED) </font> </b></legend>'
+			. '<form action="database.php" method="post">'
+			. 'Pubmed Id (Source ID) :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" name="pubmed_source_id" value=""/>&nbsp;&nbsp;&nbsp;&nbsp;'
+			. ''
+			. '<input type="submit" name="generate_abstract_news" value="Generate News" />'
+			. '</form>'
+			
+
+			. '</fieldset></div>';
+			
 	$out .= '<div style="clear:both;"><hr style="height:2px;"></div>';
 	
 	

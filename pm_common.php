@@ -55,10 +55,16 @@ function ProcessNew($id)
         echo('Importing... - ');
         if (addRecord($xml) === false) 
 		{
+			require_once('generateNews.php');
+			echo '<br><b>Generating news...<br></b>';
+			generatePubmedNewsUsingID($id);
             echo(' Import failed for this pubmed record.' . "\n<br />");
         } 
 		else 
 		{
+			require_once('generateNews.php');
+			echo '<br><b>Generating news...<br></b>';
+			generatePubmedNewsUsingID($id);
             echo(' Pubmed record imported.' . "\n<br />");
         }
     }

@@ -1854,6 +1854,78 @@ BEGIN
 END; $$
 
 DELIMITER $$
+CREATE PROCEDURE `generatePubmedNewsUsingID`( IN sourceid int)
+BEGIN	
+	DECLARE days INT DEFAULT 1000;
+	DECLARE rtag_id INT;
+	DECLARE frml VARCHAR(150);
+	DECLARE score INT;
+	DECLARE stmt VARCHAR(500);
+	DECLARE done INT DEFAULT FALSE;
+
+	DECLARE dynamicCursor CURSOR FOR SELECT id,rUIS,formula,abstract_query from redtags;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+	#cleanup temporary table (if left over from a previous failure)
+	SET @drop_tmp_tbl = 'DROP TEMPORARY TABLE IF EXISTS lttmp2.t'; 
+	PREPARE tmp_stmt1 FROM @drop_tmp_tbl;
+	EXECUTE tmp_stmt1;
+
+	OPEN dynamicCursor;
+	dynamicCursorLoop: LOOP
+
+		FETCH dynamicCursor INTO rtag_id,score,frml,stmt;
+		IF (done) THEN LEAVE dynamicCursorLoop;
+		END IF;
+
+		 
+		IF (stmt LIKE 'select %') THEN
+			IF (frml IS NULL) THEN
+				SET @frml_quoted := '"NA"';
+			ELSE
+				SET @frml_quoted := CONCAT('"',frml,'"');
+			END IF;
+
+			/*replace '[column]' with 'column'
+			to fill up the data slots (enclosed in []) in the redtag formula*/
+			IF(frml REGEXP '\\[') THEN
+				SET @first_slot_t = SUBSTRING_INDEX(frml, ']', 1);
+				SET @first_slot   = SUBSTRING_INDEX(@first_slot_t, '[', -1);
+				SET @last_slot_t  = SUBSTRING_INDEX(frml, '[', -1);
+				SET @last_slot    = SUBSTRING_INDEX(@last_slot_t, ']', 1);
+				SET @comp_formula = CONCAT('REPLACE(REPLACE(',@frml_quoted,',"[',@first_slot,']",',@first_slot,'),"[',@last_slot,']",',@last_slot,')');
+			ELSE
+				SET @first_slot   := '"NA"';
+				SET @last_slot    := '"NA"';
+				SET @comp_formula := '""';
+			END IF;
+			
+			#run the redtag abstract_query statement
+			SET @tmp_tbl = CONCAT('create temporary table lttmp2.t as ',stmt,' and source_id=',sourceid);
+			PREPARE tmp_stmt2 FROM @tmp_tbl;
+			EXECUTE tmp_stmt2;
+
+			#populate the news table
+			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
+			IF (frml IS NULL) THEN
+				SET @insert_news := CONCAT('insert into news select null,"',rtag_id,'" as redtag,abstract_text,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+			ELSE
+				SET @insert_news := CONCAT('insert into news select null,"',rtag_id,'" as redtag,abstract_text,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+			END IF;
+			PREPARE news_stmt FROM @insert_news;
+			EXECUTE news_stmt;						
+
+			#cleanup temporary table
+			PREPARE tmp_stmt FROM @drop_tmp_tbl;
+			EXECUTE tmp_stmt;			
+		END IF;
+	END LOOP;
+	
+	CLOSE dynamicCursor;
+	
+END; $$
+
+DELIMITER $$
 
 CREATE FUNCTION getMaxPhase (phase char(10)) RETURNS char(10) CHARSET latin1
 DETERMINISTIC
