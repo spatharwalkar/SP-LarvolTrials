@@ -3,6 +3,9 @@
 require_once('db.php');
 require_once('include.util.php');
 $Sphinx_search=null;
+#Added by Sivaprasad Sivarajan Storyid-67946088
+$escapers = array("\'");
+$replacements = array("'");
 
 switch($_REQUEST['op']){
 
@@ -91,13 +94,15 @@ function listSearchesInGrid()
 function insertSearch()
 {
 	$querytosave=stripslashes($_REQUEST['querytosave']);
-	global $db;
+	global $db,$escapers,$replacements;
 	$querytosave = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($querytosave) {
 		return str_replace($querytosave[1], mysql_real_escape_string($querytosave[1]), $querytosave[0]);
 	},$querytosave);	
 	
 	/***Part to Replace product/Area name by product/Area id when storing******/
-	$jsonData=$querytosave; 
+	$jsonData = str_replace($escapers, $replacements, $querytosave);
+	
+	//$jsonData=$querytosave; 
 	$filterData = json_decode($jsonData, true, 10);
 	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
 	{
@@ -161,13 +166,13 @@ function insertSearch()
 function updateSearch()
 {
 	$querytosave=stripslashes($_REQUEST['querytosave']);
-	global $db;
+	global $db,$escapers,$replacements;
 	$querytosave = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($querytosave) {
 		return str_replace($querytosave[1], mysql_real_escape_string($querytosave[1]), $querytosave[0]);
 	},$querytosave);
-	
+	$jsonData = str_replace($escapers, $replacements, $querytosave);
 	/***Part to Replace product/Area name by product/Area id when storing******/
-	$jsonData=$querytosave; 
+	//$jsonData=$querytosave; 
 	$filterData = json_decode($jsonData, true, 10);
 	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
 	{
@@ -198,7 +203,7 @@ function updateSearch()
 	}
 	else if($_REQUEST['search_type'] == 'mine')
 	{
-		$uclause = $user; $shared=0;
+		echo $uclause = $user; $shared=0;
 	}
 	else if($_REQUEST['search_type'] == 'shared')
 	{
@@ -429,12 +434,13 @@ function testQuery($jsonOp=0,$scriptCall=0,$data=null)
 function runQuery($jsonData)
 {
 	
-	global $db;
+	global $db,$escapers,$replacements;
 	global $Sphinx_search;
 	//$jsonData=$_REQUEST['data'];
 	$jsonData = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($jsonData) {
 		return str_replace($jsonData[1], mysql_real_escape_string($jsonData[1]), $jsonData[0]);
-	},$jsonData);	
+	},$jsonData);
+	$jsonData = str_replace($escapers, $replacements, $jsonData);	
 	$filterData = json_decode($jsonData, true, 10);
 	///// Part To replace Product/Area name by id as its faster to search
 	if(is_array($filterData["wheredata"]) && !empty($filterData["wheredata"]))
@@ -538,14 +544,16 @@ function runQuery($jsonData)
 
 function buildQuery($data, $isCount=false)
 {
+	global $escapers,$replacements;
 	$actual_query = "";
 	$data = preg_replace_callback('~.*?columnvalue\":\"(.*?)\"}[,\]]+.*?~', function($data) {
 		return str_replace($data[1], mysql_real_escape_string($data[1]), $data[0]);
 	},$data);	
 	
 	try {
-	
-		$jsonData=$data;
+
+		$jsonData = str_replace($escapers, $replacements, $data);	
+		//$jsonData=$data;
 		$filterData = json_decode($jsonData, true, 10);
 		
 		if(is_array($filterData["wheredata"])) {
@@ -704,6 +712,7 @@ function buildQuery($data, $isCount=false)
 
 function buildPubmedQuery($data, $pm_ids,$isCount=false)
 {
+	global $escapers,$replacements;
 	if(isset($pm_ids) and !is_array($pm_ids)) {
 		$log = "pubmed ids need to passed as a array <br />\n";
 		global $logger;
@@ -713,8 +722,8 @@ function buildPubmedQuery($data, $pm_ids,$isCount=false)
 	
 	$actual_query = "";
 	try {
-
-		$jsonData=$data;
+		$jsonData = str_replace($escapers, $replacements, $data);
+		//$jsonData=$data;
 		$filterData = json_decode($jsonData, true, 10);
 
 		if(is_array($filterData))
