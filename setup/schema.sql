@@ -1466,7 +1466,7 @@ CREATE TABLE IF NOT EXISTS `news`  (
   `enrollment` 	int(10) UNSIGNED NULL,
   `overall_status` enum('Not yet recruiting','Recruiting','Enrolling by invitation','Active, not recruiting','Completed','Suspended','Terminated','Withdrawn','Available','No Longer Available','Approved for marketing','No longer recruiting','Withheld','Temporarily Not Available','Ongoing','Not Authorized','Prohibited') COLLATE utf8_unicode_ci NOT NULL,
   `sponsor`    	varchar(150) NULL,
-  `summary`    	varchar(150) NULL,
+  `summary`    	text NULL,
   `added`      	date NOT NULL,
   `period`     	smallint(6) NOT NULL,
   `id`         	int(11) AUTO_INCREMENT NOT NULL,
@@ -1702,6 +1702,7 @@ BLOCK1: BEGIN
 				END IF;
 			
 				SET @news_insert_id := 0;
+				SET @dup_news_id := 0;
 				SET @news_summary := '';
 				SET @news_added := '';
 				SET @news_score := 0.0;
@@ -1712,43 +1713,55 @@ BLOCK1: BEGIN
 				PREPARE tmp_select_news_stmt FROM @tmp_select_news;
 				EXECUTE tmp_select_news_stmt;
 				
-				SET @select_rt_name := CONCAT('SELECT name INTO @rt_name FROM redtags WHERE id=',rtag_id);
-				PREPARE select_rt_name_stmt FROM @select_rt_name;
-				EXECUTE select_rt_name_stmt;
-
 				IF (@news_insert_id != 0) THEN
-					#update the news table if record already exists
-					SET @new_summary := '';
-					SET @summary_con := '';
-					SET @update_news := '';
-					SET @summary_con := if(@comp_formula !='' && @rt_name = 'Phase classification',REPLACE(@comp_formula,"PN/A","P=N/A"),@comp_formula);
-					IF(@summary_con != '') THEN
-						SET @select_summary := CONCAT('SELECT ',@summary_con,' as summary INTO @new_summary FROM data_trials dt, data_history dh where dt.larvol_id=dh.larvol_id AND dt.larvol_id=',tmp_larvol_id);
-						PREPARE select_summary_stmt FROM @select_summary;
-						EXECUTE select_summary_stmt;
-					END IF;
-					
-					SET @delmtr := IF(@news_summary != '' && @new_summary != '',' | ','');
-					IF(CONVERT(@news_summary USING utf8)!=CONVERT(@new_summary USING utf8)) THEN
-						SET @new_summary := CONCAT(@news_summary,@delmtr,@new_summary);
+					#check whether news and redtag id already exists or not
+					SET @select_news_redtag := CONCAT('SELECT news INTO @dup_news_id FROM news_redtag WHERE news=',@news_insert_id,' AND redtag=',rtag_id,' LIMIT 1');
+					PREPARE select_news_redtag_stmt FROM @select_news_redtag;
+					EXECUTE select_news_redtag_stmt;
+
+					IF (@dup_news_id != 0) THEN
+						#if news and redtag id already exists for same added date then just update period and avoid adding duplicate summary
+						SET @update_period := CONCAT('UPDATE news SET period=',days,' WHERE id=',@news_insert_id);
+						PREPARE update_period_stmt FROM @update_period;
+						EXECUTE update_period_stmt;
 					ELSE
-						SET @new_summary :=@news_summary;
-					END IF;
-					IF(@new_summary IS NULL) THEN
+						SET @select_rt_name := CONCAT('SELECT name INTO @rt_name FROM redtags WHERE id=',rtag_id);
+						PREPARE select_rt_name_stmt FROM @select_rt_name;
+						EXECUTE select_rt_name_stmt;
+
+						#update the news table if record already exists
 						SET @new_summary := '';
-					END IF;
-					SET @higher_score := if((TIS(tmp_larvol_id)*score)>@news_score,TIS(tmp_larvol_id)*score,@news_score);
+						SET @summary_con := '';
+						SET @update_news := '';
+						SET @summary_con := if(@comp_formula !='' && @rt_name = 'Phase classification',REPLACE(@comp_formula,"PN/A","P=N/A"),@comp_formula);
+						IF(@summary_con != '') THEN
+							SET @select_summary := CONCAT('SELECT ',@summary_con,' as summary INTO @new_summary FROM data_trials dt, data_history dh where dt.larvol_id=dh.larvol_id AND dt.larvol_id=',tmp_larvol_id);
+							PREPARE select_summary_stmt FROM @select_summary;
+							EXECUTE select_summary_stmt;
+						END IF;
 					
-					SET @update_news := CONCAT('UPDATE news SET summary="',@new_summary,'",score=',@higher_score,' WHERE id=',@news_insert_id);
-					PREPARE news_up_stmt FROM @update_news;
-					EXECUTE news_up_stmt;	
+						SET @delmtr := IF(@news_summary != '' && @new_summary != '',' | ','');
+						IF(CONVERT(@news_summary USING utf8)!=CONVERT(@new_summary USING utf8)) THEN
+							SET @new_summary := CONCAT(@news_summary,@delmtr,@new_summary);
+						ELSE
+							SET @new_summary :=@news_summary;
+						END IF;
+						IF(@new_summary IS NULL) THEN
+							SET @new_summary := '';
+						END IF;
+						SET @higher_score := if((TIS(tmp_larvol_id)*score)>@news_score,TIS(tmp_larvol_id)*score,@news_score);
+
+						SET @update_news := CONCAT('UPDATE news SET summary="',@new_summary,'",score=',@higher_score,' WHERE id=',@news_insert_id);
+						PREPARE news_up_stmt FROM @update_news;
+						EXECUTE news_up_stmt;	
+					END IF;
 				ELSE
-			#populate the news table
-			IF (frml IS NULL) THEN
+					#populate the news table
+					IF (frml IS NULL) THEN
 						SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
-			ELSE
+					ELSE
 						SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
-			END IF;
+					END IF;
 					PREPARE news_ins_stmt FROM @insert_news;
 					EXECUTE news_ins_stmt;
 			
