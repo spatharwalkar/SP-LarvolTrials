@@ -1875,6 +1875,8 @@ BEGIN
 	DECLARE score INT;
 	DECLARE stmt VARCHAR(500);
 	DECLARE done INT DEFAULT FALSE;
+	DECLARE LID int;
+	DECLARE countRow int;
 
 	DECLARE dynamicCursor CURSOR FOR SELECT id,rUIS,formula,abstract_query from redtags;
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
@@ -1921,12 +1923,20 @@ BEGIN
 			#populate the news table
 			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
 			IF (frml IS NULL) THEN
-				SET @insert_news := CONCAT('insert into news select null,"',rtag_id,'" as redtag,abstract_text,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			ELSE
-				SET @insert_news := CONCAT('insert into news select null,"',rtag_id,'" as redtag,abstract_text,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			END IF;
 			PREPARE news_stmt FROM @insert_news;
-			EXECUTE news_stmt;						
+			EXECUTE news_stmt;	
+			SET countRow =  ROW_COUNT();
+			SET LID = LAST_INSERT_ID();
+			IF(countRow >  0) THEN
+				#insert redtag association 
+				SET @ins_redtag := CONCAT('INSERT IGNORE INTO news_redtag(news,redtag) values(',LID,',',rtag_id,')');
+				PREPARE ins_news_redtag FROM @ins_redtag;
+				EXECUTE ins_news_redtag;
+			END IF;		
 
 			#cleanup temporary table
 			PREPARE tmp_stmt FROM @drop_tmp_tbl;
