@@ -38,6 +38,42 @@ function generateNewsEntities($id) {
 					JOIN redtags rt on rt.id=nr.redtag 
 					WHERE n.id=' . $id .
 					' GROUP BY n.larvol_id,n.brief_title,n.phase,n.summary,n.enrollment,n.added';
+	
+	$tmpq = 'SELECT `larvol_id` FROM news where `id`="' . $id . '" and larvol_id is not null  LIMIT 1';
+	if(!$tres = mysql_query($tmpq))
+	{
+		$log='There seems to be a problem with the SQL Query:'.$tmpq.' Error:' . mysql_error();
+		echo $log;
+		return false;
+	}
+	$tres = mysql_fetch_assoc($tres);
+
+	if(empty($tres['larvol_id'])) //if larvol_id is empty, then run the other query for pubmed
+	{				
+		$query = '
+		SELECT 
+		CONCAT	(
+					"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",p.LI_id),concat("\",\"name\":\"",REPLACE(p.name,\'"\',\'"\')),concat("\",\"owner_sponsored\":\"",0,"\"}")),"]"
+				) 	
+				as product,
+		CONCAT	(
+					"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(d.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(d.name,\'"\',\'"\'),"\"}")),"]"
+				) 	
+				as disease,		
+		NULL as investigator,
+				n.abstract_id as source_id,REPLACE(n.brief_title,\'"\',\'"\') as brief_title,n.phase,n.score,CONCAT("[",( SELECT GROUP_CONCAT(CONCAT("{", \'"\' ,counter, \'"\', ":", \'"\', LI_id, \'"\', "}")) FROM ( SELECT rt1.LI_id as LI_id, @counter := CASE WHEN @prev = @counter THEN @counter + 1 ELSE 0 END AS counter,@prev := @counter FROM news n1 JOIN news_redtag nr1 on nr1.news=n1.id JOIN redtags rt1 on rt1.id=nr1.redtag, (SELECT @counter:=1, @prev:=NULL) as vars WHERE n1.id=357165 ) as liid ),"]") as redtag_id,REPLACE(n.sponsor,\'"\',\'"\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added 
+				FROM news n 
+				LEFT JOIN entity_abstracts pt on n.abstract_id=pt.abstract
+				LEFT JOIN entity_abstracts it on n.abstract_id=pt.abstract
+				LEFT JOIN entity_abstracts dt on n.abstract_id=pt.abstract
+				LEFT JOIN entities p on p.id=pt.entity and p.class = "Product" 				
+				LEFT JOIN entities d on d.id=dt.entity and d.class="Disease"
+				LEFT JOIN entities i on i.id=it.entity and i.class="Investigator" 
+				JOIN news_redtag nr on nr.news=n.id 
+				JOIN redtags rt on rt.id=nr.redtag 
+				WHERE n.id=' . $id . 
+				' GROUP BY n.abstract_id,n.brief_title,n.phase,n.summary,n.enrollment,n.added';
+	}
 
 	$json = runNewsQuery($query);
 	$json = str_replace('\\',  '', $json);
