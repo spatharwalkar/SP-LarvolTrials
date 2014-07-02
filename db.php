@@ -308,7 +308,7 @@ class DatabaseManager
 		$headers = 'From: ' . SITE_NAME . ' <no-reply@' . $_SERVER['SERVER_NAME'] . '>' . "\r\n" . 'X-Mailer: PHP/' . phpversion();
 		$mailmsg = 'Your password on ' . SITE_NAME . " has been reset. Here are your new credentials:\r\n"
 					. 'Username: ' . $unescaped_username . "\r\nPassword: " . $password . "\r\n";		
-		if(!MAIL_ENABLED || $this->loggedIn()) //Used when Admin Resets Passwords && Mail Not Enabled
+		if(!MAIL_ENABLED) //Mail Not Enabled
 		{	
 			global $now;
 			$filename='PW_Reset_'.date('Y-m-d_H.i.s',$now);
