@@ -61,7 +61,11 @@ function generateNewsEntities($id) {
 				) 	
 				as disease,		
 		NULL as investigator,
-				n.abstract_id as source_id,REPLACE(n.brief_title,\'"\',\'"\') as brief_title,n.phase,n.score,CONCAT("[",( SELECT GROUP_CONCAT(CONCAT("{", \'"\' ,counter, \'"\', ":", \'"\', LI_id, \'"\', "}")) FROM ( SELECT rt1.LI_id as LI_id, @counter := CASE WHEN @prev = @counter THEN @counter + 1 ELSE 0 END AS counter,@prev := @counter FROM news n1 JOIN news_redtag nr1 on nr1.news=n1.id JOIN redtags rt1 on rt1.id=nr1.redtag, (SELECT @counter:=1, @prev:=NULL) as vars WHERE n1.id=357165 ) as liid ),"]") as redtag_id,REPLACE(n.sponsor,\'"\',\'"\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added 
+				n.abstract_id as source_id,REPLACE(n.brief_title,\'"\',\'"\') as brief_title,n.phase,n.score,
+				CONCAT("[",( SELECT GROUP_CONCAT(CONCAT("{", \'"\' ,counter, \'"\', ":", \'"\', LI_id, \'"\', "}")) 
+					FROM ( SELECT rt1.LI_id as LI_id, @counter := CASE WHEN @prev = @counter THEN @counter + 1 ELSE 0 END AS counter,@prev := @counter FROM news n1 
+					JOIN news_redtag nr1 on nr1.news=n1.id JOIN redtags rt1 on rt1.id=nr1.redtag, 
+					(SELECT @counter:=1, @prev:=NULL) as vars WHERE n1.id='.$id.' ) as liid ),"]") as redtag_id,REPLACE(n.sponsor,\'"\',\'"\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added 
 				FROM news n 
 				LEFT JOIN entity_abstracts pt on n.abstract_id=pt.abstract
 				LEFT JOIN entity_abstracts it on n.abstract_id=pt.abstract
