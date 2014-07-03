@@ -27,7 +27,8 @@ function generatePubmedNewsUsingID($sourceid)
 {
 	if (!isset($sourceid) or empty($sourceid) or $sourceid <= 0 )
 	{
-		die('Source ID not provided.');
+		pr('Source ID not provided.');
+		return false;
 	}
 	echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Generating news for ' . $sourceid . ' ...');
 	ob_flush();
