@@ -244,6 +244,15 @@ class TrialTracker
 			{
 				foreach($tvalue['Trials'] as $dkey => $dvalue)
 				{
+					foreach($dvalue as $dk => $dv)
+					{			
+						if(!empty($dv) && !is_array($dv))
+						{
+							$dv=iconv(mb_detect_encoding($dv, mb_detect_order(), true), "UTF-8", $dv);
+							$dvalue[$dk]=$dv;
+						}
+					}
+				
 					$startMonth = date('m',strtotime($dvalue['start_date']));
 					$startYear = date('Y',strtotime($dvalue['start_date']));
 					$endMonth = date('m',strtotime($dvalue['end_date']));
@@ -1280,6 +1289,20 @@ class TrialTracker
 		/* Display - Unmatched UPM's */
 		foreach ($naUpms as $ukey => $uvalue)
 		{
+			
+			foreach($uvalue as $dk => $dv)
+					{			
+						if(!empty($dv) && !is_array($dv))
+						{
+							$dv=iconv(mb_detect_encoding($dv, mb_detect_order(), true), "UTF-8", $dv);
+							$uvalue[$dk]=$dv;
+						}
+					}
+			
+			
+			
+			
+			
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->getFont()->setSize(8);
 			
@@ -7961,6 +7984,15 @@ class TrialTracker
 				{	
 					$result = array();
 					
+					foreach($row as $dk => $dv)
+					{			
+						if(!empty($dv) && !is_array($dv))
+						{
+							$dv=iconv(mb_detect_encoding($dv, mb_detect_order(), true), "UTF-8", $dv);
+							$row[$dk]=$dv;
+						}
+					}
+					
 					$larvolIds[] = $larvolId = $row['larvol_id'];
 				
 					if(substr($row['source_id'], 0, 3) == "NCT")
@@ -8736,6 +8768,15 @@ class TrialTracker
 					{	
 						$result = array();
 						
+					foreach($row as $dk => $dv)
+					{			
+						if(!empty($dv) && !is_array($dv))
+						{
+							$dv=iconv(mb_detect_encoding($dv, mb_detect_order(), true), "UTF-8", $dv);
+							$row[$dk]=$dv;
+						}
+					}
+						
 						$larvolIds[] = $larvolId = $row['larvol_id'];
 					
 						if(substr($row['source_id'], 0, 3) == "NCT")
@@ -9251,6 +9292,15 @@ class TrialTracker
 				{	
 					$result = array();
 					
+					foreach($row as $dk => $dv)
+					{			
+						if(!empty($dv) && !is_array($dv))
+						{
+							$dv=iconv(mb_detect_encoding($dv, mb_detect_order(), true), "UTF-8", $dv);
+							$row[$dk]=$dv;
+						}
+					}
+					
 					$larvolIds[] = $larvolId = $row['larvol_id'];
 				
 					$pId = $row['productid'];
@@ -9754,6 +9804,16 @@ class TrialTracker
 			{
 				while($row = mysql_fetch_assoc($res))
 				{	
+				
+				foreach($row as $dk => $dv)
+					{			
+						if(!empty($dv) && !is_array($dv))
+						{
+							$dv=iconv(mb_detect_encoding($dv, mb_detect_order(), true), "UTF-8", $dv);
+							$row[$dk]=$dv;
+						}
+					}
+					
 					$result = array();
 					
 					$larvolIds[] = $larvolId = $row['larvol_id'];
@@ -11426,6 +11486,16 @@ $(document).ready(function(){
 		}
 		foreach($Trials as $tkey => $tvalue)
 		{
+		
+		foreach($tvalue as $dk => $dv)
+		{			
+			if(!empty($dv) && !is_array($dv))
+			{
+				$dv=iconv(mb_detect_encoding($dv, mb_detect_order(), true), "UTF-8", $dv);
+				$tvalue[$dk]=$dv;
+			}
+		}
+
 			if($tvalue['sectionid'] != $sectionId)
 			{	
 				if($sectionId != '')
