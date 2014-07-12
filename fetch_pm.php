@@ -42,7 +42,18 @@ function run_incremental_scraper($days=NULL)
 	echo("\n<br />" . 'Begin pubmed updating. Going back ' . $days . ' days.' . "\n<br />" . "\n<br />");
 
 	echo('Searching for pubmed records...' . "\n<br />");
-	$ids = getIDs($days);
+	if(ok2runPMscraper())
+		$ids = getIDs($days);
+	else
+	{
+		$log= '<br> Pubmed scraper is not allowed to run at this time ( '.$day.'  '. date('h:ia', time()) .')';
+		global $logger;	
+		$logger->error($log);
+		echo $log;
+		die();
+		return false;
+	}
+	
 	if (count($ids) == 0) 
 	{
 		echo('There are none!' . "\n<br />");
@@ -72,9 +83,27 @@ function run_incremental_scraper($days=NULL)
 		
 		echo('Fetching record content...' . "\n<br />");
 		$progress_count = 2;
+		$current_timestamp = time();
 		foreach ($ids as $id => $one) 
 		{
-			ProcessNew($one);
+
+			if(ok2runPMscraper())
+				ProcessNew($one);
+			else
+			{
+				$log= '<br> Pubmed scraper is not allowed to run at this time ( '.$day.'  '. date('h:ia', time()) .')';
+				global $logger;	
+				$logger->error($log);
+				echo $log;
+				die();
+				return false;
+			}
+			
+			if($current_timestamp == time()) 
+			{
+				sleep(1);
+				$current_timestamp = time();
+			}
 			if($cron_run)
 			{
 				$query = 'UPDATE update_status SET updated_time="' . date("Y-m-d H:i:s", strtotime('now')) . '",update_items_progress = update_items_progress+' . $progress_count . ' WHERE update_id="' . $update_id . '"';

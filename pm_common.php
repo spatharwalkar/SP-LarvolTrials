@@ -24,23 +24,27 @@ function ProcessNew($id)
     echo "<hr>Processing new Record " . $id . "<br/>";
 
     echo('Getting XML for pubmed ID ' . $id . '... - ');
-    $xml = utf8_encode(file_get_contents('http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text'));
+//    $xml = utf8_encode(file_get_contents('http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text'));
+    $xml = utf8_encode(file_get_contents('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id='.$id.'&rettype=xml&retmode=text'));
 	$xml=trim($xml);
 	$xml2=str_replace("<pre>", "", $xml);
 	$xml2=str_replace("</pre>", "", $xml2);
 	$xml2=html_entity_decode($xml2);
+	$xml2=cleanupXML($xml) ;
 	$xml = simplexml_load_string($xml2, 'SimpleXMLElement');	
     if ($xml === false) 
 	{
-		if($parse_retry>=5)
+		if($parse_retry>=2)
 		{
-			$log="ERROR: Parsing failed for url: " . 'http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text' ;
+			//$log="ERROR: Parsing failed for url: " . 'http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text' ;
+			$log="ERROR: Parsing failed for url: " . 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id='.$id.'&rettype=xml&retmode=text' ;
 			$logger->error($log);
 			echo '<br>'. $log."<br>";
 		}
 		else
 		{
-			$log="WARNING: Parsing failed for url: " . 'http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text' ;
+			//$log="WARNING: Parsing failed for url: " . 'http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text' ;
+			$log="WARNING: Parsing failed for url: " . 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id='.$id.'&rettype=xml&retmode=text' ;
 			$logger->warn($log);
 			echo '<br>'. $log."<br>";
 			$parse_retry ++;
@@ -72,4 +76,73 @@ function ProcessNew($id)
 
     echo('Done Processing for pubmed ID: .' . $id . "\n<hr><br />");
 }
+
+function cleanupXML($xml) 
+{
+    $xmlOut = '';
+    $inTag = false;
+    $xmlLen = strlen($xml);
+    for($i=0; $i < $xmlLen; ++$i) 
+	{
+        $char = $xml[$i];
+        switch ($char) 
+		{
+			case '<':
+			if (!$inTag) 
+			{
+				for($j = $i+1; $j < $xmlLen; ++$j) 
+				{
+					$nextChar = $xml[$j];
+					switch($nextChar) 
+					{
+						case '<':  
+						$char = htmlentities($char);
+						break 2;
+						case '>':  
+						$inTag = true;
+						break 2;
+					}
+				}
+			} 
+			else 
+			{
+				$char = htmlentities($char);
+			}
+			break;
+			case '>':
+			if (!$inTag) 
+			{  
+				$char = htmlentities($char);
+			} 
+			else 
+			{
+				$inTag = false;
+			}
+			break;
+			default:
+			if (!$inTag) 
+			{
+				$char = htmlentities($char);
+			}
+			break;
+        }
+        $xmlOut .= $char;
+    }
+    return $xmlOut;
+}
+function ok2runPMscraper()
+{
+	date_default_timezone_set('America/New_York');
+	$current_time = strtotime('now');
+	$day=date('l', time());
+	if ( ($day=='Sunday' or $day=='Saturday') || ($current_time > strtotime($day.' this week 9:01pm') or $current_time < strtotime($day . ' this week 4:59am')) )
+	{
+		 return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 ?>

@@ -16,7 +16,8 @@ function addPubmed($rec)
 	global $now;
 	global $logger;
 	if($rec === false) return false;
-//	pr($rec);
+	//pr($rec);
+	$rec=$rec->PubmedArticle;
 	$DTnow = date('Y-m-d H:i:s',$now);
 
 	/*** MAPPING *************************/ 
@@ -167,7 +168,7 @@ function addPubmed($rec)
 	
 	if(!$res = mysql_query($query))
 		{
-			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+			$log='There seems to be a problem with the SQL Query.  Query = :'.$query.' Error:' . mysql_error();
 			$logger->error($log);
 			echo $log;
 			return false;

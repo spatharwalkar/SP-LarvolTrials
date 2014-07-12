@@ -68,11 +68,9 @@ function generateNewsEntities($id) {
 					(SELECT @counter:=1, @prev:=NULL) as vars WHERE n1.id='.$id.' ) as liid ),"]") as redtag_id,REPLACE(n.sponsor,\'"\',\'"\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added 
 				FROM news n 
 				LEFT JOIN entity_abstracts pt on n.abstract_id=pt.abstract
-				LEFT JOIN entity_abstracts it on n.abstract_id=pt.abstract
-				LEFT JOIN entity_abstracts dt on n.abstract_id=pt.abstract
+				LEFT JOIN entity_abstracts dt on n.abstract_id=dt.abstract
 				LEFT JOIN entities p on p.id=pt.entity and p.class = "Product" 				
 				LEFT JOIN entities d on d.id=dt.entity and d.class="Disease"
-				LEFT JOIN entities i on i.id=it.entity and i.class="Investigator" 
 				JOIN news_redtag nr on nr.news=n.id 
 				JOIN redtags rt on rt.id=nr.redtag 
 				WHERE n.id=' . $id . 
