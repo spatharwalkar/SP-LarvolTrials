@@ -1769,8 +1769,8 @@ BLOCK1: BEGIN
 						IF (frml IS NULL) THEN
 							SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
 						ELSE
-							SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
-						END IF;
+							SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id,' AND date_format(completion_date_prev,"%Y") != date_format(completion_date,"%Y") AND date_format(start_date_prev,"%Y") != date_format(start_date,"%Y") AND date_format(primary_completion_date_prev,"%Y") != date_format(primary_completion_date,"%Y")');
+						END IF;						
 						PREPARE news_ins_stmt FROM @insert_news;
 						EXECUTE news_ins_stmt;
 
