@@ -1701,88 +1701,96 @@ BLOCK1: BEGIN
 				IF (done2) THEN LEAVE innerDynamicCursorLoop;
 				END IF;
 
-				#Check for duplicate news
-				SET @dup_id := 0;
-				#added LIMIT 1 in below query to avoid sql error if there are multiple records with same larvol_id and added
-				SET @select_dup_news := CONCAT('SELECT id INTO @dup_id FROM news n,news_redtag nr WHERE n.larvol_id=',tmp_larvol_id,' AND n.added="',date_added,'" AND nr.redtag=',rtag_id,' AND n.id=nr.news LIMIT 1');
-				PREPARE select_dup_news_stmt FROM @select_dup_news;
-				EXECUTE select_dup_news_stmt;
-			
-				#If a change matches the trial, redtag, and date of an existing news item, nothing needs to be done
-				IF (@dup_id = 0) THEN
-					SET @news_insert_id := 0;
-					SET @dup_news_id := 0;
-					SET @news_summary := '';
-					SET @news_added := '';
-					SET @news_score := 0.0;
-					SET @rt_name := '';
+				#Cheack false changes
+				SET @is_false_change := 0;
+				SET @false_tbl = CONCAT('SELECT dt.larvol_id INTO @is_false_change FROM data_trials dt, data_history dh WHERE completion_date_prev = completion_date AND start_date_prev = start_date AND primary_completion_date_prev = primary_completion_date AND dt.larvol_id=',tmp_larvol_id,' LIMIT 1');
+				PREPARE false_stmt FROM @false_tbl;
+				EXECUTE false_stmt;
 
+				IF (@is_false_change = 0) THEN
+					#Check for duplicate news
+					SET @dup_id := 0;
 					#added LIMIT 1 in below query to avoid sql error if there are multiple records with same larvol_id and added
-					SET @tmp_select_news := CONCAT('SELECT id,summary,added,score INTO @news_insert_id,@news_summary,@news_added,@news_score FROM news WHERE larvol_id=',tmp_larvol_id,' AND added="',date_added,'" LIMIT 1');
-					PREPARE tmp_select_news_stmt FROM @tmp_select_news;
-					EXECUTE tmp_select_news_stmt;
+					SET @select_dup_news := CONCAT('SELECT id INTO @dup_id FROM news n,news_redtag nr WHERE n.larvol_id=',tmp_larvol_id,' AND n.added="',date_added,'" AND nr.redtag=',rtag_id,' AND n.id=nr.news LIMIT 1');
+					PREPARE select_dup_news_stmt FROM @select_dup_news;
+					EXECUTE select_dup_news_stmt;
 
-					IF (@news_insert_id != 0) THEN
-						#check whether news and redtag id already exists or not
-						SET @select_news_redtag := CONCAT('SELECT news INTO @dup_news_id FROM news_redtag WHERE news=',@news_insert_id,' AND redtag=',rtag_id,' LIMIT 1');
-						PREPARE select_news_redtag_stmt FROM @select_news_redtag;
-						EXECUTE select_news_redtag_stmt;
+					#If a change matches the trial, redtag, and date of an existing news item, nothing needs to be done
+					IF (@dup_id = 0) THEN
+						SET @news_insert_id := 0;
+						SET @dup_news_id := 0;
+						SET @news_summary := '';
+						SET @news_added := '';
+						SET @news_score := 0.0;
+						SET @rt_name := '';
 
-						IF (@dup_news_id != 0) THEN
-							#if news and redtag id already exists for same added date then just update period and avoid adding duplicate summary
-							SET @update_period := CONCAT('UPDATE news SET period=',days,' WHERE id=',@news_insert_id);
-							PREPARE update_period_stmt FROM @update_period;
-							EXECUTE update_period_stmt;
-						ELSE
-							SET @select_rt_name := CONCAT('SELECT name INTO @rt_name FROM redtags WHERE id=',rtag_id);
-							PREPARE select_rt_name_stmt FROM @select_rt_name;
-							EXECUTE select_rt_name_stmt;
+						#added LIMIT 1 in below query to avoid sql error if there are multiple records with same larvol_id and added
+						SET @tmp_select_news := CONCAT('SELECT id,summary,added,score INTO @news_insert_id,@news_summary,@news_added,@news_score FROM news WHERE larvol_id=',tmp_larvol_id,' AND added="',date_added,'" LIMIT 1');
+						PREPARE tmp_select_news_stmt FROM @tmp_select_news;
+						EXECUTE tmp_select_news_stmt;
 
-							#update the news table if record already exists
-							SET @new_summary := '';
-							SET @summary_con := '';
-							SET @update_news := '';
-							SET @summary_con := if(@comp_formula !='' && @rt_name = 'Phase classification',REPLACE(@comp_formula,"PN/A","P=N/A"),@comp_formula);
-							IF(@summary_con != '') THEN
-								SET @select_summary := CONCAT('SELECT ',@summary_con,' as summary INTO @new_summary FROM data_trials dt, data_history dh where dt.larvol_id=dh.larvol_id AND dt.larvol_id=',tmp_larvol_id);
-								PREPARE select_summary_stmt FROM @select_summary;
-								EXECUTE select_summary_stmt;
-							END IF;
+						IF (@news_insert_id != 0) THEN
+							#check whether news and redtag id already exists or not
+							SET @select_news_redtag := CONCAT('SELECT news INTO @dup_news_id FROM news_redtag WHERE news=',@news_insert_id,' AND redtag=',rtag_id,' LIMIT 1');
+							PREPARE select_news_redtag_stmt FROM @select_news_redtag;
+							EXECUTE select_news_redtag_stmt;
 
-							SET @delmtr := IF(@news_summary != '' && @new_summary != '',' | ','');
-							IF(CONVERT(@news_summary USING utf8)!=CONVERT(@new_summary USING utf8)) THEN
-								SET @new_summary := CONCAT(@news_summary,@delmtr,@new_summary);
+							IF (@dup_news_id != 0) THEN
+								#if news and redtag id already exists for same added date then just update period and avoid adding duplicate summary
+								SET @update_period := CONCAT('UPDATE news SET period=',days,' WHERE id=',@news_insert_id);
+								PREPARE update_period_stmt FROM @update_period;
+								EXECUTE update_period_stmt;
 							ELSE
-								SET @new_summary :=@news_summary;
-							END IF;
-							IF(@new_summary IS NULL) THEN
+								SET @select_rt_name := CONCAT('SELECT name INTO @rt_name FROM redtags WHERE id=',rtag_id);
+								PREPARE select_rt_name_stmt FROM @select_rt_name;
+								EXECUTE select_rt_name_stmt;
+
+								#update the news table if record already exists
 								SET @new_summary := '';
+								SET @summary_con := '';
+								SET @update_news := '';
+								SET @summary_con := if(@comp_formula !='' && @rt_name = 'Phase classification',REPLACE(@comp_formula,"PN/A","P=N/A"),@comp_formula);
+								IF(@summary_con != '') THEN
+									SET @select_summary := CONCAT('SELECT ',@summary_con,' as summary INTO @new_summary FROM data_trials dt, data_history dh where dt.larvol_id=dh.larvol_id AND dt.larvol_id=',tmp_larvol_id);
+									PREPARE select_summary_stmt FROM @select_summary;
+									EXECUTE select_summary_stmt;
+								END IF;
+
+								SET @delmtr := IF(@news_summary != '' && @new_summary != '',' | ','');
+								IF(CONVERT(@news_summary USING utf8)!=CONVERT(@new_summary USING utf8)) THEN
+									SET @new_summary := CONCAT(@news_summary,@delmtr,@new_summary);
+								ELSE
+									SET @new_summary :=@news_summary;
+								END IF;
+								IF(@new_summary IS NULL) THEN
+									SET @new_summary := '';
+								END IF;
+								SET @higher_score := if((TIS(tmp_larvol_id)*score)>@news_score,TIS(tmp_larvol_id)*score,@news_score);
+
+								SET @update_news := CONCAT('UPDATE news SET summary="',@new_summary,'",score=',@higher_score,' WHERE id=',@news_insert_id);
+								PREPARE news_up_stmt FROM @update_news;
+								EXECUTE news_up_stmt;	
 							END IF;
-							SET @higher_score := if((TIS(tmp_larvol_id)*score)>@news_score,TIS(tmp_larvol_id)*score,@news_score);
-
-							SET @update_news := CONCAT('UPDATE news SET summary="',@new_summary,'",score=',@higher_score,' WHERE id=',@news_insert_id);
-							PREPARE news_up_stmt FROM @update_news;
-							EXECUTE news_up_stmt;	
-						END IF;
-					ELSE
-						#populate the news table
-						IF (frml IS NULL) THEN
-							SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
 						ELSE
-							SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id,' AND date_format(completion_date_prev,"%Y") != date_format(completion_date,"%Y") AND date_format(start_date_prev,"%Y") != date_format(start_date,"%Y") AND date_format(primary_completion_date_prev,"%Y") != date_format(primary_completion_date,"%Y")');
-						END IF;						
-						PREPARE news_ins_stmt FROM @insert_news;
-						EXECUTE news_ins_stmt;
+							#populate the news table
+							IF (frml IS NULL) THEN
+								SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
+							ELSE
+								SET @insert_news := CONCAT('insert into news select t.larvol_id,brief_title, if(phase="N/A","P=N/A",concat("P",phase)) as phase,enrollment,overall_status,lead_sponsor, if(',@comp_formula,' !="" && (rt.`name` = "Phase classification"),REPLACE(',@comp_formula,',"PN/A","P=N/A"),',@comp_formula,') as summary, t.added, ',days,' as period,NULL as id,TIS(t.larvol_id)*',score,' as score, NULL, CURRENT_TIMESTAMP from lttmp.t t join data_history using(larvol_id) join data_trials using(larvol_id) join redtags rt where rt.id=',rtag_id,' AND t.larvol_id=',tmp_larvol_id);
+							END IF;						
+							PREPARE news_ins_stmt FROM @insert_news;
+							EXECUTE news_ins_stmt;
 
-						#get last inserted news id
-						SET @select_news := 'SELECT id into @news_insert_id FROM news ORDER BY id DESC LIMIT 1';
-						PREPARE select_news_stmt FROM @select_news;
-						EXECUTE select_news_stmt;
+							#get last inserted news id
+							SET @select_news := 'SELECT id into @news_insert_id FROM news ORDER BY id DESC LIMIT 1';
+							PREPARE select_news_stmt FROM @select_news;
+							EXECUTE select_news_stmt;
+						END IF;
+						#pupulate news_redtag table
+						SET @insert_news_redtag := CONCAT('INSERT IGNORE INTO news_redtag(news,redtag) values(',@news_insert_id,',',rtag_id,')');
+						PREPARE news_redtag_stmt FROM @insert_news_redtag;
+						EXECUTE news_redtag_stmt;
 					END IF;
-					#pupulate news_redtag table
-					SET @insert_news_redtag := CONCAT('INSERT IGNORE INTO news_redtag(news,redtag) values(',@news_insert_id,',',rtag_id,')');
-					PREPARE news_redtag_stmt FROM @insert_news_redtag;
-					EXECUTE news_redtag_stmt;
 				END IF;
 			
 			#changing done2 to false because it is setting to true if any statements got failed in inner cursor.
