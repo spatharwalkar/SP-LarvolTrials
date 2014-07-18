@@ -606,6 +606,12 @@ function name_is_noisy($name)
 		echo "$name contains an '@'. Skipping. ";
 		return TRUE;
 	}
+	if (preg_match('/#/i',$name))
+
+   	 {
+		echo $name." contains an '#'. Skipping. ";
+		return TRUE;
+   	 }
 	// Compare $name to all the institution names in the entities table
 	$name = addcslashes(mysql_real_escape_string($name), '%_');
 	$query = 
