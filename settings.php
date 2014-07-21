@@ -15,7 +15,9 @@ $settingsFailSafe = array(
 	'LI_API'=>'http://api.larvolinsight.com/api.ashx',
 	'UNICODE_MODE_ENABLED'=>'false',
 	'LINKEDIN_KEY'=>'',
-	'LINKEDIN_SECRET'=>''
+	'LINKEDIN_SECRET'=>'',
+	'PUBMED_API_URL_ARG'=>''
+	
 );
 $settingsFailSafeKeys = array_keys($settingsFailSafe);
 

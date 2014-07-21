@@ -1,5 +1,7 @@
 <?php
+require_once 'db.php';
 require_once 'include.derived.php';
+
 error_reporting(E_WARNING);
 
 function getIDs($days_passed=NULL) 
@@ -8,7 +10,12 @@ function getIDs($days_passed=NULL)
     else global $days;
     $ids = array();
     $url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=&reldate='.$days.'&datetype=edat&retmax=50000000&usehistory=y';
-	
+
+	if(PUBMED_API_URL_ARG)
+	{
+		$url =  $url.PUBMED_API_URL_ARG;
+	}
+		
 	$xml = file_get_contents($url);
 	$xml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOWARNING | LIBXML_NOERROR);
 	$source_id = $xml->IdList->Id;
@@ -18,14 +25,17 @@ function getIDs($days_passed=NULL)
 
 function ProcessNew($id) 
 {
-
 	global $parse_retry;
 	global $logger;
     echo "<hr>Processing new Record " . $id . "<br/>";
 
     echo('Getting XML for pubmed ID ' . $id . '... - ');
-//    $xml = utf8_encode(file_get_contents('http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text'));
-    $xml = utf8_encode(file_get_contents('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id='.$id.'&rettype=xml&retmode=text'));
+	$xurl='http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id='.$id.'&rettype=xml&retmode=text';
+	if(PUBMED_API_URL_ARG)
+	{
+		$xurl =  $xurl.PUBMED_API_URL_ARG;
+	}
+    $xml = utf8_encode(file_get_contents($xurl));
 	$xml=trim($xml);
 	$xml2=str_replace("<pre>", "", $xml);
 	$xml2=str_replace("</pre>", "", $xml2);
@@ -37,14 +47,14 @@ function ProcessNew($id)
 		if($parse_retry>=2)
 		{
 			//$log="ERROR: Parsing failed for url: " . 'http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text' ;
-			$log="ERROR: Parsing failed for url: " . 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id='.$id.'&rettype=xml&retmode=text' ;
+			$log="ERROR: Parsing failed for url: " . $xurl ;
 			$logger->error($log);
 			echo '<br>'. $log."<br>";
 		}
 		else
 		{
 			//$log="WARNING: Parsing failed for url: " . 'http://www.ncbi.nlm.nih.gov/pubmed/'.$id.'?report=xml&format=text' ;
-			$log="WARNING: Parsing failed for url: " . 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id='.$id.'&rettype=xml&retmode=text' ;
+			$log="WARNING: Parsing failed for url: " . $xurl ;
 			$logger->warn($log);
 			echo '<br>'. $log."<br>";
 			$parse_retry ++;
