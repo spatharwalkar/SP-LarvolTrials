@@ -400,5 +400,3 @@ require_once 'news/phpMyEdit.class.php';
 new phpMyEdit($opts);
 //pr($opts);
 ?>
-
-*
