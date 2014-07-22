@@ -95,6 +95,25 @@ function runNewsQuery($query) {
 		jsonMessg($msg);
 	}
 	$res = mysql_fetch_assoc($res) or die('cannot fetch with id=$id' . mysql_error());
+
+	/** In case of pubmed abstracts, show only the last two sentences of summary */
+	if(!empty($res['source_id']))
+	{
+		$chunks = preg_split('#[\r\n]#', $res['summary'], -1, PREG_SPLIT_NO_EMPTY);
+
+		foreach($chunks as $val)
+		{
+			preg_match_all('#(?:\s[a-z]\.(?:[a-z]\.)?|.)+?[.?!]+#i', $val, $paragraph);
+			foreach($paragraph[0] as $val)
+			{
+				$sentences[] = ltrim($val);
+			}
+		}
+		$sentences = array_slice($sentences,-2,2,false);  
+		$res['summary']=$sentences[0].' '.$sentences[1];
+	}
+	/**************/
+	
 	$json = json_encode($res, JSON_UNESCAPED_UNICODE);
 	global $days;
 	if( !empty($days) ) 
