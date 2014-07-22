@@ -2132,9 +2132,11 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
 				array_unshift($new_sfn, in_array("$k", $new_sfn, 1) ? "-$k" : $k);
 				echo '<th class="',$css_class_name,'"';
 				if(trim($fdn)=='Brief title')
-					echo ' style="width:45%"   ';
+					echo ' style="width:20%"   ';
+				elseif(trim($fdn)=='Summary')
+					echo ' style="width:20%"   ';
 				else
-					echo ' style="width:10%"  ';
+					echo ' style="width:5%"  ';
 				echo '>';
 				echo '<a class="',$css_class_name,'" href="';
 				echo htmlspecialchars($this->page_name.'?'.$this->cgi['prefix']['sys'].'fm'.'=0'
@@ -3382,5 +3384,7 @@ function '.$this->js['prefix'].'filter_handler(theForm, theEvent)
  * vim:set ts=4:
  * vim600:fdm=marker fdl=0 fdc=0:
  * }}} */
+
+/***************************/
 
 ?>
