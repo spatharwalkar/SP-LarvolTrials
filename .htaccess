@@ -5,3 +5,4 @@ AddType text/x-component .htc
 RedirectMatch 301 sigma/comments(.*) comments/$1
 Options -Indexes
 Header set X-Robots-Tag "noindex, nofollow"
+ErrorDocument 404 /404.html
