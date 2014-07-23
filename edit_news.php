@@ -43,7 +43,7 @@ if(isset($_GET['mode']) and $_GET['mode']=='edit' )
 		$_GET['PME_sys_rec']=$_GET['larvol_id'];
 	}
 }
-//$adm=$db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root');
+	//$adm=$db->loggedIn() and ($db->user->userlevel=='admin'||$db->user->userlevel=='root');
 $adm=$db->loggedIn();//Manual trial entry and overriding should be allowed to all users, not just Admin
 
 if(!$adm and isset($_POST['PME_sys_operation']) and ($_POST['PME_sys_operation']=='PME_op_Change' or $_POST['PME_sys_operation']=='Change'))
@@ -99,6 +99,11 @@ $(document).ready(function(){
 		height:"100%"
 			});
 	$("#inline_outer").hide();
+
+	// adding the css on the first navigation column (with view and edit option)
+	if ($(".pme-filter")[0]){
+		   $(".pme-main").css("width","auto");
+		}
 });
 </script>
 <style type="text/css">
@@ -114,14 +119,14 @@ table.pme-main {
 	table-layout: fixed;
 	border: #004d9c 1px solid;
 	border-collapse: collapse;
-	width: auto;
+	width: 100%;
 }
 
 table.pme-navigation {
 	table-layout: fixed;
 	border: #004d9c 0px solid;
 	border-collapse: collapse;
-	width: auto;
+	width: 100%;
 }
 
 td.pme-navigation-0, td.pme-navigation-1 {
@@ -190,16 +195,10 @@ table td {
 	overflow: hidden;
 	word-wrap: break-word;
 }
-/* added for the id columns */
-/*
-	th.pme-header-id{ 
-		background: #add8e6; 
-		border:1px solid #004d9c; 
-		color:white; 
-		width: 7%; 
-		padding: 4px; 
-	}
-*/
+
+table.pme-main > tbody > tr:first-child > th:first-child {
+width : 7%; 
+}
 </style>
 </head>
 <?php
@@ -264,7 +263,7 @@ array
 		'sort'   => true,
 		'options' => 'LAVCPDR',
 		'size|ACP'   => 10,
-		'URL' => '/api/news.php?id=$value',
+		'URL' => 'api/news.php?id=$value',
 		'URLtarget'	=>	'_blank'
 );
 $opts['fdd']['virt'] = array(
@@ -287,7 +286,7 @@ $opts['fdd']['virt'] = array(
 	  'maxlen'  => 10,
 	  'default' => '0',
 	  'sort'    => true,
-	'URL' => '/edit_trials.php?PME_sys_fl=0&PME_sys_fm=0&PME_sys_sfn[0]=0&PME_sys_operation=PME_op_Change&PME_sys_rec=$value',
+	'URL' => 'edit_trials.php?larvol_id=$value',
 	'URLtarget'	=>	'_blank'
 	);
 	$opts['fdd']['virt1'] = array(
@@ -304,10 +303,11 @@ $opts['fdd']['virt'] = array(
 
 	$field_exists = array_search('brief_title',$cols) ;
 	if ( isset($field_exists) and $field_exists > 0  )  $opts['fdd']['brief_title'] = array(
-			'name'     => 'Brief title',
-			'select'   => 'T',
-			'maxlen'   => 155,
-			'sort'     => true
+		'name'     => 'Brief title',
+		'select'   => 'T',
+		'maxlen'   => 155,
+		'sort'     => true,
+		'options'	=> 'LAVCPDR'
 	);
 
 
@@ -316,7 +316,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Phase',
 			'select'   => 'T',
 			'maxlen'   => 155,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 	$field_exists = array_search('enrollment',$cols) ;
@@ -324,7 +325,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Enrollment',
 			'select'   => 'T',
 			'maxlen'   => 155,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 
@@ -333,7 +335,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Overall Status',
 			'select'   => 'T',
 			'maxlen'   => 155,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 
@@ -342,7 +345,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Sponsor',
 			'select'   => 'T',
 			'maxlen'   => 155,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 	$field_exists = array_search('summary',$cols) ;
@@ -350,7 +354,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Summary',
 			'select'   => 'T',
 			'maxlen'   => 155,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 	$field_exists = array_search('added',$cols) ;
@@ -358,7 +363,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Added',
 			'select'   => 'T',
 			'maxlen'   => 15,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 	$field_exists = array_search('period',$cols) ;
@@ -366,7 +372,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Period',
 			'select'   => 'T',
 			'maxlen'   => 10,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 
@@ -375,7 +382,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Score',
 			'select'   => 'T',
 			'maxlen'   => 5,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 	$field_exists = array_search('abstract_id',$cols) ;
@@ -383,7 +391,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Abstract Id',
 			'select'   => 'T',
 			'maxlen'   => 5,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 	$field_exists = array_search('generation_date',$cols) ;
@@ -391,7 +400,8 @@ $opts['fdd']['virt'] = array(
 			'name'     => 'Generation Date',
 			'select'   => 'T',
 			'maxlen'   => 5,
-			'sort'     => true
+			'sort'     => true,
+			'options'	=> 'LAVCPDR'
 	);
 
 
