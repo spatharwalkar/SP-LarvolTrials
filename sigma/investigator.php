@@ -31,11 +31,13 @@
 		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Investigator" AND `id`=' . mysql_real_escape_string($InvestigatorId);
 		$res            = mysql_query($query) or die($query.' '.mysql_error());
 		$header         = mysql_fetch_array($res);
-		$InvestigatorId   = $header['id'];
-		$InvestigatorName = $header['name'];
-		if($header['display_name'] != NULL && $header['display_name'] != '')
-		     $InvestigatorName = $header['display_name'];	
-				
+		if($header)
+		{
+			$InvestigatorId   = $header['id'];
+			$InvestigatorName = $header['name'];
+			if($header['display_name'] != NULL && $header['display_name'] != '')
+				 $InvestigatorName = $header['display_name'];	
+		}				
 		if(isset($_REQUEST['dwcount']))
 			$dwcount = $_REQUEST['dwcount'];
 		else
