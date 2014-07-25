@@ -109,8 +109,11 @@ function runNewsQuery($query) {
 				$sentences[] = ltrim($val);
 			}
 		}
-		$sentences = array_slice($sentences,-2,2,false);  
-		$res['summary']=$sentences[0].' '.$sentences[1];
+		if(is_array($sentences))
+		{
+			$sentences = @array_slice($sentences,-2,2,false);  
+			$res['summary']=$sentences[0].' '.$sentences[1];
+		}
 	}
 	/**************/
 	
