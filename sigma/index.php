@@ -38,9 +38,12 @@
 		$Investigator=array();
 		if(is_array($ResultArr))
 		{
+			
 			$GetDataQuery = "SELECT `id`, `name`, `class`, `category`, `is_active`, `mesh_name` FROM `entities` WHERE id IN (" . implode(',',$ResultArr) . ") ";
 			//print $GetDataQuery;
+			
 			$GetDataQueryResult = mysql_query($GetDataQuery);
+			
 			if($GetDataQueryResult)
 			{
 				while($GetDataResult =  mysql_fetch_assoc($GetDataQueryResult))
@@ -82,7 +85,9 @@
 			if(count($MOACatArray) > 0)
 			{
 				$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` IN ('" . implode("','",$MOACatArray) . "')";			
+				
 				$MOAResult = mysql_query($MOAQuery);
+				
 				if($MOAResult &&  mysql_num_rows($MOAResult) > 0)
 				{
 					while($SMOA = mysql_fetch_assoc($MOAResult))
@@ -144,14 +149,24 @@
 		if($globalOptions['class'] == 'MOA')
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name` FROM `entities` WHERE `class` = 'MOA_Category' AND `name` <> 'Other'";
 		else if($globalOptions['class'] == 'Disease')
-		$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e JOIN `entity_relations` er ON(er.`parent`=e.`id`) JOIN `entities` e2 ON(e2.`id`=er.`child`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product'  AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')";
+		//$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e JOIN `entity_relations` er ON(er.`parent`=e.`id`) JOIN `entities` e2 ON(e2.`id`=er.`child`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product'  AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')";
+		$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` 
+							FROM `entities` e 
+							JOIN `entity_relations` er ON(er.`parent`=e.`id` and e.`class` = 'Disease'  
+															AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) 
+															AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> ''))
+							JOIN `entities` e2 ON(e2.`id`=er.`child` and e2.`class` = 'Product' and (e2.`is_active` <> '0' OR e2.`is_active` IS NULL)) 
+							 ";
 		else if($globalOptions['class'] == 'Product')
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category` FROM `entities` WHERE `class` = '".$globalOptions['class']."'  AND (`is_active` <> '0' OR `is_active` IS NULL)";
 		else if($globalOptions['class'] == 'Disease_Category')
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."' AND (`is_active` <> '0' OR `is_active` IS NULL)";
 		else
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
+		
 		$QueryResult = mysql_query($ResultArrQuery);		
+		
+		
 		$i=0;
 		while($result = mysql_fetch_assoc($QueryResult))
 		{
@@ -199,6 +214,7 @@
 		if($globalOptions['class'] == 'MOA')	//IN CASE OF MOA  - GET MOA ID AS WELL WHO DOES NOT HAVE CATEGORY OR has Other Category
 		{
 			$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e LEFT OUTER JOIN `entity_relations` er ON(e.`id`=er.`child`) LEFT OUTER JOIN `entities` e2 ON(e2.`id`=er.`parent`) WHERE e.`class`='MOA' AND ((e2.`name` = 'Other' AND e2.`class` = 'MOA_Category') OR er.`parent` IS NULL)";
+			
 		
 			$QueryResult = mysql_query($ResultArrQuery);
 		
@@ -739,7 +755,11 @@ while ($name = mysql_fetch_assoc($names)) {
 function MOAListing($MOACat)
 {
 	$htmlContent = '';
-	$MOAQuery = "SELECT `id`, `name`, `display_name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOACat) . "'";
+	//$MOAQuery = "SELECT `id`, `name`, `display_name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOACat) . "'";
+	$MOAQuery = "SELECT `id`, `name`, `display_name` 
+					FROM `entities` e 
+					JOIN `entity_relations` er ON(e.`id`=er.`child` and e.`class`='MOA' AND er.`parent` = '" . mysql_real_escape_string($MOACat) . "') 
+					";
 			
 	$MOAResult = mysql_query($MOAQuery);
 	$i=0;
@@ -771,7 +791,13 @@ function GetProductsCountFromMOA($moaID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  JOIN entity_trials etrial on er.parent=etrial.entity WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+//	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`)  JOIN entity_trials etrial on er.parent=etrial.entity WHERE et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+//	optimized
+	$query = "SELECT count(Distinct(et.`id`)) as proCount 
+				FROM `entities` et 
+				JOIN `entity_relations` er ON(et.`id` = er.`parent` and  et.`class`='Product' and er.`child`='" . mysql_real_escape_string($moaID) . "'  
+					AND (et.`is_active` <> '0' OR et.`is_active` IS NULL))
+				JOIN entity_trials etrial on er.parent=etrial.entity ";
 	$res = mysql_query($query) or die('Bad SQL query getting products count from moa id in TZ');
 	
 	if($res)
@@ -789,7 +815,11 @@ function GetTrialsCountFromInvestigator($invID)
 	global $db;
 	global $now;
 	$TrialsCount = 0;
-	$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity`='" . mysql_real_escape_string($invID) . "'";
+	//$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity`='" . mysql_real_escape_string($invID) . "'";
+	$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount 
+				FROM `data_trials` dt 
+				JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial` and et.`entity`='" . mysql_real_escape_string($invID) . "')  
+				";
 	$res = mysql_query($query) or die('Bad SQL query getting trials count from product id in TZ');
 	
 	if($res)
@@ -808,6 +838,7 @@ function GetTrialsCountFromProduct($productID)
 	global $now;
 	$TrialsCount = 0;
 	$query = "SELECT count(Distinct(dt.`larvol_id`)) as trialCount FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)  WHERE et.`entity`='" . mysql_real_escape_string($productID) . "'";
+
 	$res = mysql_query($query) or die('Bad SQL query getting trials count from product id in TZ');
 	
 	if($res)
@@ -829,7 +860,9 @@ function GetProductsCountFromCompany($companyID)
 //"SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) WHERE et.`class`='Product' AND er.`child`='" . mysql_real_escape_string($companyID) . "'  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
 	/* COUNT QUERY THROUGH OLD RELATION TABLE*/
 	//$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `products_institutions` pi ON(et.`id` = pi.`product`) WHERE et.`class`='Product' AND pi.`institution`='" . mysql_real_escape_string($companyID) . "'";
+	
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
+	
 	
 	if($res)
 	{
@@ -845,7 +878,17 @@ function GetProductsCountFromMOACat($moaCatID)
 	global $db;
 	global $now;
 	$ProductsCount = 0;
-	$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN entity_trials etrial on er.parent=etrial.entity WHERE et.`class`='Product' and er.`child` IN (SELECT et2.`id` FROM `entities` et2 JOIN `entity_relations` er2 ON(et2.`id` = er2.`child`)  WHERE et2.`class`='MOA' AND er2.`parent`='". mysql_real_escape_string($moaCatID) ."')  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+	//$query = "SELECT count(Distinct(et.`id`)) as proCount FROM `entities` et JOIN `entity_relations` er ON(et.`id` = er.`parent`) JOIN entity_trials etrial on er.parent=etrial.entity WHERE et.`class`='Product' and er.`child` IN (SELECT et2.`id` FROM `entities` et2 JOIN `entity_relations` er2 ON(et2.`id` = er2.`child`)  WHERE et2.`class`='MOA' AND er2.`parent`='". mysql_real_escape_string($moaCatID) ."')  AND (et.`is_active` <> '0' OR et.`is_active` IS NULL)";
+	//optimize query
+	$query = "SELECT count(Distinct(et.`id`)) as proCount 
+				FROM `entities` et 
+				JOIN `entity_relations` er ON(et.`id` = er.`parent` and et.`class`='Product' and (et.`is_active` <> '0' OR et.`is_active` IS NULL)) 
+				JOIN entities et2 ON (er.child=et2.id)
+				JOIN entity_relations er2 ON (et2.`id` = er2.`child`and et2.`class`='MOA' AND er2.`parent`='". mysql_real_escape_string($moaCatID) ."')
+				JOIN entity_trials etrial on er.parent=etrial.entity 
+				
+				";
+				
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
@@ -889,6 +932,7 @@ function GetProductsCountFromDisease($DiseaseID)
 	global $now;
 	$ProductsCount = 0;
 	$query = "SELECT count(Distinct(e.`id`)) as proCount FROM `entities` e JOIN `entity_relations` er ON(e.`id` = er.`child`) JOIN entity_trials etrial on er.parent=etrial.entity WHERE e.`class`='Product' AND er.`parent`='" . mysql_real_escape_string($DiseaseID) . "' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)";
+	
 	$res = mysql_query($query) or die('Bad SQL query getting products count from company id in TZ');
 	
 	if($res)
