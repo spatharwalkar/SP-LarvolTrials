@@ -341,7 +341,15 @@ function process_edits($id)
 			$colEntity = (int)$source[1];
 			$type = $source[2];
 			$value = mysql_real_escape_string($source[3]);
-			mysql_query('INSERT INTO rpt_masterhm_cells SET entity1=' . $rowEntity . ',entity2=' . $colEntity);
+			/* prevent inserting duplicate cells */
+			$query = 'SELECT entity1 from rpt_masterhm_cells where ' . $rowEntity .' in (entity1,entity2) and  ' . $colEntity .' in (entity1,entity2) limit 1' ;
+			$res2 = mysql_query($query);
+			if(!empty($res2))	$row2=mysql_fetch_assoc($res2);
+			if(empty($row2['entity1']))			
+			{
+				mysql_query('INSERT INTO rpt_masterhm_cells SET entity1=' . $rowEntity . ',entity2=' . $colEntity);
+			}
+			/**********/
 			if(substr($value,0,2) == "##") //changed which icons are in the cell
 			{
 				$command = $value[2];
