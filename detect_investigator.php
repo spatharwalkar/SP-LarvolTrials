@@ -620,24 +620,22 @@ function name_is_noisy($name)
 	}
 	// Compare $name to all the institution names in the entities table
 	$name = addcslashes(mysql_real_escape_string($name), '%_');
-	$query = 
-		"SELECT `name` ".
-		"FROM `entities` ".
-		"WHERE `class`='Institution' ".
-			"AND `name` LIKE '%$name%' ".
-		"LIMIT 1";
-	if(!$res = mysql_query($query))
-	{
-		$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-		$logger->error($log);
-		echo $log;
-		return false;
-	}
-	if (mysql_num_rows($res) > 0) {
-		$res = mysql_fetch_row($res);
-		echo "$name is contained in an entry from entities ($res[0]). Skipping. ";
-		return TRUE;
-	}
+	$query = "CALL detect_investigator('$name',@exist,@column_id,@column_name,@column_value)";
+   	$query2 = "SELECT @exist,@column_id,@column_name,@column_value";
+   
+    	if (!mysql_query($query)) {
+        	$log = 'Error calling procedure detect_investigator :' . $query . ' Error:' . mysql_error();
+        	$logger->error($log);
+        	echo $log;
+        	return false;
+	 }
+    	$res = mysql_query($query2);
+    	$res1 = mysql_fetch_row($res);
+    	if (mysql_num_rows($res) > 0 && $res1[0]>0) {
+        	$res = mysql_fetch_row($res);
+        	echo "$name is contained in an entry from entities with column '".$res1[2]."', id ".$res1[1]." and value '".$res1[3]."'. Skipping. ";
+        	return TRUE;
+    	}
 	return FALSE;
 }
 
