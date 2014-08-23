@@ -2083,14 +2083,14 @@ BEGIN
 			LEAVE dynamicCursorLoop;
 		END IF;
 
-		IF (TRIM(basename)<>'' AND input LIKE CONCAT('%', basename, '%')) THEN
+		IF (TRIM(basename)<>'' AND TRIM(basename)<>' ' AND input LIKE CONCAT('%', basename, '%')) THEN
 			SET exist = TRUE;
 			SET colId = entityID;
 			SET colName = 'name';
 			SET colValue = basename;
 			LEAVE dynamicCursorLoop;
 		END IF;
-		IF (TRIM(displayname)<>'' AND input LIKE CONCAT('%', displayname, '%')) THEN
+		IF (TRIM(displayname)<>'' AND TRIM(displayname)<>' ' AND input LIKE CONCAT('%', displayname, '%')) THEN
 			SET exist = TRUE;
 			SET colId = entityID;
 			SET colName = 'display_name';
@@ -2103,7 +2103,7 @@ BEGIN
 				SET i = 1;
 				WHILE i <= occurance DO
 					SET param = SPLIT_STR(clientname,',',i);
-					IF input LIKE concat('%',trim(param),'%') THEN
+					IF (TRIM(param)<>'' AND TRIM(param)<>' ' AND input LIKE concat('%',trim(param),'%')) THEN
 						SET exist = TRUE;
 						SET colId = entityID;
 						SET colName = 'client_name';
@@ -2120,7 +2120,7 @@ BEGIN
 				SET i = 1;
 				WHILE i <= occurance DO
 					SET param = SPLIT_STR(searchname,'|',i);
-					IF input LIKE concat('%',trim(param),'%') THEN
+					IF (TRIM(param)<>'' AND TRIM(param)<>' ' AND input LIKE concat('%',trim(param),'%')) THEN
 						SET exist = TRUE;
 						SET colId = entityID;
 						SET colName = 'search_name';
@@ -2136,43 +2136,6 @@ BEGIN
 END $$
 
 
-DROP FUNCTION IF EXISTS CHECK_SEARCH $$
-CREATE FUNCTION CHECK_SEARCH(
-	search VARCHAR(255),
-	name VARCHAR(255),
-	delim VARCHAR(12)
-) 
-RETURNS INT(1)
-BEGIN
-	DECLARE occurance INT;
-	DECLARE done INT;
-	DECLARE i INT;
-	DECLARE param VARCHAR(255);
-
-	SET occurance=LENGTH(name)-LENGTH(REPLACE(name,delim,''))+1;
-	IF occurance > 0 THEN
-		SET i = 1;
-		WHILE i <= occurance DO
-			IF done=1 THEN
-				RETURN TRUE;
-			END IF;
-			SET param = SPLIT_STR(name,delim,i);
-			IF search LIKE concat('%',trim(param),'%') THEN
-				SET done=1;
-			END IF;
-			SET i = i+1;
-		end while;
-		IF done=1 THEN
-			RETURN TRUE;
-		ELSE
-			RETURN FALSE;
-		END IF;
-	ELSE
-		RETURN FALSE;
-	END IF;
-END$$
-
-
 DROP FUNCTION IF EXISTS SPLIT_STR $$
 CREATE FUNCTION SPLIT_STR(
 	x VARCHAR(255),
@@ -2182,7 +2145,7 @@ CREATE FUNCTION SPLIT_STR(
 RETURNS varchar(255) CHARSET latin1
 BEGIN
 	RETURN REPLACE(SUBSTRING(SUBSTRING_INDEX(x, delim, pos),LENGTH(SUBSTRING_INDEX(x, delim, pos -1)) + 1),delim, '');
-END$$
+END $$
 
 DELIMITER ;
 
