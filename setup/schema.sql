@@ -2045,3 +2045,108 @@ return tis_score;
 END; $$
 
 DELIMITER ;
+
+
+#Start of detect_investigator procedure
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS detect_investigator $$
+CREATE PROCEDURE detect_investigator(
+	IN input TEXT,
+	OUT exist INT,
+	OUT colId INT,
+	OUT colName VARCHAR(255),
+	OUT colValue VARCHAR(255)
+)
+BEGIN
+	DECLARE entityID INT;
+	DECLARE basename VARCHAR(255);
+	DECLARE displayname VARCHAR(255);
+	DECLARE clientname VARCHAR(255);
+	DECLARE searchname VARCHAR(255);
+	DECLARE done INT DEFAULT FALSE;
+	DECLARE occurance INT;
+	DECLARE i INT;
+	DECLARE param VARCHAR(255);
+
+
+	DECLARE dynamicCursor CURSOR FOR SELECT id, name, display_name, client_name, search_name from entities where class='Institution';
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+	SET exist = FALSE;
+	OPEN dynamicCursor;
+	dynamicCursorLoop: LOOP
+
+		FETCH dynamicCursor INTO entityID,basename,displayname,clientname,searchname;
+		IF (done) THEN
+			LEAVE dynamicCursorLoop;
+		END IF;
+
+		IF (TRIM(basename)<>'' AND TRIM(basename)<>' ' AND input LIKE CONCAT('%', basename, '%')) THEN
+			SET exist = TRUE;
+			SET colId = entityID;
+			SET colName = 'name';
+			SET colValue = basename;
+			LEAVE dynamicCursorLoop;
+		END IF;
+		IF (TRIM(displayname)<>'' AND TRIM(displayname)<>' ' AND input LIKE CONCAT('%', displayname, '%')) THEN
+			SET exist = TRUE;
+			SET colId = entityID;
+			SET colName = 'display_name';
+			SET colValue = displayname;
+			LEAVE dynamicCursorLoop;
+		END IF;
+		IF (TRIM(clientname)<>'') THEN
+			SET occurance=LENGTH(clientname)-LENGTH(REPLACE(clientname,',',''))+1;
+			IF occurance > 0 THEN
+				SET i = 1;
+				WHILE i <= occurance DO
+					SET param = SPLIT_STR(clientname,',',i);
+					IF (TRIM(param)<>'' AND TRIM(param)<>' ' AND input LIKE concat('%',trim(param),'%')) THEN
+						SET exist = TRUE;
+						SET colId = entityID;
+						SET colName = 'client_name';
+						SET colValue = clientname;
+						LEAVE dynamicCursorLoop;
+					END IF;
+					SET i = i+1;
+				end while;
+			END IF;
+		END IF;
+		IF (TRIM(searchname)<>'') THEN
+			SET occurance=LENGTH(searchname)-LENGTH(REPLACE(searchname,'|',''))+1;
+			IF occurance > 0 THEN
+				SET i = 1;
+				WHILE i <= occurance DO
+					SET param = SPLIT_STR(searchname,'|',i);
+					IF (TRIM(param)<>'' AND TRIM(param)<>' ' AND input LIKE concat('%',trim(param),'%')) THEN
+						SET exist = TRUE;
+						SET colId = entityID;
+						SET colName = 'search_name';
+						SET colValue = searchname;
+						LEAVE dynamicCursorLoop;
+					END IF;
+					SET i = i+1;
+				end while;
+			END IF;
+		END IF;
+	END LOOP;
+	CLOSE dynamicCursor;
+END $$
+
+
+DROP FUNCTION IF EXISTS SPLIT_STR $$
+CREATE FUNCTION SPLIT_STR(
+	x VARCHAR(255),
+	delim VARCHAR(12),
+	pos INT
+)
+RETURNS varchar(255) CHARSET latin1
+BEGIN
+	RETURN REPLACE(SUBSTRING(SUBSTRING_INDEX(x, delim, pos),LENGTH(SUBSTRING_INDEX(x, delim, pos -1)) + 1),delim, '');
+END $$
+
+DELIMITER ;
+
+#End of detect_investigator procedure
