@@ -2115,7 +2115,7 @@ BEGIN
 			END IF;
 		END IF;
 		IF (TRIM(searchname)<>'') THEN
-			SET occurance=LENGTH(searchname)-LENGTH(REPLACE(searchname,',',''))+1;
+			SET occurance=LENGTH(searchname)-LENGTH(REPLACE(searchname,'|',''))+1;
 			IF occurance > 0 THEN
 				SET i = 1;
 				WHILE i <= occurance DO
