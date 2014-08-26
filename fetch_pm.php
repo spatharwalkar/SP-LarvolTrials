@@ -23,7 +23,7 @@ function run_incremental_scraper($days=NULL)
 	global $update_id;
 	$cron_run = isset($update_id); 	
 	if(is_null($days)) $days = 1;
-	if($days>60) $days=60;
+	if($days>10) $days=10;
 	$update_id=9;
 	if($cron_run)
 	{
