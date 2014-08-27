@@ -39,7 +39,7 @@
 		if(is_array($ResultArr))
 		{
 			
-			$GetDataQuery = "SELECT `id`, `name`, `class`, `category`, `is_active`, `mesh_name` FROM `entities` WHERE id IN (" . implode(',',$ResultArr) . ") ";
+			$GetDataQuery = "SELECT `id`, `name`, `class`, `category`, `is_active`, `mesh_name` FROM `entities` WHERE id IN (" . implode(',',$ResultArr) . ") AND (is_active <> '0' OR is_active IS NULL)  ";
 			//print $GetDataQuery;
 			
 			$GetDataQueryResult = mysql_query($GetDataQuery);
@@ -84,7 +84,7 @@
 			
 			if(count($MOACatArray) > 0)
 			{
-				$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` IN ('" . implode("','",$MOACatArray) . "')";			
+				$MOAQuery = "SELECT `id`, `name` FROM `entities` e JOIN `entity_relations` er ON(e.`id`=er.`child`) WHERE e.`class`='MOA' AND er.`parent` IN ('" . implode("','",$MOACatArray) . "') AND (is_active <> '0' OR is_active IS NULL) ";			
 				
 				$MOAResult = mysql_query($MOAQuery);
 				
@@ -147,7 +147,7 @@
 		$ClassFlg = true;
 		
 		if($globalOptions['class'] == 'MOA')
-		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name` FROM `entities` WHERE `class` = 'MOA_Category' AND `name` <> 'Other'";
+		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name` FROM `entities` WHERE `class` = 'MOA_Category' AND `name` <> 'Other' AND (is_active <> '0' OR is_active IS NULL) " ;
 		else if($globalOptions['class'] == 'Disease')
 		//$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` FROM `entities` e JOIN `entity_relations` er ON(er.`parent`=e.`id`) JOIN `entities` e2 ON(e2.`id`=er.`child`) WHERE e.`class` = 'Disease' AND e2.`class` = 'Product'  AND (e2.`is_active` <> '0' OR e2.`is_active` IS NULL) AND (e.`is_active` <> '0' OR e.`is_active` IS NULL) AND (e.`mesh_name` IS NOT NULL AND e.`mesh_name` <> '')";
 		$ResultArrQuery = "SELECT DISTINCT(e.`id`), e.`name`, e.`class`, e.`display_name` 
@@ -162,7 +162,7 @@
 		else if($globalOptions['class'] == 'Disease_Category')
 		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."' AND (`is_active` <> '0' OR `is_active` IS NULL)";
 		else
-		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."'";
+		$ResultArrQuery = "SELECT DISTINCT(`id`), `name`, `class`, `display_name`, `category`,`affiliation` FROM `entities` WHERE `class` = '".$globalOptions['class']."' AND (is_active <> '0' OR is_active IS NULL) ";
 		
 		$QueryResult = mysql_query($ResultArrQuery);		
 		

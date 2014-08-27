@@ -78,6 +78,8 @@
 	$TabInvestigatorCount = $rowGetTabs['investigators'];
 	$TabNewsCount = $rowGetTabs['news'];
 	
+	$MoaCatChildRecords = implode("','",getAllMoaChild($MoaCatId));
+	
 	$meta_title = 'Larvol Sigma'; //default value
 	$meta_title = isset($MoaCatName) ? $MoaCatName. ' - '.$meta_title : $meta_title;		
 ?>
