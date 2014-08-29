@@ -9,7 +9,7 @@ function getIDs($days_passed=NULL)
 	if(!is_null($days_passed)) $days=$days_passed;
     else global $days;
     $ids = array();
-    $url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=&reldate='.$days.'&datetype=edat&retmax=50000000&usehistory=y';
+    $url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=&reldate='.$days.'&datetype=mdat&retmax=50000000&usehistory=y';
 
 	if(PUBMED_API_URL_ARG)
 	{
