@@ -6,7 +6,7 @@ $days = mysql_real_escape_string($_GET['days']);
 
 
 function generateNewsIDs($days) {
-	$query = 'select CONCAT("[",GROUP_CONCAT(id),"]") as id from news where added >= DATE_SUB(current_date,interval '.$days.' day) ';
+	$query = 'select CONCAT("[",GROUP_CONCAT(id),"]") as id from news where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (generation_date >= DATE_SUB(current_date,interval '.$days.' day)) ';
 	$json = runNewsQuery($query);	
 	echo($json);
 }
@@ -37,7 +37,7 @@ function generateNewsEntities($id) {
 					JOIN news_redtag nr on nr.news=n.id 
 					JOIN redtags rt on rt.id=nr.redtag 
 					WHERE n.id=' . $id .
-					' GROUP BY n.larvol_id,n.brief_title,n.phase,n.summary,n.enrollment,n.added';
+					' GROUP BY n.larvol_id,n.brief_title,n.phase,n.summary,n.enrollment,n.generation_date';
 	
 	$tmpq = 'SELECT `larvol_id` FROM news where `id`="' . $id . '" and larvol_id is not null  LIMIT 1';
 	if(!$tres = mysql_query($tmpq))
@@ -75,7 +75,7 @@ function generateNewsEntities($id) {
 				JOIN news_redtag nr on nr.news=n.id 
 				JOIN redtags rt on rt.id=nr.redtag 
 				WHERE n.id=' . $id . 
-				' GROUP BY n.abstract_id,n.brief_title,n.phase,n.summary,n.enrollment,n.added';
+				' GROUP BY n.abstract_id,n.brief_title,n.phase,n.summary,n.enrollment,n.generation_date';
 	}
 
 	$json = runNewsQuery($query);
