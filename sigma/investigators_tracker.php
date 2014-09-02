@@ -1369,7 +1369,8 @@ function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, 
 	$htmlContent .= '<th width="8px"></th></tr>';
 
 	foreach($IdsArray as $key => $Ids)
-	{	
+	{	if(!empty($data_matrix[$key]['RowHeader']))
+		{
 		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
 		for($j=0; $j < $columns; $j++)
 		{
@@ -1381,58 +1382,59 @@ function InvestigatorTrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, 
 		
 		//// Code for Indlead
 		
-		$htmlContent .= '<tr id="'.$uniqueId.'_Graph_Row_A_'.$key.'"><th align="right" class="RowHeader_col" id="'.$uniqueId.'_RowHeaderCol_'.$key.'" rowspan="3"><a href="'.  $data_matrix[$key]['HeaderLink'] . '" style="text-decoration:underline;">'.$data_matrix[$key]['RowHeader'].'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
-	
-		///Below function will derive number of lines required to display disease name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
-		///for disease column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
-		///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
-		$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$key]['RowHeader'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
+			$htmlContent .= '<tr id="'.$uniqueId.'_Graph_Row_A_'.$key.'"><th align="right" class="RowHeader_col" id="'.$uniqueId.'_RowHeaderCol_'.$key.'" rowspan="3"><a href="'.  $data_matrix[$key]['HeaderLink'] . '" style="text-decoration:underline;">'.$data_matrix[$key]['RowHeader'].'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 		
-		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
-		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
-		
-		$Err = CountErrInvestigator($data_matrix, $key, $ratio);
+			///Below function will derive number of lines required to display disease name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
+			///for disease column. From that we can calculate extra height which will be distributed to up and down rows of graph bar, So now IE6/7 as well as chrome will not 
+			///have issue of unequal distrirbution of extra height due to rowspan and bar will remain in middle, without use of JS.
+			$ExtraAdjusterHeight = (($pdf->getNumLines($data_matrix[$key]['RowHeader'], ((650)*17/90)) * $Line_Width)  - 20) / 2;
 			
-		$Max_ValueKey = Max_ValueKeyInvestigatorTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
-			
-		$total_cols = $inner_columns * $columns;
-		$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
-		$phase_space = 0;
-	
-		foreach($phase_legend_nums as $phase_nums)
-		{
-			if($data_matrix[$key]['phase_'.$phase_nums] > 0)
+			for($j=0; $j < $columns; $j++)
 			{
-				$Color = getClassNColorforPhaseInvestigatorTracker($phase_nums);
-				$Mini_Bar_Width = CalculateMiniBarWidthInvestigatorTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
-				$phase_space =  $phase_space + $Mini_Bar_Width;					
-				$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="' . $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" class="Link" >&nbsp;</a></th>';
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
 			}
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_B_'.$key.'" class="Link" >';
+			
+			$Err = CountErrInvestigator($data_matrix, $key, $ratio);
+				
+			$Max_ValueKey = Max_ValueKeyInvestigatorTracker($data_matrix[$key]['phase_na'], $data_matrix[$key]['phase_0'], $data_matrix[$key]['phase_1'], $data_matrix[$key]['phase_2'], $data_matrix[$key]['phase_3'], $data_matrix[$key]['phase_4']);
+				
+			$total_cols = $inner_columns * $columns;
+			$Total_Bar_Width = ceil($ratio * $data_matrix[$key]['TotalCount']);
+			$phase_space = 0;
+		
+			foreach($phase_legend_nums as $phase_nums)
+			{
+				if($data_matrix[$key]['phase_'.$phase_nums] > 0)
+				{
+					$Color = getClassNColorforPhaseInvestigatorTracker($phase_nums);
+					$Mini_Bar_Width = CalculateMiniBarWidthInvestigatorTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
+					$phase_space =  $phase_space + $Mini_Bar_Width;					
+					$htmlContent .= '<th colspan="'.$Mini_Bar_Width.'" class="Link '.$Color[0].'" title="'.$data_matrix[$key]['phase_'.$phase_nums].'" style="height:20px; _height:20px;"><a href="' . $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums . '" class="Link" >&nbsp;</a></th>';
+				}
+			}
+			
+			$remain_span = $total_cols - $phase_space;
+			
+			if($remain_span > 0)
+			$htmlContent .= DrawExtraHTMLCellsInvestigatorTracker($phase_space, $inner_columns, $remain_span);
+			
+			$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_C_'.$key.'">';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
+			}
+			$htmlContent .= '<th></th></tr>';
+			
+			////// End Of - Color Graph - Bar Starts
+			
+			$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="'. (($key == (count($IdsArray)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
+			for($j=0; $j < $columns; $j++)
+			{
+				$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
+			}
+			$htmlContent .= '<th></th></tr>';
 		}
-		
-		$remain_span = $total_cols - $phase_space;
-		
-		if($remain_span > 0)
-		$htmlContent .= DrawExtraHTMLCellsInvestigatorTracker($phase_space, $inner_columns, $remain_span);
-		
-		$htmlContent .= '<th></th></tr><tr id="'.$uniqueId.'_Graph_Row_C_'.$key.'">';
-		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th height="'.$ExtraAdjusterHeight.'px" colspan="'.$inner_columns.'" class="graph_right"><font style="line-height:1px;">&nbsp;</font></th>';
-		}
-		$htmlContent .= '<th></th></tr>';
-		
-		////// End Of - Color Graph - Bar Starts
-		
-		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="'. (($key == (count($IdsArray)-1)) ? '':'graph_bottom') .' graph_right">&nbsp;</th>';
-		for($j=0; $j < $columns; $j++)
-		{
-			$htmlContent .= '<th colspan="'.$inner_columns.'" class="graph_right">&nbsp;</th>';
-		}
-		$htmlContent .= '<th></th></tr>';
 	}			   
 
 	//Draw scale			   
