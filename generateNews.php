@@ -31,6 +31,23 @@ function generatePubmedNewsUsingID($sourceid)
 		return false;
 	}
 	echo('<br><b>' . date('Y-m-d H:i:s') .'</b> - Generating news for ' . $sourceid . ' ...');
+	
+	/************ index the abstract */
+	$queryX = 'SELECT `pm_id` FROM  pubmed_abstracts where `source_id` =  ' . $sourceid . '  LIMIT 1';
+	
+	if(!$resX = mysql_query($queryX))
+		{
+			$log='There seems to be a problem with the SQL Query.  Query = :'.$queryX.' Error:' . mysql_error();
+			echo $log;
+			return false;
+		}
+	$resX = mysql_fetch_assoc($resX);
+	$pm_id = $resX['pm_id'];
+	
+	require_once('preindex_pmabstract.php');
+	pmtindex(false,NULL,NULL,NULL,NULL,array($pm_id));
+
+	/*************/
 	ob_flush();
 	flush();
 	$query = 'call generatePubmedNewsUsingID(' . $sourceid . ')';
