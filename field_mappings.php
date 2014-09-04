@@ -12,8 +12,9 @@ if($_GET['l']&&$_GET['f']&&$_GET['s'])
 }
 function get_field_value($larvol_id,  $field_name, $source)
 {
-	if( empty($larvol_id) or empty($field_name) or empty($source) )
+	if( empty($larvol_id) or empty($field_name)  )
 		return false;
+
 	global $logger;
 
 		$query = 'SELECT * FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
@@ -98,19 +99,21 @@ function get_field_value($larvol_id,  $field_name, $source)
 		}
 		
 		//nothing in data_manual, so continue.
-		$query = 'SELECT * FROM data_'. strtolower($source) . ' where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-		if(!$res = mysql_query($query))
-			{
-				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-				$logger->error($log);
-				echo $log;
+		if(!empty($source))
+		{
+			$query = 'SELECT * FROM data_'. strtolower($source) . ' where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+			if(!$res = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					$logger->error($log);
+					echo $log;
+					return false;
+				}
+			$res = mysql_fetch_assoc($res);
+			$exists = $res !== false;
+			if(!$exists)
 				return false;
-			}
-		$res = mysql_fetch_assoc($res);
-		$exists = $res !== false;
-		if(!$exists)
-			return false;
-		
+		}
 		
 		//
 		if(strtoupper($source)=='EUDRACT')

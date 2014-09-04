@@ -250,7 +250,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storecha
 	foreach($larvol_ids as $larvol_id)
 	{
 
-		
+
 
 		if($cid > $larvol_id) continue; 
 		
@@ -278,7 +278,9 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storecha
 		if(isset($sourcedb) and $sourcedb=='eudract') 
 			$nctid=$res['nct_id'];
 		else
-			$nctid=padnct($res['nct_id']);
+		{
+			if($exists) $nctid=padnct($res['nct_id']);
+		}
 		$record_data = $res;
 		if($exists)
 		{
