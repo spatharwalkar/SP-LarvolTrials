@@ -30,6 +30,7 @@ function showMOATracker($id, $TrackerType, $page=1)
 {
 	$HTMLContent = '';
 	$Return = DataGeneratorForMOATracker($id, $TrackerType, $page);
+	// *pr($Return);
 	$uniqueId = uniqid();
 	
 	///Required Data restored
@@ -58,6 +59,7 @@ function showMOATracker($id, $TrackerType, $page=1)
 		$MainPageURL = 'investigator.php';
 	
 	$HTMLContent .= MOATrackerCommonCSS($uniqueId, $TrackerType);
+	
 	
 	if($TrackerType=='MTH')
 	$HTMLContent .= MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType);
@@ -247,6 +249,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 		$arrImplode = @implode(",", $arrDiseaseIds);
 		
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Investigator" AND `id`=' .$id;
+		
 		$res = mysql_query($query) or die(mysql_error());
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
@@ -489,7 +492,16 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 		$StartSlice = ($page - 1) * $RecordsPerPage;
 		$EndSlice = $StartSlice + $RecordsPerPage;
 		$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
-		$NewMOAOrMOACatIds = array_slice($NewMOAOrMOACatIds, $StartSlice, $RecordsPerPage);
+
+		//In case of Investigators $NewMOAOrMOACatIds will be empty, so use $data_matrix instead.
+		if(!empty($NewMOAOrMOACatIds))
+		{ 
+			$NewMOAOrMOACatIds = array_slice($NewMOAOrMOACatIds, $StartSlice, $RecordsPerPage);
+		}
+		else
+		{
+			$NewMOAOrMOACatIds = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+		}
 	}
 	/////////PAGING DATA ENDS
 	
@@ -515,6 +527,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	$Return['PhaseArray'] = $PhaseArray;
 	$Return['TotalPages'] = $TotalPages;
 	$Return['TotalRecords'] = $TotalRecords;
+	
 	
 	return $Return;
 }
@@ -570,7 +583,7 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 					.controls input{
 						margin:0.1em;
 					}
-					
+			
 					#slideout_'.$uniqueId.' {
 						position: fixed;
 						_position:absolute;
@@ -606,7 +619,7 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 						padding-right:20px;
 						border-bottom:1px solid #000;
 					}
-					
+						
 					.gray {
 						background-color:#CCCCCC;
 						width: 35px;
@@ -666,7 +679,7 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 						margin-right: 1px;
 						padding-top:3px;
 					}
-					
+							
 					.downldbox {
 						height:auto;
 						width:310px;
@@ -794,7 +807,7 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 						padding-bottom:25px;
 						color:#4f2683;
 					}
-					
+						
 					.pagination a:hover {
 						background-color: #aa8ece;
 						color: #FFFFFF;
@@ -827,6 +840,7 @@ function MOATrackerCommonCSS($uniqueId, $TrackerType)
 						padding: 2px;
 					}
 					</style>';
+	
 	return $htmlContent;				
 }
 
@@ -1083,7 +1097,8 @@ function MOATrackerHeaderHTMLContent($Report_DisplayName, $TrackerType)
 }
 
 function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_columns, $inner_width, $column_width, $ratio, $column_interval, $PhaseArray, $TrackerType, $uniqueId, $TotalRecords, $TotalPages, $page, $MainPageURL)
-{				
+{
+	
 	if(count($data_matrix) == 0 && ($TrackerType == 'MTH' || $TrackerType == 'DMT' || $TrackerType == 'DISCATMT' || $TrackerType == 'INVESTMT')) return 'No MOA Found';
 	
 	require_once('../tcpdf/config/lang/eng.php');
@@ -1176,6 +1191,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 
 	foreach($IdsArray as $key => $Ids)
 	{	
+		//pr($Ids);
 		$htmlContent .= '<tr class="side_tick_height"><th class="RowHeader_col side_tick_height">&nbsp;</th><th class="graph_right">&nbsp;</th>';
 		for($j=0; $j < $columns; $j++)
 		{
@@ -1187,6 +1203,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 		
 		//// Code for Indlead
 		
+		//pr($data_matrix[$key]['HeaderLink'] );
 		$htmlContent .= '<tr id="'.$uniqueId.'_Graph_Row_A_'.$key.'"><th align="right" class="RowHeader_col" id="'.$uniqueId.'_RowHeaderCol_'.$key.'" rowspan="3"><a href="'.  $data_matrix[$key]['HeaderLink'] . '" style="text-decoration:underline;">'.$data_matrix[$key]['RowHeader'].'</th><th class="graph_right" rowspan="3">&nbsp;</th>';
 	
 		///Below function will derive number of lines required to display product name, as our graph size is fixed due to fixed scale, we can calculate approx max area  
@@ -1210,6 +1227,7 @@ function MOATrackerHTMLContent($data_matrix, $id, $columns, $IdsArray, $inner_co
 	
 		foreach($phase_legend_nums as $phase_nums)
 		{
+			
 			if($data_matrix[$key]['phase_'.$phase_nums] > 0)
 			{
 				$Color = getClassNColorforPhaseMOATracker($phase_nums);
