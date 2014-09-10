@@ -374,6 +374,7 @@ function process_edits($id)
 						mysql_query('BEGIN');
 						$query = 'UPDATE rpt_masterhm_cells SET filing="" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
 									. ' IN(entity1,entity2) LIMIT 1';
+									 
 						$res = mysql_query($query);
 						if($res === false){ $errors[] = "Bad SQL query adding item to cell." . $query . mysql_error(); mysql_query('ROLLBACK'); continue;}
 						$query = 'UPDATE rpt_masterhm_cells SET filing_lastchanged="' . date('Y-m-d', $now)
@@ -385,7 +386,7 @@ function process_edits($id)
 						case 'info':
 						mysql_query('BEGIN');
 						$query = 'UPDATE rpt_masterhm_cells SET phase_explain="" WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
-									. ' IN(entity1,entity2) LIMIT 1';
+									. ' IN(entity1,entity2) LIMIT 1'; 
 						$res = mysql_query($query);
 						if($res === false){ $errors[] = "Bad SQL query adding item to cell." . $query . mysql_error(); mysql_query('ROLLBACK'); continue;}
 						$query = 'UPDATE rpt_masterhm_cells SET phase_explain_lastchanged="' . date('Y-m-d', $now)
@@ -397,7 +398,7 @@ function process_edits($id)
 						case 'phase4':
 						mysql_query('BEGIN');
 						$query = 'UPDATE rpt_masterhm_cells SET phase4_override=1 WHERE ' . $rowEntity . ' IN(entity1,entity2) AND ' . $colEntity
-									. ' IN(entity1,entity2) LIMIT 1';
+									. ' IN(entity1,entity2) LIMIT 1'; 
 						$res = mysql_query($query);
 						if($res === false){ $errors[] = "Bad SQL query adding item to cell." . $query . mysql_error(); mysql_query('ROLLBACK'); continue;}
 						$query = 'UPDATE rpt_masterhm_cells SET phase4_override_lastchanged="' . date('Y-m-d', $now)
@@ -673,34 +674,53 @@ function show_editor($id, $editable=true)
 			$json[$row['type_id']][$col] = array();
 			if($cell['bomb'] == 'large')
 			{
-				echo(' <img src="images/lbomb.png" alt="bomb" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`bomb"/>');
+				if($row['type_id']==$cell['entity1'])
+					echo(' <img src="images/lbomb.png" alt="bomb" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`bomb"/>');
+				else
+					echo(' <img src="images/lbomb.png" alt="bomb" id="' . $cell['entity2'].'`'.$cell['entity1'] . '`bomb"/>');
 				$json[$row['type_id']][$col]['bomb'] = 'large';
 				$json[$row['type_id']][$col]['bomb_explain'] = $cell['bomb_explain'];
 			}
 			if($cell['bomb'] == 'small')
 			{
-				echo(' <img src="images/sbomb.png" alt="bomb" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`bomb"/>');
+				if($row['type_id']==$cell['entity1'])
+					echo(' <img src="images/sbomb.png" alt="bomb" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`bomb"/>');
+				else
+					echo(' <img src="images/sbomb.png" alt="bomb" id="' . $cell['entity2'].'`'.$cell['entity1'] . '`bomb"/>');
+				
 				$json[$row['type_id']][$col]['bomb'] = 'small';
 				$json[$row['type_id']][$col]['bomb_explain'] = $cell['bomb_explain'];
 			}
 			if($cell['phase_explain'] !== NULL)
 			{
-				echo(' <img src="images/phaseexp_small.png" alt="info" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`info"/>');
+				if($row['type_id']==$cell['entity1'])
+					echo(' <img src="images/phaseexp_small.png" alt="info" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`info"/>');
+				else
+					echo(' <img src="images/phaseexp_small.png" alt="info" id="' . $cell['entity2'].'`'.$cell['entity1'] . '`info"/>');
 				$json[$row['type_id']][$col]['info'] = $cell['phase_explain'];
 			}
 			if($cell['filing'] !== NULL)
 			{
-				echo(' <img src="images/filing.png" alt="filing" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`filing"/>');
+				if($row['type_id']==$cell['entity1'])
+					echo(' <img src="images/filing.png" alt="filing" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`filing"/>');
+				else
+					echo(' <img src="images/filing.png" alt="filing" id="' . $cell['entity2'].'`'.$cell['entity1'] . '`filing"/>');
 				$json[$row['type_id']][$col]['filing'] = $cell['filing'];
 			}
 			if($cell['phase4_override'])
 			{
-				echo(' <img src="images/phase4.png" alt="phase4" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`phase4"/>');
+				if($row['type_id']==$cell['entity1'])
+					echo(' <img src="images/phase4.png" alt="phase4" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`phase4"/>');
+				else
+					echo(' <img src="images/phase4.png" alt="phase4" id="' . $cell['entity2'].'`'.$cell['entity1'] . '`phase4"/>');
 				$json[$row['type_id']][$col]['phase4'] = true;
 			}
 			if($cell['preclinical'])
 			{
-				echo(' <img src="images/preclinical.png" alt="preclinical" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`preclinical"/>');
+				if($row['type_id']==$cell['entity1'])
+					echo(' <img src="images/preclinical.png" alt="preclinical" id="' . $cell['entity1'].'`'.$cell['entity2'] . '`preclinical"/>');
+				else
+					echo(' <img src="images/preclinical.png" alt="preclinical" id="' . $cell['entity2'].'`'.$cell['entity1'] . '`preclinical"/>');
 				$json[$row['type_id']][$col]['preclinical'] = true;
 			}
 			
