@@ -9,7 +9,17 @@ function getIDs($days_passed=NULL)
 	if(!is_null($days_passed)) $days=$days_passed;
     else global $days;
     $ids = array();
-    $url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=&reldate='.$days.'&datetype=mdat&retmax=50000000&usehistory=y';
+	
+
+	
+//  $url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=&reldate='.$days.'&datetype=mdat&retmax=50000000&usehistory=y';
+// 	added additional filters to the url
+
+	$pub_start_date=date('Y/m/d', strtotime("-6 months"));
+	$ent_start_date=date('Y/m/d', strtotime("-1 months"));
+	$mod_start_date=date('Y/m/d', strtotime("-".$days." days"));
+
+	$url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=50000&term=((("'. $mod_start_date . '"[Date - Modification] : "3000"[Date - Modification])) AND ("'. $ent_start_date .'"[Date - Entrez] : "3000"[Date - Entrez])) AND ("'. $pub_start_date .'"[Date - MeSH] : "3000"[Date - MeSH]) "';
 
 	if(PUBMED_API_URL_ARG)
 	{
