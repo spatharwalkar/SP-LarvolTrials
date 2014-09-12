@@ -10688,6 +10688,9 @@ class TrialTracker
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
 		$resetUrl = htmlentities($resetUrl);
 		
+		$resetUrl = str_replace("%2C","&",$resetUrl);
+		$resetUrl = str_replace("%3D","=",$resetUrl);
+
 		echo '<div id="buttons">'
 			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
 			. '<a style="display:inline;" href="' . $dir . $resetUrl . '">'
