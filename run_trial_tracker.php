@@ -7546,10 +7546,10 @@ class TrialTracker
 				}
 				
 				$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
-				foreach($pDetails['Ids'] as $ikey => $ivalue)
+				/*foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
 					$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
-				}
+				}*/
 				
 				$Ids = $pDetails['Ids'];
 				$TrialsInfo = $pDetails['TrialsInfo'];
@@ -10687,12 +10687,6 @@ class TrialTracker
 		
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
 		$resetUrl = htmlentities($resetUrl);
-		
-		$arr1 = array('%2C','%2525252C','%252525252C');
-		$arr2 = array('%3D','%2525253D','%252525253D');
-		$resetUrl = str_replace($arr1,"&",$resetUrl);
-		$resetUrl = str_replace($arr2,"=",$resetUrl);
-		$resetUrl = urldecode($resetUrl);
 
 		echo '<div id="buttons">'
 			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
