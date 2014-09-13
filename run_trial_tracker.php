@@ -10688,8 +10688,11 @@ class TrialTracker
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
 		$resetUrl = htmlentities($resetUrl);
 		
-		$resetUrl = str_replace("%2C","&",$resetUrl);
-		$resetUrl = str_replace("%3D","=",$resetUrl);
+		$arr1 = array('%2C','%2525252C','%252525252C');
+		$arr2 = array('%3D','%2525253D','%252525253D');
+		$resetUrl = str_replace($arr1,"&",$resetUrl);
+		$resetUrl = str_replace($arr2,"=",$resetUrl);
+		$resetUrl = urldecode($resetUrl);
 
 		echo '<div id="buttons">'
 			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
