@@ -7546,10 +7546,10 @@ class TrialTracker
 				}
 				
 				$pDetails = $this->getProductHeaders($productIds, $onlyUpdates);
-				/*foreach($pDetails['Ids'] as $ikey => $ivalue)
+				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
 					$pDetails['Ids'][$ikey]['area'] = implode("','", $areaIds);
-				}*/
+				}
 				
 				$Ids = $pDetails['Ids'];
 				$TrialsInfo = $pDetails['TrialsInfo'];
