@@ -103,7 +103,8 @@ VALUES(1, 'New trial', 'New Trial', 6, NULL, "select larvol_id, cast(coalesce( f
 	(24,'Clinical Trial,Phase II','Other',7,'Phase 2 Data','SKIP',"6a5d36fe-c676-49a5-85e9-7d6ce80b82db","select pm_id, concat(t.pubmeddata_date_year,"-",LPAD(t.pubmeddata_date_month, 2, '0'),"-",LPAD(t.pubmeddata_date_day, 2, '0')) as added  from pubmed_abstracts where publicationtype = 'Clinical Trial, Phase II'"),
 	(25,'Clinical Trial,Phase III','Other',8,'Phase 3 Data','SKIP',"37676fb8-c278-41dd-a008-992117fb0da4","select pm_id, concat(t.pubmeddata_date_year,"-",LPAD(t.pubmeddata_date_month, 2, '0'),"-",LPAD(t.pubmeddata_date_day, 2, '0')) as added  from pubmed_abstracts where publicationtype = 'Clinical Trial, Phase III'"),
 	(26,'Clinical Trial,Phase IV','Other',7,'Phase 4 Data','SKIP',"e293e17a-3fba-4ba6-8d46-bd0acc69995b","select pm_id, concat(t.pubmeddata_date_year,"-",LPAD(t.pubmeddata_date_month, 2, '0'),"-",LPAD(t.pubmeddata_date_day, 2, '0')) as added  from pubmed_abstracts where publicationtype = 'Clinical Trial, Phase IV'"),
-	(27,'Review','Other',5,'Review','SKIP',"555b8f0f-60c6-4c4d-b98b-28227dc42996","select pm_id from pubmed_abstracts where publicationtype = 'Review',NULL");
+	(27,'Review','Other',5,'Review','SKIP',"555b8f0f-60c6-4c4d-b98b-28227dc42996","select pm_id from pubmed_abstracts where publicationtype = 'Review',NULL"),
+	(28,'Enrollment status', 'Enrollment status', 4, '[overall_status_prev] -> [overall_status]', "select larvol_id, cast(coalesce( overall_status_lastchanged,current_date())as date) as added from data_history join data_trials dt using (larvol_id) where adddate(overall_status_lastchanged,%d)>= current_date() and overall_status_prev IN ('Recruiting','Enrolling by invitation') and dt.overall_status IN ('Recruiting','Enrolling by invitation')",'468a279c-33c9-4766-9eb2-0b87cca81dd2',NULL);
 
 INSERT INTO tis_scores(phase, score, category, input)
 VALUES('N/A', 0.5, 1, 1),
