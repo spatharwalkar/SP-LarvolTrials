@@ -1055,8 +1055,10 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 					$wstr = str_replace('%s2', $xx[1],$wstr);
 				}
 				$prevchain = $chain_name;
+				/*
 				if(array_key_exists($pm_field.$wstr,$unique_searchwords))
 					continue;
+				*/
 				$unique_searchwords[$pm_field.$wstr]++;
 				
 				//echo $wcount ." " . $wstr . "\n";
