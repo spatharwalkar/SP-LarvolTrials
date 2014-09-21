@@ -93,7 +93,62 @@ function addPubmed($rec)
 	$author_lastname= (string) $rec->MedlineCitation->Article->AuthorList->Author->LastName;
 	$author_forename= (string) $rec->MedlineCitation->Article->AuthorList->Author->ForeName;
 	$author_initials= (string) $rec->MedlineCitation->Article->AuthorList->Author->Initials;
-	$author_affiliation= (string) $rec->MedlineCitation->Article->AuthorList->Author->Affiliation;
+	//$author_affiliation= (string) $rec->MedlineCitation->Article->AuthorList->Author->Affiliation;
+	$author_affiliation='';
+	foreach($rec->MedlineCitation->Article->AuthorList as $a => $b) 
+	{	
+		foreach($b->Author as $c => $d) 
+		{
+			$staf = (string) $d->Affiliation;
+			if (stripos( $author_affiliation,$staf) === false)
+			{
+				if(!empty($author_affiliation)) 
+				{
+					$author_affiliation .= '`'.$staf;
+				}
+				else 
+				{
+					$author_affiliation .= $staf;
+				}
+			}
+			else continue;
+
+		}
+	}
+	
+	$Dmesh_terms='';
+	foreach($rec->MedlineCitation->MeshHeadingList->MeshHeading as $a => $b) 
+	{	
+		$mterm = (string) $b->DescriptorName;
+		if (stripos( $Dmesh_terms,$mterm) === false)
+		{
+			if(!empty($Dmesh_terms)) 
+			{
+				if(!empty($mterm)) $Dmesh_terms .= '`'.$mterm;
+			}
+			else 
+			{
+				if(!empty($mterm)) $Dmesh_terms .= $mterm;
+			}
+		}
+		foreach($b->QualifierName as $c => $d) 
+		{
+			$mterm = (string) $d;
+			if (stripos( $Dmesh_terms,$mterm) === false)
+			{
+				if(!empty($Dmesh_terms)) 
+				{
+					if(!empty($mterm)) $Dmesh_terms .= '`'.$mterm;
+				}
+				else 
+				{
+					if(!empty($mterm)) $Dmesh_terms .= $mterm;
+				}
+			}
+			else continue;
+		}
+	}
+	
 	$language= (string) $rec->MedlineCitation->Article->Language;
 	$publicationtype= (string) $rec->MedlineCitation->Article->PublicationTypeList->PublicationType;
 	$medlinejournal_country= (string) $rec->MedlineCitation->MedlineJournalInfo->Country;
@@ -206,6 +261,7 @@ function addPubmed($rec)
 		`author_forename`=	'."'".mysql_real_escape_string($author_forename)."'".',
 		`author_initials`=	'."'".mysql_real_escape_string($author_initials)."'".',
 		`author_affiliation`=	'."'".mysql_real_escape_string($author_affiliation)."'".',
+		`mesh_terms`=	'."'".mysql_real_escape_string($Dmesh_terms)."'".',
 		`language`=	'."'".mysql_real_escape_string($language)."'".',
 		`publicationtype`=	'."'".mysql_real_escape_string($publicationtype)."'".',
 		`medlinejournal_country`=	'."'".mysql_real_escape_string($medlinejournal_country)."'".',
@@ -270,7 +326,8 @@ function addPubmed($rec)
 		`pubmeddata_date_minute`,
 		`publication_status`,
 		`articleid_type`,
-		`articleid`)
+		`articleid`,
+		`mesh_terms`)
 		VALUES
 		('.
 
@@ -313,11 +370,11 @@ function addPubmed($rec)
 		"'".mysql_real_escape_string($pubmeddata_date_minute)."',".
 		"'".mysql_real_escape_string($publication_status)."',".
 		"'".mysql_real_escape_string($articleid_type)."',".
-		"'".mysql_real_escape_string($articleid)."'
-		
+		"'".mysql_real_escape_string($articleid)."',".
+		"'".mysql_real_escape_string($Dmesh_terms)."'
 		)";
-
 	}
+	
 	if(!mysql_query($query))
 	{
 		$log='There seems to be a problem with the SQL  Query:'.$query.' Error:' . mysql_error();
