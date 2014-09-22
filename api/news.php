@@ -104,7 +104,8 @@ function runNewsQuery($query) {
 
 		foreach($chunks as $val)
 		{
-			preg_match_all('#(?:\s[a-z]\.(?:[a-z]\.)?|.)+?[.?!]+#i', $val, $paragraph);
+			//preg_match_all('#(?:\s[a-z]\.(?:[a-z]\.)?|.)+?[.?!]+#i', $val, $paragraph);
+			preg_match_all('#(?:\s[a-z]\.(?:[a-z]\.)?|.)+?(?:\.\s|\?\s|!\s|$|\.`)+#i', $val, $paragraph);
 			foreach($paragraph[0] as $val)
 			{
 				$sentences[] = ltrim($val);
