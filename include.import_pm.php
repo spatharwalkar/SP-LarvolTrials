@@ -219,7 +219,7 @@ function addPubmed($rec)
 	return;
 	/*****************/
 	
-	$query = 'SELECT `pm_id` FROM  pubmed_abstracts where `source_id` =  ' . $source_id . '  LIMIT 1';
+	$query = 'SELECT `pm_id`,mesh_terms FROM  pubmed_abstracts where `source_id` =  ' . $source_id . '  LIMIT 1';
 	
 	if(!$res = mysql_query($query))
 		{
@@ -281,7 +281,12 @@ function addPubmed($rec)
 		where 
 		`source_id`=	"."'".mysql_real_escape_string($source_id)."'";
 
-
+		$oldmterms = $res['mesh_terms'];
+		if( empty($oldmterms) and !empty($Dmesh_terms) ) //mesh terms are newly added
+		$query_news='	UPDATE news
+						SET last_changed_date = "' . date("Y-m-d H:i:s", strtotime('now')) . '"
+						WHERE abstract_id= "'. $pm_id .'"
+					';
 	}
 	else
 	{
@@ -382,6 +387,11 @@ function addPubmed($rec)
 		mysql_query('ROLLBACK');
 		echo $log;
 		exit;
+	}
+	
+	if($exists)
+	{
+		mysql_query($query_news);
 	}
 
 }

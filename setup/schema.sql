@@ -1472,7 +1472,8 @@ CREATE TABLE IF NOT EXISTS `news`  (
   `id`         	int(11) AUTO_INCREMENT NOT NULL,
   `score`      	decimal(5,2) NOT NULL DEFAULT '0.00',
   `abstract_id` 	INT(10) UNSIGNED NULL DEFAULT NULL ,
-  `generation_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `generation_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ,
+  `last_changed_date` timestamp NULL DEFAULT NULL ,
   PRIMARY KEY (`id`),
   UNIQUE KEY `abstract_id_UNIQUE` (`abstract_id`),
   KEY `larvol_id_key` (`larvol_id`)
@@ -1535,6 +1536,7 @@ CREATE TABLE IF NOT exists `pubmed_abstracts` (
   `publication_status` varchar(30) COLLATE utf8_unicode_ci DEFAULT NULL,
   `articleid_type` varchar(30) COLLATE utf8_unicode_ci DEFAULT NULL,
   `articleid` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `mesh_terms` text COLLATE utf8_unicode_ci,
   PRIMARY KEY (`pm_id`),
   UNIQUE KEY `source_id` (`source_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1933,9 +1935,9 @@ BEGIN
 			#populate the news table
 			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
 			IF (frml IS NULL) THEN
-				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			ELSE
-				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			END IF;
 			PREPARE news_stmt FROM @insert_news;
 			EXECUTE news_stmt;	

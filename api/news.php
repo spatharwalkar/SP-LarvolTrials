@@ -6,7 +6,7 @@ $days = mysql_real_escape_string($_GET['days']);
 
 
 function generateNewsIDs($days) {
-	$query = 'select CONCAT("[",GROUP_CONCAT(id),"]") as id from news where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (generation_date >= DATE_SUB(current_date,interval '.$days.' day)) ';
+	$query = 'select CONCAT("[",GROUP_CONCAT(id),"]") as id from news where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
 	$json = runNewsQuery($query);	
 	echo($json);
 }
@@ -25,7 +25,14 @@ function generateNewsEntities($id) {
 								"[",GROUP_CONCAT(DISTINCT concat("{\"LI_id\":\"",COALESCE(i.LI_id,"N/A")),concat("\",\"name\":\"",REPLACE(i.name,\'"\',\'&quot;\'),"\"}")),"]"
 							) 	
 							as investigator,
-					t.source_id,REPLACE(t.brief_title,\'"\',\'&quot;\') as brief_title,n.phase,n.score,CONCAT("[",( SELECT GROUP_CONCAT(CONCAT("{", \'"\' ,counter, \'"\', ":", \'"\', LI_id, \'"\', "}")) FROM ( SELECT rt1.LI_id as LI_id, @counter := CASE WHEN @prev = @counter THEN @counter + 1 ELSE 0 END AS counter,@prev := @counter FROM news n1 JOIN news_redtag nr1 on nr1.news=n1.id JOIN redtags rt1 on rt1.id=nr1.redtag, (SELECT @counter:=1, @prev:=NULL) as vars WHERE n1.id='.$id.' ) as liid ),"]") as redtag_id,REPLACE(n.sponsor,\'"\',\'&quot;\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added,DATE(n.generation_date) as generation_date 
+							t.source_id,REPLACE(t.brief_title,\'"\',\'&quot;\') as brief_title,n.phase,n.score,
+							CONCAT("[",( SELECT GROUP_CONCAT(CONCAT("{", \'"\' ,counter, \'"\', ":", \'"\', LI_id, \'"\', "}")) 
+							FROM ( SELECT rt1.LI_id as LI_id, @counter := CASE WHEN @prev = @counter THEN @counter + 1 ELSE 0 END AS counter,
+							@prev := @counter FROM news n1 JOIN news_redtag nr1 on nr1.news=n1.id JOIN redtags rt1 on rt1.id=nr1.redtag, (
+							SELECT @counter:=1, @prev:=NULL) as vars WHERE n1.id='.$id.' ) as liid ),"]") as redtag_id,
+							REPLACE(n.sponsor,\'"\',\'&quot;\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' 
+							AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,
+							n.enrollment,n.overall_status as status,n.added,DATE(COALESCE(n.last_changed_date,n.generation_date)) as generation_date 
 					FROM news n 
 					JOIN data_trials t using(larvol_id)
 					LEFT JOIN entity_trials pt on n.larvol_id=pt.trial 
@@ -37,7 +44,7 @@ function generateNewsEntities($id) {
 					JOIN news_redtag nr on nr.news=n.id 
 					JOIN redtags rt on rt.id=nr.redtag 
 					WHERE n.id=' . $id .
-					' GROUP BY n.larvol_id,n.brief_title,n.phase,n.summary,n.enrollment,n.generation_date';
+					' GROUP BY n.larvol_id,n.brief_title,n.phase,n.summary,n.enrollment,COALESCE(n.last_changed_date,n.generation_date)';
 	
 	$tmpq = 'SELECT `larvol_id` FROM news where `id`="' . $id . '" and larvol_id is not null  LIMIT 1';
 	if(!$tres = mysql_query($tmpq))
@@ -63,9 +70,12 @@ function generateNewsEntities($id) {
 		NULL as investigator,
 				pma.source_id as source_id,REPLACE(n.brief_title,\'"\',\'"\') as brief_title,n.phase,n.score,
 				CONCAT("[",( SELECT GROUP_CONCAT(CONCAT("{", \'"\' ,counter, \'"\', ":", \'"\', LI_id, \'"\', "}")) 
-					FROM ( SELECT rt1.LI_id as LI_id, @counter := CASE WHEN @prev = @counter THEN @counter + 1 ELSE 0 END AS counter,@prev := @counter FROM news n1 
-					JOIN news_redtag nr1 on nr1.news=n1.id JOIN redtags rt1 on rt1.id=nr1.redtag, 
-					(SELECT @counter:=1, @prev:=NULL) as vars WHERE n1.id='.$id.' ) as liid ),"]") as redtag_id,REPLACE(n.sponsor,\'"\',\'"\') AS sponsor,IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added ,DATE(n.generation_date) as generation_date
+					FROM ( SELECT rt1.LI_id as LI_id, @counter := CASE WHEN @prev = @counter THEN @counter + 1 ELSE 0 END AS counter,@prev := @counter FROM 
+					news n1 JOIN news_redtag nr1 on nr1.news=n1.id JOIN redtags rt1 on rt1.id=nr1.redtag, 
+					(SELECT @counter:=1, @prev:=NULL) as vars WHERE n1.id='.$id.' ) as liid ),"]") as redtag_id,REPLACE(n.sponsor,\'"\',\'"\') AS sponsor,
+					IF(EXISTS(SELECT nw.id FROM news nw, entity_trials et WHERE nw.id='.$id.' AND nw.larvol_id=et.trial AND 
+					relation_type=\'ownersponsored\'),1,0) as is_product_owner_sponsored_active,n.summary,n.enrollment,n.overall_status as status,n.added ,
+					DATE(COALESCE(n.last_changed_date,n.generation_date)) as generation_date
 				FROM news n 
 				JOIN pubmed_abstracts pma on (n.abstract_id=pma.pm_id)
 				LEFT JOIN entity_abstracts pt on n.abstract_id=pt.abstract
@@ -75,7 +85,7 @@ function generateNewsEntities($id) {
 				JOIN news_redtag nr on nr.news=n.id 
 				JOIN redtags rt on rt.id=nr.redtag 
 				WHERE n.id=' . $id . 
-				' GROUP BY n.abstract_id,n.brief_title,n.phase,n.summary,n.enrollment,n.generation_date';
+				' GROUP BY n.abstract_id,n.brief_title,n.phase,n.summary,n.enrollment,COALESCE(n.last_changed_date,n.generation_date)';
 	}
 
 	$json = runNewsQuery($query);

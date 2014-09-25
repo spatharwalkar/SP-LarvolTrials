@@ -15,11 +15,11 @@ function getIDs($days_passed=NULL)
 //  $url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=&reldate='.$days.'&datetype=mdat&retmax=50000000&usehistory=y';
 // 	added additional filters to the url
 
-	$pub_start_date=date('Y/m/d', strtotime("-6 months"));
-	$ent_start_date=date('Y/m/d', strtotime("-1 months"));
-	$mod_start_date=date('Y/m/d', strtotime("-".$days." days"));
+//	$pub_start_date=date('Y/m/d', strtotime("-6 months"));
+	$ent_start_date=date('Y/m/d', strtotime("-".$days." days"));
+	$mesh_start_date=date('Y/m/d', strtotime("-".$days." days"));
 
-	$url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=50000&term=((("'. $mod_start_date . '"[Date - Modification] : "3000"[Date - Modification])) AND ("'. $ent_start_date .'"[Date - Entrez] : "3000"[Date - Entrez])) AND ("'. $pub_start_date .'"[Date - MeSH] : "3000"[Date - MeSH]) "';
+	$url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=50000&term=(("'. $mesh_start_date . '"[Date - MeSH] : "3000"[Date - MeSH]) OR ("'. $ent_start_date .'"[Date - Entrez] : "3000"[Date - Entrez])) "';
 
 	if(PUBMED_API_URL_ARG)
 	{
