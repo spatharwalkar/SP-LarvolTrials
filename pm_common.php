@@ -19,8 +19,9 @@ function getIDs($days_passed=NULL)
 	$ent_start_date=date('Y/m/d', strtotime("-".$days." days"));
 	$mesh_start_date=date('Y/m/d', strtotime("-".$days." days"));
 
-	$url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=50000&term=(("'. $mesh_start_date . '"[Date - MeSH] : "3000"[Date - MeSH]) OR ("'. $ent_start_date .'"[Date - Entrez] : "3000"[Date - Entrez])) "';
-
+//	$url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=50000&term=(("'. $mesh_start_date . '"[MHDA] : "3000"[MHDA]) OR ("'. $ent_start_date .'"[EDAT] : "3000"[EDAT])) "';
+//	$url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=50000&term=(("'. $mesh_start_date . '"[Date - MeSH] : "3000"[Date - MeSH]) OR ("'. $ent_start_date .'"[Date - Entrez] : "3000"[Date - Entrez])) "';
+	$url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=&reldate='.$days.'&datetype=mhda&retmax=100000&usehistory=y';
 	if(PUBMED_API_URL_ARG)
 	{
 		$url =  $url.PUBMED_API_URL_ARG;
