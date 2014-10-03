@@ -14,7 +14,6 @@ function get_field_value($larvol_id,  $field_name, $source)
 {
 	if( empty($larvol_id) or empty($field_name)  )
 		return false;
-
 	global $logger;
 
 		$query = 'SELECT * FROM data_manual where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
@@ -114,89 +113,37 @@ function get_field_value($larvol_id,  $field_name, $source)
 			if(!$exists)
 				return false;
 		}
-		
-		//
-		if(strtoupper($source)=='EUDRACT')
+		$nct_exists=false;
+		if(empty($source) or strtoupper($source)<>'NCT')
 		{
-			$mappings=array();
-			$mappings['source_id']=$res['eudract_id'];
-			if(empty($res['lay_title'])) 
-				$mappings['brief_title']=$res['full_title'];
-			else
-				$mappings['brief_title']=$res['lay_title'];
-			$mappings['acronym']=$res['abbr_title'];
-			$mappings['official_title']=$res['full_title'];
-			$mappings['lead_sponsor']=$res['sponsor_name'];
-			$mappings['detailed_description']=$res['main_objective'];
-			$mappings['overall_status']=$res['trial_status'];
-			$mappings['start_date']=$res['start_date'];
-			$mappings['institution_type']=getInstitutionType($res['support_org_name'],$res['sponsor_name'],$res['larvol_id']);
-			$mappings['end_date']=$res['end_date_global'];
-			$mappings['end_date_global']=$res['end_date_global'];
-			
-			$mappings['inclusion_criteria']=$res['inclusion_criteria'];
-			$mappings['exclusion_criteria']=$res['exclusion_criteria'];
-			$mappings['firstreceived_date']=$res['firstreceived_date'];
+			$query = 'SELECT larvol_id FROM data_nct where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+			if(!$res_nct = mysql_query($query))
+				{
+					$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+					echo $log;
+					return false;
+				}
+			$res_nct = mysql_fetch_assoc($res_nct);
+			$nct_exists = $res_nct !== false;
 			
 			
-			$e_is_active=array
-			(
-			"Ongoing"=> "1",
-			"Restarted"=> "1",
-			"Completed"=> "0",
-			"Temporarily Halted"=> "0",
-			"Prematurely Ended"=> "0",
-			"Not Authorised"=> "0",
-			"Prohibited by National Competent Authority"=> "0",
-			"Suspended by National Competent Authority"=> "0"
-			);
 			
-			$mappings['is_active']=$e_is_active[$res['trial_status']];
-			
-			if($res['gender_female']==1 && $res['gender_male']==1)
-				$mappings['gender']='both';
-			elseif($res['gender_female']==1)
-				$mappings['gender']='female';
-			elseif($res['gender_male']==1)
-				$mappings['gender']='male';
-			$mappings['phase'] = eudraPhase($res['tp_phase1_human_pharmacology'],$res['tp_phase2_explatory'],
-					$res['tp_phase3_confirmatory'],$res['tp_phase4_use']);
-			$mappings['enrollment']=$res['enrollment_memberstate'];
-			$mappings['condition']=$res['condition'];
-			$mp='';
-			if(!empty($res['product_name']))  $mp.= '`'.$res['product_name'];
-			if(!empty($res['product_code']))  $mp.= '`'.$res['product_code'];
-			if(!empty($res['product_pharm_form']))  $mp.='`'.$res['imp_trade_name'];
-			if(!empty($res['imp_trade_name']))  $mp.='`'.$res['imp_trade_name'];
-			$mappings['intervention_name'] = substr($mp,1);
-			$mappings['primary_outcome_measure']=$res['primary_endpoint'];
-			$mappings['location_city']=$res['city'];
-			$mappings['secondary_outcome_measure']=$res['secondary_endpoint'];
-			$agestr='';
-			if($res['age_has_under18']==1) $agestr.='`age_has_under18';
-			if($res['age_has_in_utero']==1) $agestr.='`age_has_in_utero';
-			if($res['age_has_preterm_newborn']==1) $agestr.='`age_has_preterm_newborn';
-			if($res['age_has_infant_toddler']==1) $agestr.='`age_has_infant_toddler';
-			if($res['age_has_children']==1) $agestr.='`age_has_children';
-			if($res['age_has_adolescent']==1) $agestr.='`age_has_adolescent';
-			if($res['age_has_adult']==1) $agestr.='`age_has_adult';
-			if($res['age_has_elderly']==1) $agestr.='`age_has_elderly';
-			if(substr($agestr,0,1)=='`') $agestr=substr($agestr,1);
-			$mappings['ages']=$agestr;
-			return $mappings[$field_name];
-			
-			/*
-arm_group_type & intervention NA
-			study_design - NA
-			location_zip NA
-			location_country NA
-			source & brief_summary only in manually entered trials.
-			*/
 		}
-		
 		//data_nct
-		if(strtoupper($source)=='NCT')
+		if( strtoupper($source)=='NCT'  or $nct_exists )
 		{
+		
+		if($nct_exists)
+			{
+				$query = 'SELECT * FROM data_nct where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
+				if(!$res = mysql_query($query))
+					{
+						$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+						echo $log;
+						return false;
+					}
+				$res = mysql_fetch_assoc($res);
+			}
 			$array1=array
 			(
 			'N/A',
@@ -348,6 +295,87 @@ arm_group_type & intervention NA
 			
 			return $dn_mappings[$field_name];
 		}
+		
+		//
+		elseif(strtoupper($source)=='EUDRACT' and ($nct_exists !== true) )
+		{
+			$mappings=array();
+			$mappings['source_id']=$res['eudract_id'];
+			if(empty($res['lay_title'])) 
+				$mappings['brief_title']=$res['full_title'];
+			else
+				$mappings['brief_title']=$res['lay_title'];
+			$mappings['acronym']=$res['abbr_title'];
+			$mappings['official_title']=$res['full_title'];
+			$mappings['lead_sponsor']=$res['sponsor_name'];
+			$mappings['detailed_description']=$res['main_objective'];
+			$mappings['overall_status']=$res['trial_status'];
+			$mappings['start_date']=$res['start_date'];
+			$mappings['institution_type']=getInstitutionType($res['support_org_name'],$res['sponsor_name'],$res['larvol_id']);
+			$mappings['end_date']=$res['end_date_global'];
+			$mappings['end_date_global']=$res['end_date_global'];
+			
+			$mappings['inclusion_criteria']=$res['inclusion_criteria'];
+			$mappings['exclusion_criteria']=$res['exclusion_criteria'];
+			$mappings['firstreceived_date']=$res['firstreceived_date'];
+			
+			
+			$e_is_active=array
+			(
+			"Ongoing"=> "1",
+			"Restarted"=> "1",
+			"Completed"=> "0",
+			"Temporarily Halted"=> "0",
+			"Prematurely Ended"=> "0",
+			"Not Authorised"=> "0",
+			"Prohibited by National Competent Authority"=> "0",
+			"Suspended by National Competent Authority"=> "0"
+			);
+			
+			$mappings['is_active']=$e_is_active[$res['trial_status']];
+			
+			if($res['gender_female']==1 && $res['gender_male']==1)
+				$mappings['gender']='both';
+			elseif($res['gender_female']==1)
+				$mappings['gender']='female';
+			elseif($res['gender_male']==1)
+				$mappings['gender']='male';
+			$mappings['phase'] = eudraPhase($res['tp_phase1_human_pharmacology'],$res['tp_phase2_explatory'],
+					$res['tp_phase3_confirmatory'],$res['tp_phase4_use']);
+			$mappings['enrollment']=$res['enrollment_memberstate'];
+			$mappings['condition']=$res['condition'];
+			$mp='';
+			if(!empty($res['product_name']))  $mp.= '`'.$res['product_name'];
+			if(!empty($res['product_code']))  $mp.= '`'.$res['product_code'];
+			if(!empty($res['product_pharm_form']))  $mp.='`'.$res['imp_trade_name'];
+			if(!empty($res['imp_trade_name']))  $mp.='`'.$res['imp_trade_name'];
+			$mappings['intervention_name'] = substr($mp,1);
+			$mappings['primary_outcome_measure']=$res['primary_endpoint'];
+			$mappings['location_city']=$res['city'];
+			$mappings['secondary_outcome_measure']=$res['secondary_endpoint'];
+			$agestr='';
+			if($res['age_has_under18']==1) $agestr.='`age_has_under18';
+			if($res['age_has_in_utero']==1) $agestr.='`age_has_in_utero';
+			if($res['age_has_preterm_newborn']==1) $agestr.='`age_has_preterm_newborn';
+			if($res['age_has_infant_toddler']==1) $agestr.='`age_has_infant_toddler';
+			if($res['age_has_children']==1) $agestr.='`age_has_children';
+			if($res['age_has_adolescent']==1) $agestr.='`age_has_adolescent';
+			if($res['age_has_adult']==1) $agestr.='`age_has_adult';
+			if($res['age_has_elderly']==1) $agestr.='`age_has_elderly';
+			if(substr($agestr,0,1)=='`') $agestr=substr($agestr,1);
+			$mappings['ages']=$agestr;
+			return $mappings[$field_name];
+			
+			/*
+arm_group_type & intervention NA
+			study_design - NA
+			location_zip NA
+			location_country NA
+			source & brief_summary only in manually entered trials.
+			*/
+		}
+		
+
 	return false;
 }
 

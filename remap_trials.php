@@ -260,7 +260,7 @@ function remaptrials($source_id=NULL, $larvolid=NULL,  $sourcedb=NULL, $storecha
 			$query = 'SELECT * FROM data_eudract where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 		else
 			$query = 'SELECT * FROM data_nct where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
-			
+//		pr($query);
 		if(!$res = mysql_query($query))
 		{
 			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -631,6 +631,7 @@ function remap($larvol_id, $fieldname, $value,$lastchanged_date,$oldtrial,$ins_t
 			
 	}
 	$fieldvalue=get_field_value($larvol_id,  $fieldname, $sourcedb);
+
 	update_history($larvol_id,$fieldname,$fieldvalue,$lastchanged_date);
 
 	//normalize the input
@@ -909,7 +910,6 @@ function update_history($larvol_id,$fld,$val,$lastchanged_date)
 			 
 			 
 			$query = 'update data_trials set '. $str1 . '  , lastchanged_date = "' .$lastchanged_date.'" where larvol_id="' .$larvol_id . '"  limit 1' ;
-
 			if(!mysql_query($query))
 			{
 				$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
@@ -967,6 +967,13 @@ function update_history($larvol_id,$fld,$val,$lastchanged_date)
 					return false;
 				}
 				}
+			}
+			if(!mysql_query('COMMIT'))
+			{
+				$log='There seems to be a problem while committing the changes. SQL Query:'.$query.' Error:' . mysql_error();
+				mysql_query('ROLLBACK');
+				echo $log;
+				return false;
 			}
 }
 ?>

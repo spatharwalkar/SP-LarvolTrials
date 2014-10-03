@@ -327,6 +327,54 @@ $(document).ready(function(){
 			//pr('posts');
 			//pr($_POST);
 			//pr('postsend');
+			
+			/* MAKE NCT THE SOURCE TRIAL */
+			$new_sid=null;
+			$new_lid=null;
+			if( substr($sid,0,3)<>'NCT' )
+			{
+			
+				$query = "
+					SELECT `source_id`
+					FROM `data_trials` 
+					WHERE `larvol_id` =" . $lid . " limit 1	";	
+				$res1 	= mysql_query($query) ;
+					if($res1===false)
+					{
+						$log = 'Bad SQL query. Query=' . $query;
+						echo $log;
+						return $log;
+					}
+
+					$res1=mysql_fetch_assoc($res1);
+					$new_sid=$res1['source_id'];
+					
+					
+				$query = "
+					SELECT `larvol_id`
+					FROM `data_trials` 
+					WHERE `source_id` ='" . $sid . "' limit 1	";	
+				$res1 	= mysql_query($query) ;
+					if($res1===false)
+					{
+						$log = 'Bad SQL query. Query=' . $query;
+						echo $log;
+						return $log;
+					}
+
+					$res1=mysql_fetch_assoc($res1);
+					$new_lid=$res1['larvol_id'];
+			}
+			/************* */
+			if($new_sid and $new_lid)
+			{
+				$sid=$new_sid;
+				$lid=$new_lid;
+				global $source;
+				$source='EUDRACT';
+			}
+			
+			
 			//******* pick the larvol id to be linked to
 			global $sourced_trial;
 			global $source;
@@ -359,8 +407,7 @@ $(document).ready(function(){
 				WHERE `larvol_id` ="' .  $lid .'" limit 1
 				';
 				$res1 		= mysql_query($query) ;
-				//	pr($query);
-
+				
 				if($res1===false)
 				{
 					$log = 'Bad SQL query. Query=' . $query;
