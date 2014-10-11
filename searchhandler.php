@@ -713,7 +713,8 @@ function buildQuery($data, $isCount=false)
 function buildPubmedQuery($data, $pm_ids,$isCount=false)
 {
 	global $escapers,$replacements;
-	if(isset($pm_ids) and !is_array($pm_ids)) {
+	if(isset($pm_ids) and !is_array($pm_ids)) 
+	{
 		$log = "pubmed ids need to passed as a array <br />\n";
 		global $logger;
 		$logger->fatal($log);
@@ -779,6 +780,8 @@ function buildPubmedQuery($data, $pm_ids,$isCount=false)
 				$area_flag=1;
 			}
 		}
+
+
 		$select_str = getPubmedSelectString($select_columns, $alias, $pd_alias, $ar_alias);
 		$where_str = getPubmedWhereString($where_datas, $alias, $pd_alias, $ar_alias,$pm_ids);
 		$sort_str = getSortString($sort_datas, $alias, $pd_alias, $ar_alias);
@@ -1067,7 +1070,11 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 			}
 		}
 		//$wheres[$wcount++] = " ) ";
-		$wherestr = implode(' ', $wheres);
+		
+		if(empty($pm_ids))
+			$wherestr = '( '. $alias .'.source_id IN ( SELECT  pubmed_id FROM temp_table_1 ) ) AND ( '.implode(' ', $wheres) . ' ) ';
+		else
+			$wherestr = implode(' ', $wheres);
 		$pos = strpos($prevchain,'.');
 		if($pos === false)
 		{
@@ -1079,8 +1086,10 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 		}
 		//                if($pos == true)
 		//                    $wherestr .= $prevchain;
-		if( count($pm_ids) > 0)
-			$wherestr = '('. $wherestr . ") AND ". $alias .'.pm_id IN ('. implode(',',$pm_ids). ')';
+		
+	
+		if( !empty($pm_ids) and count($pm_ids) > 0)
+			$wherestr = '( ' . $alias .'.source_id IN ('. implode(',',$pm_ids). ')) AND ('. $wherestr . ') ' ;
 	}
 	catch(Exception $e)
 	{
