@@ -78,6 +78,7 @@ function run_incremental_scraper($days=NULL)
 			if(!empty($pmids)) 
 			{
 				mysql_query($q1) or die($q1. "  "  . mysql_error());
+				$counter=0;
 			}
 			$pmids='';
 		}
