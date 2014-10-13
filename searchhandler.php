@@ -1017,7 +1017,8 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 		
 		//$wheres[$wcount++] = " ( ";
 		$unique_searchwords = array();
-		$pubmed_fields = array('abstract_text','article_title','journal_title','author_affiliation');
+		//$pubmed_fields = array('abstract_text','article_title','journal_title','author_affiliation');
+		$pubmed_fields = array('CONCAT_WS(" ",pm.abstract_text,pm.author_affiliation,journal_title,article_title)') ;
 		foreach ($pubmed_fields as $pm_field) {
 			$prevchain = ' ';
 						
@@ -1045,7 +1046,7 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 				elseif($where_data["columnname"] == '`area`')
 					$wstr = str_replace('%f', $ar_alias . "." . $column_name,$wstr);
 				else {
-					$wstr = str_replace('%f', $alias . "." . $pm_field." ",$wstr);
+					$wstr = str_replace('%f', $pm_field." ",$wstr);
 				}
 				$pos = strpos($op_string,'%s1');
 	
@@ -1071,7 +1072,7 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 		}
 		//$wheres[$wcount++] = " ) ";
 		
-		if(empty($pm_ids))
+		if(empty($pm_ids) and empty($_POST['index_all_abs']) )
 			$wherestr = '( '. $alias .'.source_id IN ( SELECT  pubmed_id FROM temp_table_1 ) ) AND ( '.implode(' ', $wheres) . ' ) ';
 		else
 			$wherestr = implode(' ', $wheres);

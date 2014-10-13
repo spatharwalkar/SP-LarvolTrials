@@ -43,10 +43,11 @@ function generatePubmedNewsUsingID($sourceid)
 		}
 	$resX = mysql_fetch_assoc($resX);
 	$pm_id = $resX['pm_id'];
-	/*  Disabled indexing abstracts individually
-	require_once('preindex_pmabstract.php');
-	pmtindex(false,NULL,NULL,NULL,NULL,array($pm_id));
-	*/
+	if (isset($_POST['pm_id']))
+	{
+		require_once('preindex_pmabstract.php');
+		pmtindex(false,NULL,NULL,NULL,NULL,array($pm_id));
+	}
 	/*************/
 	ob_flush();
 	flush();
