@@ -590,6 +590,7 @@ function primary_location($locations, $affiliation)
 // (3) the 'name' of any institution in the entities table
 function name_is_noisy($name)
 {
+	global $logger;
 	$pieces = explode(",", $name);
 	pr($pieces);
 	if(empty($pieces)) pr('NAME='.$name);
