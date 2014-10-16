@@ -805,6 +805,10 @@ function buildPubmedQuery($data, $pm_ids,$isCount=false)
 
 		if($area_flag)
 			$actual_query .= " JOIN areas ". $ar_alias ." ON (". $ar_alias .".`id`=".$alias.".`larvol_id`)";
+			
+			
+		if(empty($pm_ids) and empty($_POST['index_all_abs']) )
+			$actual_query .= " JOIN temp_table_1 tt ON (". $alias .".`source_id`=tt.`pubmed_id`) ";
 
 		if(strlen(trim($where_str)) != 0)
 		{
@@ -1073,7 +1077,7 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 		//$wheres[$wcount++] = " ) ";
 		
 		if(empty($pm_ids) and empty($_POST['index_all_abs']) )
-			$wherestr = '( '. $alias .'.source_id IN ( SELECT  pubmed_id FROM temp_table_1 ) ) AND ( '.implode(' ', $wheres) . ' ) ';
+			$wherestr = implode(' ', $wheres) ;
 		else
 			$wherestr = implode(' ', $wheres);
 		$pos = strpos($prevchain,'.');
@@ -1096,6 +1100,12 @@ function getPubmedWhereString($data, $alias, $pd_alias, $ar_alias, $pm_ids)
 	{
 		throw $e;
 	}
+	/*	
+	$pos2 = stripos($wherestr, 'benralizumab');
+	if ($pos2 !== false) {
+		pr($wherestr);
+	}
+	*/
 	return $wherestr;
 
 
