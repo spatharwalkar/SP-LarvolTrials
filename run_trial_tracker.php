@@ -6881,7 +6881,6 @@ class TrialTracker
 						. " JOIN `entities` pr ON pr.`id` = rmh.`type_id` "
 						. $where . " ORDER BY rmh.`num` ASC ";
 		$Res = m_query(__LINE__,$Query);
-		
 		if($Res)
 		{
 			if(mysql_num_rows($Res) > 0)
@@ -6907,13 +6906,22 @@ class TrialTracker
 						$product_company_names=$row['company'];
 					else
 						$product_company_names='';
-						
+					
+					/*	product should also display display_name instead of name 
 					if($row['class']=='Product')
 						$sectionHeader = formatBrandName($hname.$row['name'], 'product');
 					elseif(!empty($row['display_name']))
 						$sectionHeader = formatBrandName($hname.$row['display_name'], 'area');
 					else
 						$sectionHeader = formatBrandName($hname.$row['name'], 'area');
+					*/
+					$dspname= $row['display_name'] ?: $row['dispname'] ?: $row['name'] ;
+					
+					if( $row['class']=='Product' )
+						$sectionHeader = formatBrandName($hname.$dspname, 'product');
+					else
+						$sectionHeader = formatBrandName($hname.$dspname, 'area');
+					
 					
 					if($row['class']=='Product')	
 					$row['company'] = GetCompanyNames($productId);
@@ -7018,7 +7026,18 @@ class TrialTracker
 						$product_company_names='';
 						
 					$productSelector[$productId] = $row['name'];
+					
+					/*
 					if($row['class']=='Product')
+						$sectionHeader = formatBrandName($hname.$row['name'], 'product');
+					elseif(!empty($row['display_name']))
+						$sectionHeader = formatBrandName($hname.$row['display_name'], 'area');
+					else
+						$sectionHeader = formatBrandName($hname.$row['name'], 'area');
+					*/
+					if( $row['class']=='Product' and !empty($row['display_name']) )
+						$sectionHeader = formatBrandName($hname.$row['display_name'], 'product');
+					elseif( $row['class']=='Product' and empty($row['display_name']) )
 						$sectionHeader = formatBrandName($hname.$row['name'], 'product');
 					elseif(!empty($row['display_name']))
 						$sectionHeader = formatBrandName($hname.$row['display_name'], 'area');
@@ -7178,7 +7197,8 @@ class TrialTracker
 						else
 						{
 							$tHeader = 'Product: '.__LINE__;
-							$tHeader .= htmlformat(strip_tags($Row['name']));
+							if(empty($Row['display_name']))	$tHeader .= htmlformat(strip_tags($Row['name']));
+							else	$tHeader .= htmlformat(strip_tags($Row['display_name']));
 						}
 						
 							
@@ -7322,6 +7342,11 @@ class TrialTracker
 						{
 							$tHeader = 'Area: ';
 							$tHeader .= strip_tags(htmlformat($row['name']));
+						}
+						elseif(!empty($row['display_name']))
+						{
+							$tHeader = 'Product: ';
+							$tHeader .= strip_tags(htmlformat($row['display_name']));
 						}
 						else
 						{
@@ -7602,8 +7627,17 @@ class TrialTracker
 						
 						if($row['class']=='Product')
 						{
-							$sectionHeader = formatBrandName($row['name'], 'product');
-							$productSelector[$productId] = $row['name'];	
+							if(!empty($row['display_name'])) 
+							{
+								$sectionHeader = formatBrandName($row['display_name'], 'product');
+								$productSelector[$productId] = $row['display_name'];	
+							}
+							else	
+							{
+								$sectionHeader = formatBrandName($row['name'], 'product');
+								$productSelector[$productId] = $row['name'];	
+							}
+							
 						}
 						elseif(!empty($row['display_name']))
 						{
@@ -7678,11 +7712,19 @@ class TrialTracker
 					else
 						$product_company_names='';
 						
-					
 					if($row['class']=='Product')
 					{
-						$sectionHeader = formatBrandName($row['name'], 'product');
-						$productSelector[$areaId] = $row['name'];	
+						if(!empty($row['display_name'])) 
+						{
+							$sectionHeader = formatBrandName($row['display_name'], 'product');
+							$productSelector[$areaId] = $row['display_name'];	
+						}
+						else	
+						{
+							$sectionHeader = formatBrandName($row['name'], 'product');
+							$productSelector[$areaId] = $row['name'];	
+						}
+						
 					}
 					elseif(!empty($row['display_name']))
 					{
@@ -7775,7 +7817,8 @@ class TrialTracker
 				if($row['class'] == 'Product')
 				{
 					$pId = $id;
-					$sectionHeader = formatBrandName($row['name'], 'product');
+					if(empty($row['display_name']))  $sectionHeader = formatBrandName($row['name'], 'product');
+					else $sectionHeader = formatBrandName($row['display_name'], 'product');
 					$row['company'] = GetCompanyNames($pId);
 					
 					if($row['company'] !== NULL && $row['company'] != '')
