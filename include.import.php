@@ -388,7 +388,7 @@ $array1=array
 
 					if ($fieldname=='phase' and ( is_null($oldval) or strlen(trim($oldval)) ==0 or empty($oldval)) )
 					$cond2=false; else $cond2=true;
-					
+					/*
 					if($cond1 and $cond2 and $nullvalue=='NO' and $oldval<> "ND")
 					{
 						$query = 'update data_history set `' . $fieldname . '_prev` = "' . $oldval .'", `' . $fieldname . '_lastchanged` = "' . $olddate .'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
@@ -425,7 +425,7 @@ $array1=array
 							}
 						}
 					}
-
+					*/
 
 				}
 
@@ -884,11 +884,11 @@ $array1=array
 		$recordArray = array();
 		foreach($record as $fieldname => $value)
 		{
-//			             echo("FieldName: ");
-//						var_dump($fieldname);
-//						echo("  Value: ");
-//						var_dump($value);
-//						echo("<br>");
+		//			             echo("FieldName: ");
+		//						var_dump($fieldname);
+		//						echo("  Value: ");
+		//						var_dump($value);
+		//						echo("<br>");
 			$recordArray [$fieldname] = getEudraValue($fieldname, $value);
 		}
 		$rec = (object)$recordArray;
@@ -973,44 +973,45 @@ $array1=array
 		/*************************************/
 
 		//Go through the parsed XML structure and pick out the data
-		$record_data =array('brief_title' => $brief_title,
-						//'acronym' => $rec->abbr_title,
-						//unmapped abbr_title 
-						'acronym' => null,
-						'official_title' => $rec->full_title,
-						 'lead_sponsor' => $rec->sponsor_name,
-		                'collaborator' => $rec->support_org_name,
-	                    'detailed_description' => $detailed_descr,
-						'overall_status' => $overall_status,
-	                    'is_active' => $is_active_overall,
-						//'start_date' => $start_date, 	
-	    				'start_date' => $stdt, 	
-						'end_date' => $end_date,
-	                    'study_design' => $study_design,
-	                    'enrollment' => $enrollment,
-	                    'criteria' => $criteria,
-	                    'inclusion_criteria' => $rec->inclusion_criteria,
-	'exclusion_criteria' => $rec->exclusion_criteria,
-	'gender' => $gender,
-	'healthy_volunteers' => $rec->subjects_healthy_volunteers,
-	'firstreceived_date' => $firstreceived_date,
-	'phase' => $phase,
-	'condition' => $condition,
-						'arm_group_description' => $rec->comp_other_products,
-	'intervention_type' => $intervention_type,
-	'intervention_name' => $intervention_name,
-	'primary_outcome_measure' => $rec->primary_endpoint,
-	'primary_outcome_timeframe' => $rec->primary_endpoint_timeframe,
-	'secondary_outcome_measure' => $rec->secondary_endpoint,
-	'primary_outcome_timeframe' => $rec->secondary_endpoint_timeframe,
-	'location_city' => $rec->city,
-	'location_zip' => $rec->postcode,
-	'location_country' => $country,
-	'investigator_name' => $rec->contact_point_func_name,
-	'route_of_administration' => $rec->product_route,
-	'ages' => $ages,
-	'region' => $region,
-	'institution_type' => $ins_type);	
+		$record_data =array(
+		'brief_title' => $brief_title,
+		//'acronym' => $rec->abbr_title,
+		//unmapped abbr_title 
+		'acronym' => null,
+		'official_title' => $rec->full_title,
+		 'lead_sponsor' => $rec->sponsor_name,
+		'collaborator' => $rec->support_org_name,
+		'detailed_description' => $detailed_descr,
+		'overall_status' => $overall_status,
+		'is_active' => $is_active_overall,
+		//'start_date' => $start_date, 	
+		'start_date' => $stdt, 	
+		'end_date' => $end_date,
+		'study_design' => $study_design,
+		'enrollment' => $enrollment,
+		'criteria' => $criteria,
+		'inclusion_criteria' => $rec->inclusion_criteria,
+		'exclusion_criteria' => $rec->exclusion_criteria,
+		'gender' => $gender,
+		'healthy_volunteers' => $rec->subjects_healthy_volunteers,
+		'firstreceived_date' => $firstreceived_date,
+		'phase' => $phase,
+		'condition' => $condition,
+		'arm_group_description' => $rec->comp_other_products,
+		'intervention_type' => $intervention_type,
+		'intervention_name' => $intervention_name,
+		'primary_outcome_measure' => $rec->primary_endpoint,
+		'primary_outcome_timeframe' => $rec->primary_endpoint_timeframe,
+		'secondary_outcome_measure' => $rec->secondary_endpoint,
+		'primary_outcome_timeframe' => $rec->secondary_endpoint_timeframe,
+		'location_city' => $rec->city,
+		'location_zip' => $rec->postcode,
+		'location_country' => $country,
+		'investigator_name' => $rec->contact_point_func_name,
+		'route_of_administration' => $rec->product_route,
+		'ages' => $ages,
+		'region' => $region,
+		'institution_type' => $ins_type);	
 		
 		$end_date=normal('date',(string)$record_data->end_date);
 		
@@ -1021,20 +1022,20 @@ $array1=array
 		foreach($recordArray as $fieldname => $value)
 		if(!addEudraValToEudraCT($larvol_id, $fieldname, $value, $eudract_last_updated_date, $oldtrial,NULL,$end_date))
 		logDataErr('<br>To Eudra CT: Could not save the value of <b>' . $fieldname . '</b>, Value: ' . $value );//Log in errorlog
-//		
-//		
-//		//$inactive = $record_data['is_active'];
-//		//$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//		$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
-//		if(!mysql_query($query))
-//		{
-//			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
-//			$logger->error($log);
-//			echo $log;
-//			return false;
-//		}
+		//		
+		//		
+		//		//$inactive = $record_data['is_active'];
+		//		//$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'", `is_active`='.$inactive.'  where `larvol_id`="' .$larvol_id . '" limit 1' ;
+		//		$query = 'update data_trials set `institution_type`="' .$ins_type. '",`region`="'.$region.'" where `larvol_id`="' .$larvol_id . '" limit 1' ;
+		//		if(!mysql_query($query))
+		//		{
+		//			$log='There seems to be a problem with the SQL Query:'.$query.' Error:' . mysql_error();
+		//			$logger->error($log);
+		//			echo $log;
+		//			return false;
+		//		}
 
- // Remap the trial if it is already merged with another trial
+		 // Remap the trial if it is already merged with another trial
 		$query = 'select larvol_id from `data_nct` where `larvol_id`="' . $larvol_id . '"  LIMIT 1';
 		if(!$res = mysql_query($query))
 			{
