@@ -6,16 +6,7 @@ $days = mysql_real_escape_string($_GET['days']);
 
 
 function generateNewsIDs($days) {
-	//$query = 'select CONCAT("[",GROUP_CONCAT(id),"]") as id from news where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
-																	 
-	$query = 'select CONCAT("[",GROUP_CONCAT(distinct news.id),"]") as id from news 
-				join entity_abstracts ea on (news.abstract_id=ea.abstract)
-				join entities e1 on (ea.entity=e1.id and e1.class="product")
-				join entity_abstracts ea2 on (news.abstract_id=ea2.abstract)
-				join entities e2 on (ea2.entity=e2.id and e2.class in ("area","disease"))
-				where 	(added >= DATE_SUB(current_date,interval '.$days.' day)) OR 
-						(COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
-
+	$query = 'select CONCAT("[",GROUP_CONCAT(distinct id),"]") as id from news where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
 	$json = runNewsQuery($query);	
 	echo($json);
 }
