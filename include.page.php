@@ -255,7 +255,7 @@ if($table !='upm')
 	if($table =='diseases' && $mesh=="YES")
 		$where .= " and class='Disease' and mesh_name!='' ";
 	else if($table =='diseases')
-	    $where .= " and class='Disease' and (mesh_name='' OR mesh_name IS NULL)";
+	    $where .= " and class='Disease' and ((mesh_name='' OR mesh_name IS NULL) OR ((mesh_name!='' OR mesh_name IS NOT NULL) AND (LI_id!='' OR LI_id IS NOT NULL)))";
 	if($table =='diseasecategory' && $mesh=="YES")
 		$where .= " and class='Disease_Category' and mesh_name!='' ";
 	else if($table =='diseasecategory')
