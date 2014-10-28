@@ -1686,7 +1686,7 @@ class TrialTracker
 			}
 			else
 			{
-				$Values = $this->compileOTTData($ottType, $TrialsInfo, $Ids, $globalOptions, 'tsv');
+				$Values = $this->compileOTTData2($ottType, $TrialsInfo, $Ids, $globalOptions, 'tsv');
 			}
 			
 			unset($Ids, $productSelector, $TrialsInfo);
