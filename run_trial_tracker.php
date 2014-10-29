@@ -6915,7 +6915,7 @@ class TrialTracker
 					else
 						$sectionHeader = formatBrandName($hname.$row['name'], 'area');
 					*/
-					$dspname= $row['display_name'] ?: $row['dispname'] ?: $row['name'] ;
+					$dspname= $row['dispname'] ? $row['dispname'] : $row['name'] ;
 					
 					if( $row['class']=='Product' )
 						$sectionHeader = formatBrandName($hname.$dspname, 'product');
