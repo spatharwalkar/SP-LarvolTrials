@@ -303,11 +303,15 @@ function ohm($id, $auto = false, $fullpage = false, $direct = true, $li = false)
 			++$cl;
 		}
 	}
-	//output column categories
-	foreach($cats as $cat)
-	{
-		echo('<th colspan="' . $cat['count'] . '" class="cat"><div>' . $cat['name'] . '</div></th>');
-	}
+    //output column categories
+    foreach($cats as $cat)
+    {
+        if(!empty($cat['name'])){
+            echo('<th colspan="' . $cat['count'] . '" class="cat"><div>' . $cat['name'] . '</div></th>');
+        } else{
+            echo('<th colspan="' . $cat['count'] . '" class="cat"></th>');
+        }
+    }
 	echo('</tr><tr class="colfloat">');
 	//output column headers
 	foreach($cols as $col)
