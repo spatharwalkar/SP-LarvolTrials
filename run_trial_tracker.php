@@ -1644,6 +1644,46 @@ class TrialTracker
 		exit;
 	}
 	
+	function getSectionInfo($entities_id){
+		$sectionFields	= '';
+		$sectionValues	= '';
+		$query          = 'SELECT * FROM `entities` WHERE `id`='.$entities_id;
+		$res            = mysql_query($query) or die($query.' '.mysql_error());
+		$header         = mysql_fetch_array($res);
+		if($header)
+		{
+			$InvestigatorId   = $header['id'];
+			switch ($header['class']){
+				case 'Product':
+					$sectionFields = "Product Name \t Company \t Generic Name";
+					$sectionValues = $header['name'] . "\t" .$header['company'] . "\t" . $header['generic_names'];
+					break;
+				case 'Investigator':
+					$sectionFields = "Investigator Name \t Degrees";
+					$sectionValues = $header['name'] . "\t" .$header['degrees'];
+					break;
+				case 'Institution':
+					$sectionFields = "Name";
+					$sectionValues = $header['name'];
+					break;
+				case 'Disease':
+					$sectionFields = "Name \t Generic Name";
+					$sectionValues = $header['name'] . "\t" .$header['generic_names'];
+					break;
+					/*case 'MOA_Category':
+					 $sectionFields = 'Name';
+					$sectionValues = '';
+					break;*/
+				default:
+					$sectionFields = "Name";
+					$sectionValues = $header['name'];
+					break;
+	
+			}
+		}
+		return array('sectionFields'=>$sectionFields,'sectionValues'=>$sectionValues);
+	}
+	
 	function generateTsvFile($resultIds, $globalOptions)
 	{	
 		$Values = array();
@@ -1692,57 +1732,60 @@ class TrialTracker
 			unset($Ids, $productSelector, $TrialsInfo);
 		}
 		
+		//$outputStr = $sectionFields."\t NCT ID \t Title \t N \t Region \t Status \t Sponsor \t Condition \t Interventions \t Start \t End \t Ph \n";
+		$count = 1;
 		foreach($Values['Data'] as $tkey => $tvalue)
 		{
-			unset($Values['sectionHeader']);
-			
+			//unset($Values['sectionHeader']);
+			//var_dump($tvalue['Id']);exit;
+			$sectionHeader	= $this->getSectionInfo($tvalue['Id']);
+			if($count == 1)
+				$outputStr		= $sectionHeader['sectionFields']."\t NCT ID \t Title \t N \t Region \t Status \t Sponsor \t Condition \t Interventions \t Start \t End \t Ph \n";
+			$count++;
 			if(isset($tvalue['Trials']))
 			{
 				foreach($tvalue['Trials'] as $tkey => & $tvalue)
 				{
 					$Trials[] = $tvalue;
 				}
+				foreach($Trials as $key => $value)
+				{
+					$startDate = '';
+					$endDate = '';
+					$phase = '';
+		
+					if($value["start_date"] != '' && $value["start_date"] !== NULL && $value["start_date"] != '0000-00-00')
+					{
+						$startDate =  date('m/Y', strtotime($value["start_date"]));
+		
+					}
+					if($value["end_date"] != '' && $value["end_date"] !== NULL && $value["end_date"] != '0000-00-00')
+					{
+						$endDate = date('m/Y', strtotime($value["end_date"]));
+					}
+		
+					if($value['phase'] == 'N/A' || $value['phase'] == '' || $value['phase'] === NULL)
+					{
+						$phase = 'N/A';
+					}
+					else
+					{
+						$phase = str_replace('Phase ', '', trim($value['phase']));
+					}
+		
+					$outputStr .= $sectionHeader['sectionValues']."\t" .$value['nct_id'] . "\t" . $value['brief_title'] . "\t" . $value['enrollment'] . "\t" . $value['region'] . "\t"
+							. $value['overall_status'] . "\t" . $value['lead_sponsor'];
+					if($value['lead_sponsor'] != '' && $value['collaborator'] != ''
+							&& $value['lead_sponsor'] != NULL && $value['collaborator'] != NULL)
+					{
+						$outputStr .= ', ';
+					}
+					$outputStr .= $value['collaborator'] . "\t" . $value['condition'] . "\t" . $value['intervention_name']
+					. "\t" . $startDate . "\t" . $endDate . "\t". $phase . "\n";
+				}
 			}
 		}
 		unset($Values);
-		
-		$outputStr = "NCT ID \t Title \t N \t Region \t Status \t Sponsor \t Condition \t Interventions \t Start \t End \t Ph \n";
-		
-		foreach($Trials as $key => $value)
-		{
-			$startDate = '';
-			$endDate = '';
-			$phase = '';
-			
-			if($value["start_date"] != '' && $value["start_date"] !== NULL && $value["start_date"] != '0000-00-00')
-			{
-				$startDate =  date('m/Y', strtotime($value["start_date"]));
-				
-			}
-			if($value["end_date"] != '' && $value["end_date"] !== NULL && $value["end_date"] != '0000-00-00')
-			{
-				$endDate = date('m/Y', strtotime($value["end_date"]));
-			}
-			
-			if($value['phase'] == 'N/A' || $value['phase'] == '' || $value['phase'] === NULL)
-			{
-				$phase = 'N/A';
-			}
-			else
-			{
-				$phase = str_replace('Phase ', '', trim($value['phase']));
-			}
-			
-			$outputStr .= $value['nct_id'] . "\t" . $value['brief_title'] . "\t" . $value['enrollment'] . "\t" . $value['region'] . "\t"
-						. $value['overall_status'] . "\t" . $value['lead_sponsor'];
-			if($value['lead_sponsor'] != '' && $value['collaborator'] != ''
-			&& $value['lead_sponsor'] != NULL && $value['collaborator'] != NULL)
-			{
-				$outputStr .= ', ';
-			}
-			$outputStr .= $value['collaborator'] . "\t" . $value['condition'] . "\t" . $value['intervention_name'] 
-							. "\t" . $startDate . "\t" . $endDate . "\t". $phase . "\n";		
-		}
 		
 		header("Pragma: public");
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
