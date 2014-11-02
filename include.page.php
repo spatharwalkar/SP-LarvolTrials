@@ -3337,7 +3337,7 @@ function getSearchData($table,$searchdata,$id)
 */
 function parseProductsXmlAndSave($xmlImport,$table)
 {
-	$importKeys = array('LI_id','name','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','is_active','created','modified','company','brand_names','generic_names','code_names','approvals','xml');
+	$importKeys = array('LI_id','name','display_name','comments','product_type','licensing_mode','administration_mode','discontinuation_status','discontinuation_status_comment','is_key','is_active','created','modified','company','brand_names','generic_names','code_names','approvals','xml');
 	$success = $fail = $skip = $delete = 0;
 	foreach($xmlImport->getElementsByTagName('Product') as $product)
 	{
@@ -3430,7 +3430,7 @@ function parseProductsXmlAndSave($xmlImport,$table)
 		}
 	}
 			
-	$importVal = array('LI_id'=>$product_id,'name'=>$prodname,'comments'=>$comments,'product_type'=>$product_type,'licensing_mode'=>$licensing_mode,'administration_mode'=>$administration_mode,'discontinuation_status'=>$discontinuation_status,'discontinuation_status_comment'=>$discontinuation_status_comment,'is_key'=>$is_key,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'company'=>$company,'brand_names'=>$brand_names,'generic_names'=>$generic_names,'code_names'=>$code_names,'approvals'=>$approvals,'xml'=>$xmldump);
+	$importVal = array('LI_id'=>$product_id,'name'=>$prodname.' - '.$company,'display_name'=>$prodname,'comments'=>$comments,'product_type'=>$product_type,'licensing_mode'=>$licensing_mode,'administration_mode'=>$administration_mode,'discontinuation_status'=>$discontinuation_status,'discontinuation_status_comment'=>$discontinuation_status_comment,'is_key'=>$is_key,'is_active'=>$is_active,'created'=>$created,'modified'=>$modified,'company'=>$company,'brand_names'=>$brand_names,'generic_names'=>$generic_names,'code_names'=>$code_names,'approvals'=>$approvals,'xml'=>$xmldump);
 	if(($product_id == NULL && trim($product_id) == '') || ($prodname == NULL && trim($prodname) == ''))
 		return array('success'=>$success,'fail'=>$fail,'skip'=>$skip,'delete'=>$delete, 'exitProcess'=>true);
 	//var_dump($importVal);
