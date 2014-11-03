@@ -1702,10 +1702,11 @@ function Download_reports()
 	$prevEntity1Span=0;
 	$last_cat_col = '';
 	$entity2_Category_Presence = 0;
-	
+
 	if($ohm == 'SOHM')
 	{
 		$query = 'SELECT `num`,`type`,`type_id`, `display_name`, `category`, `tag` FROM `rpt_masterhm_headers` WHERE report=' . $id . ' ORDER BY num ASC';
+		//die;
 		$res = mysql_query($query) or die('Bad SQL query getting heatmap report headers');
 		
 		while($header = mysql_fetch_array($res))
@@ -4083,16 +4084,19 @@ function Download_reports()
 		
 	if($_POST['dwformat']=='exceldown' || isset($_GET['excel_x']))
 	{
+		$moveColumn = 0;
+		foreach($rows as $key=>$val)
+		{
+			if($rowsCategoryName[$key]!='')
+			{
+				$moveColumn=1;
+				break;
+			}
+		}
 		$name = htmlspecialchars(strlen($name)>0?$name:('report '.$id.''));		
 		// Create excel file object
 		$objPHPExcel = new PHPExcel();
-		//$entity2_Category_Presence decides over the position of Columns
-		$moveColumn = 0;
-		if($entity2_Category_Presence){
-			$moveColumn = 1;
-		}else{
-			$moveColumn = 0;
-		}		
+		
 		// Set properties
 		$objPHPExcel->getProperties()->setCreator(SITE_NAME);
 		$objPHPExcel->getProperties()->setLastModifiedBy(SITE_NAME);
@@ -4165,7 +4169,6 @@ function Download_reports()
 		//freezepane
 		//$entity2_Category_Presence decides over the position of freeze pane
 		if($entity2_Category_Presence){
-			$objPHPExcel->getActiveSheet()->SetCellValue('A5', 'Category');	
 			$objPHPExcel->getActiveSheet()->freezePane('B6');
 		}else{
 			$objPHPExcel->getActiveSheet()->freezePane('B5');
@@ -4221,6 +4224,8 @@ function Download_reports()
 			}
 		}		
 		$Excel_HMCounter++;
+		if($moveColumn)
+			$objPHPExcel->getActiveSheet()->SetCellValue('A'.$Excel_HMCounter, 'Category');	
 		foreach($columns as $col => $val)
 		{
 			$cell= num2char($col+$moveColumn).$Excel_HMCounter;
@@ -4786,7 +4791,7 @@ function Download_reports()
 		
 		$objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
 	
-		ob_end_clean();  
+		ob_end_clean(); 
 		
 		header("Pragma: public");
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
