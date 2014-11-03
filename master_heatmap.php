@@ -4087,7 +4087,7 @@ function Download_reports()
 		$moveColumn = 0;
 		foreach($rows as $key=>$val)
 		{
-			if($rowsCategoryName[$key]!='')
+			if(isset($rowsCategoryName[$key]) && $rowsCategoryName[$key]!='' && $rowsCategoryName[$key] != 'Undefined')
 			{
 				$moveColumn=1;
 				break;
