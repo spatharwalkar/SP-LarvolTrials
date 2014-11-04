@@ -132,7 +132,7 @@ function updateviewmode()
 	var osflt = "";
 	switch(mode)
 	{
-		case 'ai':  list = "list=1&";	itype = 'itype=1&';	osflt='osflt=&'; break;
+		case 'ai':  list = "list=1&";	itype = 'itype=1,0&';	osflt='osflt=&'; break;
 		case 'aos': list = "list=1&";	itype = 'itype=&';	osflt='osflt=on&'; break;
 		case 'act': list = "list=1&";	itype = 'itype=&';	osflt='osflt=&'; break;
 		case 'all': list = "list=2&";	itype = 'itype=&';	osflt='osflt=&'; break;
@@ -140,7 +140,7 @@ function updateviewmode()
 	
 	var links = document.getElementById('mainhm').getElementsByTagName('a');
 	$.each(links, function(){
-		this.href = this.href.replace(/list=\d*&/,list).replace(/itype=\d*&/,itype).replace(/osflt=[a-z]*&/,osflt);
+		this.href = this.href.replace(/list=\d*&/,list).replace(/itype=.*&/,itype).replace(/osflt=[a-z]*&/,osflt);
 		
 	});
 }
