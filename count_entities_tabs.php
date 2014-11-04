@@ -612,7 +612,7 @@ function updateDiseasesTabCount($diseaseId) {
 	else
 	$diseasesCompanies = '';
 	
-	$sqlGetCompaniesForDisease = "SELECT e2.`id` FROM `rpt_masterhm_cells` rpt 
+	/*$sqlGetCompaniesForDisease = "SELECT e2.`id` FROM `rpt_masterhm_cells` rpt 
 								JOIN `entities` e ON((rpt.`entity1`=e.`id` AND e.`class`='Product') OR (rpt.`entity2`=e.`id` AND e.`class`='Product')) 
 								JOIN `entity_relations` er ON(e.`id` = er.`parent`) 
 								JOIN `entities` e2 ON(e2.`id` = er.`child`) 
@@ -620,8 +620,10 @@ function updateDiseasesTabCount($diseaseId) {
 								AND e2.`id` IN ('$diseasesCompanies') 
 								AND e2.`class`='Institution' 
 								AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)
-								group by e2.`id`";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS
-
+								group by e2.`id`";	//SELECTING DISTINCT PHASES SO WE WILL HAVE MIN ROWS TO PROCESS 
+	*/
+	$sqlGetCompaniesForDisease = "SELECT DISTINCT er.child AS CompId, e2.`name` AS CompName, e2.`display_name` AS CompDispName,er.parent AS ProdId, dt.phase as phase, group_concat((dt.`phase`)) as phases, et.entity AS entity1 from entity_trials et JOIN data_trials dt on (et.trial = dt.larvol_id) JOIN entity_trials et2 ON (dt.larvol_id = et2.trial and et.entity = '".$diseaseId."') JOIN entities e ON (et2.entity = e.id and e.class='Product' AND (e.`is_active` <> '0' OR e.`is_active` IS NULL)) JOIN entity_relations er ON (e.id = er.parent ) JOIN entities e2 ON (er.child = e2.id and e2.class='Institution' ) 
+group by CompId";
 	$resGetCompaniesForDisease = mysql_query($sqlGetCompaniesForDisease) or die(mysql_error());
 	
 	$diseasesCompanyCount = mysql_num_rows($resGetCompaniesForDisease);
