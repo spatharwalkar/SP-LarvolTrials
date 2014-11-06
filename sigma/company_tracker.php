@@ -217,7 +217,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	}
 	if($TrackerType == 'INVESTCT')	
 	{
-		global $CompanyIds;
+		//global $CompanyIds;
 		global $arrDiseaseIds;
 		$arrImplode = @implode(",", $arrDiseaseIds);
 		
@@ -226,7 +226,10 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 		$header = mysql_fetch_array($res);
 		$Report_DisplayName = $header['name'];
 	
-		$CompanyIds = array_filter(array_unique($CompanyIds));
+		//$CompanyIds = array_filter(array_unique($CompanyIds));
+		$CompanyIds			= GetCompaniesFromInvestigator_CompanyTracker($id);
+		$CompanyIds 		= array_filter(array_unique($CompanyIds));
+		
 		$id=$header['id'];
 
 		
