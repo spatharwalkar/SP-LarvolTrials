@@ -96,8 +96,12 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	//END DATA
 	if($TrackerType == 'DISCATCT')	//CTH - COMPANY TRACKER with HEADER DCT - DISEASE COMPANY TRACKER
 	{
-		global $CompanyIds;
-		global $arrDiseaseIds;
+		//global $CompanyIds;
+		//global $arrDiseaseIds;
+		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCat($id);
+		$CompanyIds      = GetCompaniesFromDiseaseCat_CompanyTracker($arrDiseaseIds);
+		$TabCompanyCount = count($CompanyIds);
+		
 		$arrImplode = @implode(",", $arrDiseaseIds);
 		
 		$query = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' .$id;

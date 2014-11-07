@@ -289,7 +289,11 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	}
 	else if($TrackerType == 'DISCATPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
 	{
-		global $productIds;
+		//global $productIds;
+		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCat($id);
+		$productIds      = GetProductsFromDiseaseCat($arrDiseaseIds);
+		$TabProductCount = count($productIds);
+		
 		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `id`=' . $id;
 		$res = mysql_query($query) or die($query.' - '.mysql_error());
 		$header = mysql_fetch_array($res);

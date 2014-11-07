@@ -101,8 +101,12 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	//END DATA
 	if($TrackerType == 'DISCATMT')	//MTH - MOA TRACKER with HEADER DMT - DISEASE MOA TRACKER
 	{
-		global $MOAData;
-		global $arrDiseaseIds;
+		//global $MOAData;
+		//global $arrDiseaseIds;
+		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCat($id);
+		$MOAData         = GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds);
+		$TabMOACount     = count($MOAData['all']);
+		
 		$arrImplode = implode(",", $arrDiseaseIds);
 		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
