@@ -110,6 +110,28 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 }
 ///End of Process Report Tracker
 
+/* Function to get Diseases count based on Disease_Category id */
+function getDiseaseIdsFromDiseaseCat($dcid)
+{
+	global $db;
+	global $now;
+	$ProductsCount = 0;
+	$arrDiseaseIds = array();
+
+	if($dcid > 0)
+	{
+		$query = "SELECT child FROM `entity_relations` WHERE parent = '$dcid'";
+		$res = mysql_query($query) or die('Bad SQL query for counting diseases by a disease category ID ');
+
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+				$arrDiseaseIds[] = $row['child'];
+		}
+	}
+	return $arrDiseaseIds;
+}
+
 function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 {
 	global $db;
