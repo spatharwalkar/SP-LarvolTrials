@@ -7346,7 +7346,7 @@ class TrialTracker
 				
 				foreach($aDetails['TrialsInfo'] as $akey => $value)
 				{
-					$tHeader .= strip_tags($value['sectionHeader']);
+					$tHeader .= $value['sectionHeader'];
 				}
 				
 				$pDetails = $this->getProductHmHeaders($hmId, array());
