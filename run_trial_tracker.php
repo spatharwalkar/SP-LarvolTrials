@@ -10730,7 +10730,8 @@ class TrialTracker
 		
 		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
 		$resetUrl = htmlentities($resetUrl);
-
+		if(!stristr($_SERVER['HTTP_HOST'],"larvol.com"))
+			$dir="";
 		echo '<div id="buttons">'
 			. '<input type="submit" id="Show" value="Search" class="searchbutton" />&nbsp;'
 			. '<a style="display:inline;" href="' . $dir . $resetUrl . '">'
