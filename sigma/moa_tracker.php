@@ -78,7 +78,7 @@ function showMOATracker($id, $TrackerType, $page=1)
 }
 
 /* Function to get Diseases count based on Disease_Category id */
-function getDiseaseIdsFromDiseaseCat($dcid)
+function getDiseaseIdsFromDiseaseCatForMT($dcid)
 {
 	global $db;
 	global $now;
@@ -126,7 +126,7 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	{
 		//global $MOAData;
 		//global $arrDiseaseIds;
-		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCat($id);
+		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCatForMT($id);
 		$MOAData         = GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds);
 		$TabMOACount     = count($MOAData['all']);
 		

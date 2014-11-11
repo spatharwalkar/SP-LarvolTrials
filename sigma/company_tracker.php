@@ -74,7 +74,7 @@ function showCompanyTracker($id, $TrackerType, $page=1)
 }
 ///End of Process Report Tracker
 /* Function to get Diseases count based on Disease_Category id */
-function getDiseaseIdsFromDiseaseCat($dcid)
+function getDiseaseIdsFromDiseaseCatForCT($dcid)
 {
 	global $db;
 	global $now;
@@ -120,7 +120,7 @@ function DataGeneratorForCompanyTracker($id, $TrackerType, $page=1)
 	{
 		//global $CompanyIds;
 		//global $arrDiseaseIds;
-		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCat($id);
+		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCatForCT($id);
 		$CompanyIds      = GetCompaniesFromDiseaseCat_CompanyTracker($arrDiseaseIds);
 		$TabCompanyCount = count($CompanyIds);
 		

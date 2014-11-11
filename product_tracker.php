@@ -111,7 +111,7 @@ function showProductTracker($id, $dwcount, $TrackerType, $page=1, $OptionArray =
 ///End of Process Report Tracker
 
 /* Function to get Diseases count based on Disease_Category id */
-function getDiseaseIdsFromDiseaseCat($dcid)
+function getDiseaseIdsFromDiseaseCatForPT($dcid)
 {
 	global $db;
 	global $now;
@@ -312,7 +312,7 @@ function DataGenerator($id, $TrackerType, $page=1, $OptionArray, $dwcount='')
 	else if($TrackerType == 'DISCATPT')	///DISCATPT=DISEASE Category COMPANY PRODUCT TRACKER
 	{
 		//global $productIds;
-		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCat($id);
+		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCatForPT($id);
 		$productIds      = GetProductsFromDiseaseCat($arrDiseaseIds);
 		$TabProductCount = count($productIds);
 		
