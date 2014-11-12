@@ -76,6 +76,29 @@ function showMOATracker($id, $TrackerType, $page=1)
 	
 	return $HTMLContent;
 }
+
+/* Function to get Diseases count based on Disease_Category id */
+function getDiseaseIdsFromDiseaseCatForMT($dcid)
+{
+	global $db;
+	global $now;
+	$ProductsCount = 0;
+	$arrDiseaseIds = array();
+
+	if($dcid > 0)
+	{
+		$query = "SELECT child FROM `entity_relations` WHERE parent = '$dcid'";
+		$res = mysql_query($query) or die('Bad SQL query for counting diseases by a disease category ID ');
+
+		if($res)
+		{
+			while($row = mysql_fetch_array($res))
+				$arrDiseaseIds[] = $row['child'];
+		}
+	}
+	return $arrDiseaseIds;
+}
+
 ///End of Process Report Tracker
 
 function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
@@ -101,8 +124,12 @@ function DataGeneratorForMOATracker($id, $TrackerType, $page=1)
 	//END DATA
 	if($TrackerType == 'DISCATMT')	//MTH - MOA TRACKER with HEADER DMT - DISEASE MOA TRACKER
 	{
-		global $MOAData;
-		global $arrDiseaseIds;
+		//global $MOAData;
+		//global $arrDiseaseIds;
+		$arrDiseaseIds   = getDiseaseIdsFromDiseaseCatForMT($id);
+		$MOAData         = GetMOAsOrMOACatFromDiseaseCat_MOATracker($arrDiseaseIds);
+		$TabMOACount     = count($MOAData['all']);
+		
 		$arrImplode = implode(",", $arrDiseaseIds);
 		$query          = 'SELECT `name`, `id`, `display_name` FROM `entities` WHERE `class` = "Disease_Category" AND `id`=' . $id;
 		$res = mysql_query($query) or die(mysql_error());
