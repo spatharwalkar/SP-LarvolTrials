@@ -2579,17 +2579,20 @@ function pagePagination($limit,$totalCount,$table,$script,$ignoreFields=array(),
 			. ($visualPage<$maxPage?'<input type="submit" name="next" value="Next &gt;" />':'')
 			. '<input type="hidden" value="'.$oldVal.'" name="oldval">'
 			. '</fieldset>';
-	echo '<fieldset class="floatl">';
-	echo '<legend> Actions: </legend>';
-	if(isset($options['add_new_record']) && $options['add_new_record']!==false)
-	{
-     //       if($addEdit_flag == TRUE) { 
-                echo '<input type="submit" value="Add New Record" name="add_new_record">';
-     //       }
+	$fileName = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+	if($fileName != 'redtags.php'){
+		echo '<fieldset class="floatl">';
+		echo '<legend> Actions: </legend>';
+		if(isset($options['add_new_record']) && $options['add_new_record']!==false)
+		{
+	     //       if($addEdit_flag == TRUE) { 
+	                echo '<input type="submit" value="Add New Record" name="add_new_record">';
+	     //       }
+		}
+			if($options['import'])
+			echo '<input type="submit" value="Import" name="import">';
+			echo '</fieldset>';
 	}
-		if($options['import'])
-		echo '<input type="submit" value="Import" name="import">';
-		echo '</fieldset>';
 	//$_SESSION['page_errors'] = array('Sql error','What is this error.');
 	if(isset($_SESSION['page_errors']) && is_array($_SESSION['page_errors']) && count($_SESSION['page_errors'])>0)
 	{
