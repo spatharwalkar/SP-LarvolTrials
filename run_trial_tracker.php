@@ -10770,8 +10770,7 @@ class TrialTracker
 		
 		$resetUrl = ''. $globalOptions['pageLocation'] .'.php?';
 		$resetUrl .= $globalOptions['url'];
-		
-		$resetUrl .= str_replace(',', '&', $globalOptions['resetLink']);
+		$resetUrl .= str_replace(',', '&', urldecode($globalOptions['resetLink']));
 		$resetUrl = htmlentities($resetUrl);
 		if(!stristr($_SERVER['HTTP_HOST'],"larvol.com"))
 			$dir="";
@@ -10783,7 +10782,7 @@ class TrialTracker
 			. '<div class="export" id="chromemenu" style="width:64px;"><div><a rel="dropmenu"><b style="margin-left:16px;">Export</b></a></div></div>'
 			. '</div>';
 				
-		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . $globalOptions['resetLink'] . '" />';
+		echo '<input type="hidden" name="rflag" value="1" /><input type="hidden" name="rlink" value="' . urldecode($globalOptions['resetLink']) . '" />';
 		if(isset($globalOptions['sphinx_s']))
 		{
 			echo '<input type="hidden" name="sphinx_s" value="' . $globalOptions['sphinx_s'] . '" />';
