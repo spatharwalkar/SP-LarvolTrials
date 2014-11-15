@@ -31,7 +31,7 @@ function showNewsTracker($id, $TrackerType, $page=1)
 		$data_matrix[] = $data1;
 	}
 	
-	$RecordsPerPage = 50;
+	$RecordsPerPage = 1;
 	$TotalPages = 0;
 	$TotalRecords = count($data_matrix);
 	$MainPageURL = 'product.php';
@@ -118,7 +118,7 @@ function NewsTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $Ma
 	if($TrackerType == 'PNT')	//PDT = PRODUCT News TRACKER
 		$url = 'e1='.$id.'&amp;tab=newstrac';
 	else if($TrackerType == 'DNT')	//DNT = Disease News TRACKER
-		$url = 'DiseaseId='.$id.'&amp;tab=newstrac';
+		$url = 'DiseaseId='.$id.'&amp;tab=News';
 	else if($TrackerType == 'CNT')	//CNT = COMPANY News TRACKER
 		$url = 'CompanyId='.$id.'&amp;tab=newstrac';
 	else if($TrackerType == 'MNT')	//MCDT = MOA News TRACKER
@@ -220,7 +220,7 @@ function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 	}
 	//$query .= " order by added desc limit 50";
 	$query .= " order by added desc";
-
+	//echo $query;exit;
 	if(!$res = mysql_query($query))
 	{
 		global $logger;
