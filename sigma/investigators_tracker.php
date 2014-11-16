@@ -1711,7 +1711,7 @@ function DownloadInvestigatorTrackerReports()
 				
 			$cell = $Header_Col . $Excel_HMCounter;
 			$objPHPExcel->getActiveSheet()->SetCellValue($cell, $data_matrix[$key]['RowHeader']);
-			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl($data_matrix[$key]['HeaderLink']); 
+			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath().$data_matrix[$key]['HeaderLink']); 
 			$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($data_matrix[$key]['RowHeader']);
 			 
 			$from = $Start_Char;
@@ -1738,7 +1738,7 @@ function DownloadInvestigatorTrackerReports()
 					$Mini_Bar_Width = CalculateMiniBarWidthInvestigatorTracker($ratio, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 					$phase_space =  $phase_space + $Mini_Bar_Width;					
 					$url .= $data_matrix[$key]['ColumnsLink'] . '&phase='. $phase_nums;
-					$from = CreatePhaseCellforExcelExportInvestigatorTracker($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+					$from = CreatePhaseCellforExcelExportInvestigatorTracker($from, $Mini_Bar_Width, urlPath().$url, $Excel_HMCounter, $data_matrix[$key]['phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 				}
 			}
 			

@@ -1580,9 +1580,9 @@ function InvDownload_reports()
 				$objPHPExcel->getActiveSheet()->SetCellValue($cell, $data_matrix[$row]['investigatorName'].$data_matrix[$row]['investigator_CompanyName'].((trim($data_matrix[$row]['investigatorTag']) != '') ? ' ['.$data_matrix[$row]['investigatorTag'].']':''));
 				
 				if($TrackerType != 'PTH')
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl($procommonPart1.'&sourcepg=TZP'); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath().$procommonPart1.'&sourcepg=TZP'); 
 				else
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl($fullLink); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath().$fullLink); 
 				
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 				if($rdesc)
