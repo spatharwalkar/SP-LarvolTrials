@@ -108,7 +108,7 @@ function updateCompanyTabCount($companyId) {
 		while($rowCompanyNews = mysql_fetch_array($resCompanyNews))
 			$companyNewsCount = $rowCompanyNews['newsCount'];
 	}
-	if ($companyNewsCount > 50) $companyNewsCount = 50;
+	//if ($companyNewsCount > 50) $companyNewsCount = 50;
 	
 	// diseases count for company
 	$companyDiseasesCount = 0;	
@@ -326,7 +326,7 @@ function updateProductTabCount($productId) {
 		while($rowProductNewsCount = mysql_fetch_array($resProductNewsCount))
 			$prodcutNewsCount = $rowProductNewsCount['newsCount'];
 	}
-	if ($prodcutNewsCount > 50) $prodcutNewsCount = 50;
+	//if ($prodcutNewsCount > 50) $prodcutNewsCount = 50;
 	
 	// to check if tab for this enetity is already there in the tabs table
 	$sqlCheckTabsTable = "SELECT entity_id FROM tabs 
@@ -542,7 +542,7 @@ function updateMOATabCount($moaId) {
 		while($rowGetMoaNews = mysql_fetch_array($resGetMoaNews))
 			$moaNewsCount = $rowGetMoaNews['newsCount'];
 	}
-	if ($moaNewsCount > 50) $moaNewsCount = 50;
+	//if ($moaNewsCount > 50) $moaNewsCount = 50;
 	
 	// to check if tab for this enetity is already there in the tabs table
 	$sqlCheckTabsTable = "SELECT entity_id FROM tabs 
@@ -787,7 +787,7 @@ group by CompId";
 		while($rowGetNewsForDisease = mysql_fetch_array($resGetNewsForDisease))
 			$diseaseNewsCount = $rowGetNewsForDisease['newsCount'];
 	}
-	if ($diseaseNewsCount > 50) $diseaseNewsCount = 50;
+	//if ($diseaseNewsCount > 50) $diseaseNewsCount = 50;
 	
 	// to check if tab for this enetity is already there in the tabs table
 	$sqlCheckTabsTable = "SELECT entity_id FROM tabs 
@@ -1223,7 +1223,7 @@ function updateMoaCatTabCount($moaCatId) {
 		while($rowGetNews = mysql_fetch_array($resGetNews))
 			$moaNewsCount = $rowGetNews['newsCount'];
 	}
-	if ($moaNewsCount > 50) $moaNewsCount = 50;
+	//if ($moaNewsCount > 50) $moaNewsCount = 50;
 	
 	
 	// to check if tab for this enetity is already there in the tabs table

@@ -4616,10 +4616,11 @@ function Download_reports()
 						$objDrawing = new PHPExcel_Worksheet_Drawing();
 						$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 						if($data_matrix[$rid][$cid]['total'] == 0)
-						$objDrawing->setOffsetX(60);
+							$objDrawing->setOffsetX(5);
 						else
-						$objDrawing->setOffsetX(80);
-						$objDrawing->setOffsetY(1);
+							$objDrawing->setOffsetX(5);
+							
+						$objDrawing->setOffsetY(5);
 						
 						$img = $data_matrix[$rid][$cid]['exec_bomb']['src'];
 						if($data_matrix[$rid][$cid]['total'] != 0)

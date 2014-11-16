@@ -20,22 +20,164 @@ if(isset($_REQUEST['page']) && is_numeric($_REQUEST['page']))
 
 
 function showNewsTracker($id, $TrackerType, $page=1)
-{
+{//echo $TrackerType;exit;
 	$uniqueId = uniqid();
 	
 	$data = DataGeneratorForNewsTracker($id, $TrackerType, $page);	
-	$HTMLContent = NewsTrackerCommonCSS($uniqueId, $TrackerType);	
-	$HTMLContent .= NewsTrackerHTMLContent($data); 
-
+	
+	///////////PAGING DATA
+	$data_matrix = array();
+	while($data1  = mysql_fetch_array($data)){
+		$data_matrix[] = $data1;
+	}
+	
+	$RecordsPerPage = 1;
+	$TotalPages = 0;
+	$TotalRecords = count($data_matrix);
+	$MainPageURL = 'product.php';
+	
+	$MainPageURL = 'news_tracker.php';
+	if($TrackerType == 'PNT')	//PIT=Product Investigator TRACKER
+		$MainPageURL = 'product.php';
+	else if($TrackerType == 'DNT')	//CIT=company investigator TRACKER
+		$MainPageURL = 'disease.php';
+	else if($TrackerType == 'CNT')	//CIT=company investigator TRACKER
+		$MainPageURL = 'company.php';
+	else if($TrackerType == 'MNT')	//MIT=MOA Investigator TRACKER
+		$MainPageURL = 'moa.php';
+	else if($TrackerType == 'MCNT')	//MCIT=MOA Category Investigator TRACKER
+		$MainPageURL = 'moacategory.php';
+	
+	if(isset($_REQUEST['dwcount']))
+		$CountType = $_REQUEST['dwcount'];
+	else
+		$CountType = 'total';
+	$query = "SELECT `name`, `display_name`, `id`, `class` FROM `entities` WHERE id='" . $id ."'";
+	
+	$res = mysql_query($query) or die( $query . ' '.mysql_error());
+	$header = mysql_fetch_array($res);
+	$GobalEntityType = $header['class'];
+	
+	$page=!empty($_REQUEST['page'])?$_REQUEST['page']:1;
+	if(!isset($_POST['download']))
+	{
+	
+	
+		//Get only those product Ids which we are planning to display on current page to avoid unnecessary queries
+		
+		if(!empty($data_matrix))
+		{
+			$TotalPages = ceil(count($data_matrix) / $RecordsPerPage);
+			$StartSlice = ($page - 1) * $RecordsPerPage;
+			$EndSlice = $StartSlice + $RecordsPerPage;
+			$data_matrix_temp = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+			$rowsTemp = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+				
+			if (($TotalPages > 0 ) && (count($data_matrix_temp) == 0)){
+					
+				$StartSlice = ($TotalPages - 1) * $RecordsPerPage;
+				$EndSlice = $StartSlice + $RecordsPerPage;
+				$data_matrix = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+				$rows = array_slice($data_matrix, $StartSlice, $RecordsPerPage);
+				$page=$TotalPages;
+					
+			} else {
+				$data_matrix = $data_matrix_temp;
+				$rows        = $rowsTemp ;
+			}
+				
+		}
+		else
+		{
+			$data_matrix=array();
+			$rows = array();
+		}
+	}
+	
+	$HTMLContent = NewsTrackerCommonCSS($uniqueId, $TrackerType);
+	
+	if($TotalPages > 1)
+	{
+		$paginate = NewsTrackerpagination($TrackerType, $TotalPages, $id, $page, $MainPageURL, $GobalEntityType, $CountType);
+		$HTMLContent .= '<br/><br/>'.$paginate[1];
+	}
+	$HTMLContent .= NewsTrackerHTMLContent($data_matrix);
+	/////////PAGING DATA ENDS
 	return $HTMLContent;
 }
 
-function NewsTrackerHTMLContent($res) {
-	$results=array();
+function NewsTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $MainPageURL, $GobalEntityType, $CountType)
+{
 
+	$url = '';
+	$stages = 5;
+		
+	$url = 'id=' . $id .'&amp;tab=newstrac';
+
+	$url = 'id='.$id;
+	if($TrackerType == 'PNT')	//PDT = PRODUCT News TRACKER
+		$url = 'e1='.$id.'&amp;tab=newstrac';
+	else if($TrackerType == 'DNT')	//DNT = Disease News TRACKER
+		$url = 'DiseaseId='.$id.'&amp;tab=News';
+	else if($TrackerType == 'CNT')	//CNT = COMPANY News TRACKER
+		$url = 'CompanyId='.$id.'&amp;tab=newstrac';
+	else if($TrackerType == 'MNT')	//MCDT = MOA News TRACKER
+		$url = 'MoaId='.$id.'&amp;tab=newstrac';
+	else if($TrackerType == 'MCNT')	//MCNT = MOA CATEGORY News TRACKER
+		$url = 'MoaCatId='.$id.'&amp;tab=newstrac';
+
+	if($GobalEntityType == 'Product')
+		$url .= '&amp;dwcount=' . $CountType;
+
+	$rootUrl = $MainPageURL.'?';
+	$paginateStr = '<table align="center"><tr><td style="border:0px;"><span class="pagination">';
+
+	if($CurrentPage != 1)
+	{
+		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage-1) . '\'>&laquo;</a>';
+	}
+
+	$prelink = 	'<a href=\'' . $rootUrl . $url . '&page=1\'>1</a>'
+			.'<a href=\'' . $rootUrl . $url . '&page=2\'>2</a>'
+					.'<span>...</span>';
+	$postlink = '<span>...</span>'
+			.'<a href=\'' . $rootUrl . $url . '&page=' . ($totalPages-1) . '\'>' . ($totalPages-1) . '</a>'
+					.'<a href=\'' . $rootUrl . $url . '&page=' . $totalPages . '\'>' . $totalPages . '</a>';
+		
+	if($totalPages > (($stages * 2) + 3))
+	{
+		if($CurrentPage >= ($stages+3)){
+			$paginateStr .= $prelink;
+			if($totalPages >= $CurrentPage + $stages + 2)
+			{
+				$paginateStr .= generateLink($CurrentPage - $stages,$CurrentPage + $stages,$CurrentPage,$rootUrl,$url);
+				$paginateStr .= $postlink;
+			}else{
+				$paginateStr .= generateLink($totalPages - (($stages*2) + 2),$totalPages,$CurrentPage,$rootUrl,$url);
+			}
+		}else{
+			$paginateStr .= generateLink(1,($stages*2) + 3,$CurrentPage,$rootUrl,$url);
+			$paginateStr .= $postlink;
+		}
+	}else{
+		$paginateStr .= generateLink(1,$totalPages,$CurrentPage,$rootUrl,$url);
+	}
+
+	if($CurrentPage != $totalPages)
+	{
+		$paginateStr .= '<a href=\'' . $rootUrl . $url . '&page=' . ($CurrentPage+1) . '\'>&raquo;</a>';
+	}
+	$paginateStr .= '</span></td></tr></table>';
+
+	return array($url, $paginateStr);
+}
+
+function NewsTrackerHTMLContent($res) {
+	$results=array();	
+	
 	$htmlContent  = '<table class="news">';
 
-	while($result = mysql_fetch_array($res))
+	foreach($res as $result)
 	{
 		//this assignment should not happen here, 
 		//set summary in the database during news generation
@@ -76,8 +218,9 @@ function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 		$impArr = implode("','", $productIds);
 		$query .= "WHERE et.`entity` in('" . $impArr . "')";
 	}
-	$query .= " order by added desc limit 50";
-
+	//$query .= " order by added desc limit 50";
+	$query .= " order by added desc";
+	//echo $query;exit;
 	if(!$res = mysql_query($query))
 	{
 		global $logger;
@@ -172,6 +315,39 @@ function NewsTrackerCommonCSS($uniqueId, $TrackerType)
 		}		
 		.summary {
 			color:purple;
+		}
+		.pagination {
+						width:100%;
+						float:none;
+						float: left; 
+						padding-top:0px; 
+						vertical-align:top;
+						font-weight:bold;
+						padding-bottom:25px;
+						color:#4f2683;
+		}
+					
+		.pagination a:hover {
+						background-color: #aa8ece;
+						color: #FFFFFF;
+						font-weight:bold;
+						display:inline;
+		}
+					
+		.pagination a {
+						margin: 0 2px;
+						border: 1px solid #CCC;
+						background-color:#4f2683;
+						font-weight: bold;
+						padding: 2px 5px;
+						text-align: center;
+						color: #FFFFFF;
+						text-decoration: none;
+						display:inline;
+		}
+					
+		.pagination span {
+			padding: 2px 5px;
 		}
 					</style>';
 	return $htmlContent;				
