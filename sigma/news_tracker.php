@@ -31,7 +31,7 @@ function showNewsTracker($id, $TrackerType, $page=1)
 		$data_matrix[] = $data1;
 	}
 	
-	$RecordsPerPage = 1;
+	$RecordsPerPage = 50;
 	$TotalPages = 0;
 	$TotalRecords = count($data_matrix);
 	$MainPageURL = 'product.php';
