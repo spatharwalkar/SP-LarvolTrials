@@ -781,7 +781,7 @@
 			else{ 
 				$ctLink = 'javascript:void(0)';
 			}
-			$ctLink = urlencode($ctLink);
+			//$ctLink = urlencode($ctLink);
 			
 			$objPHPExcel->getActiveSheet()->setCellValue('A'.$i , $value['larvol_id']);
 			$objPHPExcel->getActiveSheet()->getCell('A'.$i , $value['larvol_id'])->getHyperlink()->setUrl($ctLink);

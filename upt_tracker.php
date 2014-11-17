@@ -732,7 +732,7 @@
 			else{ 
 				$ctLink = 'javascript:void(0)';
 			}
-			$ctLink = urlencode($ctLink);
+			//$ctLink = urlencode($ctLink);
 			
 			$getNCTId = mysql_query("SELECT");
 			

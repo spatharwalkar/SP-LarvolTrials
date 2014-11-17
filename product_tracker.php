@@ -2061,9 +2061,9 @@ function Download_reports()
 				$objPHPExcel->getActiveSheet()->SetCellValue($cell, $data_matrix[$row]['productName'].$data_matrix[$row]['product_CompanyName'].((trim($data_matrix[$row]['productTag']) != '') ? ' ['.$data_matrix[$row]['productTag'].']':''));
 				
 				if($TrackerType != 'PTH')
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl($procommonPart1.'&sourcepg=TZP'); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath().$procommonPart1.'&sourcepg=TZP'); 
 				else
-				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl($fullLink); 
+				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setUrl(urlPath().$fullLink); 
 				
 				$objPHPExcel->getActiveSheet()->getCell($cell)->getHyperlink()->setTooltip($tooltip);
 				if($rdesc)
@@ -2097,7 +2097,7 @@ function Download_reports()
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
 							$url =  $fullLink . '&phase=' . $phase_nums;
-							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, urlPath().$url, $Excel_HMCounter, $data_matrix[$row]['indlead_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
 				}
@@ -2115,7 +2115,7 @@ function Download_reports()
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
 							$url = $fullLink . '&phase=' . $phase_nums;
-							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, urlPath().$url, $Excel_HMCounter, $data_matrix[$row]['active_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
 				}
@@ -2133,7 +2133,7 @@ function Download_reports()
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
 							$url =  $fullLink . '&phase=' . $phase_nums;
-							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, urlPath().$url, $Excel_HMCounter, $data_matrix[$row]['owner_sponsored_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
 				}
@@ -2151,7 +2151,7 @@ function Download_reports()
 							$Mini_Bar_Width = CalculateMiniBarWidth($ratio, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $Max_ValueKey, $Err, $Total_Bar_Width);
 							$phase_space =  $phase_space + $Mini_Bar_Width;
 							$url = $fullLink . '&phase=' . $phase_nums;
-							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, $url, $Excel_HMCounter, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
+							$from = CreatePhaseCellforExcelExport($from, $Mini_Bar_Width, urlPath().$url, $Excel_HMCounter, $data_matrix[$row]['total_phase_'.$phase_nums], $phase_nums, $objPHPExcel);
 						}
 					}
 				}
