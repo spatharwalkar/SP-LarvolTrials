@@ -175,7 +175,7 @@ function NewsTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $Ma
 function NewsTrackerHTMLContent($res) {
 	$results=array();	
 	
-	$htmlContent  = '<table class="news">';
+	$htmlContent  = '';//<table class="news">';
 
 	foreach($res as $result)
 	{
@@ -185,9 +185,9 @@ function NewsTrackerHTMLContent($res) {
 			$result['summary'] = $result['name'];
 		
 		$formattedNews=formatNews($result);
-		$htmlContent .= '<tr><td>' . $formattedNews .'</td></tr>';
+		$htmlContent .= '<ul><li>' . $formattedNews .'</li></ul>';
 	}
-	$htmlContent .= '</table>';
+	$htmlContent .= '';//</table>';
 	return $htmlContent;
 }
 
@@ -236,9 +236,11 @@ function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 function formatNews($result) {
 	
 	$nctid = $result['source_id'];
+	$source_name = '';
 	if(isset($nctid) && strpos($nctid, 'NCT') === FALSE)
 	{
 		$ctLink = 'https://www.clinicaltrialsregister.eu/ctr-search/search?query=' . $nctid;
+		$source_name = 'EUDRACT';
 	}
 	else if(isset($nctid) && strpos($nctid, 'NCT') !== FALSE)
 	{
@@ -247,6 +249,7 @@ function formatNews($result) {
 			$nctid = $matches[1];
 			
 		$ctLink = 'http://clinicaltrials.gov/ct2/show/' . $nctid;
+		$source_name = 'clinicaltrials.gov';
 	}
 	else
 	{
@@ -258,10 +261,11 @@ function formatNews($result) {
 	}else
 		$phase = 'P='. $phase;
 			
+	$compName[] =$result['company_name'];	
 	$returnStr = '';
-	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['score']).'</span>'.str_repeat('|',10-floor($result['score'])).'&nbsp;&nbsp;</span><span class="product_name">'.$result['product'].'</span><br>';
-	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span><span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',&nbsp;'.$result['overall_status'].',&nbsp;</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
-	$returnStr .= '<a class="title" href="'.$ctLink.'" target="_blank">'.$result['brief_title'].'</a>&nbsp;-&nbsp;&nbsp;'.date('M jS, Y', strtotime($result['added'])) .'<br>';
+	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['score']).'</span><span class="barBold">'.str_repeat('|',10-floor($result['score'])).'</span>&nbsp;&nbsp;</span><span class="product_name">'.productFormatLI($result['product'], $compName, $tag='').'</span><br>';
+	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span>'.'<a class="title" href="'.$ctLink.'" target="_blank">'.$result['brief_title'].'</a>&nbsp;('.$source_name.') -&nbsp;&nbsp;';
+	$returnStr .= date('M j, Y', strtotime($result['added'])).'&nbsp;-&nbsp;&nbsp;<br>'.'<span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',&nbsp;'.$result['overall_status'].',&nbsp;</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
 	$returnStr .= '<span class="summary">'.$result['summary'].'</span>';
 	return $returnStr;
 }
@@ -299,22 +303,27 @@ function NewsTrackerCommonCSS($uniqueId, $TrackerType)
 			color:#151B54;
 		}
 		.rUIS {
-			color:red;
+			color:purple;
+		font-weight: bold;
+		}
+		.barBold{
+			color:#E5E4E2;
+		font-weight: bold;
 		}
 		.redtag {
 			color:red;
 		}
 		.phase_enroll {
-			color:brown;
+			color:black;
 		}		
 		.sponsor {
-			color:blue;
+			color:black;
 		}		
 		a.title, a.title:visited, a.title:hover, a.title:active {
 			color:#000080;
 		}		
 		.summary {
-			color:purple;
+			color:black;
 		}
 		.pagination {
 						width:100%;
