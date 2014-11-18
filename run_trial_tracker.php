@@ -8368,15 +8368,15 @@ class TrialTracker
 				. '<input type="hidden" name="e2" value="' . $resultIds['e2'] . '" />';
 		
 		if(isset($globalOptions['DiseaseId']))		
-		echo '<input type="hidden" name="DiseaseId" value="' . $globalOptions['DiseaseId'] . '" />'
+		echo '<input type="hidden" name="DiseaseId" value="' . urldecode($globalOptions['DiseaseId']) . '" />'
 				. '<input type="hidden" name="tab" value="DiseaseOTT" />';
 				
 		if(isset($globalOptions['InvestigatorId']))		
-		echo '<input type="hidden" name="InvestigatorId" value="' . $globalOptions['InvestigatorId'] . '" />'
+		echo '<input type="hidden" name="InvestigatorId" value="' . urldecode($globalOptions['InvestigatorId']) . '" />'
 				. '<input type="hidden" name="tab" value="InvestigatorOTT" />';
 				
 		if(isset($globalOptions['DiseaseCatId']))
-			echo '<input type="hidden" name="DiseaseCatId" value="' . $globalOptions['DiseaseCatId'] . '" />'
+			echo '<input type="hidden" name="DiseaseCatId" value="' . urldecode($globalOptions['DiseaseCatId']) . '" />'
 					. '<input type="hidden" name="tab" value="DiseaseOTT" />';
 		
 		if($globalOptions['sourcepg'] == 'TZ')		
@@ -10522,7 +10522,7 @@ class TrialTracker
 		if($ottType == 'indexed')
 			$globalOptions['includeProductsWNoData'] = "on";
 			
-		echo '<input type="hidden" name="pr" id="product" value="' . implode(',', $globalOptions['product']) . '" />';
+		echo '<input type="hidden" name="pr" id="product" value="' . implode(',', urldecode($globalOptions['product'])) . '" />';
 		
 		$count = $Values['count'];
 		$totalPages = ceil($count / $this->resultsPerPage);
@@ -11342,10 +11342,10 @@ $(document).ready(function(){
 		}
 		echo '</td></tr>'
 			. '<tr><td colspan="5" style="border: none;height:29px;"></td></tr></table>'
-			. '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
-			. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
-			. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
-			. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
+			. '<input type="hidden" name="status" id="status" value="' . implode(',', urldecode($globalOptions['status'])) . '" />'
+			. '<input type="hidden" name="itype" id="itype" value="' . implode(',', urldecode($globalOptions['itype'])) . '" />'
+			. '<input type="hidden" name="region" id="region" value="' . implode(',', urldecode($globalOptions['region'])) . '" />'
+			. '<input type="hidden" name="phase" id="phase" value="' . implode(',', urldecode($globalOptions['phase'])) . '" />';
 	}
 
 	function pagination($globalOptions = array(), $totalPages, $loggedIn)
