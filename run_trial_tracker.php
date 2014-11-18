@@ -7585,7 +7585,8 @@ class TrialTracker
 				$tHeader = '';
 				if ($globalOptions["sourcepg"] != "TZC"){
 					$productIds = $resultIds['e1'];
-				}else{ 
+					$pDetails = $this->getProductHeaders($productIds);
+				}else{ // Added this else part to fix the issue exel export
 					$companyProducts = getcompanyProducts($resultIds['e1'][0]);
 					$productIds = array_keys($companyProducts);					
 					$pDetails = $this->getProductHeaders($productIds);
