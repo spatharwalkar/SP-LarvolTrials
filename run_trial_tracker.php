@@ -263,7 +263,7 @@ class TrialTracker
 					
 					if(isset($dvalue['manual_is_sourceless']))
 					{
-						$ctLink = $dvalue['source'];
+						$ctLink = appendHyperlinkBase($dvalue['source']);						
 					}
 					else if(isset($dvalue['source_id']) && strpos($dvalue['source_id'], 'NCT') === FALSE)
 					{	
@@ -278,7 +278,7 @@ class TrialTracker
 					{ 
 						$ctLink = 'javascript:void(0)';
 					}
-					$ctLink = urlencode($ctLink);
+					//$ctLink = urlencode($ctLink);
                                         
 					$cellSpan = $i;
 					$rowspanLimit = 0;
@@ -1109,8 +1109,10 @@ class TrialTracker
 							$edYear = date('Y', strtotime($mvalue['end_date']));
 							$upmTitle = htmlformat($mvalue['event_description']);
 							
-							$mvalue['event_link'] = urlencode(trim($mvalue['event_link']));
-							$mvalue['result_link'] = urlencode(trim($mvalue['result_link']));
+							//$mvalue['event_link'] = urlencode(trim($mvalue['event_link']));
+							//$mvalue['result_link'] = urlencode(trim($mvalue['result_link']));
+							$mvalue['event_link'] = trim($mvalue['event_link']);						
+							$mvalue['result_link'] = trim($mvalue['result_link']);
 							
 							if(!$loggedIn && !$this->liLoggedIn())
 							{
@@ -1155,7 +1157,7 @@ class TrialTracker
 								$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 								if($mvalue['result_link'] != '' && $mvalue['result_link'] !== NULL)
 								{
-									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['result_link']);
+									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(appendHyperlinkBase($mvalue['result_link']));
 									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 								}
 								
@@ -1168,14 +1170,14 @@ class TrialTracker
 								$objPHPExcel->getActiveSheet()->getStyle('L' . $i)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 								if($mvalue['event_link'] != '' && $mvalue['event_link'] !== NULL)
 								{
-									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl($mvalue['event_link']);
+									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setUrl(appendHyperlinkBase($mvalue['event_link']));
 									$objPHPExcel->getActiveSheet()->getCell('L' . $i)->getHyperlink()->setTooltip(substr($upmTitle,0,255));
 								}
 							}
 							
 							
 							$this->upmGnattChartforExcel($stMonth, $stYear, $edMonth, $edYear, $currentYear, $secondYear, $thirdYear, $mvalue['start_date'], 
-							$mvalue['end_date'], $mvalue['event_link'], $upmTitle, $objPHPExcel, $i, 'M');
+							$mvalue['end_date'], appendHyperlinkBase($mvalue['event_link']), $upmTitle, $objPHPExcel, $i, 'M');
 							
 							$objPHPExcel->getActiveSheet()->getRowDimension($i)->setRowHeight(15);
 							$i++;	
@@ -1306,14 +1308,15 @@ class TrialTracker
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->applyFromArray($styleThinBlueBorderOutline);
 			$objPHPExcel->getActiveSheet()->getStyle('A' . $i . ':AX' . $i . '')->getFont()->setSize(8);
 			
-			$eventLink = urlencode(trim($uvalue['event_link']));
-			$resultLink = urlencode(trim($uvalue['result_link']));
-			
+			//$eventLink = urlencode(trim($uvalue['event_link']));
+	       //$resultLink = urlencode(trim($uvalue['result_link']));
+			$eventLink = trim($uvalue['event_link']);		
+			$resultLink = trim($uvalue['result_link']);
 			if(!$loggedIn && !$this->liLoggedIn())
 			{
 				$eventLink = NULL;
 			}
-			
+			$eventLink=appendHyperlinkBase($eventLink);
 			//upm id
 			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $uvalue["id"]);
 			if($uvalue['new'] == 'y')
@@ -1559,7 +1562,7 @@ class TrialTracker
 				$uvalue['event_description'] = substr($uvalue['event_description'], 0, 255);
 				if($resultLink != '' && $resultLink !== NULL) 
 				{
-					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl($resultLink);
+					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setUrl(appendHyperlinkBase($resultLink));
 					$objPHPExcel->getActiveSheet()->getCell('H' . $i)->getHyperlink()->setTooltip($uvalue['event_description']);
 				}
 			}
@@ -8370,15 +8373,15 @@ class TrialTracker
 				. '<input type="hidden" name="e2" value="' . $resultIds['e2'] . '" />';
 		
 		if(isset($globalOptions['DiseaseId']))		
-		echo '<input type="hidden" name="DiseaseId" value="' . $globalOptions['DiseaseId'] . '" />'
+		echo '<input type="hidden" name="DiseaseId" value="' . urldecode($globalOptions['DiseaseId']) . '" />'
 				. '<input type="hidden" name="tab" value="DiseaseOTT" />';
 				
 		if(isset($globalOptions['InvestigatorId']))		
-		echo '<input type="hidden" name="InvestigatorId" value="' . $globalOptions['InvestigatorId'] . '" />'
+		echo '<input type="hidden" name="InvestigatorId" value="' . urldecode($globalOptions['InvestigatorId']) . '" />'
 				. '<input type="hidden" name="tab" value="InvestigatorOTT" />';
 				
 		if(isset($globalOptions['DiseaseCatId']))
-			echo '<input type="hidden" name="DiseaseCatId" value="' . $globalOptions['DiseaseCatId'] . '" />'
+			echo '<input type="hidden" name="DiseaseCatId" value="' . urldecode($globalOptions['DiseaseCatId']) . '" />'
 					. '<input type="hidden" name="tab" value="DiseaseOTT" />';
 		
 		if($globalOptions['sourcepg'] == 'TZ')		
@@ -10524,7 +10527,7 @@ class TrialTracker
 		if($ottType == 'indexed')
 			$globalOptions['includeProductsWNoData'] = "on";
 			
-		echo '<input type="hidden" name="pr" id="product" value="' . implode(',', $globalOptions['product']) . '" />';
+		echo '<input type="hidden" name="pr" id="product" value="' . implode(',', urldecode($globalOptions['product'])) . '" />';
 		
 		$count = $Values['count'];
 		$totalPages = ceil($count / $this->resultsPerPage);
@@ -11344,10 +11347,10 @@ $(document).ready(function(){
 		}
 		echo '</td></tr>'
 			. '<tr><td colspan="5" style="border: none;height:29px;"></td></tr></table>'
-			. '<input type="hidden" name="status" id="status" value="' . implode(',', $globalOptions['status']) . '" />'
-			. '<input type="hidden" name="itype" id="itype" value="' . implode(',', $globalOptions['itype']) . '" />'
-			. '<input type="hidden" name="region" id="region" value="' . implode(',', $globalOptions['region']) . '" />'
-			. '<input type="hidden" name="phase" id="phase" value="' . implode(',', $globalOptions['phase']) . '" />';
+			. '<input type="hidden" name="status" id="status" value="' . implode(',', urldecode($globalOptions['status'])) . '" />'
+			. '<input type="hidden" name="itype" id="itype" value="' . implode(',', urldecode($globalOptions['itype'])) . '" />'
+			. '<input type="hidden" name="region" id="region" value="' . implode(',', urldecode($globalOptions['region'])) . '" />'
+			. '<input type="hidden" name="phase" id="phase" value="' . implode(',', urldecode($globalOptions['phase'])) . '" />';
 	}
 
 	function pagination($globalOptions = array(), $totalPages, $loggedIn)
@@ -13998,5 +14001,16 @@ function getNonProductTrialDataList($tid,$productName=''){
 	$dataArr['count'] = $totalCount;
 	return $dataArr;
 }
-
+function appendHyperlinkBase($link){
+	if($link !== NULL && trim($link) == true)
+	{
+		$linkArray=parse_url($link);
+		if(!array_key_exists('scheme',$linkArray))
+		{
+			$link='http://'.$link;
+		}
+		
+	}
+	return $link;
+}
 ?>

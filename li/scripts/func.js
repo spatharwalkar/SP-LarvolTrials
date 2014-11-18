@@ -1,6 +1,6 @@
 $(document).ready(function()
 {
-	$('#addtoright').after('<div id="addedtoright">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Show all milestones</b></div>');
+	$('#addtoright').after('<div id="addedtoright" style="background-repeat:no-repeat">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Show all milestones</b></div>');
 	var image;
 	if($('#upmstyle').val() == 'expand') 
 	{
@@ -43,7 +43,11 @@ function sh(obj,key,all)
 	if(all==undefined)
 	{	
 		$(obj).css('background-image',dir);
-		$('#addedtoright').css('background-image',scansh());
+		$('#addedtoright').css('background-image',scansh())
+		.css('background-repeat','no-repeat')
+		.css('background-position','left center')
+		.css('border','1px solid')
+		.css('padding','2px')
 		if(updown>0)
 		{	
 			$('.upms.'+key).show();
@@ -56,7 +60,12 @@ function sh(obj,key,all)
 	if(all==1)
 	{
 		$('.upmpointer').css('background-image',dir);
-		$('#addedtoright').css('background-image',scansh());
+		$('#addedtoright').css('background-image',scansh())
+		.css('background-repeat','no-repeat')
+		.css('background-position','left center')
+		.css('border','1px solid')
+		.css('padding','2px')
+		
 		if(updown>0)
 		{
 			$('.upms').show();
