@@ -4,7 +4,6 @@ require_once('db.php');
 $id = mysql_real_escape_string($_GET['id']);
 $days = mysql_real_escape_string($_GET['days']);
 
-
 function generateNewsIDs($days) {
 	//$query = 'select CONCAT("[",GROUP_CONCAT(distinct id),"]") as id from news where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
 	$query = 'select CONCAT("[",GROUP_CONCAT(distinct news.id),"]") as id from news 
