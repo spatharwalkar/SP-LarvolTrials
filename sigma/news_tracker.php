@@ -194,13 +194,13 @@ function NewsTrackerHTMLContent($res) {
 function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 
 	global $db;
-	$query = "SELECT n.*,p.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN products p ON(et.entity = p.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `news_redtag` nr ON(nr.news=n.id) JOIN `redtags` r ON(r.id=nr.redtag)";
+	$query = "SELECT n.*,p.name as product,p.company as company_name,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN products p ON(et.entity = p.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `news_redtag` nr ON(nr.news=n.id) JOIN `redtags` r ON(r.id=nr.redtag)";
 
 	if($TrackerType == 'PNT'){
 		$query .= "WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
 
 	} elseif($TrackerType == 'DNT' ) {
-	 	$query = "SELECT  n.*,en.name as product ,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN entities en ON(et.entity = en.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `news_redtag` nr ON(nr.news=n.id) JOIN `redtags` r ON(r.id=nr.redtag) WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
+	 	$query = "SELECT  n.*,en.name as product,en.company as company_name,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN entities en ON(et.entity = en.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `news_redtag` nr ON(nr.news=n.id) JOIN `redtags` r ON(r.id=nr.redtag) WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
 	}
 	else {
 		switch($TrackerType) {
@@ -260,10 +260,16 @@ function formatNews($result) {
 		$phase = 'P'. $phase;
 	}else
 		$phase = 'P='. $phase;
-			
-	$compName[] =$result['company_name'];	
+
+	$productName = '';
+	if(empty($result['company_name']) || $result['company_name'] == '' || $result['company_name']== null){
+		$productName = '<span class="disease_name">'.$result['product'].'</span>';
+	}else {
+		$compName[] =$result['company_name'];
+		$productName = '<span class="product_name">'.productFormatLI($result['product'], $compName, $tag='').'</span>';
+	}
 	$returnStr = '';
-	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['score']).'</span><span class="barBold">'.str_repeat('|',10-floor($result['score'])).'</span>&nbsp;&nbsp;</span><span class="product_name">'.productFormatLI($result['product'], $compName, $tag='').'</span><br>';
+	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['score']).'</span><span class="barBold">'.str_repeat('|',10-floor($result['score'])).'</span>&nbsp;&nbsp;</span>'.$productName.'<br>';
 	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span>'.'<a class="title" href="'.$ctLink.'" target="_blank">'.$result['brief_title'].'</a>&nbsp;('.$source_name.') -&nbsp;&nbsp;';
 	$returnStr .= date('M j, Y', strtotime($result['added'])).'&nbsp;-&nbsp;&nbsp;<br>'.'<span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',&nbsp;'.$result['overall_status'].',&nbsp;</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
 	$returnStr .= '<span class="summary">'.$result['summary'].'</span>';
@@ -301,6 +307,10 @@ function NewsTrackerCommonCSS($uniqueId, $TrackerType)
 		}
 		.product_name {
 			color:#151B54;
+		}
+		.disease_name {
+			color:#151B54;
+		font-weight: bold;
 		}
 		.rUIS {
 			color:purple;
