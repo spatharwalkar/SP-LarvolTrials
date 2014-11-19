@@ -9,10 +9,8 @@ function generateNewsIDs($days) {
 	//$query = 'select CONCAT("[",GROUP_CONCAT(distinct id),"]") as id from news where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
 	$query = 'select CONCAT("[",GROUP_CONCAT(distinct news.id),"]") as id from news 
 				join entity_abstracts ea on (news.abstract_id=ea.abstract)
-				join entities e1 on (ea.entity=e1.id and e1.class="product" and e1.is_active=1)
-				join entity_abstracts ea2 on (news.abstract_id=ea2.abstract)
-				join entities e2 on (ea2.entity=e2.id and e2.class in ("area","disease"))
-				where 	(added >= DATE_SUB(current_date,interval '.$days.' day)) OR 
+				LEFT JOIN entities e1 on (ea.entity=e1.id and e1.class="Product" and e1.is_active=1)
+				where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR 
 						(COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
 
 	$json = runNewsQuery($query);	
@@ -90,7 +88,7 @@ function generateNewsEntities($id) {
 				JOIN pubmed_abstracts pma on (n.abstract_id=pma.pm_id)
 				LEFT JOIN entity_abstracts pt on n.abstract_id=pt.abstract
 				LEFT JOIN entity_abstracts dt on n.abstract_id=dt.abstract
-				LEFT JOIN entities p on p.id=pt.entity and p.class = "Product" 				
+				LEFT JOIN entities p on p.id=pt.entity and p.class = "Product" and p.is_active=1 				
 				LEFT JOIN entities d on d.id=dt.entity and d.class="Disease"
 				JOIN news_redtag nr on nr.news=n.id 
 				JOIN redtags rt on rt.id=nr.redtag 
@@ -200,7 +198,12 @@ exit;
 /********/
 function getNewsCount($days) 
 {
-	$query = 'select id from news where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
+	//$query = 'select id from news JOIN where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR (COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day)) ';
+	$query = 'select CONCAT("[",GROUP_CONCAT(distinct news.id),"]") as id from news 
+				join entity_abstracts ea on (news.abstract_id=ea.abstract)
+				left join entities e1 on (ea.entity=e1.id and e1.class="Product" and e1.is_active=1)
+				where (added >= DATE_SUB(current_date,interval '.$days.' day)) OR 
+						(COALESCE(last_changed_date,generation_date) >= DATE_SUB(current_date,interval '.$days.' day))';
 	if(!$tres = mysql_query($query))
 	{
 		$log='There seems to be a problem with the SQL Query:'.$tmpq.' Error:' . mysql_error();
@@ -242,7 +245,7 @@ function getIndividualNewsItem($id) {
 					LEFT JOIN entity_trials pt on n.larvol_id=pt.trial 
 					LEFT JOIN entity_trials it on n.larvol_id=it.trial 
 	            	LEFT JOIN entity_trials dt on n.larvol_id=dt.trial 
-				    LEFT JOIN entities p on p.id=pt.entity and p.class = "Product" 				
+				    LEFT JOIN entities p on p.id=pt.entity and p.class = "Product" and p.is_active=1 				
 					LEFT JOIN entities d on d.id=dt.entity and d.class="Disease"
 					LEFT JOIN entities i on i.id=it.entity and i.class="Investigator" 
 					JOIN news_redtag nr on nr.news=n.id 
@@ -284,8 +287,8 @@ function getIndividualNewsItem($id) {
 				JOIN pubmed_abstracts pma on (n.abstract_id=pma.pm_id)
 				LEFT JOIN entity_abstracts pt on n.abstract_id=pt.abstract
 				LEFT JOIN entity_abstracts dt on n.abstract_id=dt.abstract
-				LEFT JOIN entities p on p.id=pt.entity and p.class = "Product" 				
-				LEFT JOIN entities d on d.id=dt.entity and d.class="Disease"
+				LEFT JOIN entities p on p.id=pt.entity and p.class = "Product" and p.is_active=1				
+				LEFT JOIN entities d on d.id=dt.entity and d.class="Disease" 
 				JOIN news_redtag nr on nr.news=n.id 
 				JOIN redtags rt on rt.id=nr.redtag 
 				WHERE n.id=' . $id . 
