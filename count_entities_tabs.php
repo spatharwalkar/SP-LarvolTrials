@@ -896,6 +896,19 @@ function updateInvestigatorTabCount($investigatorId) {
 			$investigatorTrialCount = $rowGetInvestigatorTrials['trialCount'];
 	}
 		
+	//investigator news count
+	$investigatorNewsCount = 0;
+	$sqlGetNewsForInvestigator = "SELECT count(dt.`larvol_id`) as newsCount FROM `data_trials` dt
+	JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`)
+	JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`)
+	WHERE et.`entity`='$investigatorId'";
+	$resGetNewsForInvestigator = mysql_query($sqlGetNewsForInvestigator) or die('Bad SQL query getting news for disease'.$sqlGetNewsForInvestigator);
+	
+	if($resGetNewsForInvestigator) {
+	while($rowGetNewsForInvestigator = mysql_fetch_array($resGetNewsForInvestigator))
+		$investigatorNewsCount = $rowGetNewsForInvestigator['newsCount'];
+	}
+	
 	// to check if tab for this enetity is already there in the tabs table
 	$sqlCheckTabsTable = "SELECT entity_id FROM tabs 
 					WHERE entity_id = '$investigatorId'
@@ -912,7 +925,8 @@ function updateInvestigatorTabCount($investigatorId) {
 							products = '$investigatorProductCount',
 							moas = '$investigatorMoaCount',
 							diseases = '$investigatorDiseaseCount',
-							trials = '$investigatorTrialCount'
+							trials = '$investigatorTrialCount',
+							news = '$investigatorNewsCount'
 							WHERE entity_id = '$investigatorId'
 							AND table_name = 'entities' LIMIT 1";
 		
@@ -926,7 +940,8 @@ function updateInvestigatorTabCount($investigatorId) {
 							products = '$investigatorProductCount',
 							moas = '$investigatorMoaCount',
 							diseases = '$investigatorDiseaseCount',
-							trials = '$investigatorTrialCount'";
+							trials = '$investigatorTrialCount',
+							news = '$investigatorNewsCount'";
 		$resInsertTabsTable = mysql_query($sqlInsertTabsTable) or die('Bad SQL query . '.$sqlInsertTabsTable);;
 	}
 	

@@ -199,7 +199,7 @@ function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 	if($TrackerType == 'PNT'){
 		$query .= "WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
 
-	} elseif($TrackerType == 'DNT' ) {
+	} elseif($TrackerType == 'DNT') {
 	 	$query = "SELECT  n.*,en.name as product,en.company as company_name,r.*,dt.phase,dt.enrollment,dt.source,dt.source_id FROM `data_trials` dt JOIN `entity_trials` et ON(dt.`larvol_id` = et.`trial`) JOIN entities en ON(et.entity = en.id) JOIN `news` n ON(dt.`larvol_id` = n.`larvol_id`) JOIN `news_redtag` nr ON(nr.news=n.id) JOIN `redtags` r ON(r.id=nr.redtag) WHERE et.`entity`='" . mysql_real_escape_string($id) . "'";
 	}
 	else {
@@ -213,6 +213,9 @@ function DataGeneratorForNewsTracker($id, $TrackerType, $page) {
 				break;
 			case 'MCNT':
 				$productIds = GetProductsFromMOACategory($id, 'MCPT', array());
+				break;
+			case 'INVESTNT':
+				$productIds = getProductIdsFromInvestigator($id);
 				break;
 		}
 		$impArr = implode("','", $productIds);

@@ -13,6 +13,7 @@
 	require_once('company_tracker.php');
 	require_once('moa_tracker.php');
 	require_once('disease_tracker.php');
+	require_once('news_tracker.php');
 	$page = 1;
 	$InvestigatorId = NULL;
 	if($_REQUEST['TrackerType'] == 'INVESTDT' && $_REQUEST['DiseaseId'] && $_REQUEST['InvestigatorId'] )
@@ -53,7 +54,7 @@
 		$tab = mysql_real_escape_string($_REQUEST['tab']);
 	}
 	$tabCommonUrl		= 'investigator.php?InvestigatorId='.$InvestigatorId;
-	$TabCompanyCount = $TabProductCount = $TabDiseaseCount = $TabMOACount = $TabTrialCount = 0;
+	$TabCompanyCount = $TabProductCount = $TabDiseaseCount = $TabMOACount = $TabTrialCount = $TabNewsCount = 0;
 	$MOAIds = array();	
 	if($InvestigatorId !=NULL)
 	{	
@@ -72,6 +73,7 @@
 		$TabDiseaseCount = $rowGetTabs['diseases'];
 		$TabMOACount = $rowGetTabs['moas'];
 		$TabTrialCount = $rowGetTabs['trials'];
+		$TabNewsCount = $rowGetTabs['news'];
 	}	
 	
 	$meta_title = 'Larvol Sigma'; //default value
@@ -199,7 +201,8 @@
 						$CountExt = (($TabTrialCount == 1) ? 'Trial':'Trials');
 						$ottLinkName = '<a href="'.$tabCommonUrl.'&tab=InvestigatorOTT" title="'.$TabTrialCount.' '.$CountExt.'">&nbsp;'.$TabTrialCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						$ohmLinkName = '<a href="'.$tabCommonUrl.'&tab=InvestigatorOHM" title="Heatmap">&nbsp;Heatmap&nbsp;</a>';
-						
+						$CountExt = (($TabNewsCount == 1) ? 'News':'News');
+						$newsLinkName = '<a href="'.$tabCommonUrl.'&tab=newstrac" title="'.$TabNewsCount.' '.$CountExt.'">&nbsp;'.$TabNewsCount.'&nbsp;'.$CountExt.'&nbsp;</a>';
 						if($tab == 'Companies') { ?>							
 							<td>
 								<img id="CompaniesImg" src="../images/firstSelectTab.png" />
@@ -226,7 +229,12 @@
 							</td>
 							
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
+							<td>
+								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
+							</td>
 							
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td>
+													
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="InvestigatorOHMImg" src="../images/afterTab.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td> 
 							<td></td>
@@ -252,6 +260,11 @@
 							</td>
 							
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
+							<td>
+								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
+							</td>
+							
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td>
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="InvestigatorOHMImg" src="../images/afterTab.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td> 
 							<td></td>
@@ -276,6 +289,11 @@
 								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
 							</td>
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
+							<td>
+								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
+							</td>
+							
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td>
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="InvestigatorOHMImg" src="../images/afterTab.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td> 
 							<td></td>
@@ -301,6 +319,11 @@
 								<img id="InvestigatorOTTImg" src="../images/selectTabConn.png" />
 							</td>
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
+							<td>
+								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
+							</td>
+							
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td>
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
 							<!-- <td><img id="InvestigatorOHMImg" src="../images/afterTab.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/lastTab.png" /></td> 
 							<td></td>
@@ -328,15 +351,20 @@
 							<td id="DiseasesTab" class="Tab"><?php print $diseaseLinkName; ?></td>
 				
 							
-							<td><img id="InvestigatorOTTImg" src="../images/middleTab.png" /></td>															
+							<td><img id="InvestigatorOTTImg" src="../images/middleTab.png" /></td>	
+																					
 							<td id="InvestigatorTab" class="selectTab"><?php print $ottLinkName; ?></td>
-							';
 							
+							<td>
+								<img id="InvestigatorOTTImg" src="../images/selectTabConn.png" />
+							</td>
 							
-							
+							<td id="NewsTab" class="Tab"><?php print $newsLinkName; ?></td>
 							
 							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
-							<!-- <td><img id="InvestigatorOHMImg" src="../images/selectTabConn.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>
+							<!-- <td><img id="InvestigatorOHMImg" src="../images/selectTabConn.png" /></td><td id="InvestigatorOHMTab" class="Tab">
+							<?php //print $ohmLinkName; ?></td></td> --> 
+							<td><img id="lastImg" src="../images/lastTab.png" /></td> 
 						<?php } else if($tab == 'InvestigatorOHM') { ?>
 							<td>
 								<img id="ProductsImg" src="../images/firstTab.png" />
@@ -351,7 +379,7 @@
 							</td>
 							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
 							<td>
-								<img id="InvestigatorOTTImg" src="../images/afterTab.png" />
+								<img id="InvestigatorOTTImg" src=""../images/selectTabConn.png"" />
 							</td>
 							<td id="InvestigatorOTTTab" class="Tab"><?php print $ottLinkName; ?></td>
 							<td>
@@ -359,10 +387,43 @@
 							</td>
 							<td id="InvestigatorOHMTab" class="selectTab"><?php print $ohmLinkName; ?></td>
 							<td>
-								<img id="lastImg" src="../images/selectLastTab.png" />
+								<img id="lastImg" src="../images/middleTab.png" />
 							</td>
 							<td></td>
-						<?php } ?>						
+						<?php } else if($tab == 'newstrac') { ?>
+					
+							<td>
+								<img id="CompaniesImg" src="../images/firstTab.png" />
+							</td>
+							<td id="CompaniesTab" class="Tab"><?php print $compLinkName; ?></td>
+							
+							<td>
+								<img id="ProductsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="ProductsTab" class="Tab"><?php print $prodLinkName; ?></td>
+							
+							<td>
+								<img id="MOAsImg" src="../images/afterTab.png" />
+							</td>
+							<td id="MOAsTab" class="Tab"><?php print $moaLinkName; ?></td>
+							
+							<td>
+								<img id="DiseasesImg" src="../images/afterTab.png" />
+							</td>
+							<td id="DiseasesTab" class="Tab"><?php print $diseaseLinkName; ?></td>
+							
+							<td><img id="InvestigatorOTTImg" src="../images/afterTab.png" /></td>	
+																					
+							<td id="InvestigatorTab" class="Tab"><?php print $ottLinkName; ?></td>
+							
+							<td>
+								<img id="DiseasesImg" src="../images/middleTab.png" />
+							</td>
+							<td id="NewsTab" class="selectTab"><?php print $newsLinkName; ?></td>
+							
+							<!-- Temporarily disabled the auto HM tab becauase of performance issues (remove html and php comments below to enable it)-->
+							<!-- <td><img id="InvestigatorOHMImg" src="../images/selectTabConn.png" /></td><td id="InvestigatorOHMTab" class="Tab"><?php //print $ohmLinkName; ?></td></td> --> <td><img id="lastImg" src="../images/selectLastTab.png" /></td><td></td>
+						<?php }?>									
 					</tr>
 				</table>
 			</td>
@@ -401,6 +462,12 @@
 					{
 						
 						print '<div id="InvestigatorOHM" align="center">'; DisplayOHM($arrInvestigatorIds, 'DOHM'); print '</div>'; 
+					}
+					
+					if($tab == 'newstrac'){
+					
+						print '<div id="diseaseTab_content" align="left">'.showNewsTracker($InvestigatorId, 'INVESTNT', $page);		//PDT = Investigator NEWS TRACKER  showNewsTracker
+					
 					} ?>
 				</div>
 			</td>
@@ -416,6 +483,7 @@
 	{
 		global $db;
 		global $now;
+		$arrInvestigatorIds = array();
 		$ProductsCount = 0;
 		$query = "	SELECT er.parent from entity_relations er
 					JOIN entities e ON (er.child = e.id and e.class='Institution')
@@ -428,7 +496,10 @@
 		{
 			while($row = mysql_fetch_array($res))
 				$arrInvestigatorIds[] = $row['parent'];
+			
+			$arrInvestigatorIds  = array_filter(array_unique($arrInvestigatorIds));
 		}
+		
 		return $arrInvestigatorIds;
 	}
 
