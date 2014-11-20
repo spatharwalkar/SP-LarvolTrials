@@ -7586,10 +7586,15 @@ class TrialTracker
 				global $productIds;
 				$ottType = 'indexed';
 				$tHeader = '';
-				if ($globalOptions["sourcepg"] != "TZC")
+				if ($globalOptions["sourcepg"] != "TZC"){
 					$productIds = $resultIds['e1'];
+					$pDetails = $this->getProductHeaders($productIds);
+				}else{ // Added this else part to fix the issue exel export
+					$companyProducts = getcompanyProducts($resultIds['e1'][0]);
+					$productIds = array_keys($companyProducts);					
+					$pDetails = $this->getProductHeaders($productIds);
+				}				
 				
-				$pDetails = $this->getProductHeaders($productIds);
 				
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
