@@ -7586,10 +7586,15 @@ class TrialTracker
 				global $productIds;
 				$ottType = 'indexed';
 				$tHeader = '';
-				if ($globalOptions["sourcepg"] != "TZC")
+				if ($globalOptions["sourcepg"] != "TZC"){
 					$productIds = $resultIds['e1'];
+					$pDetails = $this->getProductHeaders($productIds);
+				}else{ // Added this else part to fix the issue exel export
+					$companyProducts = getcompanyProducts($resultIds['e1'][0]);
+					$productIds = array_keys($companyProducts);					
+					$pDetails = $this->getProductHeaders($productIds);
+				}				
 				
-				$pDetails = $this->getProductHeaders($productIds);
 				
 				foreach($pDetails['Ids'] as $ikey => $ivalue)
 				{
@@ -10522,7 +10527,7 @@ class TrialTracker
 		if($ottType == 'indexed')
 			$globalOptions['includeProductsWNoData'] = "on";
 			
-		echo '<input type="hidden" name="pr" id="product" value="' . implode(',', urldecode($globalOptions['product'])) . '" />';
+		echo '<input type="hidden" name="pr" id="product" value="' . urldecode(implode(',',$globalOptions['product'])) . '" />';
 		
 		$count = $Values['count'];
 		$totalPages = ceil($count / $this->resultsPerPage);
@@ -11342,10 +11347,10 @@ $(document).ready(function(){
 		}
 		echo '</td></tr>'
 			. '<tr><td colspan="5" style="border: none;height:29px;"></td></tr></table>'
-			. '<input type="hidden" name="status" id="status" value="' . implode(',', urldecode($globalOptions['status'])) . '" />'
-			. '<input type="hidden" name="itype" id="itype" value="' . implode(',', urldecode($globalOptions['itype'])) . '" />'
-			. '<input type="hidden" name="region" id="region" value="' . implode(',', urldecode($globalOptions['region'])) . '" />'
-			. '<input type="hidden" name="phase" id="phase" value="' . implode(',', urldecode($globalOptions['phase'])) . '" />';
+			. '<input type="hidden" name="status" id="status" value="' . urldecode(implode(',', $globalOptions['status'])) . '" />'
+			. '<input type="hidden" name="itype" id="itype" value="' . urldecode(implode(',', $globalOptions['itype'])) . '" />'
+			. '<input type="hidden" name="region" id="region" value="' . urldecode(implode(',', $globalOptions['region'])) . '" />'
+			. '<input type="hidden" name="phase" id="phase" value="' . urldecode(implode(',', $globalOptions['phase'])) . '" />';
 	}
 
 	function pagination($globalOptions = array(), $totalPages, $loggedIn)
