@@ -274,7 +274,7 @@ function formatNews($result) {
 	$returnStr = '';
 	$returnStr .= '<span class="rUIS">'.str_repeat('|',$result['score']).'</span><span class="barBold">'.str_repeat('|',10-floor($result['score'])).'</span>&nbsp;&nbsp;</span>'.$productName.'<br>';
 	$returnStr .= '<span class="redtag">'.$result['name'].':&nbsp;&nbsp;</span>'.'<a class="title" href="'.$ctLink.'" target="_blank">'.$result['brief_title'].'</a>&nbsp;('.$source_name.') -&nbsp;&nbsp;';
-	$returnStr .= date('M j, Y', strtotime($result['added'])).'&nbsp;-&nbsp;&nbsp;<br>'.'<span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',&nbsp;'.$result['overall_status'].',&nbsp;</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
+	$returnStr .= date('M j, Y', strtotime($result['added'])).'&nbsp;&nbsp;&nbsp;<br>'.'<span class="phase_enroll">'.$phase.', &nbsp;N='.$result['enrollment'].',&nbsp;'.$result['overall_status'].',&nbsp;</span><span class="sponsor">&nbsp;Sponsor:&nbsp;'.$result['source'].'</span><br>';
 	$returnStr .= '<span class="summary">'.$result['summary'].'</span>';
 	return $returnStr;
 }
