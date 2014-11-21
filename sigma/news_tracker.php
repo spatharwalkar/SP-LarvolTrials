@@ -34,7 +34,6 @@ function showNewsTracker($id, $TrackerType, $page=1)
 	$RecordsPerPage = 50;
 	$TotalPages = 0;
 	$TotalRecords = count($data_matrix);
-	$MainPageURL = 'product.php';
 	
 	$MainPageURL = 'news_tracker.php';
 	if($TrackerType == 'PNT')	//PIT=Product Investigator TRACKER
@@ -47,6 +46,8 @@ function showNewsTracker($id, $TrackerType, $page=1)
 		$MainPageURL = 'moa.php';
 	else if($TrackerType == 'MCNT')	//MCIT=MOA Category Investigator TRACKER
 		$MainPageURL = 'moacategory.php';
+	else if($TrackerType == 'INVESTNT')	//MCIT=MOA Category Investigator TRACKER
+		$MainPageURL = 'investigator.php';
 	
 	if(isset($_REQUEST['dwcount']))
 		$CountType = $_REQUEST['dwcount'];
@@ -125,6 +126,8 @@ function NewsTrackerpagination($TrackerType, $totalPages, $id, $CurrentPage, $Ma
 		$url = 'MoaId='.$id.'&amp;tab=newstrac';
 	else if($TrackerType == 'MCNT')	//MCNT = MOA CATEGORY News TRACKER
 		$url = 'MoaCatId='.$id.'&amp;tab=newstrac';
+	else if($TrackerType == 'INVESTNT')	//MCNT = MOA CATEGORY News TRACKER
+		$url = 'InvestigatorId='.$id.'&amp;tab=newstrac';
 
 	if($GobalEntityType == 'Product')
 		$url .= '&amp;dwcount=' . $CountType;
