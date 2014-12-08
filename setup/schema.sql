@@ -1861,9 +1861,9 @@ BEGIN
 			#populate the news table
 			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
 			IF (frml IS NULL) THEN
-				SET @insert_news := CONCAT('insert into news select null,"',rtag_id,'" as redtag,abstract_text,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+				SET @insert_news := CONCAT('insert into news select null,"',rtag_id,'" as redtag,abstract_text,"" ,null, null,null,COALESCE(abstract_text, "No abstract available") as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			ELSE
-				SET @insert_news := CONCAT('insert into news select null,"',rtag_id,'" as redtag,abstract_text,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+				SET @insert_news := CONCAT('insert into news select null,"',rtag_id,'" as redtag,abstract_text,"" ,null, null,null,COALESCE(abstract_text, "No abstract available") as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			END IF;
 			PREPARE news_stmt FROM @insert_news;
 			EXECUTE news_stmt;						
@@ -1935,9 +1935,9 @@ BEGIN
 			#populate the news table
 			SET sql_mode = 'NO_UNSIGNED_SUBTRACTION';
 			IF (frml IS NULL) THEN
-				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,COALESCE(abstract_text, "No abstract available") as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			ELSE
-				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,abstract_text as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
+				SET @insert_news := CONCAT('insert into news select null,article_title,"" ,null, null,null,COALESCE(abstract_text, "No abstract available") as summary, added, ',days,' as period,null as id,',score,' as score,t.pm_id,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP from lttmp2.t t join pubmed_abstracts using(pm_id) join redtags rt where rt.id=',rtag_id,' ON DUPLICATE KEY UPDATE added=t.added,period=',days);
 			END IF;
 			PREPARE news_stmt FROM @insert_news;
 			EXECUTE news_stmt;	
